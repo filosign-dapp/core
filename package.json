@@ -1,0 +1,23 @@
+{
+  "name": "filosign",
+  "version": "1.0.0",
+  "description": "Filosign monorepo",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "bun run --cwd packages/client build",
+    "dev": "bun run --cwd packages/client dev",
+    "start": "bun run --cwd packages/client start",
+    "test": "bun run --cwd packages/* test",
+    "lint": "bun run --cwd packages/* lint",
+    "clean": "rm -rf packages/*/dist packages/*/node_modules packages/*/.bun node_modules .bun",
+    "install:all": "bun install && bun run --cwd packages/client install",
+    "setup": "bun install && bun run install:all"
+  },
+  "engines": {
+    "bun": ">=1.0.0"
+  },
+  "packageManager": "bun@1.0.0"
+}
