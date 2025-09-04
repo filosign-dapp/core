@@ -94,7 +94,7 @@ export default function LandingPage() {
           </motion.div>
         </div>
 
-        <Image src="/static/hero.png" alt="Filosign" width={500} height={500} className="size-full rounded-main" />
+        <Image src="/static/hero.png" alt="Filosign" width={500} height={500} className="size-full rounded-large" />
       </section>
 
       {/* Features Section */}
