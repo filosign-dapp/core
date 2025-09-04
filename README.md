@@ -1,10 +1,6 @@
-# Filosign Monorepo
+# Filosign
 
-A monorepo managed with Bun runtime and package manager.
-
-## Prerequisites
-
-- [Bun](https://bun.sh/) installed (version 1.0.0 or higher)
+Secure, fast, and easy-to-use document signing on filecoin.
 
 ## Setup
 
@@ -13,9 +9,9 @@ A monorepo managed with Bun runtime and package manager.
    bun install
    ```
 
-2. Install dependencies for all packages:
+2. For client app:
    ```bash
-   bun run --cwd packages/* install
+   cd packages/client && cp .env.template .env
    ```
 
 ## Available Scripts
@@ -29,20 +25,15 @@ A monorepo managed with Bun runtime and package manager.
 ## Adding New Packages
 
 1. Create a new directory in `packages/`
-2. Initialize with `bun init`
-3. Add your package configuration
-4. Run `bun install` from the root to link workspaces
+3. Add your package configuration, and name modules as @filosign/<module_name>
+4. Run `bun install`
 
 ## Workspace Structure
 
 ```
 filosign/
-├── packages/          # All workspace packages
-├── package.json       # Root package configuration
+├── packages/client   # Client application
+├── package.json      # Root package configuration
 ├── bunfig.toml       # Bun configuration
 └── README.md         # This file
 ```
-
-## Package Development
-
-Each package in the `packages/` directory can be developed independently while sharing the monorepo's dependency management and tooling.
