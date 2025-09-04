@@ -20,9 +20,9 @@
   --accent-foreground: #1e2122;
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-  --border: #d1d0cf;
-  --input: #d1d0cf;
-  --ring: #d8f9b8;
+  --border: #d7d7d7;
+  --input: #f3f2f1;
+  --ring: #74ad3a;
   --chart-1: #f59e0b;
   --chart-2: #10b981;
   --chart-3: #3b82f6;
@@ -95,7 +95,7 @@
   }
 
   * {
-    @apply border-border outline-ring/50 font-inter;
+    @apply border-border outline-ring/50 font-manrope;
     scrollbar-width: thin;
   }
 
@@ -104,19 +104,23 @@
   }
 
   h1 {
-    @apply text-4xl font-semibold leading-tight tracking-tight;
+    @apply text-4xl font-semibold leading-tight tracking-tight font-inter;
   }
 
   h2 {
-    @apply text-3xl font-semibold leading-tight tracking-tight;
+    @apply text-3xl font-semibold leading-tight tracking-tight font-inter;
   }
 
   h3 {
-    @apply text-2xl font-semibold leading-tight tracking-tight;
+    @apply text-2xl font-semibold leading-tight tracking-tight font-inter;
   }
 
   h4 {
-    @apply text-xl font-semibold leading-tight tracking-tight;
+    @apply text-xl font-semibold leading-tight tracking-tight font-inter;
+  }
+
+  p, span, div, a, button {
+    @apply font-inter;
   }
 
   button {
