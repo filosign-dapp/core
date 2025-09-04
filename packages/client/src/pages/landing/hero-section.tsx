@@ -1,6 +1,6 @@
 import { Badge } from "@/src/lib/components/ui/badge";
 import { Button } from "@/src/lib/components/ui/button";
-import { ArrowRightIcon, PlayIcon } from "@phosphor-icons/react";
+import { ArrowRightIcon, CircleIcon, PlayIcon } from "@phosphor-icons/react";
 import { Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { Image } from "@/src/lib/components/custom/Image";
@@ -21,7 +21,7 @@ export default function HeroSection() {
         }}
       >
         {/* Announcement Banner */}
-        <motion.button
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{
@@ -33,9 +33,9 @@ export default function HeroSection() {
           className="self-start group"
         >
           <Badge>
-            Join waitlist <ArrowRightIcon className="size-4 transition-transform duration-200 group-hover:translate-x-1" />
+          <CircleIcon className="size-4 animate-pulse" /> Waitlist is live 
           </Badge>
-        </motion.button>
+        </motion.div>
 
         {/* Main Headline */}
         <motion.h1

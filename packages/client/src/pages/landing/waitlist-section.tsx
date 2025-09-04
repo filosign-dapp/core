@@ -70,24 +70,25 @@ export default function WaitlistSection() {
                 delay: 0.4
               }}
             >
-              <div className="flex gap-4 w-full">
+              <div className="flex gap-4 w-full flex-col md:flex-row">
                 <input
                   type="email"
                   placeholder="enter your email address"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="flex-1 h-20 text-4xl px-8 rounded-large border-2 focus-visible:border-primary focus-visible:ring-primary/20"
+                  className="flex-1 text-lg md:text-4xl p-4 rounded-large border-2 focus-visible:border-primary focus-visible:ring-primary/20"
                   required
                 />
 
                 <motion.div
                   whileTap={{ scale: 0.95 }}
+                  className="w-full md:w-auto"
                 >
                   <Button
                     type="submit"
                     variant="primary"
                     disabled={!email}
-                    className="h-20 px-8 text-2xl font-semibold rounded-large group relative overflow-hidden"
+                    className="h-20 px-8 text-2xl font-semibold rounded-large group relative overflow-hidden w-full md:w-auto"
                   >
                     <motion.div
                       className="flex items-center justify-center gap-3"
@@ -203,7 +204,7 @@ export default function WaitlistSection() {
                 stiffness: 200,
                 damping: 25,
                 delay: 0.5
-              }} className="text-7xl font-semibold leading-tight">You're on the list!</motion.h1>
+              }} className="text-4xl md:text-7xl leading-tight">You're on the list!</motion.h1>
             <motion.p
               initial={{ y: 30, opacity: 0 }}
               animate={waitlistInView ? { y: 0, opacity: 1 } : { y: 30, opacity: 0 }}
@@ -212,25 +213,9 @@ export default function WaitlistSection() {
                 stiffness: 200,
                 damping: 25,
                 delay: 0.6
-              }} className="text-muted text-lg">
+              }} className="text-muted md:text-lg">
               We'll notify you as soon as Filosign goes live.
             </motion.p>
-
-            <motion.div
-              initial={{ y: 30, opacity: 0 }}
-              animate={waitlistInView ? { y: 0, opacity: 1 } : { y: 30, opacity: 0 }}
-              transition={{
-                type: "spring",
-                stiffness: 200,
-                damping: 25,
-                delay: 0.8
-              }}
-              className="w-full"
-            >
-              <Button onClick={() => setIsSubmitted(false)} className="w-full text-2xl mt-4 h-12">
-                Reset
-              </Button>
-            </motion.div>
           </motion.div>
           </motion.div>
         )}
