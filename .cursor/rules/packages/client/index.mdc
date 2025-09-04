@@ -1,8 +1,0 @@
----
-alwaysApply: true
----
-
-- when adding icons, always use phosphor
-- keep all designs consistent with the design system described in global.css
-- create app-level reusable components in src/lib/components/app
-- create page-level reusable components in the specific page dir in src/pages

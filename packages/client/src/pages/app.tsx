@@ -5,8 +5,9 @@ import {
   createRootRoute,
 } from '@tanstack/react-router'
 import { withPageErrorBoundary } from "@/src/lib/components/errors/PageErrorBoundary";
-import HomePage from "./home";
+import LandingPage from "./landing";
 import { useAnalytics } from '../lib/hooks/use-analytics';
+import DashboardPage from './dashboard';
 
 const rootRoute = createRootRoute({
   component: () => {
@@ -24,12 +25,19 @@ const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
   component: function Index() {
-    return withPageErrorBoundary(HomePage)({});
+    return withPageErrorBoundary(LandingPage)({});
   },
 })
 
+const dashboardRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/dashboard',
+  component: function Dashboard() {
+    return withPageErrorBoundary(DashboardPage)({});
+  },
+})
 
-const routeTree = rootRoute.addChildren([indexRoute])
+const routeTree = rootRoute.addChildren([indexRoute, dashboardRoute])
 const router = createRouter({
   routeTree,
 })

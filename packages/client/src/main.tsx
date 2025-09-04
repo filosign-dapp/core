@@ -21,6 +21,7 @@ const app = (
         <ThemeProvider defaultTheme="dark" storageKey="theme">
           <IconContext.Provider value={{
             mirrored: false,
+            weight: "fill",
           }}>
             <RouterProvider router={router} />
             <Toaster position="bottom-right" />

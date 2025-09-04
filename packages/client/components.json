@@ -17,5 +17,5 @@
     "components": "@/src/lib/components",
     "ui": "@/src/lib/components/ui"
   },
-  "iconLibrary": "lucide"
+  "iconLibrary": "phosphor"
 }
