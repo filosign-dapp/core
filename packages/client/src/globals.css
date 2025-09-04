@@ -1,60 +1,48 @@
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
 
-@plugin "tailwindcss-animate";
-@plugin "@tailwindcss/typography";
-
+/* no typography for now */
+/* @plugin "@tailwindcss/typography"; */ 
 
 :root {
-  --background: hsl(0 0% 98%);
-  --foreground: hsl(240 10% 8%);
-  --card: hsl(0 0% 98%);
-  --card-foreground: hsl(240 10% 8%);
-  --popover: hsl(0 0% 98%);
-  --popover-foreground: hsl(240 10% 8%);
-  --primary: hsl(240 6% 12%);
-  --primary-foreground: hsl(0 0% 96%);
-  --secondary: hsl(240 5% 92%);
-  --secondary-foreground: hsl(240 6% 12%);
-  --muted: hsl(240 5% 92%);
-  --muted-foreground: hsl(240 4% 48%);
-  --accent: hsl(240 5% 92%);
-  --accent-foreground: hsl(240 6% 12%);
-  --destructive: hsl(0 75% 55%);
-  --destructive-foreground: hsl(0 0% 96%);
-  --border: hsl(240 6% 85%);
-  --input: hsl(240 6% 85%);
-  --ring: hsl(240 10% 8%);
-  --chart-1: hsl(12 75% 58%);
-  --chart-2: hsl(173 55% 40%);
-  --chart-3: hsl(197 38% 26%);
-  --chart-4: hsl(43 72% 64%);
-  --chart-5: hsl(27 85% 65%);
+  --background: #f3f2f1;
+  --foreground: #1f2223;
+  --card: #edecea;
+  --card-foreground: #1f2223;
+  --popover: #edecea;
+  --popover-foreground: #1f2223;
+  --primary: #d8f9b8;
+  --primary-foreground: #1f2223;
+  --secondary: #e8e7e6;
+  --secondary-foreground: #1f2223;
+  --muted: #666666;
+  --muted-foreground: #1f2223;
+  --accent: #e8e7e6;
+  --accent-foreground: #1f2223;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #d1d0cf;
+  --input: #d1d0cf;
+  --ring: #d8f9b8;
+  --chart-1: #f59e0b;
+  --chart-2: #10b981;
+  --chart-3: #3b82f6;
+  --chart-4: #8b5cf6;
+  --chart-5: #ef4444;
   --radius: 0.6rem;
-  --sidebar-background: hsl(0 0% 96%);
-  --sidebar-foreground: hsl(240 6% 28%);
-  --sidebar-primary: hsl(240 6% 12%);
-  --sidebar-primary-foreground: hsl(0 0% 96%);
-  --sidebar-accent: hsl(240 5% 92%);
-  --sidebar-accent-foreground: hsl(240 6% 12%);
-  --sidebar-border: hsl(220 12% 88%);
-  --sidebar-ring: hsl(217.2 88% 57%);
-  --sidebar: hsl(0 0% 96%);
-
-  --grey-50: #0f0f0f;
-  --grey-100: #1a1a1a;
-  --grey-200: #262626;
-  --grey-300: #363636;
-  --grey-400: #4a4a4a;
-  --grey-500: #5a5a5a;
-  --grey-600: #7a7a7a;
-  --grey-700: #a0a0a0;
-  --grey-800: #cccccc;
-  --grey-900: #f0f0f0;
-  --grey-950: #f7f7f7;
+  --sidebar-background: #e8e7e6;
+  --sidebar-foreground: #666666;
+  --sidebar-primary: #d8f9b8;
+  --sidebar-primary-foreground: #1f2223;
+  --sidebar-accent: #e8e7e6;
+  --sidebar-accent-foreground: #1f2223;
+  --sidebar-border: #d1d0cf;
+  --sidebar-ring: #d8f9b8;
+  --sidebar: #e8e7e6;
 }
 
-.dark {
+/* no dark mode for now */
+/* .dark {
   --background: hsl(240 8% 6%);
   --foreground: hsl(0 0% 92%);
   --card: hsl(240 8% 6%);
@@ -88,34 +76,10 @@
   --sidebar-border: hsl(240 3% 18%);
   --sidebar-ring: hsl(217.2 85% 55%);
   --sidebar: hsl(240 5% 12%);
-
-  --grey-50: #f7f7f7;
-  --grey-100: #f0f0f0;
-  --grey-200: #e0e0e0;
-  --grey-300: #cccccc;
-  --grey-400: #a0a0a0;
-  --grey-500: #7a7a7a;
-  --grey-600: #5a5a5a;
-  --grey-700: #4a4a4a;
-  --grey-800: #363636;
-  --grey-900: #262626;
-  --grey-950: #1a1a1a;
-}
+} */
 
 @theme {
-  --font-manrope: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-
-  --color-grey-50: var(--grey-50);
-  --color-grey-100: var(--grey-100);
-  --color-grey-200: var(--grey-200);
-  --color-grey-300: var(--grey-300);
-  --color-grey-400: var(--grey-400);
-  --color-grey-500: var(--grey-500);
-  --color-grey-600: var(--grey-600);
-  --color-grey-700: var(--grey-700);
-  --color-grey-800: var(--grey-800);
-  --color-grey-900: var(--grey-900);
-  --color-grey-950: var(--grey-950);
+  --font-inter: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -153,33 +117,11 @@
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar: var(--sidebar-background);
-  --animate-accordion-down: accordion-down 0.2s ease-out;
-  --animate-accordion-up: accordion-up 0.2s ease-out;
-
-  @keyframes accordion-down {
-    from {
-      height: 0;
-    }
-
-    to {
-      height: var(--radix-accordion-content-height);
-    }
-  }
-
-  @keyframes accordion-up {
-    from {
-      height: var(--radix-accordion-content-height);
-    }
-
-    to {
-      height: 0;
-    }
-  }
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50 font-manrope;
+    @apply border-border outline-ring/50 font-inter;
     scrollbar-width: thin;
   }
 
@@ -187,10 +129,20 @@
     @apply bg-background text-foreground;
   }
 
-  h1,
-  h2,
+  h1 {
+    @apply text-3xl font-semibold;
+  }
+
+  h2 {
+    @apply text-2xl font-semibold;
+  }
+
   h3 {
-    @apply font-semibold;
+    @apply text-xl font-semibold;
+  }
+
+  h4 {
+    @apply text-lg font-semibold;
   }
 
   button {

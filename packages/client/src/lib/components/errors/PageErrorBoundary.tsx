@@ -3,7 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { Button } from "../ui/button";
 import ThemeSwitch from "../custom/ThemeSwitch";
-import Icon from "../custom/Icon";
+import { HouseIcon } from "@phosphor-icons/react";
 
 interface PageErrorBoundaryProps {
   children: React.ReactNode;
@@ -78,7 +78,7 @@ const DefaultErrorFallback = () => {
             <Button onClick={() => navigate({
               to: "/",
             })} variant="outline">
-              <Icon name="House" />
+              <HouseIcon />
               Go Back
             </Button>
           </div>

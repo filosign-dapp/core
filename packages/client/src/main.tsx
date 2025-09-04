@@ -7,6 +7,7 @@ import router from "./pages/app";
 import { Toaster } from "sonner";
 import { RouterProvider } from "@tanstack/react-router";
 import "./globals.css";
+import { IconContext } from "@phosphor-icons/react";
 
 // Root element
 const rootElement = document.getElementById("root")!;
@@ -18,12 +19,16 @@ const app = (
     <ErrorBoundary>
       <QueryClientProvider>
         <ThemeProvider defaultTheme="dark" storageKey="theme">
-          <RouterProvider router={router} />
-          <Toaster position="bottom-right" />
+          <IconContext.Provider value={{
+            mirrored: false,
+          }}>
+            <RouterProvider router={router} />
+            <Toaster position="bottom-right" />
+          </IconContext.Provider>
         </ThemeProvider>
       </QueryClientProvider>
     </ErrorBoundary>
-  </StrictMode>
+  </StrictMode >
 );
 
 // Hot module replacement

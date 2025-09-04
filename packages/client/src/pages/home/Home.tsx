@@ -3,7 +3,6 @@ import { useStorePersist } from "@/src/lib/hooks/use-store";
 import { motion } from "motion/react"
 import { cn } from "@/src/lib/utils";
 import { useApi } from "@/src/lib/hooks/use-api";
-import Upload from "@/src/lib/components/custom/Upload";
 
 export default function HomePage() {
     const { bears, setBears } = useStorePersist();
@@ -47,7 +46,7 @@ export default function HomePage() {
             </motion.div>
 
             <Button
-                variant="secondary"
+                variant="primary"
                 onClick={() => setBears(0)}
                 className="mt-4"
             >

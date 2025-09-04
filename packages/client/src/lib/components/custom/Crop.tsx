@@ -8,8 +8,8 @@ import {
   DialogFooter,
 } from "../ui/dialog";
 import { Button } from "../ui/button";
-import Icon from "./Icon";
 import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group";
+import { MinusIcon, RectangleIcon } from "@phosphor-icons/react/dist/ssr";
 
 type AspectRatio =
   | "square"
@@ -35,14 +35,14 @@ const MAX_FILE_SIZE = 1024 * 1024; // 1MB
 
 const aspectRatioOptions: Record<
   AspectRatio,
-  { value: number; label: string; icon: string }
+  { value: number; label: string; }
 > = {
-  square: { value: 1, label: "Square (1:1)", icon: "Square" },
-  portrait: { value: 3 / 4, label: "Portrait (3:4)", icon: "Image" },
-  landscape: { value: 4 / 3, label: "Landscape (4:3)", icon: "Image" },
-  banner: { value: 3, label: "Banner (3:1)", icon: "Image" },
-  wide: { value: 16 / 9, label: "Wide (16:9)", icon: "Monitor" },
-  custom: { value: 0, label: "Free", icon: "Maximize" },
+  square: { value: 1, label: "Square (1:1)" },
+  portrait: { value: 3 / 4, label: "Portrait (3:4)" },
+  landscape: { value: 4 / 3, label: "Landscape (4:3)" },
+  banner: { value: 3, label: "Banner (3:1)" },
+  wide: { value: 16 / 9, label: "Wide (16:9)" },
+  custom: { value: 0, label: "Free" },
 };
 
 export default function Crop({
@@ -249,10 +249,6 @@ export default function Crop({
                   value={ratio}
                   aria-label={aspectRatioOptions[ratio].label}
                 >
-                  <Icon
-                    name={aspectRatioOptions[ratio].icon as any}
-                    className="mr-2 size-4"
-                  />
                   <span className="hidden sm:inline">
                     {aspectRatioOptions[ratio].label}
                   </span>
@@ -265,7 +261,7 @@ export default function Crop({
         <div className="flex flex-col gap-2 py-2">
           <label className="text-sm font-medium">Zoom</label>
           <div className="flex items-center gap-2">
-            <Icon name="Minimize" className="size-4" />
+            <MinusIcon />
             <input
               type="range"
               value={zoom}
@@ -276,7 +272,7 @@ export default function Crop({
               onChange={(e) => setZoom(Number(e.target.value))}
               className="w-full"
             />
-            <Icon name="Maximize" className="size-4" />
+            <RectangleIcon />
           </div>
         </div>
 
