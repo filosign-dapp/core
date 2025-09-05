@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { CaretUpDownIcon, PlusIcon } from "@phosphor-icons/react"
+import { CaretDownIcon, PlusIcon } from "@phosphor-icons/react"
 
 import {
   DropdownMenu,
@@ -9,7 +9,6 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/src/lib/components/ui/dropdown-menu"
 import {
@@ -20,18 +19,24 @@ import {
 } from "@/src/lib/components/ui/sidebar"
 
 export function TeamSwitcher({
-  teams,
+  orgs,
 }: {
-  teams: {
+  orgs: {
     name: string
     logo: React.ElementType
     plan: string
   }[]
 }) {
-  const { isMobile } = useSidebar()
-  const [activeTeam, setActiveTeam] = React.useState(teams[0])
+  const { isMobile, state, setOpen } = useSidebar()
+  const [activeOrganization, setActiveOrganization] = React.useState(orgs[0])
 
-  if (!activeTeam) {
+  const handleIconClick = () => {
+    if (state === "collapsed") {
+      setOpen(true)
+    }
+  }
+
+  if (!activeOrganization) {
     return null
   }
 
@@ -42,46 +47,44 @@ export function TeamSwitcher({
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground cursor-pointer"
+              onClick={handleIconClick}
             >
-              <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                <activeTeam.logo className="size-6" />
+              <div className=" text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
+                <activeOrganization.logo className="size-6" />
               </div>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{activeTeam.name}</span>
-                <span className="truncate text-xs">{activeTeam.plan}</span>
+              <div className="grid flex-1 text-left leading-tight group-data-[collapsible=icon]:hidden"> 
+                <p className="truncate">{activeOrganization.name}</p>
               </div>
-              <CaretUpDownIcon className="ml-auto size-6" />
+              <CaretDownIcon className="ml-auto size-6 group-data-[collapsible=icon]:hidden" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
             className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
             align="start"
-            side={isMobile ? "bottom" : "right"}
-            sideOffset={4}
+            side={"top"}
           >
             <DropdownMenuLabel className="text-muted-foreground text-xs">
-              Teams
+              Organisations
             </DropdownMenuLabel>
-            {teams.map((team, index) => (
+            {orgs.map((org) => (
               <DropdownMenuItem
-                key={team.name}
-                onClick={() => setActiveTeam(team)}
+                key={org.name}
+                onClick={() => setActiveOrganization(org)}
                 className="gap-2 p-2"
               >
-                <div className="flex size-6 items-center justify-center rounded-md border">
-                  <team.logo className="size-6 shrink-0" />
+                <div className="flex size-6 items-center justify-center rounded-md">
+                  <org.logo className="size-5 shrink-0" />
                 </div>
-                {team.name}
-                <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
+                {org.name}
               </DropdownMenuItem>
             ))}
             <DropdownMenuSeparator />
             <DropdownMenuItem className="gap-2 p-2">
-              <div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
+              <div className="flex size-6 items-center justify-center rounded-md bg-transparent">
                 <PlusIcon className="size-6" />
               </div>
-              <div className="text-muted-foreground font-medium">Add team</div>
+              <div className="font-medium">Add organization</div>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

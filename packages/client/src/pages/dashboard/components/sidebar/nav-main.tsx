@@ -14,6 +14,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
+  useSidebar,
 } from "@/src/lib/components/ui/sidebar"
 
 export function NavMain({
@@ -30,9 +31,17 @@ export function NavMain({
     }[]
   }[]
 }) {
+  const { state, setOpen } = useSidebar()
+
+  const handleIconClick = () => {
+    if (state === "collapsed") {
+      setOpen(true)
+    }
+  }
+
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
+      <SidebarGroupLabel>E-Sign Platform</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
           <Collapsible
@@ -43,10 +52,18 @@ export function NavMain({
           >
             <SidebarMenuItem>
               <CollapsibleTrigger asChild>
-                <SidebarMenuButton tooltip={item.title}>
-                  {item.icon && <item.icon className="size-6" />}
-                  <span>{item.title}</span>
-                  <CaretRightIcon className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                <SidebarMenuButton 
+                  tooltip={item.title}
+                  onClick={handleIconClick}
+                  className="cursor-pointer"
+                >
+                  {item.icon && (
+                    <item.icon 
+                      className="size-6 group-data-[collapsible=icon]:size-6 group-data-[collapsible=offcanvas]:size-7.5" 
+                    />
+                  )}
+                  <span className="group-data-[collapsible=icon]:hidden">{item.title}</span>
+                  <CaretRightIcon className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 group-data-[collapsible=icon]:hidden" />
                 </SidebarMenuButton>
               </CollapsibleTrigger>
               <CollapsibleContent>

@@ -33,18 +33,26 @@ export function NavProjects({
     icon: React.ElementType
   }[]
 }) {
-  const { isMobile } = useSidebar()
+  const { isMobile, state, setOpen } = useSidebar()
+
+  const handleIconClick = () => {
+    if (state === "collapsed") {
+      setOpen(true)
+    }
+  }
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <SidebarGroupLabel>Projects</SidebarGroupLabel>
+      <SidebarGroupLabel>Recent Documents</SidebarGroupLabel>
       <SidebarMenu>
         {projects.map((item) => (
           <SidebarMenuItem key={item.name}>
             <SidebarMenuButton asChild>
-              <a href={item.url}>
-                <item.icon className="size-6" />
-                <span>{item.name}</span>
+              <a href={item.url} onClick={handleIconClick} className="cursor-pointer">
+                <item.icon 
+                  className="size-6 group-data-[collapsible=icon]:size-9 group-data-[collapsible=offcanvas]:size-7.5" 
+                />
+                <span className="group-data-[collapsible=icon]:hidden">{item.name}</span>
               </a>
             </SidebarMenuButton>
             <DropdownMenu>
@@ -60,26 +68,28 @@ export function NavProjects({
                 align={isMobile ? "end" : "start"}
               >
                 <DropdownMenuItem>
-                  <FolderIcon className="size-6 text-muted-foreground" />
-                  <span>View Project</span>
+                  <FolderIcon className="size-6" />
+                  <span>View Document</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
-                  <ShareIcon className="size-6 text-muted-foreground" />
-                  <span>Share Project</span>
+                  <ShareIcon className="size-6" />
+                  <span>Send for Signature</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
-                  <TrashIcon className="size-6 text-muted-foreground" />
-                  <span>Delete Project</span>
+                  <TrashIcon className="size-6" />
+                  <span>Delete Document</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </SidebarMenuItem>
         ))}
         <SidebarMenuItem>
-          <SidebarMenuButton className="text-sidebar-foreground/70">
-            <DotsThreeIcon className="size-6 text-sidebar-foreground/70" />
-            <span>More</span>
+          <SidebarMenuButton onClick={handleIconClick} className="cursor-pointer">
+            <DotsThreeIcon 
+              className="size-6 group-data-[collapsible=icon]:size-9 group-data-[collapsible=offcanvas]:size-7.5" 
+            />
+            <span className="group-data-[collapsible=icon]:hidden">View All</span>
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarMenu>

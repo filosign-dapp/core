@@ -4,7 +4,7 @@ import { GithubLogoIcon, TwitterLogoIcon, LinkedinLogoIcon, EnvelopeIcon, Lightn
 
 export default function FooterSection() {
   return (
-    <footer className="max-w-6xl mx-auto p-page py-16">
+    <footer className="max-w-6xl mx-auto p-page py-12">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -18,9 +18,9 @@ export default function FooterSection() {
         className="flex flex-col gap-12"
       >
         {/* Main Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
           {/* Brand Section */}
-          <div className="md:col-span-2 space-y-4">
+          <div className="sm:col-span-2 md:col-span-2 space-y-4">
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -35,7 +35,7 @@ export default function FooterSection() {
               >
                 <LightningIcon className="size-6 text-foreground transition-all duration-200 group-hover:rotate-12 group-hover:scale-105" weight="fill" />
               </motion.div>
-              <h3 className="text-2xl font-semibold text-foreground font-manrope">filosign</h3>
+              <h3 className="text-foreground font-manrope font-">filosign</h3>
             </motion.div>
             <motion.p
               initial={{ opacity: 0, y: 10 }}
