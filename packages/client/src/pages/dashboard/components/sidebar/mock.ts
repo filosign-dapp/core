@@ -9,12 +9,14 @@ import {
 } from "@phosphor-icons/react"
 
 // This is sample data.
+export const userData = {
+  name: "Sarah Chen",
+  email: "sarah.chen@filosign.com",
+  avatar: undefined, // Set to undefined to show fallback icon
+}
+
 export const sidebarData = {
-  user: {
-    name: "Sarah Chen",
-    email: "sarah.chen@filosign.com",
-    avatar: "/avatars/sarah-chen.jpg",
-  },
+  user: userData,
   orgs: [
     {
       name: "Legal Partners LLP",

@@ -20,10 +20,10 @@ const DefaultErrorFallback = () => {
 
       <div className="relative w-full max-w-md p-8 overflow-hidden duration-500 border rounded-lg shadow-md bg-card border-border animate-in fade-in slide-in-from-bottom-4">
         {/* Animated top border */}
-        <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent animate-shimmer" />
+        <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-muted to-transparent animate-shimmer" />
 
         <div className="text-center">
-          <div className="inline-flex items-center justify-center w-20 h-20 mx-auto mb-6 duration-300 rounded-full bg-primary/10 text-primary animate-in zoom-in-50">
+          <div className="inline-flex items-center justify-center w-20 h-20 mx-auto mb-6 duration-300 rounded-full bg-muted/20 text-foreground animate-in zoom-in-50">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="36"

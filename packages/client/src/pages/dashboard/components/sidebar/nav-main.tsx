@@ -1,4 +1,6 @@
+import * as React from "react"
 import { CaretRightIcon } from "@phosphor-icons/react"
+import { motion, AnimatePresence } from "framer-motion"
 
 import {
   Collapsible,
@@ -32,6 +34,17 @@ export function NavMain({
   }[]
 }) {
   const { state, setOpen } = useSidebar()
+  const isCollapsed = state === "collapsed"
+  const [openItems, setOpenItems] = React.useState<Set<string>>(
+    new Set(items.filter(item => item.isActive).map(item => item.title))
+  )
+
+  // Collapse all items when sidebar collapses
+  React.useEffect(() => {
+    if (state === "collapsed") {
+      setOpenItems(new Set())
+    }
+  }, [state])
 
   const handleIconClick = () => {
     if (state === "collapsed") {
@@ -39,49 +52,98 @@ export function NavMain({
     }
   }
 
+  const toggleItem = (title: string) => {
+    setOpenItems(prev => {
+      const newSet = new Set<string>()
+      // If the clicked item is already open, close it
+      // If it's closed, open it and close all others (only one active at a time)
+      if (!prev.has(title)) {
+        newSet.add(title)
+      }
+      return newSet
+    })
+  }
+
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>E-Sign Platform</SidebarGroupLabel>
       <SidebarMenu>
-        {items.map((item) => (
-          <Collapsible
-            key={item.title}
-            asChild
-            defaultOpen={item.isActive}
-            className="group/collapsible"
-          >
-            <SidebarMenuItem>
-              <CollapsibleTrigger asChild>
-                <SidebarMenuButton 
-                  tooltip={item.title}
-                  onClick={handleIconClick}
-                  className="cursor-pointer"
-                >
-                  {item.icon && (
-                    <item.icon 
-                      className="size-6 group-data-[collapsible=icon]:size-6 group-data-[collapsible=offcanvas]:size-7.5" 
-                    />
+        {items.map((item) => {
+          const isOpen = openItems.has(item.title)
+          
+          return (
+            <SidebarMenuItem key={item.title}>
+              <SidebarMenuButton 
+                tooltip={item.title}
+                size="lg"
+                onClick={() => {
+                  handleIconClick()
+                  if (item.items && item.items.length > 0) {
+                    toggleItem(item.title)
+                  }
+                }}
+                className="cursor-pointer text-sm font-semibold transition-all duration-200 hover:bg-accent/50 data-[active=true]:bg-accent data-[active=true]:text-accent-foreground data-[active=true]:shadow-sm"
+                isActive={item.isActive}
+              >
+                {item.icon && (
+                  <item.icon 
+                    className="!size-6 group-data-[collapsible=icon]:!size-6" 
+                  />
+                )}
+                {!isCollapsed && (
+                  <motion.span 
+                    className="group-data-[collapsible=icon]:hidden"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 230,
+                      damping: 25,
+                      delay: 0.1
+                    }}
+                  >
+                    {item.title}
+                  </motion.span>
+                )}
+                {item.items && item.items.length > 0 && (
+                  <CaretRightIcon 
+                    className={`ml-auto transition-transform duration-200 group-data-[collapsible=icon]:hidden ${
+                      isOpen ? 'rotate-90' : ''
+                    }`} 
+                  />
+                )}
+              </SidebarMenuButton>
+              
+              {item.items && item.items.length > 0 && (
+                <AnimatePresence>
+                  {isOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2, ease: "easeInOut" }}
+                      className="overflow-hidden"
+                    >
+                      <SidebarMenuSub className="mt-1">
+                        {item.items.map((subItem) => (
+                          <SidebarMenuSubItem key={subItem.title}>
+                            <SidebarMenuSubButton 
+                              asChild
+                              className="text-sm font-medium transition-all duration-200 hover:bg-accent/30 hover:text-accent-foreground data-[active=true]:bg-accent/50 data-[active=true]:text-accent-foreground data-[active=true]:font-semibold px-5 py-2"
+                            >
+                              <a href={subItem.url}>
+                                <span>{subItem.title}</span>
+                              </a>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        ))}
+                      </SidebarMenuSub>
+                    </motion.div>
                   )}
-                  <span className="group-data-[collapsible=icon]:hidden">{item.title}</span>
-                  <CaretRightIcon className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 group-data-[collapsible=icon]:hidden" />
-                </SidebarMenuButton>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <SidebarMenuSub>
-                  {item.items?.map((subItem) => (
-                    <SidebarMenuSubItem key={subItem.title}>
-                      <SidebarMenuSubButton asChild>
-                        <a href={subItem.url}>
-                          <span>{subItem.title}</span>
-                        </a>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                  ))}
-                </SidebarMenuSub>
-              </CollapsibleContent>
+                </AnimatePresence>
+              )}
             </SidebarMenuItem>
-          </Collapsible>
-        ))}
+          )
+        })}
       </SidebarMenu>
     </SidebarGroup>
   )
