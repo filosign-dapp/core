@@ -130,7 +130,7 @@ export function UserDropdown() {
             className="gap-2 p-2 cursor-pointer text-destructive focus:text-destructive"
           >
             <div className="flex size-6 items-center justify-center rounded-md">
-              <SignOutIcon className="size-5 shrink-0" />
+              <SignOutIcon className="size-5 shrink-0 text-destructive" />
             </div>
             <div className="font-medium">Sign out</div>
           </DropdownMenuItem>
