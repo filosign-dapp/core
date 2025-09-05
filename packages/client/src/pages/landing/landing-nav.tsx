@@ -1,3 +1,4 @@
+import Logo from "@/src/lib/components/custom/Logo";
 import { Button } from "@/src/lib/components/ui/button";
 import { LightningIcon } from "@phosphor-icons/react";
 import { Link } from "@tanstack/react-router";
@@ -58,44 +59,7 @@ export default function LandingNavbar() {
         }}
       >
         {/* Logo */}
-        <motion.div
-          className="flex items-center group cursor-pointer"
-          initial={{ opacity: 0, x: -30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{
-            type: "spring",
-            stiffness: 230,
-            damping: 25,
-            delay: 0.17
-          }}
-        >
-          <motion.div
-            className="p-2 mr-3 rounded-xl bg-primary transition-colors duration-200"
-            initial={{ scale: 0, rotate: -180 }}
-            animate={{ scale: 1, rotate: 0 }}
-            transition={{
-              type: "spring",
-              stiffness: 345,
-              damping: 20,
-              delay: 0.26
-            }}
-          >
-            <LightningIcon className="size-6 text-foreground transition-all duration-200 group-hover:rotate-12 group-hover:scale-105" weight="fill" />
-          </motion.div>
-          <motion.h3
-            className="text-primary font-manrope transition-colors duration-200"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{
-              type: "spring",
-              stiffness: 230,
-              damping: 25,
-              delay: 0.35
-            }}
-          >
-            filosign
-          </motion.h3>
-        </motion.div>
+        <Logo textDelay={0.35} iconDelay={0.26} className="px-0" />
 
         {/* Navigation Links */}
         <motion.div

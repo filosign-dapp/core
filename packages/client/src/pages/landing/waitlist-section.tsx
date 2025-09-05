@@ -54,7 +54,7 @@ export default function WaitlistSection() {
                 Join the waitlist
               </h1>
               <p className="text-lg text-muted leading-relaxed max-w-2xl mx-auto">
-                Be the first one to try filosign when it launches.
+                Be the first one to try Filosign when it goes live on the mainnet.
               </p>
             </motion.div>
 
@@ -214,7 +214,7 @@ export default function WaitlistSection() {
                 damping: 25,
                 delay: 0.6
               }} className="text-muted md:text-lg">
-              We'll notify you as soon as Filosign goes live.
+              We'll notify you as soon as we go live on the mainnet.
             </motion.p>
           </motion.div>
           </motion.div>

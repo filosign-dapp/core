@@ -1,24 +1,39 @@
 import { motion } from "motion/react";
 import { LightningIcon } from "@phosphor-icons/react";
 import { cn } from "../../utils";
-import { useSidebar } from "../ui/sidebar";
 
 interface LogoProps {
+    className?: string;
     iconClassName?: string;
     textClassName?: string;
     animatedLogo?: boolean;
     iconOnly?: boolean;
+    isCollapsed?: boolean;
+    onIconClick?: () => void;
+    showText?: boolean;
+    textDelay?: number;
+    iconDelay?: number;
 }
 
-export default function Logo({ iconClassName, textClassName, animatedLogo = true, iconOnly = false }: LogoProps) {
-    const { state, setOpen } = useSidebar();
-    const isCollapsed = state === "collapsed";
+export default function Logo({
+    className,
+    iconClassName,
+    textClassName,
+    animatedLogo = true,
+    iconOnly = false,
+    isCollapsed = false,
+    onIconClick,
+    showText = true,
+    textDelay = 0.2,
+    iconDelay = 0.26
+}: LogoProps) {
 
     return (
         <motion.div
             className={cn(
                 "flex items-center group/logo py-2 cursor-pointer transition-all",
-                !isCollapsed && "px-4 -ml-1"
+                !isCollapsed && "px-4 -ml-1",
+                className
             )}
         >
             <motion.div
@@ -31,13 +46,9 @@ export default function Logo({ iconClassName, textClassName, animatedLogo = true
                     type: "spring",
                     stiffness: 345,
                     damping: 20,
-                    delay: 0.26
+                    delay: iconDelay
                 }}
-                onClick={() => {
-                    if (isCollapsed) {
-                        setOpen(true)
-                    }
-                }}
+                onClick={onIconClick}
             >
                 <LightningIcon
                     className={cn(
@@ -48,7 +59,7 @@ export default function Logo({ iconClassName, textClassName, animatedLogo = true
                     weight="fill"
                 />
             </motion.div>
-            {!iconOnly && !isCollapsed && (
+            {!iconOnly && !isCollapsed && showText && (
                 <motion.h3
                     className={cn(
                         "text-primary ml-3 font-manrope transition-colors duration-200",
@@ -60,7 +71,7 @@ export default function Logo({ iconClassName, textClassName, animatedLogo = true
                         type: "spring",
                         stiffness: 230,
                         damping: 25,
-                        delay: 0.2
+                        delay: textDelay
                     }}
                 >
                     filosign

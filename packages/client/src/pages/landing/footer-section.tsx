@@ -18,9 +18,9 @@ export default function FooterSection() {
         className="flex flex-col gap-12"
       >
         {/* Main Footer Content */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-8">
           {/* Brand Section */}
-          <div className="sm:col-span-2 md:col-span-2 space-y-4">
+          <div className="col-span-2 sm:col-span-2 md:col-span-2 space-y-4">
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -42,7 +42,7 @@ export default function FooterSection() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
               viewport={{ once: true }}
-              className="text-muted-foreground leading-relaxed max-w-md"
+              className="text-muted-foreground leading-relaxed max-w-sm"
             >
               Trustless document signing for the modern web. Secure, fast, and easy-to-use document signing on Filecoin.
             </motion.p>
@@ -119,7 +119,7 @@ export default function FooterSection() {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
+          transition={{ delay: 0.3 }}
           viewport={{ once: true }}
           className="flex items-center gap-6"
         >
@@ -166,7 +166,7 @@ export default function FooterSection() {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
+          transition={{ delay: 0.3 }}
           viewport={{ once: true }}
           className="pt-8 border-t border-border"
         >

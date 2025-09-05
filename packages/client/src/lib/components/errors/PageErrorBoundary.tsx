@@ -12,11 +12,7 @@ const DefaultErrorFallback = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="relative min-h-screen bg-background">
-      <div className="fixed bottom-4 right-4">
-        <ThemeSwitch />
-      </div>
-      
+    <div className="flex flex-1 flex-col gap-4 h-screen">
       <PageCrashed
         title="Something went wrong"
         description="There was an error loading this page."

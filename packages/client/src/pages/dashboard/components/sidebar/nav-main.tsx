@@ -1,15 +1,8 @@
 import * as React from "react"
 import { CaretRightIcon } from "@phosphor-icons/react"
 import { motion, AnimatePresence } from "framer-motion"
-
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/src/lib/components/ui/collapsible"
 import {
   SidebarGroup,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -55,8 +48,6 @@ export function NavMain({
   const toggleItem = (title: string) => {
     setOpenItems(prev => {
       const newSet = new Set<string>()
-      // If the clicked item is already open, close it
-      // If it's closed, open it and close all others (only one active at a time)
       if (!prev.has(title)) {
         newSet.add(title)
       }
