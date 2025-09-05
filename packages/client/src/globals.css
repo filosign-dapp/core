@@ -112,7 +112,7 @@
 }
 
 @utility glass {
-  @apply bg-foreground/80 backdrop-blur-sm border-foreground/10 shadow-lg;
+  @apply bg-foreground/80 backdrop-blur-sm border-foreground/10;
 }
 
 @utility rounded-main {

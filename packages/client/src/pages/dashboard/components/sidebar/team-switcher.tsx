@@ -28,8 +28,9 @@ export function TeamSwitcher({
     plan: string
   }[]
 }) {
-  const { isMobile, state, setOpen } = useSidebar()
+  const { state, setOpen } = useSidebar()
   const [activeOrganization, setActiveOrganization] = React.useState(orgs[0])
+  const [isDropdownOpen, setIsDropdownOpen] = React.useState(false)
 
   const handleIconClick = () => {
     if (state === "collapsed") {
@@ -44,7 +45,7 @@ export function TeamSwitcher({
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <DropdownMenu>
+        <DropdownMenu onOpenChange={setIsDropdownOpen}>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
@@ -57,7 +58,7 @@ export function TeamSwitcher({
               <div className="grid flex-1 text-left leading-tight group-data-[collapsible=icon]:hidden"> 
                 <p className="truncate">{activeOrganization.name}</p>
               </div>
-              <CaretDownIcon className="ml-auto size-6 group-data-[collapsible=icon]:hidden transition-transform duration-150 rotate-180 data-[state=open]:rotate-0" />
+              <CaretDownIcon className={`ml-auto size-6 group-data-[collapsible=icon]:hidden transition-transform duration-150 ${isDropdownOpen ? 'rotate-180' : ''}`} />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent

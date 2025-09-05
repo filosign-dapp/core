@@ -13,7 +13,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <SidebarInset>
         <DashboardNav />
         <Separator />
-        <section id="dashboard-content" className="flex flex-1 flex-col gap-4 pt-8">
+        <section id="dashboard-content" className="flex flex-1 flex-col gap-4">
           {children}
         </section>
       </SidebarInset>

@@ -1,6 +1,6 @@
 import { Badge } from "@/src/lib/components/ui/badge";
 import { Button } from "@/src/lib/components/ui/button";
-import { ArrowRightIcon, CircleIcon, PlayIcon } from "@phosphor-icons/react";
+import { CaretRightIcon, CircleIcon, PlayIcon } from "@phosphor-icons/react";
 import { Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { Image } from "@/src/lib/components/custom/Image";
@@ -82,7 +82,7 @@ export default function HeroSection() {
           <Button variant="primary" size="lg" asChild>
             <Link to="/dashboard" className="flex items-center gap-2 group">
               Get started
-              <ArrowRightIcon className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" />
+              <CaretRightIcon className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" />
             </Link>
           </Button>
 
