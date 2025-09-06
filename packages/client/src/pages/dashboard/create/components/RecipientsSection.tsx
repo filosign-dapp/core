@@ -19,20 +19,7 @@ import { Input } from "@/src/lib/components/ui/input"
 import { Checkbox } from "@/src/lib/components/ui/checkbox"
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/src/lib/components/ui/form"
 import { cn } from "@/src/lib/utils/utils"
-
-type Recipient = {
-    name: string
-    email: string
-    walletAddress: string
-    role: "signer" | "cc" | "approver"
-}
-
-type EnvelopeForm = {
-    isOnlySigner: boolean
-    recipients: Recipient[]
-    emailSubject: string
-    emailMessage: string
-}
+import type { EnvelopeForm, Recipient } from "../types"
 
 interface RecipientsSectionProps {
     control: Control<EnvelopeForm>
@@ -211,7 +198,9 @@ export default function RecipientsSection({
                                             <FormField
                                                 control={control}
                                                 name={`recipients.${index}.name`}
-                                                rules={{ required: "Name is required" }}
+                                                rules={{ 
+                                                    required: isOnlySigner ? false : "Name is required" 
+                                                }}
                                                 render={({ field }) => (
                                                     <FormItem>
                                                         <FormLabel className="flex items-center gap-2">
@@ -236,8 +225,8 @@ export default function RecipientsSection({
                                                 control={control}
                                                 name={`recipients.${index}.email`}
                                                 rules={{ 
-                                                    required: "Email is required",
-                                                    pattern: {
+                                                    required: isOnlySigner ? false : "Email is required",
+                                                    pattern: isOnlySigner ? undefined : {
                                                         value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
                                                         message: "Invalid email address"
                                                     }
@@ -268,8 +257,8 @@ export default function RecipientsSection({
                                             control={control}
                                             name={`recipients.${index}.walletAddress`}
                                             rules={{ 
-                                                required: "Wallet address is required",
-                                                pattern: {
+                                                required: isOnlySigner ? false : "Wallet address is required",
+                                                pattern: isOnlySigner ? undefined : {
                                                     value: /^0x[a-fA-F0-9]{40}$/,
                                                     message: "Invalid wallet address format"
                                                 }

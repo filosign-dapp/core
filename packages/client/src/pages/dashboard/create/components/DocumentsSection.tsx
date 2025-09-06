@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback } from "react"
 import { motion } from "framer-motion"
+import type { Control, FieldArrayWithId, UseFieldArrayAppend, UseFieldArrayRemove } from "react-hook-form"
 import {
     PaperPlaneTiltIcon,
     CaretUpIcon,
@@ -10,20 +11,20 @@ import {
 } from "@phosphor-icons/react"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/src/lib/components/ui/collapsible"
 import { Button } from "@/src/lib/components/ui/button"
+import { FormField, FormItem, FormMessage } from "@/src/lib/components/ui/form"
 import { cn } from "@/src/lib/utils/utils"
 import FileCard from "./FileCard"
+import type { EnvelopeForm, UploadedFile } from "../types"
 
-type UploadedFile = {
-    id: string
-    file: File
-    name: string
-    size: number
-    type: string
+interface DocumentsSectionProps {
+    control: Control<EnvelopeForm>
+    fields: FieldArrayWithId<EnvelopeForm, "documents", "id">[]
+    append: UseFieldArrayAppend<EnvelopeForm, "documents">
+    remove: UseFieldArrayRemove
 }
 
-export default function DocumentsSection() {
+export default function DocumentsSection({ control, fields, append, remove }: DocumentsSectionProps) {
     const [isDocumentsOpen, setIsDocumentsOpen] = useState(true)
-    const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
     const [isDragOver, setIsDragOver] = useState(false)
     const [viewMode, setViewMode] = useState<"list" | "grid">("grid")
     const fileInputRef = useRef<HTMLInputElement>(null)
@@ -41,14 +42,14 @@ export default function DocumentsSection() {
             }))
             .filter(newFile => {
                 // Check if file with same name and size already exists
-                return !uploadedFiles.some(existingFile => 
+                return !fields.some(existingFile => 
                     existingFile.name === newFile.name && 
                     existingFile.size === newFile.size
                 )
             })
 
-        setUploadedFiles(prev => [...prev, ...newFiles])
-    }, [uploadedFiles])
+        newFiles.forEach(file => append(file))
+    }, [fields, append])
 
     const handleFileInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         handleFileSelect(event.target.files)
@@ -79,7 +80,10 @@ export default function DocumentsSection() {
     }
 
     const removeFile = (fileId: string) => {
-        setUploadedFiles(prev => prev.filter(file => file.id !== fileId))
+        const index = fields.findIndex(file => file.id === fileId)
+        if (index !== -1) {
+            remove(index)
+        }
     }
 
     return (
@@ -114,15 +118,24 @@ export default function DocumentsSection() {
                 </CollapsibleTrigger>
 
                 <CollapsibleContent className="mt-6">
-                    {/* Hidden file input */}
-                    <input
-                        ref={fileInputRef}
-                        type="file"
-                        multiple
-                        onChange={handleFileInputChange}
-                        className="hidden"
-                        accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif"
-                    />
+                    <FormField
+                        control={control}
+                        name="documents"
+                        rules={{ 
+                            required: "At least one document is required",
+                            validate: (value) => value.length > 0 || "At least one document is required"
+                        }}
+                        render={({ field }) => (
+                            <FormItem>
+                                {/* Hidden file input */}
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    multiple
+                                    onChange={handleFileInputChange}
+                                    className="hidden"
+                                    accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif"
+                                />
                     
                     <motion.div
                         className={cn(
@@ -198,7 +211,7 @@ export default function DocumentsSection() {
                     </motion.div>
                     
                     {/* Uploaded Files Display */}
-                    {uploadedFiles.length > 0 && (
+                    {fields.length > 0 && (
                         <motion.div
                             className="mt-6 space-y-4"
                             initial={{ opacity: 0, y: 20 }}
@@ -213,7 +226,7 @@ export default function DocumentsSection() {
                             {/* Header with view mode toggle */}
                             <div className="flex items-center justify-between">
                                 <h5 className="text-sm font-medium text-muted-foreground">
-                                    Uploaded Files ({uploadedFiles.length})
+                                    Uploaded Files ({fields.length})
                                 </h5>
                                 <div className="flex items-center gap-1 bg-muted/20 rounded-lg p-1">
                                     <Button
@@ -240,7 +253,7 @@ export default function DocumentsSection() {
                             {/* Files display */}
                             {viewMode === "list" ? (
                                 <div className="space-y-2">
-                                    {uploadedFiles.map((file) => (
+                                    {fields.map((file) => (
                                         <FileCard
                                             key={file.id}
                                             file={file}
@@ -252,7 +265,7 @@ export default function DocumentsSection() {
                             ) : (
                                 <div className="overflow-x-auto">
                                     <div className="flex gap-4 pb-2" style={{ width: 'max-content' }}>
-                                        {uploadedFiles.map((file) => (
+                                        {fields.map((file) => (
                                             <FileCard
                                                 key={file.id}
                                                 file={file}
@@ -265,6 +278,10 @@ export default function DocumentsSection() {
                             )}
                         </motion.div>
                     )}
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
                 </CollapsibleContent>
             </Collapsible>
         </motion.section>

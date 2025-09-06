@@ -7,24 +7,14 @@ import { Textarea } from "@/src/lib/components/ui/textarea"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/src/lib/components/ui/collapsible"
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/src/lib/components/ui/form"
 import { cn } from "@/src/lib/utils/utils"
-
-type EnvelopeForm = {
-    isOnlySigner: boolean
-    recipients: Array<{
-        name: string
-        email: string
-        walletAddress: string
-        role: "signer" | "cc" | "approver"
-    }>
-    emailSubject: string
-    emailMessage: string
-}
+import type { EnvelopeForm } from "../types"
 
 interface MessageSectionProps {
     control: Control<EnvelopeForm>
+    isOnlySigner: boolean
 }
 
-export default function MessageSection({ control }: MessageSectionProps) {
+export default function MessageSection({ control, isOnlySigner }: MessageSectionProps) {
     const [isMessageOpen, setIsMessageOpen] = useState(false)
 
     return (
@@ -62,10 +52,10 @@ export default function MessageSection({ control }: MessageSectionProps) {
                         <FormField
                             control={control}
                             name="emailSubject"
-                            rules={{ required: "Email subject is required" }}
+                            rules={{ required: isOnlySigner ? false : "Email subject is required" }}
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Email Subject *</FormLabel>
+                                    <FormLabel>Email Subject {!isOnlySigner && "*"}</FormLabel>
                                     <FormControl>
                                         <Input
                                             placeholder="Enter email subject"
