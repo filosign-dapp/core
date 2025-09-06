@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import { LightningIcon } from "@phosphor-icons/react";
 import { cn } from "../../utils";
+import { useNavigate } from "@tanstack/react-router";
 
 interface LogoProps {
     className?: string;
@@ -27,18 +28,23 @@ export default function Logo({
     textDelay = 0.2,
     iconDelay = 0.26
 }: LogoProps) {
+    const navigate = useNavigate();
 
     return (
-        <motion.div
+        <motion.button
             className={cn(
                 "flex items-center group/logo py-2 cursor-pointer transition-all",
                 !isCollapsed && "px-4 -ml-1",
                 className
             )}
+            onClick={() => {
+                onIconClick?.();
+                navigate({ to: "/dashboard", replace: true });
+            }}
         >
             <motion.div
                 className={cn(
-                    "p-2 rounded-xl bg-primary transition-colors duration-200 ml-1",
+                    "p-2 rounded-xl bg-secondary transition-colors duration-200 ml-1",
                 )}
                 initial={animatedLogo ? { scale: 0, rotate: -180 } : {}}
                 animate={animatedLogo ? { scale: 1, rotate: 0 } : {}}
@@ -48,7 +54,6 @@ export default function Logo({
                     damping: 20,
                     delay: iconDelay
                 }}
-                onClick={onIconClick}
             >
                 <LightningIcon
                     className={cn(
@@ -62,7 +67,7 @@ export default function Logo({
             {!iconOnly && !isCollapsed && showText && (
                 <motion.h3
                     className={cn(
-                        "text-primary ml-3 font-manrope transition-colors duration-200",
+                        "text-secondary ml-3 font-manrope transition-colors duration-200",
                         textClassName
                     )}
                     initial={{ opacity: 0, x: -20 }}
@@ -77,6 +82,6 @@ export default function Logo({
                     filosign
                 </motion.h3>
             )}
-        </motion.div>
+        </motion.button>
     )
 }

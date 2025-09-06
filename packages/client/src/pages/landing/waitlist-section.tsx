@@ -169,7 +169,7 @@ export default function WaitlistSection() {
               damping: 25,
               duration: 0.8
             }}
-            className="text-center space-y-6 p-8 rounded-large border border-primary/20"
+            className="text-center space-y-6 p-8 rounded-large"
           >
           <motion.div
             initial={{ y: 50, opacity: 0 }}

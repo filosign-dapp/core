@@ -34,21 +34,9 @@ export function ComingSoon({
           transition={{ delay: 0.2, duration: 0.5, ease: "easeOut" }}
           className="relative"
         >
-          <div className="flex justify-center items-center mx-auto w-32 h-32 rounded-full bg-muted/20">
-            <ClockIcon className="w-16 h-16 text-muted-foreground" />
+          <div className="flex justify-center items-center mx-auto w-32 h-32 rounded-full bg-primary">
+            <ClockIcon className="w-16 h-16 text-primary-foreground" />
           </div>
-          <motion.div
-            initial={{ opacity: 0, scale: 0 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 1, duration: 0.3 }}
-            className="flex absolute -top-1 -right-1 justify-center items-center w-6 h-6 rounded-full bg-muted-foreground/20"
-          >
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-              className="w-3 h-3 rounded-full border-2 border-background border-t-transparent"
-            />
-          </motion.div>
         </motion.div>
 
         {/* Content */}
@@ -75,20 +63,21 @@ export function ComingSoon({
         >
           {showBackButton && (
             <Button
-              variant="secondary"
+              variant="ghost"
               onClick={onBack}
               className="gap-2"
             >
-              <CaretLeftIcon className="w-4 h-4" />
+              <CaretLeftIcon className="w-4 h-4" weight="bold" />
               Go Back
             </Button>
           )}
           {showNotifyButton && (
             <Button
               onClick={onNotify}
+              variant="primary"
               className="gap-2"
             >
-              <BellIcon className="w-4 h-4" />
+              <BellIcon className="w-4 h-4" weight="bold" />
               Notify Me
             </Button>
           )}

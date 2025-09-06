@@ -75,6 +75,7 @@ export function PageCrashed({
         >
           {showRetryButton && (
             <Button
+              variant="primary"
               onClick={onRetry}
               className="gap-2"
             >
@@ -84,7 +85,7 @@ export function PageCrashed({
           )}
           {showBackButton && (
             <Button
-              variant="secondary"
+              variant="ghost"
               onClick={onBack}
               className="gap-2"
             >
@@ -94,7 +95,7 @@ export function PageCrashed({
           )}
           {showHomeButton && (
             <Button
-              variant="secondary"
+              variant="ghost"
               onClick={onHome}
               className="gap-2"
             >

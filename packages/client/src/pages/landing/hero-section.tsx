@@ -9,7 +9,7 @@ export default function HeroSection() {
   return (
     <section className="max-w-6xl mx-auto flex flex-col gap-8 py-12 p-page">
       {/* Text Content Group */}
-      <motion.div 
+      <motion.div
         className="flex flex-col gap-4"
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
@@ -33,7 +33,7 @@ export default function HeroSection() {
           className="self-start group"
         >
           <Badge>
-          <CircleIcon className="size-4 animate-pulse" /> Waitlist is live 
+            <CircleIcon className="size-4 animate-pulse" weight="fill" /> Waitlist is live
           </Badge>
         </motion.div>
 

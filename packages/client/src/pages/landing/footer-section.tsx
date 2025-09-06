@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import { Link } from "@tanstack/react-router";
 import { GithubLogoIcon, TwitterLogoIcon, LinkedinLogoIcon, EnvelopeIcon, LightningIcon } from "@phosphor-icons/react";
+import Logo from "@/src/lib/components/custom/Logo";
 
 export default function FooterSection() {
   return (
@@ -21,22 +22,7 @@ export default function FooterSection() {
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-8">
           {/* Brand Section */}
           <div className="col-span-2 sm:col-span-2 md:col-span-2 space-y-4">
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              viewport={{ once: true }}
-              className="flex items-center group cursor-pointer"
-            >
-              <motion.div
-                className="p-2 mr-3 rounded-xl bg-primary transition-colors duration-200"
-                whileHover={{ scale: 1.05, rotate: 5 }}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}
-              >
-                <LightningIcon className="size-6 text-foreground transition-all duration-200 group-hover:rotate-12 group-hover:scale-105" weight="fill" />
-              </motion.div>
-              <h3 className="text-foreground font-manrope font-">filosign</h3>
-            </motion.div>
+            <Logo className="px-0" textClassName="text-foreground font-bold" />
             <motion.p
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}

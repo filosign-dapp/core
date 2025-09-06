@@ -104,7 +104,7 @@ export default function LandingNavbar() {
             delay: 0.78
           }}
         >
-          <Button variant="primary" asChild>
+          <Button variant="secondary" asChild>
             <Link to="/dashboard">
               Sign in
             </Link>

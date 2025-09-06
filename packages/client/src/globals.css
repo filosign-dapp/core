@@ -4,32 +4,39 @@
 @plugin "tailwindcss-animate";
 
 :root {
-  --background: #f3f2f1;
+  --background: #fefffd;
   --foreground: #1f2223;
   --card: #edecea;
   --card-foreground: #1f2223;
-  --popover: #edecea;
+  --popover: #fefffd;
   --popover-foreground: #1f2223;
-  --primary: #d8f9b8;
-  --primary-foreground: #1f2223;
-  --secondary: #e8e7e6;
+  --primary: #224009;
+  --primary-foreground: #fefffd;
+  --secondary: #d8f9b8;
   --secondary-foreground: #1f2223;
-  --muted: #6f6e6e;
+  --muted: rgb(174, 182, 165);
   --muted-foreground: #6f6e6e;
-  --accent: #bfc0bd;
-  --accent-foreground: #1e2122;
+  --accent: #d8f9b8;
+  --accent-foreground: #1f2223;
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-  --border: #d7d7d7;
+  --border: #d4d4d4;
   --input: #f3f2f1;
-  --ring: #74ad3a;
+  --ring: #66a037;
   --chart-1: #f59e0b;
   --chart-2: #10b981;
   --chart-3: #3b82f6;
   --chart-4: #8b5cf6;
   --chart-5: #ef4444;
 
-  --radius: 0.6rem;
+  --primary-light: #d8f9b8;
+  --primary-medium: #66a037;
+  --primary-dark: #224009;
+  --secondary-light: #ffd18d;
+  --secondary-medium: #e59b59;
+  --secondary-dark: #aa6728;
+
+  --radius: 0.4rem;
 }
 
 @theme {
@@ -68,13 +75,13 @@
 
 @layer base {
   ::selection {
-    background-color: var(--primary);
-    color: var(--primary-foreground);
+    background-color: var(--secondary);
+    color: var(--secondary-foreground);
   }
 
   ::-moz-selection {
-    background-color: var(--primary);
-    color: var(--primary-foreground);
+    background-color: var(--secondary);
+    color: var(--secondary-foreground);
   }
 
   * {
@@ -102,7 +109,11 @@
     @apply text-xl font-semibold leading-tight tracking-tight font-inter;
   }
 
-  p, span, div, a, button {
+  p,
+  span,
+  div,
+  a,
+  button {
     @apply font-inter;
   }
 
