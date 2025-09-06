@@ -1,5 +1,6 @@
 import { useForm, useFieldArray } from "react-hook-form"
 import { motion } from "framer-motion"
+// import { useNavigate } from "react-router-dom"
 import { CaretLeftIcon } from "@phosphor-icons/react"
 import { Button } from "@/src/lib/components/ui/button"
 import { Form } from "@/src/lib/components/ui/form"
@@ -7,6 +8,7 @@ import Logo from "@/src/lib/components/custom/Logo"
 import DocumentsSection from "./components/DocumentsSection"
 import RecipientsSection from "./components/RecipientsSection"
 import MessageSection from "./components/MessageSection"
+import { useNavigate } from "@tanstack/react-router"
 
 type Recipient = {
     name: string
@@ -17,24 +19,23 @@ type Recipient = {
 
 type EnvelopeForm = {
     isOnlySigner: boolean
-    setSigningOrder: boolean
     recipients: Recipient[]
     emailSubject: string
     emailMessage: string
 }
 
 export default function CreateEnvelopePage() {
+    const navigate = useNavigate();
     const form = useForm<EnvelopeForm>({
         defaultValues: {
             isOnlySigner: false,
-            setSigningOrder: false,
             recipients: [{ name: "", email: "", walletAddress: "", role: "signer" }],
             emailSubject: "",
             emailMessage: ""
         }
     })
 
-    const { fields, append, remove } = useFieldArray({
+    const { fields, append, remove, move } = useFieldArray({
         control: form.control,
         name: "recipients"
     })
@@ -42,19 +43,20 @@ export default function CreateEnvelopePage() {
     const isOnlySigner = form.watch("isOnlySigner")
 
     const onSubmit = (data: EnvelopeForm) => {
+        navigate({ to: "/dashboard/create/add-signature" })
         console.log("Form submitted:", data)
-        // Handle form submission
+        // Navigate to signature placement page
+        // navigate("/dashboard/create/add-signature")
+        console.log("Would navigate to signature page")
     }
 
     return (
         <div className="min-h-screen bg-background">
             {/* Header */}
-            <header className="sticky top-0 z-50 glass bg-background/50 border-b border-border">
-                <div className="flex items-center justify-between h-16 px-8">
-                    <div className="flex items-center gap-3">
-                        <Logo className="px-0" textClassName="text-foreground font-bold" iconOnly />
-                        <h3>Create Envelope</h3>
-                    </div>
+            <header className="sticky top-0 z-50 glass bg-background/50 border-b border-border flex items-center justify-between h-16 px-8">
+                <div className="flex items-center gap-4">
+                    <Logo className="px-0" textClassName="text-foreground font-bold" iconOnly />
+                    <h3>Create New Envelope</h3>
                 </div>
             </header>
 
@@ -68,6 +70,7 @@ export default function CreateEnvelopePage() {
                             fields={fields}
                             append={append}
                             remove={remove}
+                            move={move}
                             isOnlySigner={isOnlySigner}
                         />
                         <MessageSection control={form.control} />

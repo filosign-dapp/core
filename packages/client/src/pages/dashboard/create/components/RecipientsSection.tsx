@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { motion } from "framer-motion"
+import { useWatch } from "react-hook-form"
 import type { Control, FieldArrayWithId, UseFieldArrayAppend, UseFieldArrayRemove } from "react-hook-form"
 import {
     MagnifyingGlassIcon,
@@ -8,8 +9,9 @@ import {
     EnvelopeIcon,
     WalletIcon,
     PlusIcon,
-    EyeIcon,
-    XIcon
+    XIcon,
+    CaretUpIcon,
+    CaretDownIcon as ArrowDownIcon
 } from "@phosphor-icons/react"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/src/lib/components/ui/collapsible"
 import { Button } from "@/src/lib/components/ui/button"
@@ -27,7 +29,6 @@ type Recipient = {
 
 type EnvelopeForm = {
     isOnlySigner: boolean
-    setSigningOrder: boolean
     recipients: Recipient[]
     emailSubject: string
     emailMessage: string
@@ -38,6 +39,7 @@ interface RecipientsSectionProps {
     fields: FieldArrayWithId<EnvelopeForm, "recipients", "id">[]
     append: UseFieldArrayAppend<EnvelopeForm, "recipients">
     remove: UseFieldArrayRemove
+    move: (from: number, to: number) => void
     isOnlySigner: boolean
 }
 
@@ -46,9 +48,16 @@ export default function RecipientsSection({
     fields,
     append,
     remove,
+    move,
     isOnlySigner
 }: RecipientsSectionProps) {
     const [isRecipientsOpen, setIsRecipientsOpen] = useState(true)
+    
+    // Watch all recipient names to update headers dynamically
+    const recipientNames = useWatch({
+        control,
+        name: "recipients"
+    }) as Recipient[]
 
     const handleAddRecipient = () => {
         append({ name: "", email: "", walletAddress: "", role: "signer" })
@@ -57,6 +66,18 @@ export default function RecipientsSection({
     const handleRemoveRecipient = (index: number) => {
         if (fields.length > 1) {
             remove(index)
+        }
+    }
+
+    const handleMoveUp = (index: number) => {
+        if (index > 0) {
+            move(index, index - 1)
+        }
+    }
+
+    const handleMoveDown = (index: number) => {
+        if (index < fields.length - 1) {
+            move(index, index + 1)
         }
     }
 
@@ -113,34 +134,6 @@ export default function RecipientsSection({
                                 )}
                             />
                             
-                            <FormField
-                                control={control}
-                                name="setSigningOrder"
-                                render={({ field }) => (
-                                    <FormItem className="flex items-center space-x-3">
-                                        <FormControl>
-                                            <Checkbox
-                                                checked={field.value}
-                                                onCheckedChange={field.onChange}
-                                            />
-                                        </FormControl>
-                                        <FormLabel className="cursor-pointer">
-                                            Set signing order
-                                        </FormLabel>
-                                        {field.value && (
-                                            <Button
-                                                type="button"
-                                                variant="ghost"
-                                                size="sm"
-                                                className="h-auto p-0 text-primary hover:text-primary/80"
-                                            >
-                                                <EyeIcon className="h-4 w-4 mr-1" />
-                                                View
-                                            </Button>
-                                        )}
-                                    </FormItem>
-                                )}
-                            />
                         </div>
 
                         {/* Recipients */}
@@ -164,18 +157,50 @@ export default function RecipientsSection({
                                             <div className="size-6 rounded-full bg-secondary text-secondary-foreground text-sm font-medium flex items-center justify-center">
                                                 {index + 1}
                                             </div>
-                                            <h4 className="">Recipient {index + 1}</h4>
+                                            <h4 className="">
+                                                {recipientNames[index]?.name ? 
+                                                    recipientNames[index].name.split(' ')[0] : 
+                                                    `Recipient ${index + 1}`
+                                                }
+                                            </h4>
                                         </div>
-                                        {fields.length > 1 && (
-                                            <Button
-                                                type="button"
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={() => handleRemoveRecipient(index)}
-                                            >
-                                                <XIcon className="size-4" weight="bold" />
-                                            </Button>
-                                        )}
+                                        <div className="flex items-center gap-4">
+                                            {/* Reorder buttons - always show when there are multiple recipients */}
+                                            {fields.length > 1 && (
+                                                <div className="flex gap-2">
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        onClick={() => handleMoveUp(index)}
+                                                        disabled={index === 0 || isOnlySigner}
+                                                        className="h-6 w-6 p-0"
+                                                    >
+                                                        <CaretUpIcon className="size-4" weight="bold" />
+                                                    </Button>
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        onClick={() => handleMoveDown(index)}
+                                                        disabled={index === fields.length - 1 || isOnlySigner}
+                                                        className="h-6 w-6 p-0"
+                                                    >
+                                                        <ArrowDownIcon className="size-4" weight="bold" />
+                                                    </Button>
+                                                </div>
+                                            )}
+                                            {fields.length > 1 && (
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => handleRemoveRecipient(index)}
+                                                >
+                                                    <XIcon className="size-4" weight="bold" />
+                                                </Button>
+                                            )}
+                                        </div>
                                     </div>
 
                                     {/* Form Fields */}
@@ -197,6 +222,7 @@ export default function RecipientsSection({
                                                             <Input
                                                                 placeholder="Enter recipient name"
                                                                 className=""
+                                                                disabled={isOnlySigner}
                                                                 {...field}
                                                             />
                                                         </FormControl>
@@ -227,6 +253,7 @@ export default function RecipientsSection({
                                                                 type="email"
                                                                 placeholder="Enter email address"
                                                                 className=""
+                                                                disabled={isOnlySigner}
                                                                 {...field}
                                                             />
                                                         </FormControl>
@@ -257,6 +284,7 @@ export default function RecipientsSection({
                                                         <Input
                                                             placeholder="Enter wallet address (0x...)"
                                                             className=" w-full"
+                                                            disabled={isOnlySigner}
                                                             {...field}
                                                         />
                                                     </FormControl>
@@ -285,6 +313,7 @@ export default function RecipientsSection({
                                 variant="muted"
                                 size="lg"
                                 onClick={handleAddRecipient}
+                                disabled={isOnlySigner}
                                 className="w-full"
                             >
                                 <PlusIcon className="h-4 w-4" />

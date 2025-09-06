@@ -9,6 +9,7 @@ import LandingPage from "./landing";
 import { useAnalytics } from '../lib/hooks/use-analytics';
 import DashboardPage from './dashboard';
 import CreateEnvelopePage from './dashboard/create';
+import AddSignaturePage from './dashboard/create/add-signature';
 
 const rootRoute = createRootRoute({
   component: () => {
@@ -46,7 +47,16 @@ const createEnvelopeRoute = createRoute({
   },
 })
 
-const routeTree = rootRoute.addChildren([indexRoute, dashboardRoute, createEnvelopeRoute])
+const addSignatureRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/dashboard/create/add-signature',
+  component: function AddSignature() {
+    return withPageErrorBoundary(AddSignaturePage)({});
+  },
+})
+
+
+const routeTree = rootRoute.addChildren([indexRoute, dashboardRoute, createEnvelopeRoute, addSignatureRoute])
 const router = createRouter({
   routeTree,
 })

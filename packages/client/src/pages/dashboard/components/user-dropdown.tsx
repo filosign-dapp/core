@@ -37,7 +37,7 @@ export function UserDropdown() {
               alt={userData.name}
               className="size-8 rounded-full object-cover"
             >
-              <UserIcon className="size-5 text-muted-foreground" />
+              <UserIcon className="size-5 text-muted-foreground" weight="bold" />
             </Image>
           </div>
         </Button>

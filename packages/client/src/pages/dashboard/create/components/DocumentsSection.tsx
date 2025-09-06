@@ -25,22 +25,30 @@ export default function DocumentsSection() {
     const [isDocumentsOpen, setIsDocumentsOpen] = useState(true)
     const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
     const [isDragOver, setIsDragOver] = useState(false)
-    const [viewMode, setViewMode] = useState<"list" | "grid">("list")
+    const [viewMode, setViewMode] = useState<"list" | "grid">("grid")
     const fileInputRef = useRef<HTMLInputElement>(null)
 
     const handleFileSelect = useCallback((files: FileList | null) => {
         if (!files) return
 
-        const newFiles: UploadedFile[] = Array.from(files).map(file => ({
-            id: Math.random().toString(36).substr(2, 9),
-            file,
-            name: file.name,
-            size: file.size,
-            type: file.type
-        }))
+        const newFiles: UploadedFile[] = Array.from(files)
+            .map(file => ({
+                id: Math.random().toString(36).substr(2, 9),
+                file,
+                name: file.name,
+                size: file.size,
+                type: file.type
+            }))
+            .filter(newFile => {
+                // Check if file with same name and size already exists
+                return !uploadedFiles.some(existingFile => 
+                    existingFile.name === newFile.name && 
+                    existingFile.size === newFile.size
+                )
+            })
 
         setUploadedFiles(prev => [...prev, ...newFiles])
-    }, [])
+    }, [uploadedFiles])
 
     const handleFileInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         handleFileSelect(event.target.files)
@@ -210,21 +218,21 @@ export default function DocumentsSection() {
                                 <div className="flex items-center gap-1 bg-muted/20 rounded-lg p-1">
                                     <Button
                                         type="button"
-                                        variant={viewMode === "list" ? "default" : "ghost"}
-                                        size="sm"
-                                        onClick={() => setViewMode("list")}
-                                        className="h-7 w-7 p-0"
-                                    >
-                                        <ListIcon className="h-4 w-4" />
-                                    </Button>
-                                    <Button
-                                        type="button"
                                         variant={viewMode === "grid" ? "default" : "ghost"}
                                         size="sm"
                                         onClick={() => setViewMode("grid")}
                                         className="h-7 w-7 p-0"
                                     >
                                         <GridFourIcon className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        variant={viewMode === "list" ? "default" : "ghost"}
+                                        size="sm"
+                                        onClick={() => setViewMode("list")}
+                                        className="h-7 w-7 p-0"
+                                    >
+                                        <ListIcon className="h-4 w-4" />
                                     </Button>
                                 </div>
                             </div>

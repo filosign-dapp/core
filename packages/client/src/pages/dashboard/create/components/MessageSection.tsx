@@ -10,7 +10,6 @@ import { cn } from "@/src/lib/utils/utils"
 
 type EnvelopeForm = {
     isOnlySigner: boolean
-    setSigningOrder: boolean
     recipients: Array<{
         name: string
         email: string
