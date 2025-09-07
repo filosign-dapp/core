@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import {
     FileIcon,
@@ -9,6 +9,7 @@ import {
     XIcon
 } from "@phosphor-icons/react"
 import { Button } from "@/src/lib/components/ui/button"
+import { Skeleton } from "@/src/lib/components/ui/skeleton"
 import { cn } from "@/src/lib/utils/utils"
 import { Image } from "@/src/lib/components/custom/Image"
 
@@ -24,6 +25,7 @@ interface FileCardProps {
     file: UploadedFile
     onRemove: (fileId: string) => void
     variant?: "list" | "grid"
+    delayPreview?: boolean
 }
 
 const getFileIcon = (fileType: string) => {
@@ -42,10 +44,29 @@ const getFileTypeColor = (fileType: string) => {
     return "text-primary"
 }
 
-export default function FileCard({ file, onRemove, variant = "list" }: FileCardProps) {
+export default function FileCard({ file, onRemove, variant = "list", delayPreview = false }: FileCardProps) {
     const [imageError, setImageError] = useState(false)
+    const [showPreview, setShowPreview] = useState(!delayPreview)
+    const [isLoading, setIsLoading] = useState(delayPreview)
     const FileIconComponent = getFileIcon(file.type)
     const iconColor = getFileTypeColor(file.type)
+
+    // Delay preview loading to avoid interfering with animations
+    useEffect(() => {
+        if (delayPreview) {
+            setIsLoading(true)
+            setShowPreview(false)
+            const timer = setTimeout(() => {
+                setIsLoading(false)
+                setShowPreview(true)
+            }, 300) 
+            
+            return () => clearTimeout(timer)
+        } else {
+            setIsLoading(false)
+            setShowPreview(true)
+        }
+    }, [delayPreview])
 
     const formatFileSize = (bytes: number) => {
         if (bytes === 0) return '0 Bytes'
@@ -56,12 +77,12 @@ export default function FileCard({ file, onRemove, variant = "list" }: FileCardP
     }
 
     const isImage = file.type.includes("image")
-    const showPreview = isImage && !imageError
+    const shouldShowPreview = isImage && !imageError && showPreview
 
     if (variant === "grid") {
         return (
             <motion.div
-                className="relative group bg-background border border-border rounded-lg p-2 min-w-[200px] max-w-[200px]"
+                className="relative group bg-background border border-border rounded-lg p-2 w-full"
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
@@ -85,7 +106,7 @@ export default function FileCard({ file, onRemove, variant = "list" }: FileCardP
 
                 {/* Preview/Icon */}
                 <div className="aspect-square mb-3 bg-muted/20 rounded-lg flex items-center justify-center overflow-hidden">
-                    {showPreview ? (
+                    {shouldShowPreview ? (
                         <img
                             src={URL.createObjectURL(file.file)}
                             alt={file.name}
@@ -93,7 +114,13 @@ export default function FileCard({ file, onRemove, variant = "list" }: FileCardP
                             onError={() => setImageError(true)}
                         />
                     ) : (
-                        <FileIconComponent className={cn("h-12 w-12", iconColor)} />
+                        <div className="flex items-center justify-center w-full h-full">
+                            {isLoading && isImage ? (
+                                <Skeleton className="w-full h-full rounded-lg" />
+                            ) : (
+                                <FileIconComponent className={cn("h-12 w-12", iconColor)} />
+                            )}
+                        </div>
                     )}
                 </div>
 
@@ -125,15 +152,21 @@ export default function FileCard({ file, onRemove, variant = "list" }: FileCardP
             }}
         >
             <div className="flex items-center gap-3">
-                {showPreview ? (
-                    <Image
+                {shouldShowPreview ? (
+                    <img
                         src={URL.createObjectURL(file.file)}
                         alt={file.name}
                         className="size-10 object-cover rounded"
                         onError={() => setImageError(true)}
                     />
                 ) : (
-                    <FileIconComponent className={cn("size-5", iconColor)} />
+                    <div className="flex items-center justify-center">
+                        {isLoading && isImage ? (
+                            <Skeleton className="size-10 rounded" />
+                        ) : (
+                            <FileIconComponent className={cn("size-10", iconColor, "bg-muted/20 p-2 rounded-lg")} />
+                        )}
+                    </div>
                 )}
                 <div>
                     <p className="text-sm font-medium">{file.name}</p>

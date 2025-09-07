@@ -8,9 +8,11 @@ import RecipientsSection from "./components/RecipientsSection"
 import MessageSection from "./components/MessageSection"
 import { useNavigate } from "@tanstack/react-router"
 import type { EnvelopeForm } from "./types"
+import { useStorePersist } from "@/src/lib/hooks/use-store"
 
 export default function CreateEnvelopePage() {
     const navigate = useNavigate();
+    const { setCreateForm } = useStorePersist()
     const form = useForm<EnvelopeForm>({
         defaultValues: {
             isOnlySigner: false,
@@ -33,9 +35,33 @@ export default function CreateEnvelopePage() {
 
     const isOnlySigner = form.watch("isOnlySigner")
 
-    const onSubmit = (data: EnvelopeForm) => {
-        console.log("Form submitted:", data)
-        console.log("Would navigate to signature page")
+    const onSubmit = async (data: EnvelopeForm) => {
+        const toDataUrl = (file: File) => new Promise<string>((resolve, reject) => {
+            const reader = new FileReader()
+            reader.onload = () => resolve(reader.result as string)
+            reader.onerror = reject
+            reader.readAsDataURL(file)
+        })
+
+        const documents = await Promise.all(
+            (data.documents || []).map(async (d) => ({
+                id: d.id,
+                name: d.name,
+                type: d.type,
+                size: d.size,
+                // Store data URLs for images and PDFs to enable preview in step 2
+                dataUrl: (d.type.includes("image") || d.type.includes("pdf")) ? await toDataUrl(d.file) : undefined
+            }))
+        )
+
+        setCreateForm({
+            isOnlySigner: data.isOnlySigner,
+            recipients: data.recipients,
+            emailSubject: data.emailSubject,
+            emailMessage: data.emailMessage,
+            documents
+        })
+
         navigate({ to: "/dashboard/create/add-signature" })
     }
 

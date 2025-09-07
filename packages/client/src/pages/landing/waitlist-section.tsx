@@ -120,7 +120,7 @@ export default function WaitlistSection() {
                             key="send-icon"
                             initial={{ opacity: 0, scale: 0.8, rotate: 180 }}
                             animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                            exit={{ opacity: 0, scale: 0.8, rotate: -180 }}
+                            exit={{ opacity: 0, scale: 0.5, rotate: 180 }}
                             transition={{ 
                               duration: 0.3, 
                               ease: "easeInOut" 

@@ -6,9 +6,11 @@ import SignatureFieldsSidebar from "./components/SignatureFieldsSidebar"
 import DocumentViewer from "./components/DocumentViewer"
 import MobileSignatureToolbar from "./components/MobileSignatureToolbar"
 import { mockDocuments, fieldTypeConfigs, type SignatureField, type Document } from "./mock"
+import { useStorePersist } from "@/src/lib/hooks/use-store"
 
 export default function AddSignaturePage() {
     const navigate = useNavigate()
+    const { createForm } = useStorePersist()
     const [currentPage, setCurrentPage] = useState(1)
     const [zoom, setZoom] = useState(100)
     const [signatureFields, setSignatureFields] = useState<SignatureField[]>([])
@@ -16,7 +18,14 @@ export default function AddSignaturePage() {
     const [isPlacingField, setIsPlacingField] = useState(false)
     const [pendingFieldType, setPendingFieldType] = useState<SignatureField["type"] | null>(null)
 
-    const currentDocument = mockDocuments[0]
+    const currentDocument: Document = createForm?.documents?.length
+        ? {
+            id: createForm.documents[0].id,
+            name: createForm.documents[0].name,
+            url: createForm.documents[0].dataUrl || "",
+            pages: 1
+        }
+        : mockDocuments[0]
 
     // Local utility function for generating unique IDs
     const generateFieldId = () => Math.random().toString(36).substr(2, 9)

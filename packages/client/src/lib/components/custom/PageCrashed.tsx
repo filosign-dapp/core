@@ -41,14 +41,6 @@ export function PageCrashed({
           <div className="flex justify-center items-center mx-auto w-32 h-32 rounded-full bg-muted/20">
             <SmileySadIcon weight="regular" className="w-16 h-16 text-muted-foreground" />
           </div>
-          <motion.div
-            initial={{ opacity: 0, scale: 0 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.8, duration: 0.3 }}
-            className="flex absolute -top-2 -right-2 justify-center items-center w-8 h-8 rounded-full bg-destructive/10"
-          >
-            <span className="text-xs font-bold text-destructive">!</span>
-          </motion.div>
         </motion.div>
 
         {/* Content */}

@@ -15,6 +15,7 @@ import { FormField, FormItem, FormMessage } from "@/src/lib/components/ui/form"
 import { cn } from "@/src/lib/utils/utils"
 import FileCard from "./FileCard"
 import type { EnvelopeForm, UploadedFile } from "../types"
+import { ACCEPTED_FILE_MIME_SET, ACCEPTED_FILE_EXTENSIONS } from "../types"
 
 interface DocumentsSectionProps {
     control: Control<EnvelopeForm>
@@ -27,12 +28,28 @@ export default function DocumentsSection({ control, fields, append, remove }: Do
     const [isDocumentsOpen, setIsDocumentsOpen] = useState(true)
     const [isDragOver, setIsDragOver] = useState(false)
     const [viewMode, setViewMode] = useState<"list" | "grid">("grid")
+    const [isViewSwitching, setIsViewSwitching] = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
+    const [unsupportedFiles, setUnsupportedFiles] = useState<string[]>([])
+    const [oversizedFiles, setOversizedFiles] = useState<string[]>([])
+
+    // 5MB file size limit
+    const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB in bytes
 
     const handleFileSelect = useCallback((files: FileList | null) => {
         if (!files) return
 
-        const newFiles: UploadedFile[] = Array.from(files)
+        const incoming = Array.from(files)
+        const rejected = incoming
+            .filter(file => !ACCEPTED_FILE_MIME_SET.has(file.type as any))
+            .map(file => file.name)
+
+        const oversized = incoming
+            .filter(file => file.size > MAX_FILE_SIZE)
+            .map(file => file.name)
+
+        const newFiles: UploadedFile[] = incoming
+            .filter(file => ACCEPTED_FILE_MIME_SET.has(file.type as any) && file.size <= MAX_FILE_SIZE)
             .map(file => ({
                 id: Math.random().toString(36).substr(2, 9),
                 file,
@@ -42,14 +59,16 @@ export default function DocumentsSection({ control, fields, append, remove }: Do
             }))
             .filter(newFile => {
                 // Check if file with same name and size already exists
-                return !fields.some(existingFile => 
-                    existingFile.name === newFile.name && 
+                return !fields.some(existingFile =>
+                    existingFile.name === newFile.name &&
                     existingFile.size === newFile.size
                 )
             })
 
         newFiles.forEach(file => append(file))
-    }, [fields, append])
+        setUnsupportedFiles(rejected)
+        setOversizedFiles(oversized)
+    }, [fields, append, MAX_FILE_SIZE])
 
     const handleFileInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         handleFileSelect(event.target.files)
@@ -86,6 +105,17 @@ export default function DocumentsSection({ control, fields, append, remove }: Do
         }
     }
 
+    const handleViewModeChange = (newViewMode: "list" | "grid") => {
+        if (newViewMode !== viewMode) {
+            setIsViewSwitching(true)
+            setViewMode(newViewMode)
+            // Reset the switching state after animation completes
+            setTimeout(() => {
+                setIsViewSwitching(false)
+            }, 300)
+        }
+    }
+
     return (
         <motion.section
             className="space-y-4"
@@ -108,7 +138,7 @@ export default function DocumentsSection({ control, fields, append, remove }: Do
                                 "size-5 text-muted-foreground group-hover/add-docs:rotate-45 transition-transform duration-200",
                                 isDocumentsOpen && "rotate-45"
                             )} />
-                            Add documents
+                            Add files
                         </h4>
                         <CaretDownIcon className={cn(
                             "size-4 text-muted-foreground transition-transform duration-200",
@@ -121,9 +151,13 @@ export default function DocumentsSection({ control, fields, append, remove }: Do
                     <FormField
                         control={control}
                         name="documents"
-                        rules={{ 
-                            required: "At least one document is required",
-                            validate: (value) => value.length > 0 || "At least one document is required"
+                        rules={{
+                            validate: (value) => {
+                                if (!value || value.length === 0) {
+                                    return "At least 1 file is required"
+                                }
+                                return true
+                            }
                         }}
                         render={({ field }) => (
                             <FormItem>
@@ -134,150 +168,166 @@ export default function DocumentsSection({ control, fields, append, remove }: Do
                                     multiple
                                     onChange={handleFileInputChange}
                                     className="hidden"
-                                    accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.gif"
+                                    accept={ACCEPTED_FILE_EXTENSIONS.join(',')}
                                 />
-                    
-                    <motion.div
-                        className={cn(
-                            "border-2 border-primary/20 rounded-lg p-16 text-center transition-colors bg-muted/5",
-                            isDragOver 
-                                ? "border-primary bg-primary/5" 
-                                : "hover:border-muted-foreground/50"
-                        )}
-                        transition={{ duration: 0.2 }}
-                        onDragOver={handleDragOver}
-                        onDragLeave={handleDragLeave}
-                        onDrop={handleDrop}
-                    >
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{
-                                type: "spring",
-                                stiffness: 230,
-                                damping: 25,
-                                delay: 0.1
-                            }}
-                            className="space-y-6"
-                        >
-                            <motion.div
-                                className="flex justify-center"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                transition={{
-                                    type: "spring",
-                                    stiffness: 230,
-                                    damping: 25,
-                                    delay: 0.2
-                                }}
-                            >
-                                <motion.div
-                                    className="p-6 rounded-full bg-muted/20"
-                                    transition={{
-                                        type: "spring",
-                                        stiffness: 230,
-                                        damping: 25,
-                                        duration: 0.3
-                                    }}
-                                >
-                                    <UploadIcon className="h-12 w-12 text-primary" />
-                                </motion.div>
-                            </motion.div>
-                            <motion.div
-                                className="space-y-4"
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{
-                                    type: "spring",
-                                    stiffness: 230,
-                                    damping: 25,
-                                    delay: 0.3
-                                }}
-                            >
-                                <p className="text-muted-foreground">
-                                    {isDragOver ? "Drop your files here" : "Drop your files here or"}
-                                </p>
-                                <Button
-                                    type="button"
-                                    variant="primary"
-                                    size="lg"
-                                    className="gap-2 px-6 py-3"
-                                    onClick={handleUploadClick}
-                                >
-                                    Upload
-                                </Button>
-                            </motion.div>
-                        </motion.div>
-                    </motion.div>
-                    
-                    {/* Uploaded Files Display */}
-                    {fields.length > 0 && (
-                        <motion.div
-                            className="mt-6 space-y-4"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{
-                                type: "spring",
-                                stiffness: 230,
-                                damping: 25,
-                                delay: 0.1
-                            }}
-                        >
-                            {/* Header with view mode toggle */}
-                            <div className="flex items-center justify-between">
-                                <h5 className="text-sm font-medium text-muted-foreground">
-                                    Uploaded Files ({fields.length})
-                                </h5>
-                                <div className="flex items-center gap-1 bg-muted/20 rounded-lg p-1">
-                                    <Button
-                                        type="button"
-                                        variant={viewMode === "grid" ? "default" : "ghost"}
-                                        size="sm"
-                                        onClick={() => setViewMode("grid")}
-                                        className="h-7 w-7 p-0"
-                                    >
-                                        <GridFourIcon className="h-4 w-4" />
-                                    </Button>
-                                    <Button
-                                        type="button"
-                                        variant={viewMode === "list" ? "default" : "ghost"}
-                                        size="sm"
-                                        onClick={() => setViewMode("list")}
-                                        className="h-7 w-7 p-0"
-                                    >
-                                        <ListIcon className="h-4 w-4" />
-                                    </Button>
-                                </div>
-                            </div>
 
-                            {/* Files display */}
-                            {viewMode === "list" ? (
-                                <div className="space-y-2">
-                                    {fields.map((file) => (
-                                        <FileCard
-                                            key={file.id}
-                                            file={file}
-                                            onRemove={removeFile}
-                                            variant="list"
-                                        />
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="overflow-x-auto">
-                                    <div className="flex gap-4 pb-2" style={{ width: 'max-content' }}>
-                                        {fields.map((file) => (
-                                            <FileCard
-                                                key={file.id}
-                                                file={file}
-                                                onRemove={removeFile}
-                                                variant="grid"
-                                            />
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </motion.div>
-                    )}
+                                <motion.div
+                                    className={cn(
+                                        "border-2 border-primary/20 rounded-lg p-16 text-center transition-colors bg-muted/5",
+                                        isDragOver
+                                            ? "border-primary bg-primary/5"
+                                            : "hover:border-muted-foreground/50"
+                                    )}
+                                    transition={{ duration: 0.2 }}
+                                    onDragOver={handleDragOver}
+                                    onDragLeave={handleDragLeave}
+                                    onDrop={handleDrop}
+                                >
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{
+                                            type: "spring",
+                                            stiffness: 230,
+                                            damping: 25,
+                                            delay: 0.1
+                                        }}
+                                        className="space-y-6"
+                                    >
+                                        <motion.div
+                                            className="flex justify-center"
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            transition={{
+                                                type: "spring",
+                                                stiffness: 230,
+                                                damping: 25,
+                                                delay: 0.2
+                                            }}
+                                        >
+                                            <motion.div
+                                                className="p-6 rounded-full bg-muted/20"
+                                                transition={{
+                                                    type: "spring",
+                                                    stiffness: 230,
+                                                    damping: 25,
+                                                    duration: 0.3
+                                                }}
+                                            >
+                                                <UploadIcon className="h-12 w-12 text-primary" />
+                                            </motion.div>
+                                        </motion.div>
+                                        <motion.div
+                                            className="space-y-4"
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{
+                                                type: "spring",
+                                                stiffness: 230,
+                                                damping: 25,
+                                                delay: 0.3
+                                            }}
+                                        >
+                                            <p className="text-muted-foreground">
+                                                {isDragOver ? "Drop your files here" : "Drop your files here or"}
+                                            </p>
+                                            <Button
+                                                type="button"
+                                                variant="primary"
+                                                size="lg"
+                                                className="gap-2 px-6 py-3"
+                                                onClick={handleUploadClick}
+                                            >
+                                                Upload
+                                            </Button>
+                                        </motion.div>
+                                    </motion.div>
+                                </motion.div>
+
+                                {/* Unsupported files error */}
+                                {unsupportedFiles.length > 0 && (
+                                    <p className="mt-2 text-sm text-destructive font-medium">
+                                        Unsupported files: {unsupportedFiles.join(", ")}
+                                    </p>
+                                )}
+
+                                {/* Oversized files error */}
+                                {oversizedFiles.length > 0 && (
+                                    <p className="mt-2 text-sm text-destructive font-medium">
+                                        Files too large (max 5MB): {oversizedFiles.join(", ")}
+                                    </p>
+                                )}
+
+                                {/* Uploaded Files Display */}
+                                {fields.length > 0 && (
+                                    <motion.div
+                                        className="mt-4 space-y-4"
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{
+                                            type: "spring",
+                                            stiffness: 230,
+                                            damping: 25,
+                                            delay: 0.1
+                                        }}
+                                    >
+                                        {/* Header with view mode toggle */}
+                                        <div className="flex items-center justify-between">
+                                            <h5 className="text-sm font-medium text-muted-foreground">
+                                                Uploaded Files ({fields.length})
+                                            </h5>
+                                            <div className="flex items-center gap-1 bg-muted/20 rounded-lg p-1">
+                                                <Button
+                                                    type="button"
+                                                    variant={viewMode === "grid" ? "default" : "ghost"}
+                                                    size="sm"
+                                                    onClick={() => handleViewModeChange("grid")}
+                                                    className="h-7 w-7 p-0"
+                                                >
+                                                    <GridFourIcon className="h-4 w-4" />
+                                                </Button>
+                                                <Button
+                                                    type="button"
+                                                    variant={viewMode === "list" ? "default" : "ghost"}
+                                                    size="sm"
+                                                    onClick={() => handleViewModeChange("list")}
+                                                    className="h-7 w-7 p-0"
+                                                >
+                                                    <ListIcon className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+                                        </div>
+
+                                        {/* Files display */}
+                                        {viewMode === "list" ? (
+                                            <div className="space-y-2">
+                                                {fields.map((file) => (
+                                                    <FileCard
+                                                        key={file.id}
+                                                        file={file}
+                                                        onRemove={removeFile}
+                                                        variant="list"
+                                                        delayPreview={isViewSwitching}
+                                                    />
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="max-h-96 overflow-auto">
+                                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 p-1">
+                                                    {fields.map((file) => (
+                                                        <FileCard
+                                                            key={file.id}
+                                                            file={file}
+                                                            onRemove={removeFile}
+                                                            variant="grid"
+                                                            delayPreview={isViewSwitching}
+                                                        />
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </motion.div>
+                                )}
                                 <FormMessage />
                             </FormItem>
                         )}

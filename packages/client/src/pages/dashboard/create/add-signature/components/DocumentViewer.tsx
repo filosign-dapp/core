@@ -196,67 +196,77 @@ export default function DocumentViewer({
                     }}
                     onClick={handleDocumentClick}
                 >
-                    {/* Mock Document */}
-                    <div className="w-[600px] h-[800px] bg-white border border-border relative">
-                        {/* Document Content Placeholder */}
-                        <div className="p-8 space-y-4">
-                            <div className="mb-8 text-2xl font-bold text-center">
-                                {document.name}
-                            </div>
-                            
-                            <div className="space-y-4 text-sm">
-                                <p>This is a sample document for signature placement.</p>
-                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-                                <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-                            </div>
-
-                            {/* Signature Fields */}
-                            {signatureFields.map((field) => (
-                                <div
-                                    key={field.id}
-                                    className={cn(
-                                        "absolute border-2 border-dashed rounded-md bg-primary/5 hover:bg-primary/10 cursor-move select-none group",
-                                        selectedField === field.id 
-                                            ? "border-primary bg-primary/10 shadow-lg" 
-                                            : "border-primary/50 hover:border-primary/70"
-                                    )}
-                                    style={{
-                                        left: field.x,
-                                        top: field.y,
-                                        width: field.width,
-                                        height: field.height
-                                    }}
-                                    onClick={(e) => handleFieldClick(field.id, e)}
-                                    onMouseDown={(e) => handleFieldMouseDown(field.id, e)}
+                    {/* Document Page */}
+                    <div className="w-[600px] h-[800px] bg-white border border-border relative overflow-hidden">
+                        {/* Render uploaded PDF or image if provided */}
+                        {document.url ? (
+                            (document.url.startsWith("data:application/pdf") || document.name?.toLowerCase().endsWith(".pdf")) ? (
+                                <object
+                                    data={document.url}
+                                    type="application/pdf"
+                                    className="absolute inset-0 w-full h-full pointer-events-none"
                                 >
-                                    <div className="flex justify-between items-center p-2 h-full">
-                                        <div className="flex flex-1 gap-2 items-center">
-                                            <span className="text-primary">{getFieldIcon(field.type)}</span>
-                                            <span className="text-xs font-medium text-primary">
-                                                {getFieldLabel(field.type)}
-                                            </span>
-                                        </div>
-                                        
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="p-0 w-4 h-4 opacity-0 transition-opacity hover:bg-destructive/20 group-hover:opacity-100"
-                                            onClick={(e) => {
-                                                e.stopPropagation()
-                                                onFieldRemove(field.id)
-                                            }}
-                                        >
-                                            <XIcon className="w-3 h-3" />
-                                        </Button>
+                                    {/* Fallback if PDF cannot render */}
+                                    <div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground px-6 text-center">
+                                        PDF preview not supported in this browser.
+                                    </div>
+                                </object>
+                            ) : (
+                                <img
+                                    src={document.url}
+                                    alt={document.name}
+                                    className="absolute inset-0 w-full h-full object-contain bg-white"
+                                    draggable={false}
+                                />
+                            )
+                        ) : null}
+
+                        {/* Signature Fields */}
+                        {signatureFields.map((field) => (
+                            <div
+                                key={field.id}
+                                className={cn(
+                                    "absolute border-2 border-dashed rounded-md bg-primary/5 hover:bg-primary/10 cursor-move select-none group",
+                                    selectedField === field.id 
+                                        ? "border-primary bg-primary/10 shadow-lg" 
+                                        : "border-primary/50 hover-border-primary/70"
+                                )}
+                                style={{
+                                    left: field.x,
+                                    top: field.y,
+                                    width: field.width,
+                                    height: field.height
+                                }}
+                                onClick={(e) => handleFieldClick(field.id, e)}
+                                onMouseDown={(e) => handleFieldMouseDown(field.id, e)}
+                            >
+                                <div className="flex justify-between items-center p-2 h-full">
+                                    <div className="flex flex-1 gap-2 items-center">
+                                        <span className="text-primary">{getFieldIcon(field.type)}</span>
+                                        <span className="text-xs font-medium text-primary">
+                                            {getFieldLabel(field.type)}
+                                        </span>
                                     </div>
                                     
-                                    {/* Resize handle */}
-                                    {selectedField === field.id && (
-                                        <div className="absolute -right-1 -bottom-1 w-3 h-3 rounded-full border border-white opacity-0 bg-primary cursor-se-resize group-hover:opacity-100" />
-                                    )}
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="p-0 w-4 h-4 opacity-0 transition-opacity hover:bg-destructive/20 group-hover:opacity-100"
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            onFieldRemove(field.id)
+                                        }}
+                                    >
+                                        <XIcon className="w-3 h-3" />
+                                    </Button>
                                 </div>
-                            ))}
-                        </div>
+                                
+                                {/* Resize handle */}
+                                {selectedField === field.id && (
+                                    <div className="absolute -right-1 -bottom-1 w-3 h-3 rounded-full border border-white opacity-0 bg-primary cursor-se-resize group-hover:opacity-100" />
+                                )}
+                            </div>
+                        ))}
                     </div>
                 </div>
             </div>
