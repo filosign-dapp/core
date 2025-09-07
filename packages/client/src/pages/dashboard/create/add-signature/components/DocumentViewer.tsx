@@ -5,9 +5,25 @@ import { cn } from "@/src/lib/utils/utils"
 import { type SignatureField, type Document } from "../mock"
 import { Image } from "@/src/lib/components/custom/Image"
 
-const WIDTH = 600
-const HEIGHT = 800
-const MARGIN = 10
+const useDocumentDimensions = () => {
+    const [isMobile, setIsMobile] = useState(false)
+    
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth < 768) // md breakpoint
+        }
+        
+        checkMobile()
+        window.addEventListener('resize', checkMobile)
+        return () => window.removeEventListener('resize', checkMobile)
+    }, [])
+    
+    return {
+        width: isMobile ? 300 : 600,
+        height: isMobile ? 400 : 800,
+        margin: 10
+    }
+}
 
 interface DocumentViewerProps {
     document: Document | null
@@ -39,6 +55,7 @@ export default function DocumentViewer({
     onBack
 }: DocumentViewerProps) {
     const [isDragging, setIsDragging] = useState(false)
+    const { width: documentWidth, height: documentHeight, margin } = useDocumentDimensions()
     const containerRef = useRef<HTMLDivElement>(null)
     const documentRef = useRef<HTMLDivElement>(null)
     const dragDataRef = useRef({
@@ -59,9 +76,7 @@ export default function DocumentViewer({
         const x = (event.clientX - documentRect.left) / (zoom / 100)
         const y = (event.clientY - documentRect.top) / (zoom / 100)
 
-        const documentWidth = WIDTH
-        const documentHeight = HEIGHT
-        const margin = MARGIN
+        // Use responsive dimensions
 
         const boundedX = Math.max(margin, Math.min(x, documentWidth - margin))
         const boundedY = Math.max(margin, Math.min(y, documentHeight - margin))
@@ -108,9 +123,7 @@ export default function DocumentViewer({
         const deltaX = (event.clientX - dragData.startX) / (zoom / 100)
         const deltaY = (event.clientY - dragData.startY) / (zoom / 100)
 
-        const documentWidth = WIDTH
-        const documentHeight = HEIGHT
-        const margin = MARGIN
+        // Use responsive dimensions
 
         const newX = Math.max(margin, Math.min(dragData.fieldX + deltaX, documentWidth - margin))
         const newY = Math.max(margin, Math.min(dragData.fieldY + deltaY, documentHeight - margin))
@@ -202,8 +215,8 @@ export default function DocumentViewer({
                         `bg-white relative`
                     )}
                     style={{
-                        width: WIDTH,
-                        height: HEIGHT
+                        width: documentWidth,
+                        height: documentHeight
                     }}
                     >
                         {/* Render uploaded PDF or image if provided */}
@@ -260,10 +273,7 @@ export default function DocumentViewer({
 
                         {/* Signature Fields */}
                         {signatureFields.map((field) => {
-                            const documentWidth = WIDTH
-                            const documentHeight = HEIGHT
-                            const margin = MARGIN
-
+                            // Use responsive dimensions
                             const constrainedX = Math.max(margin, Math.min(field.x, documentWidth - margin))
                             const constrainedY = Math.max(margin, Math.min(field.y, documentHeight - margin))
 
