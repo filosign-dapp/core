@@ -1,12 +1,12 @@
 import { useState, useRef, useCallback, useEffect } from "react"
-import { XIcon, CaretLeftIcon, CaretRightIcon, SignatureIcon, TextAaIcon, CalendarIcon, UserIcon, EnvelopeIcon, TextBIcon, CheckSquareIcon, FileIcon } from "@phosphor-icons/react"
+import { XIcon, CaretLeftIcon, CaretRightIcon, SignatureIcon, TextAaIcon, CalendarIcon, UserIcon, EnvelopeIcon, TextBIcon, CheckSquareIcon, FileIcon, MagnifyingGlassMinusIcon, MagnifyingGlassPlusIcon, PrinterIcon, ArrowCounterClockwiseIcon, ArrowClockwiseIcon, FloppyDiskIcon } from "@phosphor-icons/react"
 import { Button } from "@/src/lib/components/ui/button"
 import { cn } from "@/src/lib/utils/utils"
 import { type SignatureField, type Document } from "../mock"
+import { Image } from "@/src/lib/components/custom/Image"
 
 interface DocumentViewerProps {
-    document: Document
-    currentPage: number
+    document: Document | null
     zoom: number
     signatureFields: SignatureField[]
     selectedField: string | null
@@ -15,12 +15,12 @@ interface DocumentViewerProps {
     onFieldSelect: (fieldId: string) => void
     onFieldRemove: (fieldId: string) => void
     onFieldUpdate: (fieldId: string, updates: Partial<SignatureField>) => void
-    onPageChange: (page: number) => void
+    onZoomChange: (zoom: number) => void
+    onBack: () => void
 }
 
 export default function DocumentViewer({
     document,
-    currentPage,
     zoom,
     signatureFields,
     selectedField,
@@ -29,28 +29,21 @@ export default function DocumentViewer({
     onFieldSelect,
     onFieldRemove,
     onFieldUpdate,
-    onPageChange
+    onZoomChange,
+    onBack
 }: DocumentViewerProps) {
     const [isDragging, setIsDragging] = useState(false)
     const [draggedField, setDraggedField] = useState<string | null>(null)
     const containerRef = useRef<HTMLDivElement>(null)
     const documentRef = useRef<HTMLDivElement>(null)
-    const dragDataRef = useRef({ 
-        startX: 0, 
-        startY: 0, 
-        fieldX: 0, 
-        fieldY: 0, 
-        fieldId: '' 
+    const dragDataRef = useRef({
+        startX: 0,
+        startY: 0,
+        fieldX: 0,
+        fieldY: 0,
+        fieldId: ''
     })
     const lastUpdateRef = useRef(0)
-
-    const handlePreviousPage = () => {
-        onPageChange(Math.max(1, currentPage - 1))
-    }
-
-    const handleNextPage = () => {
-        onPageChange(Math.min(document.pages, currentPage + 1))
-    }
 
     const handleDocumentClick = useCallback((event: React.MouseEvent) => {
         if (!isPlacingField) return
@@ -58,16 +51,16 @@ export default function DocumentViewer({
         const documentRect = documentRef.current?.getBoundingClientRect()
         if (!documentRect) return
 
-        // Calculate position relative to the document, not the container
-        const x = event.clientX - documentRect.left
-        const y = event.clientY - documentRect.top
+        // Calculate position relative to the document, accounting for zoom
+        const x = (event.clientX - documentRect.left) / (zoom / 100)
+        const y = (event.clientY - documentRect.top) / (zoom / 100)
 
-        // Ensure the field is placed within document bounds
-        const boundedX = Math.max(10, Math.min(x, documentRect.width - 160))
-        const boundedY = Math.max(10, Math.min(y, documentRect.height - 50))
+        // Ensure the field is placed within document bounds (600x800 is the document size)
+        const boundedX = Math.max(10, Math.min(x, 500))
+        const boundedY = Math.max(10, Math.min(y, 750))
 
         onFieldPlaced(boundedX, boundedY)
-    }, [isPlacingField, onFieldPlaced])
+    }, [isPlacingField, onFieldPlaced, zoom])
 
     const handleFieldClick = (fieldId: string, event: React.MouseEvent) => {
         event.stopPropagation()
@@ -76,10 +69,10 @@ export default function DocumentViewer({
 
     const handleFieldMouseDown = (fieldId: string, event: React.MouseEvent) => {
         event.stopPropagation()
-        
+
         const field = signatureFields.find(f => f.id === fieldId)
         if (!field) return
-        
+
         // Store drag data in ref for immediate access
         dragDataRef.current = {
             startX: event.clientX,
@@ -88,7 +81,7 @@ export default function DocumentViewer({
             fieldY: field.y,
             fieldId: fieldId
         }
-        
+
         setIsDragging(true)
         setDraggedField(fieldId)
         onFieldSelect(fieldId)
@@ -98,29 +91,26 @@ export default function DocumentViewer({
     const handleMouseMove = useCallback((event: MouseEvent) => {
         if (!isDragging) return
 
-        // Throttle updates to 60fps for smooth performance
         const now = performance.now()
-        if (now - lastUpdateRef.current < 16) return // ~60fps
+        if (now - lastUpdateRef.current < 16) return
         lastUpdateRef.current = now
 
         const documentRect = documentRef.current?.getBoundingClientRect()
         if (!documentRect) return
 
         const dragData = dragDataRef.current
-        const deltaX = event.clientX - dragData.startX
-        const deltaY = event.clientY - dragData.startY
+        const deltaX = (event.clientX - dragData.startX) / (zoom / 100)
+        const deltaY = (event.clientY - dragData.startY) / (zoom / 100)
 
-        const newX = Math.max(10, Math.min(dragData.fieldX + deltaX, documentRect.width - 160))
-        const newY = Math.max(10, Math.min(dragData.fieldY + deltaY, documentRect.height - 50))
+        const newX = Math.max(10, Math.min(dragData.fieldX + deltaX, 500))
+        const newY = Math.max(10, Math.min(dragData.fieldY + deltaY, 750))
 
-        // Update field position directly
         onFieldUpdate(dragData.fieldId, { x: newX, y: newY })
-    }, [isDragging, onFieldUpdate])
+    }, [isDragging, onFieldUpdate, zoom])
 
     const handleMouseUp = useCallback(() => {
         setIsDragging(false)
         setDraggedField(null)
-        // Reset drag data
         dragDataRef.current = { startX: 0, startY: 0, fieldX: 0, fieldY: 0, fieldId: '' }
     }, [])
 
@@ -129,7 +119,7 @@ export default function DocumentViewer({
         if (isDragging) {
             const handleGlobalMouseMove = (event: MouseEvent) => handleMouseMove(event)
             const handleGlobalMouseUp = () => handleMouseUp()
-            
+
             window.addEventListener('mousemove', handleGlobalMouseMove)
             window.addEventListener('mouseup', handleGlobalMouseUp)
             return () => {
@@ -162,109 +152,112 @@ export default function DocumentViewer({
 
     return (
         <div className="flex flex-col flex-1">
-            {/* Page Navigation */}
-            <div className="flex justify-between items-center p-4 border-b border-border">
-                <div className="flex gap-2 items-center">
-                    <Button variant="ghost" size="sm" disabled={currentPage === 1} onClick={handlePreviousPage}>
-                        <CaretLeftIcon className="w-4 h-4" weight="bold" />
-                    </Button>
-                    <span className="text-sm font-medium">
-                        Page {currentPage} of {document.pages}
-                    </span>
-                    <Button variant="ghost" size="sm" disabled={currentPage === document.pages} onClick={handleNextPage}>
-                        <CaretRightIcon className="w-4 h-4" weight="bold" />
-                    </Button>
-                </div>
-                
-                <div className="text-sm text-muted-foreground">
-                    {signatureFields.length} field{signatureFields.length !== 1 ? 's' : ''} placed
-                </div>
+            {/* Document Tools */}
+            <div className="flex items-center justify-center gap-2 py-4 w-full border-b px-4 z-20">
+                <Button variant="ghost" size="sm" onClick={onBack}>
+                    <ArrowCounterClockwiseIcon className="size-5" />
+                </Button>
+                <Button variant="ghost" size="sm">
+                    <ArrowClockwiseIcon className="size-5" />
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => onZoomChange(Math.max(zoom - 25, 50))}>
+                    <MagnifyingGlassMinusIcon className="size-5" />
+                </Button>
+                <span className="text-sm font-medium min-w-[3rem] text-center">{zoom}%</span>
+                <Button variant="ghost" size="sm" onClick={() => onZoomChange(Math.min(zoom + 25, 200))}>
+                    <MagnifyingGlassPlusIcon className="size-5" />
+                </Button>
+                <Button variant="ghost" size="sm">
+                    <PrinterIcon className="size-5" />
+                </Button>
             </div>
 
             {/* Document Container */}
-            <div 
+            <div
                 ref={containerRef}
-                className="overflow-auto flex-1 p-8 bg-muted/20"
-                style={{ cursor: isPlacingField ? "crosshair" : "default" }}
+                className={cn(
+                    "overflow-auto bg-muted/10 flex items-center justify-center p-8 flex-1",
+                    isPlacingField ? "cursor-crosshair" : "cursor-default"
+                )}
             >
                 <div
                     ref={documentRef}
-                    className="mx-auto w-fit bg-white border shadow-lg border-border"
+                    className="w-fit bg-white border shadow-lg border-border"
                     style={{
                         transform: `scale(${zoom / 100})`,
-                        transformOrigin: "top left"
+                        transformOrigin: "top center"
                     }}
-                    onClick={handleDocumentClick}
                 >
                     {/* Document Page */}
-                    <div className="w-[600px] h-[800px] bg-white border border-border relative overflow-hidden">
+                    <div className="w-[300px] md:w-[600px] aspect-[3/4] bg-white relative">
                         {/* Render uploaded PDF or image if provided */}
-                        {document.url ? (
+                        {document?.url ? (
                             (document.url.startsWith("data:application/pdf") || document.name?.toLowerCase().endsWith(".pdf")) ? (
-                                <object
-                                    data={document.url}
-                                    type="application/pdf"
-                                    className="absolute inset-0 w-full h-full pointer-events-none"
-                                >
-                                    {/* Fallback if PDF cannot render */}
-                                    <div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground px-6 text-center">
-                                        PDF preview not supported in this browser.
-                                    </div>
-                                </object>
+                                <>
+                                    <object
+                                        data={document.url}
+                                        type="application/pdf"
+                                        className="absolute inset-0 w-full h-full pointer-events-none"
+                                    >
+                                        <div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground px-6 text-center">
+                                            PDF preview not supported in this browser.
+                                        </div>
+                                    </object>
+                                    <div
+                                        className={cn(
+                                            "absolute inset-0 w-full h-full pointer-events-auto",
+                                            isPlacingField ? "cursor-crosshair bg-blue-500/5" : "cursor-default bg-transparent"
+                                        )}
+                                        onClick={handleDocumentClick}
+                                    />
+                                </>
                             ) : (
-                                <img
+                                <Image
                                     src={document.url}
                                     alt={document.name}
                                     className="absolute inset-0 w-full h-full object-contain bg-white"
                                     draggable={false}
+                                    onClick={handleDocumentClick}
                                 />
                             )
-                        ) : null}
+                        ) : (
+                            <div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground px-6 text-center">
+                                No document preview available
+                            </div>
+                        )}
 
                         {/* Signature Fields */}
                         {signatureFields.map((field) => (
                             <div
                                 key={field.id}
                                 className={cn(
-                                    "absolute border-2 border-dashed rounded-md bg-primary/5 hover:bg-primary/10 cursor-move select-none group",
-                                    selectedField === field.id 
-                                        ? "border-primary bg-primary/10 shadow-lg" 
+                                    "absolute border-2 border-dashed rounded-md bg-primary/5 hover:bg-primary/10 cursor-move select-none group inline-flex items-center gap-2 p-2",
+                                    selectedField === field.id
+                                        ? "border-primary bg-primary/10 shadow-lg"
                                         : "border-primary/50 hover-border-primary/70"
                                 )}
                                 style={{
                                     left: field.x,
                                     top: field.y,
-                                    width: field.width,
                                     height: field.height
                                 }}
                                 onClick={(e) => handleFieldClick(field.id, e)}
                                 onMouseDown={(e) => handleFieldMouseDown(field.id, e)}
                             >
-                                <div className="flex justify-between items-center p-2 h-full">
-                                    <div className="flex flex-1 gap-2 items-center">
-                                        <span className="text-primary">{getFieldIcon(field.type)}</span>
-                                        <span className="text-xs font-medium text-primary">
-                                            {getFieldLabel(field.type)}
-                                        </span>
-                                    </div>
-                                    
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="p-0 w-4 h-4 opacity-0 transition-opacity hover:bg-destructive/20 group-hover:opacity-100"
-                                        onClick={(e) => {
-                                            e.stopPropagation()
-                                            onFieldRemove(field.id)
-                                        }}
-                                    >
-                                        <XIcon className="w-3 h-3" />
-                                    </Button>
-                                </div>
-                                
-                                {/* Resize handle */}
-                                {selectedField === field.id && (
-                                    <div className="absolute -right-1 -bottom-1 w-3 h-3 rounded-full border border-white opacity-0 bg-primary cursor-se-resize group-hover:opacity-100" />
-                                )}
+                                <span className="text-primary">{getFieldIcon(field.type)}</span>
+                                <span className="text-xs font-medium text-primary whitespace-nowrap">
+                                    {getFieldLabel(field.type)}
+                                </span>
+                                <button
+                                    type="button"
+                                    className="p-0 w-4 h-4"
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        onFieldRemove(field.id)
+                                    }}
+                                >
+                                    <XIcon className="w-3 h-3" />
+                                </button>
                             </div>
                         ))}
                     </div>

@@ -92,14 +92,14 @@ export default function SignatureFieldsSidebar({ onAddField, isPlacingField, pen
                             <Button
                                 variant="ghost"
                                 className={cn(
-                                    "w-full justify-start h-auto p-3 hover:bg-accent/50 transition-colors duration-100",
-                                    isPlacingField && pendingFieldType === field.type && "bg-primary/10 border border-primary/20"
+                                    "w-full justify-start h-auto p-3 hover:bg-muted/50 transition-colors duration-100",
+                                    isPlacingField && pendingFieldType === field.type && "bg-accent border"
                                 )}
                                 onClick={() => onAddField(field.type)}
                             >
                                 <div className="flex items-center gap-3 w-full">
-                                    <div className="p-2 rounded-md bg-primary/10">
-                                        <IconComponent className="size-6 text-primary" weight="bold" />
+                                    <div className="p-2 rounded-md bg-muted/30">
+                                        <IconComponent className="size-6 text-primary" weight="regular" />
                                     </div>
                                     <div className="flex-1 text-left">
                                         <div className="text-sm font-medium">{field.label}</div>

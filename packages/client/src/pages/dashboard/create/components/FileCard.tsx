@@ -79,6 +79,7 @@ export default function FileCard({ file, onRemove, variant = "list", delayPrevie
     const isImage = file.type.includes("image")
     const shouldShowPreview = isImage && !imageError && showPreview
 
+    // Grid variant
     if (variant === "grid") {
         return (
             <motion.div
@@ -96,7 +97,7 @@ export default function FileCard({ file, onRemove, variant = "list", delayPrevie
                 {/* Remove button */}
                 <Button
                     type="button"
-                    variant="ghost"
+                    variant="outline"
                     size="icon"
                     onClick={() => onRemove(file.id)}
                     className="absolute top-4 right-4 size-6 p-0"
@@ -137,7 +138,7 @@ export default function FileCard({ file, onRemove, variant = "list", delayPrevie
         )
     }
 
-    // List variant (existing implementation)
+    // List variant
     return (
         <motion.div
             className="flex items-center justify-between p-2 bg-background border border-border rounded-lg"

@@ -6,6 +6,7 @@ export type SignatureField = {
     width: number
     height: number
     page: number
+    documentId: string
     required: boolean
     label?: string
 }
@@ -37,6 +38,7 @@ export const mockSignatureFields: SignatureField[] = [
         width: 150,
         height: 50,
         page: 1,
+        documentId: "1",
         required: true,
         label: "Client Signature"
     },
@@ -48,6 +50,7 @@ export const mockSignatureFields: SignatureField[] = [
         width: 120,
         height: 40,
         page: 1,
+        documentId: "1",
         required: true,
         label: "Date Signed"
     },
@@ -59,6 +62,7 @@ export const mockSignatureFields: SignatureField[] = [
         width: 200,
         height: 40,
         page: 1,
+        documentId: "1",
         required: false,
         label: "Print Name"
     }
@@ -77,7 +81,7 @@ export const fieldTypeConfigs = [
         type: "initial" as const,
         label: "Initial",
         description: "Initial field",
-        defaultWidth: 80,
+        defaultWidth: 120,
         defaultHeight: 40
     },
     {

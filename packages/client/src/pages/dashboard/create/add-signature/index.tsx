@@ -1,4 +1,4 @@
-import { useState } from "react"
+import React, { useState } from "react"
 import { useNavigate } from "@tanstack/react-router"
 import { cn } from "@/src/lib/utils/utils"
 import Header from "./components/Header"
@@ -11,6 +11,7 @@ import { useStorePersist } from "@/src/lib/hooks/use-store"
 export default function AddSignaturePage() {
     const navigate = useNavigate()
     const { createForm } = useStorePersist()
+    const [currentDocumentId, setCurrentDocumentId] = useState<string>("")
     const [currentPage, setCurrentPage] = useState(1)
     const [zoom, setZoom] = useState(100)
     const [signatureFields, setSignatureFields] = useState<SignatureField[]>([])
@@ -18,14 +19,24 @@ export default function AddSignaturePage() {
     const [isPlacingField, setIsPlacingField] = useState(false)
     const [pendingFieldType, setPendingFieldType] = useState<SignatureField["type"] | null>(null)
 
-    const currentDocument: Document = createForm?.documents?.length
-        ? {
-            id: createForm.documents[0].id,
-            name: createForm.documents[0].name,
-            url: createForm.documents[0].dataUrl || "",
-            pages: 1
+    // Convert createForm documents to Document format
+    const documents: Document[] = createForm?.documents?.length
+        ? createForm.documents.map(doc => ({
+            id: doc.id,
+            name: doc.name,
+            url: doc.dataUrl || "",
+            pages: 1 // For now, assume 1 page per document
+        }))
+        : mockDocuments
+
+    // Set initial document if not set
+    React.useEffect(() => {
+        if (documents.length > 0 && !currentDocumentId) {
+            setCurrentDocumentId(documents[0].id)
         }
-        : mockDocuments[0]
+    }, [documents, currentDocumentId])
+
+    const currentDocument: Document | undefined = documents.find(doc => doc.id === currentDocumentId)
 
     // Local utility function for generating unique IDs
     const generateFieldId = () => Math.random().toString(36).substr(2, 9)
@@ -37,7 +48,7 @@ export default function AddSignaturePage() {
     }
 
     const handleFieldPlaced = (x: number, y: number) => {
-        if (!pendingFieldType) return
+        if (!pendingFieldType || !currentDocumentId) return
 
         const fieldConfig = fieldTypeConfigs.find(config => config.type === pendingFieldType)
         if (!fieldConfig) return
@@ -50,6 +61,7 @@ export default function AddSignaturePage() {
             width: fieldConfig.defaultWidth,
             height: fieldConfig.defaultHeight,
             page: currentPage,
+            documentId: currentDocumentId,
             required: true,
             label: fieldConfig.label
         }
@@ -86,19 +98,22 @@ export default function AddSignaturePage() {
         navigate({ to: "/dashboard" })
     }
 
-    const currentPageFields = signatureFields.filter(field => field.page === currentPage)
+    const currentPageFields = signatureFields.filter(field => 
+        field.documentId === currentDocumentId && field.page === currentPage
+    )
+
+    const handleDocumentSelect = (documentId: string) => {
+        setCurrentDocumentId(documentId)
+        setCurrentPage(1) // Reset to first page when switching documents
+        setSelectedField(null) // Clear selected field when switching documents
+    }
 
     return (
         <div className="min-h-screen bg-background flex flex-col">
-            <Header 
-                zoom={zoom}
-                onZoomChange={setZoom}
-                onBack={handleBack}
-                onSend={handleSend}
-            />
+            <Header onSend={handleSend} />
 
             {/* Main Content */}
-            <div className="flex flex-1 overflow-hidden">
+            <div className="flex flex-1">
                 {/* Left Sidebar - Signature Fields */}
                 <aside className="hidden lg:block w-64 border-r border-border bg-muted/5">
                     <SignatureFieldsSidebar
@@ -109,42 +124,74 @@ export default function AddSignaturePage() {
                 </aside>
 
                 {/* Document Viewer */}
-                <main className="flex-1 flex flex-col">
-                    <DocumentViewer
-                        document={currentDocument}
-                        currentPage={currentPage}
-                        zoom={zoom}
-                        signatureFields={currentPageFields}
-                        selectedField={selectedField}
-                        isPlacingField={isPlacingField}
-                        onFieldPlaced={handleFieldPlaced}
-                        onFieldSelect={handleFieldSelect}
-                        onFieldRemove={handleFieldRemove}
-                        onFieldUpdate={handleFieldUpdate}
-                        onPageChange={setCurrentPage}
-                    />
+                <main className="flex-1 flex flex-col bg-background">
+                    {currentDocument ? (
+                        <DocumentViewer
+                            document={currentDocument || null}
+                            zoom={zoom}
+                            signatureFields={currentPageFields}
+                            selectedField={selectedField}
+                            isPlacingField={isPlacingField}
+                            onFieldPlaced={handleFieldPlaced}
+                            onFieldSelect={handleFieldSelect}
+                            onFieldRemove={handleFieldRemove}
+                            onFieldUpdate={handleFieldUpdate}
+                            onZoomChange={setZoom}
+                            onBack={handleBack}
+                        />
+                    ) : (
+                        <div className="flex-1 flex items-center justify-center">
+                            <div className="text-center">
+                                <p className="text-muted-foreground">No documents available</p>
+                            </div>
+                        </div>
+                    )}
                 </main>
 
                 {/* Right Sidebar - Document Thumbnails */}
-                <aside className="hidden lg:block w-48 border-l border-border bg-muted/5 p-4">
-                    <div className="space-y-2">
-                        <h4 className="text-sm font-medium text-muted-foreground">Pages</h4>
-                        {Array.from({ length: currentDocument.pages }, (_, i) => (
-                            <div
-                                key={i + 1}
-                                className={cn(
-                                    "aspect-[3/4] bg-muted rounded border-2 cursor-pointer transition-colors",
-                                    currentPage === i + 1
-                                        ? "border-primary bg-primary/5"
-                                        : "border-border hover:border-muted-foreground/50"
-                                )}
-                                onClick={() => setCurrentPage(i + 1)}
-                            >
-                                <div className="p-2 text-xs text-center">
-                                    Page {i + 1}
+                <aside className="hidden lg:block w-48 border-l border-border p-4 z-20 bg-background">
+                    <div className="space-y-4">
+                        <h4 className="text-sm font-medium text-muted-foreground">Documents</h4>
+                        <div className="space-y-2">
+                            {documents.map((doc) => (
+                                <div
+                                    key={doc.id}
+                                    className={cn(
+                                        "aspect-[3/4] bg-muted rounded border-2 cursor-pointer transition-colors relative",
+                                        currentDocumentId === doc.id
+                                            ? "border-primary bg-primary/5"
+                                            : "border-border hover:border-muted-foreground/50"
+                                    )}
+                                    onClick={() => handleDocumentSelect(doc.id)}
+                                >
+                                    {/* Document preview */}
+                                    {doc.url ? (
+                                        doc.url.startsWith("data:application/pdf") || doc.name?.toLowerCase().endsWith(".pdf") ? (
+                                            <div className="absolute inset-0 flex items-center justify-center bg-red-50">
+                                                <div className="text-xs text-destructive font-medium">PDF</div>
+                                            </div>
+                                        ) : (
+                                            <img
+                                                src={doc.url}
+                                                alt={doc.name}
+                                                className="absolute inset-0 w-full h-full object-cover rounded"
+                                            />
+                                        )
+                                    ) : (
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            <div className="text-xs text-muted-foreground">No preview</div>
+                                        </div>
+                                    )}
+                                    
+                                    {/* Document name overlay */}
+                                    <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-2 rounded-b">
+                                        <div className="text-xs truncate" title={doc.name}>
+                                            {doc.name}
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
                 </aside>
             </div>

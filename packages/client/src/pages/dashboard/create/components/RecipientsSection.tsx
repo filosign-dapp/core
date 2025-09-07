@@ -107,15 +107,15 @@ export default function RecipientsSection({
                                 control={control}
                                 name="isOnlySigner"
                                 render={({ field }) => (
-                                    <FormItem className="flex items-center space-x-3">
+                                    <FormItem className="flex items-center space-x-1">
                                         <FormControl>
                                             <Checkbox
                                                 checked={field.value}
                                                 onCheckedChange={field.onChange}
                                             />
                                         </FormControl>
-                                        <FormLabel className="cursor-pointer">
-                                            I'm the only signer
+                                        <FormLabel className="cursor-pointer font-semibold">
+                                            I&apos;m the only signer
                                         </FormLabel>
                                     </FormItem>
                                 )}
