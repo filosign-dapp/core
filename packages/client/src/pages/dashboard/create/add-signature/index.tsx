@@ -58,8 +58,6 @@ export default function AddSignaturePage() {
             type: pendingFieldType,
             x,
             y,
-            width: fieldConfig.defaultWidth,
-            height: fieldConfig.defaultHeight,
             page: currentPage,
             documentId: currentDocumentId,
             required: true,
@@ -104,8 +102,8 @@ export default function AddSignaturePage() {
 
     const handleDocumentSelect = (documentId: string) => {
         setCurrentDocumentId(documentId)
-        setCurrentPage(1) // Reset to first page when switching documents
-        setSelectedField(null) // Clear selected field when switching documents
+        setCurrentPage(1)
+        setSelectedField(null)
     }
 
     return (
@@ -132,6 +130,7 @@ export default function AddSignaturePage() {
                             signatureFields={currentPageFields}
                             selectedField={selectedField}
                             isPlacingField={isPlacingField}
+                            pendingFieldType={pendingFieldType}
                             onFieldPlaced={handleFieldPlaced}
                             onFieldSelect={handleFieldSelect}
                             onFieldRemove={handleFieldRemove}
@@ -151,7 +150,7 @@ export default function AddSignaturePage() {
                 {/* Right Sidebar - Document Thumbnails */}
                 <aside className="hidden lg:block w-48 border-l border-border p-4 z-20 bg-background">
                     <div className="space-y-4">
-                        <h4 className="text-sm font-medium text-muted-foreground">Documents</h4>
+                        <p className="font-medium text-muted-foreground">Documents</p>
                         <div className="space-y-2">
                             {documents.map((doc) => (
                                 <div

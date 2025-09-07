@@ -70,7 +70,7 @@ export default function SignatureFieldsSidebar({ onAddField, isPlacingField, pen
     return (
         <div className="p-4 space-y-4">
             <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-3">Standard Fields</h3>
+                <p className="font-medium text-muted-foreground mb-2">Standard Fields</p>
                 <p className="text-xs text-muted-foreground mb-4">
                     Drag and drop fields onto your document
                 </p>

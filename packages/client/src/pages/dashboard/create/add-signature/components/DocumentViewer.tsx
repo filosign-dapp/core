@@ -1,9 +1,13 @@
 import { useState, useRef, useCallback, useEffect } from "react"
-import { XIcon, CaretLeftIcon, CaretRightIcon, SignatureIcon, TextAaIcon, CalendarIcon, UserIcon, EnvelopeIcon, TextBIcon, CheckSquareIcon, FileIcon, MagnifyingGlassMinusIcon, MagnifyingGlassPlusIcon, PrinterIcon, ArrowCounterClockwiseIcon, ArrowClockwiseIcon, FloppyDiskIcon } from "@phosphor-icons/react"
+import { XIcon, SignatureIcon, TextAaIcon, CalendarIcon, UserIcon, EnvelopeIcon, TextBIcon, CheckSquareIcon, FileIcon, MagnifyingGlassMinusIcon, MagnifyingGlassPlusIcon, PrinterIcon, ArrowCounterClockwiseIcon, ArrowClockwiseIcon } from "@phosphor-icons/react"
 import { Button } from "@/src/lib/components/ui/button"
 import { cn } from "@/src/lib/utils/utils"
 import { type SignatureField, type Document } from "../mock"
 import { Image } from "@/src/lib/components/custom/Image"
+
+const WIDTH = 600
+const HEIGHT = 800
+const MARGIN = 10
 
 interface DocumentViewerProps {
     document: Document | null
@@ -11,6 +15,7 @@ interface DocumentViewerProps {
     signatureFields: SignatureField[]
     selectedField: string | null
     isPlacingField: boolean
+    pendingFieldType: SignatureField["type"] | null
     onFieldPlaced: (x: number, y: number) => void
     onFieldSelect: (fieldId: string) => void
     onFieldRemove: (fieldId: string) => void
@@ -25,6 +30,7 @@ export default function DocumentViewer({
     signatureFields,
     selectedField,
     isPlacingField,
+    pendingFieldType,
     onFieldPlaced,
     onFieldSelect,
     onFieldRemove,
@@ -33,7 +39,6 @@ export default function DocumentViewer({
     onBack
 }: DocumentViewerProps) {
     const [isDragging, setIsDragging] = useState(false)
-    const [draggedField, setDraggedField] = useState<string | null>(null)
     const containerRef = useRef<HTMLDivElement>(null)
     const documentRef = useRef<HTMLDivElement>(null)
     const dragDataRef = useRef({
@@ -51,13 +56,15 @@ export default function DocumentViewer({
         const documentRect = documentRef.current?.getBoundingClientRect()
         if (!documentRect) return
 
-        // Calculate position relative to the document, accounting for zoom
         const x = (event.clientX - documentRect.left) / (zoom / 100)
         const y = (event.clientY - documentRect.top) / (zoom / 100)
 
-        // Ensure the field is placed within document bounds (600x800 is the document size)
-        const boundedX = Math.max(10, Math.min(x, 500))
-        const boundedY = Math.max(10, Math.min(y, 750))
+        const documentWidth = WIDTH
+        const documentHeight = HEIGHT
+        const margin = MARGIN
+
+        const boundedX = Math.max(margin, Math.min(x, documentWidth - margin))
+        const boundedY = Math.max(margin, Math.min(y, documentHeight - margin))
 
         onFieldPlaced(boundedX, boundedY)
     }, [isPlacingField, onFieldPlaced, zoom])
@@ -83,7 +90,6 @@ export default function DocumentViewer({
         }
 
         setIsDragging(true)
-        setDraggedField(fieldId)
         onFieldSelect(fieldId)
     }
 
@@ -102,15 +108,18 @@ export default function DocumentViewer({
         const deltaX = (event.clientX - dragData.startX) / (zoom / 100)
         const deltaY = (event.clientY - dragData.startY) / (zoom / 100)
 
-        const newX = Math.max(10, Math.min(dragData.fieldX + deltaX, 500))
-        const newY = Math.max(10, Math.min(dragData.fieldY + deltaY, 750))
+        const documentWidth = WIDTH
+        const documentHeight = HEIGHT
+        const margin = MARGIN
+
+        const newX = Math.max(margin, Math.min(dragData.fieldX + deltaX, documentWidth - margin))
+        const newY = Math.max(margin, Math.min(dragData.fieldY + deltaY, documentHeight - margin))
 
         onFieldUpdate(dragData.fieldId, { x: newX, y: newY })
     }, [isDragging, onFieldUpdate, zoom])
 
     const handleMouseUp = useCallback(() => {
         setIsDragging(false)
-        setDraggedField(null)
         dragDataRef.current = { startX: 0, startY: 0, fieldX: 0, fieldY: 0, fieldId: '' }
     }, [])
 
@@ -189,7 +198,14 @@ export default function DocumentViewer({
                     }}
                 >
                     {/* Document Page */}
-                    <div className="w-[300px] md:w-[600px] aspect-[3/4] bg-white relative">
+                    <div className={cn(
+                        `bg-white relative`
+                    )}
+                    style={{
+                        width: WIDTH,
+                        height: HEIGHT
+                    }}
+                    >
                         {/* Render uploaded PDF or image if provided */}
                         {document?.url ? (
                             (document.url.startsWith("data:application/pdf") || document.name?.toLowerCase().endsWith(".pdf")) ? (
@@ -210,15 +226,31 @@ export default function DocumentViewer({
                                         )}
                                         onClick={handleDocumentClick}
                                     />
+                                    {isPlacingField && (
+                                        <div className="absolute inset-0 border-2 border-dashed border-blue-400 bg-blue-50/20 pointer-events-none">
+                                            <div className="absolute top-2 left-2 text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded">
+                                                Click to place {pendingFieldType} field
+                                            </div>
+                                        </div>
+                                    )}
                                 </>
                             ) : (
-                                <Image
-                                    src={document.url}
-                                    alt={document.name}
-                                    className="absolute inset-0 w-full h-full object-contain bg-white"
-                                    draggable={false}
-                                    onClick={handleDocumentClick}
-                                />
+                                <>
+                                    <Image
+                                        src={document.url}
+                                        alt={document.name}
+                                        className="absolute inset-0 w-full h-full object-contain bg-white"
+                                        draggable={false}
+                                        onClick={handleDocumentClick}
+                                    />
+                                    {isPlacingField && (
+                                        <div className="absolute inset-0 border-2 border-dashed border-blue-400 bg-blue-50/20 pointer-events-none">
+                                            <div className="absolute top-2 left-2 text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded">
+                                                Click to place {pendingFieldType} field
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
                             )
                         ) : (
                             <div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground px-6 text-center">
@@ -227,39 +259,49 @@ export default function DocumentViewer({
                         )}
 
                         {/* Signature Fields */}
-                        {signatureFields.map((field) => (
-                            <div
-                                key={field.id}
-                                className={cn(
-                                    "absolute border-2 border-dashed rounded-md bg-primary/5 hover:bg-primary/10 cursor-move select-none group inline-flex items-center gap-2 p-2",
-                                    selectedField === field.id
-                                        ? "border-primary bg-primary/10 shadow-lg"
-                                        : "border-primary/50 hover-border-primary/70"
-                                )}
-                                style={{
-                                    left: field.x,
-                                    top: field.y,
-                                    height: field.height
-                                }}
-                                onClick={(e) => handleFieldClick(field.id, e)}
-                                onMouseDown={(e) => handleFieldMouseDown(field.id, e)}
-                            >
-                                <span className="text-primary">{getFieldIcon(field.type)}</span>
-                                <span className="text-xs font-medium text-primary whitespace-nowrap">
-                                    {getFieldLabel(field.type)}
-                                </span>
-                                <button
-                                    type="button"
-                                    className="p-0 w-4 h-4"
-                                    onClick={(e) => {
-                                        e.stopPropagation()
-                                        onFieldRemove(field.id)
+                        {signatureFields.map((field) => {
+                            const documentWidth = WIDTH
+                            const documentHeight = HEIGHT
+                            const margin = MARGIN
+
+                            const constrainedX = Math.max(margin, Math.min(field.x, documentWidth - margin))
+                            const constrainedY = Math.max(margin, Math.min(field.y, documentHeight - margin))
+
+                            return (
+                                <div
+                                    key={field.id}
+                                    className={cn(
+                                        "absolute border-2 border-dashed rounded-md bg-primary/10 hover:bg-primary/10 cursor-move select-none group flex justify-center items-center gap-2 p-2",
+                                        selectedField === field.id
+                                            ? "border-primary bg-primary/10 shadow-lg "
+                                            : "border-primary/50 hover:border-primary/70 hover:bg-primary/80"
+                                    )}
+                                    style={{
+                                        left: constrainedX,
+                                        top: constrainedY,
                                     }}
+                                    onClick={(e) => handleFieldClick(field.id, e)}
+                                    onMouseDown={(e) => handleFieldMouseDown(field.id, e)}
                                 >
-                                    <XIcon className="w-3 h-3" />
-                                </button>
-                            </div>
-                        ))}
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-primary">{getFieldIcon(field.type)}</span>
+                                        <span className="text-xs font-medium text-primary whitespace-nowrap">
+                                            {getFieldLabel(field.type)}
+                                        </span>
+                                        <button
+                                            type="button"
+                                            className="p-0 w-4 h-4"
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                                onFieldRemove(field.id)
+                                            }}
+                                        >
+                                            <XIcon className="w-3 h-3" />
+                                        </button>
+                                    </div>
+                                </div>
+                            )
+                        })}
                     </div>
                 </div>
             </div>
