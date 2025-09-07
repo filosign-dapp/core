@@ -8,8 +8,9 @@ import { withPageErrorBoundary } from "@/src/lib/components/errors/PageErrorBoun
 import LandingPage from "./landing";
 import { useAnalytics } from '../lib/hooks/use-analytics';
 import DashboardPage from './dashboard';
-import CreateEnvelopePage from './dashboard/create';
-import AddSignaturePage from './dashboard/create/add-signature';
+import CreateEnvelopePage from './dashboard/envelope/create/create-envelope';
+import AddSignaturePage from './dashboard/envelope/create/add-sign';
+import CreateNewSignaturePage from './dashboard/signature/create';
 
 const rootRoute = createRootRoute({
   component: () => {
@@ -39,9 +40,18 @@ const dashboardRoute = createRoute({
   },
 })
 
+const createSignatureRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/dashboard/signature/create',
+  component: function CreateSignature() {
+    return withPageErrorBoundary(CreateNewSignaturePage)({});
+  },
+})
+
+
 const createEnvelopeRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/dashboard/create',
+  path: '/dashboard/envelope/create',
   component: function Create() {
     return withPageErrorBoundary(CreateEnvelopePage)({});
   },
@@ -49,14 +59,14 @@ const createEnvelopeRoute = createRoute({
 
 const addSignatureRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/dashboard/create/add-signature',
+  path: '/dashboard/envelope/create/add-sign',
   component: function AddSignature() {
     return withPageErrorBoundary(AddSignaturePage)({});
   },
 })
 
 
-const routeTree = rootRoute.addChildren([indexRoute, dashboardRoute, createEnvelopeRoute, addSignatureRoute])
+const routeTree = rootRoute.addChildren([indexRoute, dashboardRoute, createEnvelopeRoute, addSignatureRoute, createSignatureRoute])
 const router = createRouter({
   routeTree,
 })

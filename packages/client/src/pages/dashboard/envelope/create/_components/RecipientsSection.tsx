@@ -19,7 +19,7 @@ import { Input } from "@/src/lib/components/ui/input"
 import { Checkbox } from "@/src/lib/components/ui/checkbox"
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/src/lib/components/ui/form"
 import { cn } from "@/src/lib/utils/utils"
-import type { EnvelopeForm, Recipient } from "../types"
+import type { EnvelopeForm, Recipient } from "../envelope/types"
 
 interface RecipientsSectionProps {
     control: Control<EnvelopeForm>

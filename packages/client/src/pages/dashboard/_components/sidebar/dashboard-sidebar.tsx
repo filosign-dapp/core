@@ -1,8 +1,8 @@
 import * as React from "react"
 
-import { NavMain } from "@/src/pages/dashboard/components/sidebar/nav-main"
-import { TeamSwitcher } from "@/src/pages/dashboard/components/sidebar/team-switcher"
-import { sidebarData } from "@/src/pages/dashboard/components/sidebar/mock"
+import { NavMain } from "@/src/pages/dashboard/_components/sidebar/nav-main"
+import { TeamSwitcher } from "@/src/pages/dashboard/_components/sidebar/team-switcher"
+import { sidebarData } from "@/src/pages/dashboard/_components/sidebar/mock"
 import {
   Sidebar,
   SidebarContent,

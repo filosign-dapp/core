@@ -14,8 +14,8 @@ import { Button } from "@/src/lib/components/ui/button"
 import { FormField, FormItem, FormMessage } from "@/src/lib/components/ui/form"
 import { cn } from "@/src/lib/utils/utils"
 import FileCard from "./FileCard"
-import type { EnvelopeForm, UploadedFile } from "../types"
-import { ACCEPTED_FILE_MIME_SET, ACCEPTED_FILE_EXTENSIONS } from "../types"
+import type { EnvelopeForm, UploadedFile } from "../../../envelope/create/types"
+import { ACCEPTED_FILE_MIME_SET, ACCEPTED_FILE_EXTENSIONS } from "../../../envelope/create/types"
 
 interface DocumentsSectionProps {
     control: Control<EnvelopeForm>

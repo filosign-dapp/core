@@ -226,7 +226,7 @@ export default function DocumentViewer({
                                     <object
                                         data={document.url}
                                         type="application/pdf"
-                                        className="absolute inset-0 w-full h-full pointer-events-none"
+                                        className="absolute inset-0 w-full h-full z-10"
                                     >
                                         <div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground px-6 text-center">
                                             PDF preview not supported in this browser.
@@ -235,13 +235,13 @@ export default function DocumentViewer({
                                     <div
                                         className={cn(
                                             "absolute inset-0 w-full h-full pointer-events-auto",
-                                            isPlacingField ? "cursor-crosshair bg-blue-500/5" : "cursor-default bg-transparent"
+                                            isPlacingField ? "cursor-crosshair bg-blue-500/5 z-20" : "cursor-default bg-transparent"
                                         )}
                                         onClick={handleDocumentClick}
                                     />
                                     {isPlacingField && (
-                                        <div className="absolute inset-0 border-2 border-dashed border-blue-400 bg-blue-50/20 pointer-events-none">
-                                            <div className="absolute top-2 left-2 text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded">
+                                        <div className="absolute inset-0 border-2 border-dashed border-secondary/50 bg-secondary/20 pointer-events-none">
+                                            <div className="absolute top-2 left-2 text-xs text-primary bg-secondary px-2 py-1 rounded">
                                                 Click to place {pendingFieldType} field
                                             </div>
                                         </div>
@@ -252,13 +252,20 @@ export default function DocumentViewer({
                                     <Image
                                         src={document.url}
                                         alt={document.name}
-                                        className="absolute inset-0 w-full h-full object-contain bg-white"
+                                        className="absolute inset-0 w-full h-full object-contain bg-white z-10"
                                         draggable={false}
                                         onClick={handleDocumentClick}
                                     />
+                                    <div
+                                        className={cn(
+                                            "absolute inset-0 w-full h-full pointer-events-auto",
+                                            isPlacingField ? "cursor-crosshair bg-blue-500/5 z-20" : "cursor-default bg-transparent"
+                                        )}
+                                        onClick={handleDocumentClick}
+                                    />
                                     {isPlacingField && (
-                                        <div className="absolute inset-0 border-2 border-dashed border-blue-400 bg-blue-50/20 pointer-events-none">
-                                            <div className="absolute top-2 left-2 text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded">
+                                        <div className="absolute inset-0 border-2 border-dashed border-secondary/50 bg-secondary/20 pointer-events-none z-20">
+                                            <div className="absolute top-2 left-2 text-xs text-primary bg-secondary px-2 py-1 rounded ">
                                                 Click to place {pendingFieldType} field
                                             </div>
                                         </div>
@@ -273,7 +280,6 @@ export default function DocumentViewer({
 
                         {/* Signature Fields */}
                         {signatureFields.map((field) => {
-                            // Use responsive dimensions
                             const constrainedX = Math.max(margin, Math.min(field.x, documentWidth - margin))
                             const constrainedY = Math.max(margin, Math.min(field.y, documentHeight - margin))
 
@@ -281,7 +287,7 @@ export default function DocumentViewer({
                                 <div
                                     key={field.id}
                                     className={cn(
-                                        "absolute border-2 border-dashed rounded-md bg-primary/10 hover:bg-primary/10 cursor-move select-none group flex justify-center items-center gap-2 p-2",
+                                        "absolute border-2 border-dashed rounded-md bg-primary/10 hover:bg-primary/10 cursor-move select-none group flex justify-center items-center gap-2 p-2 z-30",
                                         selectedField === field.id
                                             ? "border-primary bg-primary/10 shadow-lg "
                                             : "border-primary/50 hover:border-primary/70 hover:bg-primary/80"

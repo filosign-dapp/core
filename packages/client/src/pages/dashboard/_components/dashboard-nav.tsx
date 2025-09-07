@@ -12,7 +12,7 @@ export default function DashboardNav() {
       </div>
 
       <div className="flex gap-4 items-center">
-        <Link to="/dashboard/create">
+        <Link to="/dashboard/envelope/create">
           <Button variant="primary" className="gap-2">
             <PlusIcon className="size-4" weight="bold" />
             Create Envelope

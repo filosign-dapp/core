@@ -3,11 +3,11 @@ import { CaretLeftIcon } from "@phosphor-icons/react"
 import { Button } from "@/src/lib/components/ui/button"
 import { Form } from "@/src/lib/components/ui/form"
 import Logo from "@/src/lib/components/custom/Logo"
-import DocumentsSection from "./components/DocumentUpload"
-import RecipientsSection from "./components/RecipientsSection"
-import MessageSection from "./components/MessageSection"
+import DocumentsSection from "../_components/DocumentUpload"
+import RecipientsSection from "../_components/RecipientsSection"
+import MessageSection from "../_components/MessageSection"
 import { useNavigate } from "@tanstack/react-router"
-import type { EnvelopeForm } from "./types"
+import type { EnvelopeForm } from "../types"
 import { useStorePersist } from "@/src/lib/hooks/use-store"
 
 export default function CreateEnvelopePage() {
@@ -62,7 +62,7 @@ export default function CreateEnvelopePage() {
             documents
         })
 
-        navigate({ to: "/dashboard/create/add-signature" })
+        navigate({ to: "/dashboard/envelope/create/add-sign" })
     }
 
     return (
