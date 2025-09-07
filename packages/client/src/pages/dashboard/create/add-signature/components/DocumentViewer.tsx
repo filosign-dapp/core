@@ -176,7 +176,7 @@ export default function DocumentViewer({
             <div
                 ref={containerRef}
                 className={cn(
-                    "overflow-auto bg-muted/10 flex items-center justify-center p-8 flex-1",
+                    "overflow-auto bg-muted/10 flex items-start justify-center px-8 py-8 flex-1",
                     isPlacingField ? "cursor-crosshair" : "cursor-default"
                 )}
             >
@@ -185,7 +185,7 @@ export default function DocumentViewer({
                     className="w-fit bg-white border shadow-lg border-border"
                     style={{
                         transform: `scale(${zoom / 100})`,
-                        transformOrigin: "top center"
+                        transformOrigin: "top left"
                     }}
                 >
                     {/* Document Page */}

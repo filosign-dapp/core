@@ -25,11 +25,9 @@ export default function LandingNavbar() {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
 
-      // Show navbar when at the top
       if (currentScrollY < 10) {
         setIsVisible(true);
       } else {
-        // Hide when scrolling down, show when scrolling up
         setIsVisible(currentScrollY < lastScrollY);
       }
 
@@ -55,7 +53,7 @@ export default function LandingNavbar() {
           stiffness: 230,
           damping: 25,
           mass: 1.0,
-          delay: 0, // Start immediately
+          delay: 0,
         }}
       >
         {/* Logo */}
@@ -84,7 +82,7 @@ export default function LandingNavbar() {
                 type: "spring",
                 stiffness: 230,
                 damping: 25,
-                delay: 0.52 + (index * 0.087) // Staggered delay for each link
+                delay: 0.52 + (index * 0.087)
               }}
             >
               {link.label}

@@ -23,7 +23,7 @@ export default function WaitlistSection() {
   };
 
   return (
-    <section ref={waitlistRef} className="max-w-6xl mx-auto h-screen flex items-center justify-center p-page">
+    <section ref={waitlistRef} className="max-w-[70dvw] mx-auto h-screen flex items-center justify-center p-page">
       <AnimatePresence mode="wait">
         {!isSubmitted ? (
           <motion.div
@@ -50,17 +50,17 @@ export default function WaitlistSection() {
               }}
               className="text-center"
             >
-              <h1 className="text-7xl font-semibold leading-tight">
+              <h1 className="text-7xl xl:text-9xl font-semibold leading-tight">
                 Join the waitlist
               </h1>
-              <p className="text-lg text-muted leading-relaxed max-w-2xl mx-auto">
+              <p className="text-lg xl:text-2xl text-muted leading-relaxed max-w-2xl mx-auto">
                 Be the first one to try Filosign when it goes live on the mainnet.
               </p>
             </motion.div>
 
             <motion.form
               onSubmit={handleJoinWaitlist}
-              className="w-full max-w-4xl mx-auto"
+              className="w-full max-w-7xl mx-auto"
               initial={{ opacity: 0, y: 40 }}
               animate={waitlistInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
               transition={{
@@ -204,7 +204,7 @@ export default function WaitlistSection() {
                 stiffness: 200,
                 damping: 25,
                 delay: 0.5
-              }} className="text-4xl md:text-7xl leading-tight">You're on the list!</motion.h1>
+              }} className="text-4xl xl:text-7xl leading-tight">You're on the list!</motion.h1>
             <motion.p
               initial={{ y: 30, opacity: 0 }}
               animate={waitlistInView ? { y: 0, opacity: 1 } : { y: 30, opacity: 0 }}
@@ -213,7 +213,7 @@ export default function WaitlistSection() {
                 stiffness: 200,
                 damping: 25,
                 delay: 0.6
-              }} className="text-muted md:text-lg">
+              }} className="text-muted xl:text-lg">
               We'll notify you as soon as we go live on the mainnet.
             </motion.p>
           </motion.div>

@@ -116,7 +116,7 @@ export default function FooterSection() {
               target="_blank"
               rel="noopener noreferrer"
               whileTap={{ scale: 0.95 }}
-              className="p-2 rounded-lg bg-card hover:bg-primary transition-colors duration-200"
+              className="p-2 rounded-lg bg-card hover:bg-secondary transition-colors duration-200"
             >
               <GithubLogoIcon className="w-5 h-5 text-muted-foreground hover:text-foreground transition-colors duration-200" />
             </motion.a>
@@ -125,7 +125,7 @@ export default function FooterSection() {
               target="_blank"
               rel="noopener noreferrer"
               whileTap={{ scale: 0.95 }}
-              className="p-2 rounded-lg bg-card hover:bg-primary transition-colors duration-200"
+              className="p-2 rounded-lg bg-card hover:bg-secondary transition-colors duration-200"
             >
               <TwitterLogoIcon className="w-5 h-5 text-muted-foreground hover:text-foreground transition-colors duration-200" />
             </motion.a>
@@ -134,14 +134,14 @@ export default function FooterSection() {
               target="_blank"
               rel="noopener noreferrer"
               whileTap={{ scale: 0.95 }}
-              className="p-2 rounded-lg bg-card hover:bg-primary transition-colors duration-200"
+              className="p-2 rounded-lg bg-card hover:bg-secondary transition-colors duration-200"
             >
               <LinkedinLogoIcon className="w-5 h-5 text-muted-foreground hover:text-foreground transition-colors duration-200" />
             </motion.a>
             <motion.a
               href="mailto:hello@filosign.com"
               whileTap={{ scale: 0.95 }}
-              className="p-2 rounded-lg bg-card hover:bg-primary transition-colors duration-200"
+              className="p-2 rounded-lg bg-card hover:bg-secondary transition-colors duration-200"
             >
               <EnvelopeIcon className="w-5 h-5 text-muted-foreground hover:text-foreground transition-colors duration-200" />
             </motion.a>
