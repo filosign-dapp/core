@@ -42,6 +42,18 @@
 @theme {
   --font-inter: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-manrope: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  
+  /* Handwritten signature fonts */
+  --font-allura: "Allura", cursive;
+  --font-great-vibes: "Great Vibes", cursive;
+  --font-dancing-script: "Dancing Script", cursive;
+  --font-pacifico: "Pacifico", cursive;
+  --font-brush-script: "Brush Script MT", cursive;
+  --font-lucida-handwriting: "Lucida Handwriting", cursive;
+  --font-kalam: "Kalam", cursive;
+  --font-caveat: "Caveat", cursive;
+  --font-kaushan-script: "Kaushan Script", cursive;
+  --font-satisfy: "Satisfy", cursive;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -153,4 +165,29 @@
 
 @utility m-rect {
   @apply mx-6 my-4;
+}
+
+/* Handwritten Signature Font Classes */
+.font-caveat {
+  font-family: "Caveat", cursive;
+}
+
+.font-gloria-hallelujah {
+  font-family: "Gloria Hallelujah", cursive;
+}
+
+.font-homemade-apple {
+  font-family: "Homemade Apple", cursive;
+}
+
+.font-nothing-you-could-do {
+  font-family: "Nothing You Could Do", cursive;
+}
+
+.font-reenie-beanie {
+  font-family: "Reenie Beanie", cursive;
+}
+
+.font-mr-dafoe {
+  font-family: "Mr Dafoe", cursive;
 }

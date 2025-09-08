@@ -1,10 +1,10 @@
 import React, { useState } from "react"
 import { useNavigate } from "@tanstack/react-router"
 import { cn } from "@/src/lib/utils/utils"
-import Header from "./components/Header"
-import SignatureFieldsSidebar from "./components/SignatureFieldsSidebar"
-import DocumentViewer from "./components/DocumentViewer"
-import MobileSignatureToolbar from "./components/MobileSignatureToolbar"
+import Header from "./_components/Header"
+import SignatureFieldsSidebar from "./_components/SignatureFieldsSidebar"
+import DocumentViewer from "./_components/DocumentViewer"
+import MobileSignatureToolbar from "./_components/MobileSignatureToolbar"
 import { mockDocuments, fieldTypeConfigs, type SignatureField, type Document } from "./mock"
 import { useStorePersist } from "@/src/lib/hooks/use-store"
 
@@ -87,7 +87,7 @@ export default function AddSignaturePage() {
     }
 
     const handleBack = () => {
-        navigate({ to: "/dashboard/create" })
+        navigate({ to: "/dashboard/envelope/create" })
     }
 
     const handleSend = () => {
