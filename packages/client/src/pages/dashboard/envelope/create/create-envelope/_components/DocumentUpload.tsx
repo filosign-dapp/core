@@ -3,7 +3,6 @@ import { motion } from "framer-motion"
 import type { Control, FieldArrayWithId, UseFieldArrayAppend, UseFieldArrayRemove } from "react-hook-form"
 import {
     PaperPlaneTiltIcon,
-    CaretUpIcon,
     UploadIcon,
     ListIcon,
     GridFourIcon,

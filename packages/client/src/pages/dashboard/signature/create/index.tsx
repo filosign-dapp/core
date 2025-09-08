@@ -1,5 +1,6 @@
 import { useState } from "react"
-import { PaintBrushIcon, PaletteIcon, SignatureIcon, TextAaIcon, UploadSimpleIcon, XIcon, TrashIcon } from "@phosphor-icons/react"
+import { PaintBrushIcon, PaletteIcon, SignatureIcon, TextAaIcon, TrashIcon, UploadIcon } from "@phosphor-icons/react"
+import { motion } from "motion/react"
 import { Button } from "@/src/lib/components/ui/button"
 import { Input } from "@/src/lib/components/ui/input"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/src/lib/components/ui/tabs"
@@ -19,7 +20,7 @@ export default function CreateNewSignaturePage() {
     // Signature data
     const [signatureData, setSignatureData] = useState<string | null>(null)
     const [initialsData, setInitialsData] = useState<string | null>(null)
-    
+
     // Selected signature from options
     const [selectedSignatureId, setSelectedSignatureId] = useState<string | null>(null)
 
@@ -69,20 +70,32 @@ export default function CreateNewSignaturePage() {
             <header className="flex sticky top-0 z-50 justify-between items-center px-8 h-16 border-b glass bg-background/50 border-border">
                 <div className="flex gap-4 items-center">
                     <Logo className="px-0" textClassName="text-foreground font-bold" iconOnly />
-                    <h3>Create Your Signature</h3>
+                    <motion.h3
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ type: "spring", stiffness: 200, damping: 25, delay: 0.1 }}
+                    >
+                        Create Your Signature
+                    </motion.h3>
                 </div>
-                <Button variant="ghost" size="icon">
-                    <XIcon className="w-5 h-5" />
-                </Button>
             </header>
 
             {/* Main Content */}
             <main className="p-8 mx-auto max-w-6xl space-y-8 flex flex-col items-center justify-center min-h-[calc(100dvh-4rem)]">
-                <div>
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ type: "spring", stiffness: 200, damping: 25, delay: 0.2 }}
+                >
                     <Image src="/static/sign-bg.png" alt="Signature Background" className="w-full h-full rounded-xl" />
-                </div>
+                </motion.div>
                 {/* Name and Initials Input */}
-                <div className="grid grid-cols-2 gap-4 w-full">
+                <motion.div
+                    className="grid grid-cols-2 gap-4 w-full"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ type: "spring", stiffness: 200, damping: 25, delay: 0.3 }}
+                >
                     <div className="space-y-2">
                         <label htmlFor="fullName" className="text-sm font-medium">
                             Full Name *
@@ -105,166 +118,186 @@ export default function CreateNewSignaturePage() {
                             placeholder="Enter your initials"
                         />
                     </div>
-                </div>
+                </motion.div>
 
                 {/* Signature Creation Tabs */}
-                <Tabs defaultValue="choose" className="w-full min-h-[32rem]">
-                    <TabsList className="grid w-full grid-cols-3">
-                        <TabsTrigger value="choose">
-                            <PaletteIcon className="size-5" weight="bold" />
-                            <p>Choose</p>
-                        </TabsTrigger>
-                        <TabsTrigger value="draw">
-                            <PaintBrushIcon className="size-5" weight="bold" />
-                            <p>Draw</p>
-                        </TabsTrigger>
-                        <TabsTrigger value="upload">
-                            <UploadSimpleIcon className="size-5" weight="bold" />
-                            <p>Upload</p>
-                        </TabsTrigger>
-                    </TabsList>
+                <motion.div
+                    className="w-full"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ type: "spring", stiffness: 200, damping: 25, delay: 0.4 }}
+                >
+                    <Tabs defaultValue="choose" className="w-full min-h-[32rem]">
+                        <TabsList className="grid w-full grid-cols-3">
+                            <TabsTrigger value="choose">
+                                <PaletteIcon className="size-5" weight="bold" />
+                                <p>Choose</p>
+                            </TabsTrigger>
+                            <TabsTrigger value="draw">
+                                <PaintBrushIcon className="size-5" weight="bold" />
+                                <p>Draw</p>
+                            </TabsTrigger>
+                            <TabsTrigger value="upload">
+                                <UploadIcon className="size-5" weight="bold" />
+                                <p>Upload</p>
+                            </TabsTrigger>
+                        </TabsList>
 
-                    <TabsContent value="choose" className="mt-6">
-                        <SignatureOptions
-                            fullName={fullName}
-                            initials={initials}
-                            onSelect={handleSignatureSelection}
-                            selectedSignatureId={selectedSignatureId || undefined}
-                        />
-                    </TabsContent>
+                        <TabsContent value="choose" className="mt-6">
+                            <SignatureOptions
+                                fullName={fullName}
+                                initials={initials}
+                                onSelect={handleSignatureSelection}
+                                selectedSignatureId={selectedSignatureId || undefined}
+                            />
+                        </TabsContent>
 
-                    <TabsContent value="draw" className="mt-6">
-                        <div className="space-y-4">
-                            <h4 className="text-muted-foreground">Draw Signature</h4>
-                            <div className="grid grid-cols-2 gap-4">
-                                {/* Signature drawing area */}
-                                <div className="space-y-3">
-                                    <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center min-h-[16rem] flex flex-col items-center justify-center bg-background">
-                                        {signatureData ? (
-                                            <div className="space-y-3">
-                                                <img
-                                                    src={signatureData}
-                                                    alt="Signature"
-                                                    className="max-w-full max-h-32 object-contain"
-                                                />
-                                                <div className="flex gap-2 justify-center">
+                        <TabsContent value="draw" className="mt-6">
+                            <div className="space-y-4">
+                                <h4 className="text-muted-foreground">Draw Signature</h4>
+                                <div className="grid grid-cols-2 gap-4">
+                                    {/* Signature drawing area */}
+                                    <div className="space-y-3">
+                                        <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center min-h-[16rem] flex flex-col items-center justify-center bg-background">
+                                            {signatureData ? (
+                                                <div className="space-y-3">
+                                                    <img
+                                                        src={signatureData}
+                                                        alt="Signature"
+                                                        className="max-w-full max-h-32 object-contain"
+                                                    />
+                                                    <div className="flex gap-2 justify-center">
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            onClick={() => setIsSignatureDialogOpen(true)}
+                                                        >
+                                                            Edit Signature
+                                                        </Button>
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            onClick={handleClearSignature}
+                                                            className="text-destructive hover:text-destructive"
+                                                        >
+                                                            <TrashIcon className="size-4" />
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="space-y-3 flex flex-col items-center justify-center">
+                                                    <SignatureIcon className="size-16 text-muted-foreground" />
                                                     <Button
-                                                        variant="outline"
-                                                        size="sm"
+                                                        variant="primary"
                                                         onClick={() => setIsSignatureDialogOpen(true)}
                                                     >
-                                                        Edit Signature
-                                                    </Button>
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        onClick={handleClearSignature}
-                                                        className="text-destructive hover:text-destructive"
-                                                    >
-                                                        <TrashIcon className="size-4" />
+                                                        <PaintBrushIcon className="size-4" weight="bold" />
+                                                        Draw Signature
                                                     </Button>
                                                 </div>
-                                            </div>
-                                        ) : (
-                                            <div className="space-y-3 flex flex-col items-center justify-center">
-                                                <SignatureIcon className="size-16 text-muted-foreground" />
-                                                <Button
-                                                    variant="primary"
-                                                    onClick={() => setIsSignatureDialogOpen(true)}
-                                                >
-                                                    Draw Signature
-                                                </Button>
-                                            </div>
-                                        )}
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
-                                {/* Initials drawing area */}
-                                <div className="space-y-3">
-                                    <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center min-h-[16rem] flex flex-col items-center justify-center bg-background">
-                                        {initialsData ? (
-                                            <div className="space-y-3">
-                                                <img
-                                                    src={initialsData}
-                                                    alt="Initials"
-                                                    className="max-w-full max-h-32 object-contain"
-                                                />
-                                                <div className="flex gap-2 justify-center">
+                                    {/* Initials drawing area */}
+                                    <div className="space-y-3">
+                                        <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center min-h-[16rem] flex flex-col items-center justify-center bg-background">
+                                            {initialsData ? (
+                                                <div className="space-y-3">
+                                                    <img
+                                                        src={initialsData}
+                                                        alt="Initials"
+                                                        className="max-w-full max-h-32 object-contain"
+                                                    />
+                                                    <div className="flex gap-2 justify-center">
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            onClick={() => setIsInitialsDialogOpen(true)}
+                                                        >
+                                                            Edit Initials
+                                                        </Button>
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            onClick={handleClearInitials}
+                                                            className="text-destructive hover:text-destructive"
+                                                        >
+                                                            <TrashIcon className="size-4" />
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="space-y-3 flex flex-col items-center justify-center">
+                                                    <TextAaIcon className="size-16 text-muted-foreground" />
                                                     <Button
-                                                        variant="outline"
-                                                        size="sm"
+                                                        variant="primary"
                                                         onClick={() => setIsInitialsDialogOpen(true)}
                                                     >
-                                                        Edit Initials
-                                                    </Button>
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        onClick={handleClearInitials}
-                                                        className="text-destructive hover:text-destructive"
-                                                    >
-                                                        <TrashIcon className="size-4" />
+                                                        <PaintBrushIcon className="size-4" weight="bold" />
+                                                        Draw Initials
                                                     </Button>
                                                 </div>
-                                            </div>
-                                        ) : (
-                                            <div className="space-y-3 flex flex-col items-center justify-center">
-                                                <TextAaIcon className="size-16 text-muted-foreground" />
-                                                <Button
-                                                    variant="primary"
-                                                    onClick={() => setIsInitialsDialogOpen(true)}
-                                                >
-                                                    Draw Initials
-                                                </Button>
-                                            </div>
-                                        )}
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
+                                <div className="flex justify-end mx-auto max-w-6xl w-full gap-4">
+                                    <Button variant="ghost" size="lg">
+                                        <p className="hidden sm:block">Cancel</p>
+                                    </Button>
+                                    <Button variant="primary" size="lg" onClick={handleCreateSignature}>
+                                        Save
+                                    </Button>
+                                </div>
                             </div>
-                            <div className="flex justify-end mx-auto max-w-6xl w-full gap-4">
-                                <Button variant="ghost" size="lg">
-                                    <p className="hidden sm:block">Cancel</p>
-                                </Button>
-                                <Button variant="primary" size="lg" onClick={handleCreateSignature}>
-                                    Save
-                                </Button>
-                            </div>
-                        </div>
-                    </TabsContent>
+                        </TabsContent>
 
-                    <TabsContent value="upload" className="mt-6">
-                        <div className="space-y-4">
-                            <h4 className="text-muted-foreground">Upload Signature</h4>
-                            <div className="grid grid-cols-2 gap-4">
-                                {/* Signature upload area */}
-                                <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center min-h-[16rem] flex flex-col items-center justify-center">
-                                    <SignatureIcon className="size-16" />
-                                    <Button variant="primary" className="mt-2">Upload Signature</Button>
+                        <TabsContent value="upload" className="mt-6">
+                            <div className="space-y-4">
+                                <h4 className="text-muted-foreground">Upload Signature</h4>
+                                <div className="grid grid-cols-2 gap-4">
+                                    {/* Signature upload area */}
+                                    <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center min-h-[16rem] flex flex-col items-center justify-center">
+                                        <SignatureIcon className="size-16 text-muted-foreground" />
+                                        <Button variant="primary" className="mt-2">
+                                            <UploadIcon className="size-4" weight="bold" />
+                                            Upload Signature
+                                        </Button>
+                                    </div>
+                                    {/* Initials upload area */}
+                                    <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center min-h-[16rem] flex flex-col items-center justify-center">
+                                        <TextAaIcon className="size-16 text-muted-foreground" />
+                                        <Button variant="primary" className="mt-2">
+                                            <UploadIcon className="size-4" weight="bold" />
+                                            Upload Initials
+                                        </Button>
+                                    </div>
                                 </div>
-                                {/* Initials upload area */}
-                                <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center min-h-[16rem] flex flex-col items-center justify-center">
-                                    <TextAaIcon className="size-16" />
-                                    <Button variant="primary" className="mt-2">Upload Initials</Button>
+                                <p className="text-sm text-muted-foreground">
+                                    Accepted File Formats: GIF, JPG, PNG, BMP. Max file size 2MB.
+                                </p>
+                                <div className="flex justify-end mx-auto max-w-6xl w-full gap-4">
+                                    <Button variant="ghost" size="lg">
+                                        <p className="hidden sm:block">Cancel</p>
+                                    </Button>
+                                    <Button variant="primary" size="lg" onClick={handleCreateSignature}>
+                                        Save
+                                    </Button>
                                 </div>
                             </div>
-                            <p className="text-sm text-muted-foreground">
-                                Accepted File Formats: GIF, JPG, PNG, BMP. Max file size 2MB.
-                            </p>
-                            <div className="flex justify-end mx-auto max-w-6xl w-full gap-4">
-                                <Button variant="ghost" size="lg">
-                                    <p className="hidden sm:block">Cancel</p>
-                                </Button>
-                                <Button variant="primary" size="lg" onClick={handleCreateSignature}>
-                                    Save
-                                </Button>
-                            </div>
-                        </div>
-                    </TabsContent>
-                </Tabs>
+                        </TabsContent>
+                    </Tabs>
+                </motion.div>
 
                 {/* Legal Disclaimer */}
-                <div className="text-sm text-muted-foreground">
+                <motion.div
+                    className="text-sm text-muted-foreground"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ type: "spring", stiffness: 200, damping: 25, delay: 0.5 }}
+                >
                     By clicking Save, I agree that the signature and initials will be the electronic representation of my signature and initials for all purposes when I (or my agent) use them on envelopes, including legally binding contracts.
-                </div>
+                </motion.div>
             </main>
 
             {/* Signature Dialog */}

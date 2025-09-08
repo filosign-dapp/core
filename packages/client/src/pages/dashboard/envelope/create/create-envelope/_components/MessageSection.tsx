@@ -7,7 +7,7 @@ import { Textarea } from "@/src/lib/components/ui/textarea"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/src/lib/components/ui/collapsible"
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/src/lib/components/ui/form"
 import { cn } from "@/src/lib/utils/utils"
-import type { EnvelopeForm } from "../envelope/types"
+import type { EnvelopeForm } from "../../types"
 
 interface MessageSectionProps {
     control: Control<EnvelopeForm>

@@ -1,5 +1,6 @@
 import * as React from "react"
 import * as TabsPrimitive from "@radix-ui/react-tabs"
+import { motion } from "motion/react"
 
 import { cn } from "../../utils"
 
@@ -57,7 +58,20 @@ function TabsContent({
       data-slot="tabs-content"
       className={cn("flex-1 outline-none", className)}
       {...props}
-    />
+      asChild
+    >
+      <motion.div
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{
+            type: "spring",
+            stiffness: 400,
+            damping: 30,
+          }}
+      >
+        {props.children}
+      </motion.div>
+    </TabsPrimitive.Content>
   )
 }
 
