@@ -3,6 +3,7 @@ import HeroSection from "./hero-section";
 import WaitlistSection from "./waitlist-section";
 import FooterSection from "./footer-section";
 import { Separator } from "@/src/lib/components/ui/separator";
+import PricingSection from "./pricing-section";
 
 export default function LandingPage() {
 
@@ -18,8 +19,13 @@ export default function LandingPage() {
 
       {/* Waitlist Section */}
       <WaitlistSection />
+      
+      <div className="h-[var(--section-gap)]" />
 
-      <Separator />
+      {/* Pricing Section */}
+      <PricingSection />
+
+      <Separator className="mt-56" />
 
       {/* Footer Section */}
       <FooterSection />

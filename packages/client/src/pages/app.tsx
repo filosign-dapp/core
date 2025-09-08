@@ -11,6 +11,7 @@ import DashboardPage from './dashboard';
 import CreateEnvelopePage from './dashboard/envelope/create/create-envelope';
 import AddSignaturePage from './dashboard/envelope/create/add-sign';
 import CreateNewSignaturePage from './dashboard/signature/create';
+import PitchPage from './pitch';  
 
 const rootRoute = createRootRoute({
   component: () => {
@@ -32,6 +33,14 @@ const indexRoute = createRoute({
   },
 })
 
+const pitchRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/pitch',
+  component: function Pitch() {
+    return withPageErrorBoundary(PitchPage)({});
+  },
+})
+
 const dashboardRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/dashboard',
@@ -47,7 +56,6 @@ const createSignatureRoute = createRoute({
     return withPageErrorBoundary(CreateNewSignaturePage)({});
   },
 })
-
 
 const createEnvelopeRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -66,7 +74,7 @@ const addSignatureRoute = createRoute({
 })
 
 
-const routeTree = rootRoute.addChildren([indexRoute, dashboardRoute, createEnvelopeRoute, addSignatureRoute, createSignatureRoute])
+const routeTree = rootRoute.addChildren([indexRoute, dashboardRoute, createEnvelopeRoute, addSignatureRoute, createSignatureRoute, pitchRoute])
 const router = createRouter({
   routeTree,
 })

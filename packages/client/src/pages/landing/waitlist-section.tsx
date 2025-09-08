@@ -53,7 +53,7 @@ export default function WaitlistSection() {
               <h1 className="text-7xl xl:text-9xl font-semibold leading-tight">
                 Join the waitlist
               </h1>
-              <p className="text-lg xl:text-2xl text-muted leading-relaxed max-w-2xl mx-auto">
+              <p className="text-lg xl:text-lg text-muted-foreground leading-relaxed mx-auto">
                 Be the first one to try Filosign when it goes live on the mainnet.
               </p>
             </motion.div>
@@ -213,7 +213,7 @@ export default function WaitlistSection() {
                 stiffness: 200,
                 damping: 25,
                 delay: 0.6
-              }} className="text-muted xl:text-lg">
+              }} className="text-lg xl:text-lg text-muted-foreground leading-relaxed">
               We'll notify you as soon as we go live on the mainnet.
             </motion.p>
           </motion.div>
