@@ -3,11 +3,12 @@ import {
   createRouter,
   createRoute,
   createRootRoute,
+  redirect,
 } from '@tanstack/react-router'
 import { withPageErrorBoundary } from "@/src/lib/components/errors/PageErrorBoundary";
 import LandingPage from "./landing";
 import { useAnalytics } from '../lib/hooks/use-analytics';
-import DashboardPage from './dashboard';
+import DocumentAllPage from './dashboard/document/all';
 import CreateEnvelopePage from './dashboard/envelope/create/create-envelope';
 import AddSignaturePage from './dashboard/envelope/create/add-sign';
 import CreateNewSignaturePage from './dashboard/signature/create';
@@ -45,8 +46,19 @@ const pitchRoute = createRoute({
 const dashboardRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/dashboard',
-  component: function Dashboard() {
-    return withPageErrorBoundary(DashboardPage)({});
+  beforeLoad: () => {
+    throw redirect({
+      to: '/dashboard/document/all',
+      replace: true,
+    });
+  },
+})
+
+const dashboardDocumentAllRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/dashboard/document/all',
+  component: function DocumentAll() {
+    return withPageErrorBoundary(DocumentAllPage)({});
   },
 })
 
@@ -84,7 +96,7 @@ const allDocsRoute = createRoute({
 
 
 
-const routeTree = rootRoute.addChildren([indexRoute, dashboardRoute, createEnvelopeRoute, addSignatureRoute, createSignatureRoute, pitchRoute, allDocsRoute])
+const routeTree = rootRoute.addChildren([indexRoute, pitchRoute, dashboardRoute, dashboardDocumentAllRoute, createEnvelopeRoute, addSignatureRoute, createSignatureRoute, allDocsRoute])
 const router = createRouter({
   routeTree,
 })

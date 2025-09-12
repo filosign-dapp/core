@@ -43,7 +43,7 @@ export const sidebarData = {
       items: [
         {
           title: "All Documents",
-          url: "#",
+          url: "/dashboard/document/all",
         },
         {
           title: "Draft Contracts",
