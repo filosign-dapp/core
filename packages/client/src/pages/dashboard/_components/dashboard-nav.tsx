@@ -6,7 +6,7 @@ import { Link } from "@tanstack/react-router";
 
 export default function DashboardNav() {
   return (
-    <nav className="sticky glass bg-background/50 top-0 flex h-16 justify-between bg shrink-0 items-center gap-2 transition-[width,height] ease-linear px-8 border-b border-border z-50">
+    <nav className="sticky top-0 flex h-16 justify-between shrink-0 items-center gap-2 transition-[width,height] ease-linear px-8 z-50 border-b border-border/50">
       <div className="flex gap-2 items-center">
         <SidebarTrigger className="-ml-1" />
       </div>

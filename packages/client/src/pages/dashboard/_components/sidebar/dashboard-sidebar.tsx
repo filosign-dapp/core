@@ -14,13 +14,13 @@ import {
 import Logo from "@/src/lib/components/custom/Logo"
 
 
-export function DashboardSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function DashboardSidebar({ className, ...props }: React.ComponentProps<typeof Sidebar>) {
   const { state, setOpen } = useSidebar()
   const isCollapsed = state === "collapsed"
 
   return (
     <>
-      <Sidebar collapsible="icon" {...props}>
+      <Sidebar className={className} collapsible="icon" {...props}>
         <SidebarHeader>
           <Logo 
             textClassName="text-foreground font-bold" 

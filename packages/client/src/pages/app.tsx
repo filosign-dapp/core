@@ -12,6 +12,7 @@ import CreateEnvelopePage from './dashboard/envelope/create/create-envelope';
 import AddSignaturePage from './dashboard/envelope/create/add-sign';
 import CreateNewSignaturePage from './dashboard/signature/create';
 import PitchPage from './pitch';  
+import FilesPage from './dashboard/files';
 
 const rootRoute = createRootRoute({
   component: () => {
@@ -73,8 +74,17 @@ const addSignatureRoute = createRoute({
   },
 })
 
+const allDocsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/dashboard/files',
+  component: function Files() {
+    return withPageErrorBoundary(FilesPage)({});
+  },
+})
 
-const routeTree = rootRoute.addChildren([indexRoute, dashboardRoute, createEnvelopeRoute, addSignatureRoute, createSignatureRoute, pitchRoute])
+
+
+const routeTree = rootRoute.addChildren([indexRoute, dashboardRoute, createEnvelopeRoute, addSignatureRoute, createSignatureRoute, pitchRoute, allDocsRoute])
 const router = createRouter({
   routeTree,
 })

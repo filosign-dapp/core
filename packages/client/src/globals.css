@@ -4,15 +4,15 @@
 @plugin "tailwindcss-animate";
 
 :root {
-  --background: #fefffd;
+  --background: hsl(90,55%,98%);
   --foreground: #1f2223;
-  --card: #edecea;
+  --card: #f5f5f5;
   --card-foreground: #1f2223;
   --popover: #fefffd;
   --popover-foreground: #1f2223;
   --primary: #224009;
   --primary-foreground: #fefffd;
-  --secondary: #d8f9b8;
+  --secondary: hsl(90,84%,84%);
   --secondary-foreground: #1f2223;
   --muted: rgb(174, 182, 165);
   --muted-foreground: #6f6e6e;
@@ -35,6 +35,10 @@
   --secondary-light: #ffd18d;
   --secondary-medium: #e59b59;
   --secondary-dark: #aa6728;
+
+
+  --white: #ffffff;
+  --off-white: hsl(90,55%,98%);
 
   --radius: 0.4rem;
 }
@@ -106,19 +110,19 @@
   }
 
   h1 {
-    @apply text-4xl font-semibold leading-tight tracking-tight font-inter;
+    @apply text-4xl font-medium leading-tight tracking-tight font-inter;
   }
 
   h2 {
-    @apply text-3xl font-semibold leading-tight tracking-tight font-inter;
+    @apply text-3xl font-medium leading-tight tracking-tight font-inter;
   }
 
   h3 {
-    @apply text-2xl font-semibold leading-tight tracking-tight font-inter;
+    @apply text-2xl font-medium leading-tight tracking-tight font-inter;
   }
 
   h4 {
-    @apply text-xl font-semibold leading-tight tracking-tight font-inter;
+    @apply text-xl font-medium leading-tight tracking-tight font-inter;
   }
 
   p,

@@ -4,15 +4,13 @@ import {
   SidebarProvider,
 } from "@/src/lib/components/ui/sidebar"
 import DashboardNav from "./_components/dashboard-nav"
-import { Separator } from "@/src/lib/components/ui/separator"
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
-      <DashboardSidebar />
+      <DashboardSidebar className="border-r border-border/50" />
       <SidebarInset>
         <DashboardNav />
-        <Separator />
         <section id="dashboard-content" className="flex flex-1 flex-col gap-4">
           {children}
         </section>

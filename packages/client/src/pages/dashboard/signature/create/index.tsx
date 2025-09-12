@@ -8,10 +8,14 @@ import Logo from "@/src/lib/components/custom/Logo"
 import SignatureDialog from "./_components/SignatureDialog"
 import SignatureOptions from "./_components/SignatureOptions"
 import { Image } from "@/src/lib/components/custom/Image"
+import SignatureUpload from "./_components/SignatureUpload"
 
 export default function CreateNewSignaturePage() {
     const [fullName, setFullName] = useState("Kartikay Tiwari")
     const [initials, setInitials] = useState("KT")
+
+    // Tab state
+    const [activeTab, setActiveTab] = useState("choose")
 
     // Dialog states
     const [isSignatureDialogOpen, setIsSignatureDialogOpen] = useState(false)
@@ -53,6 +57,15 @@ export default function CreateNewSignaturePage() {
         setSelectedSignatureId(signature) // Use signature as unique identifier
     }
 
+    // Handle file uploads
+    const handleSignatureUpload = (data: string) => {
+        setSignatureData(data)
+    }
+
+    const handleInitialsUpload = (data: string) => {
+        setInitialsData(data)
+    }
+
     // Handle create signature
     const handleCreateSignature = () => {
         // TODO: Save signature data to your backend/state management
@@ -62,6 +75,13 @@ export default function CreateNewSignaturePage() {
         console.log('Initials:', initials)
 
         // For now, just log the data - you can implement saving logic here
+    }
+
+    const handleTabChange = (value: string) => {
+        setActiveTab(value)
+        setSignatureData(null)
+        setInitialsData(null)
+        setSelectedSignatureId(null)
     }
 
     return (
@@ -127,7 +147,7 @@ export default function CreateNewSignaturePage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ type: "spring", stiffness: 200, damping: 25, delay: 0.4 }}
                 >
-                    <Tabs defaultValue="choose" className="w-full min-h-[32rem]">
+                    <Tabs defaultValue="choose" onValueChange={handleTabChange} className="w-full min-h-[32rem]">
                         <TabsList className="grid w-full grid-cols-3">
                             <TabsTrigger value="choose">
                                 <PaletteIcon className="size-5" weight="bold" />
@@ -256,22 +276,20 @@ export default function CreateNewSignaturePage() {
                             <div className="space-y-4">
                                 <h4 className="text-muted-foreground">Upload Signature</h4>
                                 <div className="grid grid-cols-2 gap-4">
-                                    {/* Signature upload area */}
-                                    <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center min-h-[16rem] flex flex-col items-center justify-center">
-                                        <SignatureIcon className="size-16 text-muted-foreground" />
-                                        <Button variant="primary" className="mt-2">
-                                            <UploadIcon className="size-4" weight="bold" />
-                                            Upload Signature
-                                        </Button>
-                                    </div>
-                                    {/* Initials upload area */}
-                                    <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center min-h-[16rem] flex flex-col items-center justify-center">
-                                        <TextAaIcon className="size-16 text-muted-foreground" />
-                                        <Button variant="primary" className="mt-2">
-                                            <UploadIcon className="size-4" weight="bold" />
-                                            Upload Initials
-                                        </Button>
-                                    </div>
+                                    <SignatureUpload
+                                        title="Upload Signature"
+                                        icon={<SignatureIcon className="size-16 text-muted-foreground" />}
+                                        onFileUpload={handleSignatureUpload}
+                                        onFileClear={handleClearSignature}
+                                        uploadedFile={signatureData}
+                                    />
+                                    <SignatureUpload
+                                        title="Upload Initials"
+                                        icon={<TextAaIcon className="size-16 text-muted-foreground" />}
+                                        onFileUpload={handleInitialsUpload}
+                                        onFileClear={handleClearInitials}
+                                        uploadedFile={initialsData}
+                                    />
                                 </div>
                                 <p className="text-sm text-muted-foreground">
                                     Accepted File Formats: GIF, JPG, PNG, BMP. Max file size 2MB.
