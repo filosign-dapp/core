@@ -82,26 +82,26 @@ export default function PricingSection() {
     const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
 
     return (
-        <section ref={sectionRef} className="max-w-[70dvw] mx-auto flex flex-col gap-8 py-12 p-page">
+        <section ref={sectionRef} className="max-w-[90dvw] md:max-w-[70dvw] mx-auto flex flex-col gap-6 md:gap-8 py-8 md:py-12 p-4 md:p-page">
             <motion.div
                 className="text-center"
                 initial={{ opacity: 0, y: 30 }}
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ type: "spring", stiffness: 200, damping: 25, delay: 0.2 }}
             >
-                <h1 className="md:text-5xl xl:text-7xl">Pricing Plans for Every Need</h1>
-                <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mt-2">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl xl:text-7xl leading-tight">Pricing Plans for Every Need</h1>
+                <p className="text-base sm:text-lg md:text-xl text-muted-foreground leading-relaxed mt-2">
                     Experience the future of document signing. Secure, decentralized, and built for the modern web.
                 </p>
             </motion.div>
 
             <motion.div
-                className="flex items-center justify-center gap-4 my-8"
+                className="flex items-center justify-center gap-4 my-6 md:my-8"
                 initial={{ opacity: 0, y: 30 }}
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ type: "spring", stiffness: 200, damping: 25, delay: 0.3 }}
             >
-                <div className="relative flex w-52 items-center rounded-full bg-primary p-2">
+                <div className="relative flex w-48 sm:w-52 items-center rounded-full bg-primary p-2">
                     <motion.div
                         className="absolute left-1 top-1 h-[calc(100%-0.5rem)] w-[calc(50%-0.25rem)] rounded-full bg-background shadow-sm"
                         animate={{ x: billedYearly ? '100%' : '0%' }}
@@ -125,35 +125,35 @@ export default function PricingSection() {
             </motion.div>
 
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
                 {plans.map((plan, index) => (
                     <motion.div
                         key={plan.name}
-                        className="flex flex-col p-6 bg-background border rounded-large"
+                        className="flex flex-col p-4 sm:p-6 bg-background border rounded-large"
                         initial={{ opacity: 0, y: 50 }}
                         animate={isInView ? { opacity: 1, y: 0 } : {}}
                         transition={{ type: "spring", stiffness: 200, damping: 25, delay: 0.4 + index * 0.1 }}
                     >
                         <div className="flex-grow">
-                            <h2 className="text-2xl font-semibold">{plan.name}</h2>
-                            <div className="flex items-baseline gap-2 mt-4">
-                                <span className="text-4xl font-bold">${billedYearly && plan.billedYearly ? plan.billedYearly.price : plan.price}</span>
-                                <span className="text-muted-foreground">{plan.priceSuffix}</span>
+                            <h2 className="text-xl sm:text-2xl font-semibold">{plan.name}</h2>
+                            <div className="flex items-baseline gap-2 mt-3 sm:mt-4">
+                                <span className="text-3xl sm:text-4xl font-bold">${billedYearly && plan.billedYearly ? plan.billedYearly.price : plan.price}</span>
+                                <span className="text-sm sm:text-base text-muted-foreground">{plan.priceSuffix}</span>
                             </div>
                             {plan.billedYearly && (
                                 <Badge variant="secondary" className="mt-2">Save ${plan.billedYearly.save} with yearly</Badge>
                             )}
-                            <p className="text-muted-foreground mt-4">{plan.description}</p>
-                            <ul className="space-y-3 mt-6">
+                            <p className="text-sm sm:text-base text-muted-foreground mt-3 sm:mt-4">{plan.description}</p>
+                            <ul className="space-y-2 sm:space-y-3 mt-4 sm:mt-6">
                                 {plan.features.map((feature) => (
-                                    <li key={feature} className="flex items-center gap-3">
-                                        <CheckCircle className="text-ring" size={20} weight="fill" />
-                                        <span>{feature}</span>
+                                    <li key={feature} className="flex items-start gap-2 sm:gap-3">
+                                        <CheckCircle className="text-ring flex-shrink-0 mt-0.5" size={16} weight="fill" />
+                                        <span className="text-sm sm:text-base">{feature}</span>
                                     </li>
                                 ))}
                             </ul>
                         </div>
-                        <Button variant="primary" className="w-full mt-6">{plan.buttonText}</Button>
+                        <Button variant="primary" className="w-full mt-4 sm:mt-6 text-sm sm:text-base">{plan.buttonText}</Button>
                     </motion.div>
                 ))}
             </div>

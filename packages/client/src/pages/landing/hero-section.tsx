@@ -7,7 +7,7 @@ import { Image } from "@/src/lib/components/custom/Image";
 
 export default function HeroSection() {
   return (
-    <section className="max-w-[70dvw] mx-auto flex flex-col gap-8 py-12 p-page">
+    <section className="max-w-[90dvw] md:max-w-[70dvw] mx-auto flex flex-col gap-6 md:gap-8 py-8 md:py-12 p-4 md:p-page">
       {/* Text Content Group */}
       <motion.div
         className="flex flex-col gap-4"
@@ -47,7 +47,7 @@ export default function HeroSection() {
             damping: 25,
             delay: 1.4
           }}
-          className="md:text-5xl xl:text-7xl"
+          className="text-3xl sm:text-4xl md:text-5xl xl:text-7xl leading-tight"
         >
           Trustless document signing for the modern web.
         </motion.h1>
@@ -62,7 +62,7 @@ export default function HeroSection() {
             damping: 25,
             delay: 1.5
           }}
-          className="text-lg md:text-xl text-muted-foreground leading-relaxed -mt-2"
+          className="text-base sm:text-lg md:text-xl text-muted-foreground leading-relaxed -mt-2"
         >
           Secure, fast, and easy-to-use document signing on filecoin.
         </motion.p>
@@ -77,17 +77,17 @@ export default function HeroSection() {
             damping: 25,
             delay: 1.6
           }}
-          className="flex flex-row items-center gap-4"
+          className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4"
         >
-          <Button variant="primary" size="lg" asChild>
-            <Link to="/dashboard" className="flex items-center gap-2 group">
+          <Button variant="primary" size="lg" asChild className="w-full sm:w-auto">
+            <Link to="/dashboard" className="flex items-center justify-center gap-2 group">
               Get started
               <CaretRightIcon className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" />
             </Link>
           </Button>
 
-          <Button variant="secondary" size="lg" asChild>
-            <Link to="/dashboard" className="flex items-center gap-2 text-foreground group">
+          <Button variant="secondary" size="lg" asChild className="w-full sm:w-auto">
+            <Link to="/dashboard" className="flex items-center justify-center gap-2 text-foreground group">
               <PlayIcon className="w-4 h-4 transition-transform duration-200 group-hover:rotate-120" />
               See it in action
             </Link>
