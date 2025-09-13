@@ -60,7 +60,7 @@ export const mockFiles: MockFile[] = [
     size: 512000, // 500KB
     type: "image/png",
     createdAt: new Date("2024-09-08"),
-    dataUrl: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
+    dataUrl: "https://images.unsplash.com/photo-1554224155-cfa08c2a758f?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8ZmlsZXxlbnwwfHwwfHx8MA%3D%3D"
   },
   {
     id: "file-3",
@@ -82,7 +82,7 @@ export const mockFiles: MockFile[] = [
     size: 2048000, // 2MB
     type: "image/jpeg",
     createdAt: new Date("2024-09-11"),
-    dataUrl: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/2wBDAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0RXRhU0hWjGqc5Q5v0a7QZaNrZ3nP5+zfbbhfBvv8AgX9V6SrWDrJ2fXbHf8AKS7V7rO7p6nJcXWaV7W3P5+zfbbhfBv+Qf//Z"
+    dataUrl: "https://images.unsplash.com/photo-1554224155-cfa08c2a758f?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8ZmlsZXxlbnwwfHwwfHx8MA%3D%3D"
   },
 
   // Files in folders

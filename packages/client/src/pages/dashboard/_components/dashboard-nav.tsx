@@ -1,12 +1,9 @@
 import { SidebarTrigger } from "@/src/lib/components/ui/sidebar";
 import { UserDropdown } from "./user-dropdown";
-import { Button } from "@/src/lib/components/ui/button";
-import { PlusIcon } from "@phosphor-icons/react";
-import { Link } from "@tanstack/react-router";
 
 export default function DashboardNav() {
   return (
-    <nav className="sticky top-0 flex h-16 justify-between shrink-0 items-center gap-2 transition-[width,height] ease-linear px-8 z-50 border-b border-border/50">
+    <nav className="sticky top-0 bg-background/80 glass flex h-16 justify-between shrink-0 items-center gap-2 transition-[width,height] ease-linear px-8 z-50 border-b border-border/50">
       <div className="flex gap-2 items-center">
         <SidebarTrigger className="-ml-1" />
       </div>

@@ -72,14 +72,12 @@ export default function FileCard({ file, onClick, variant = "grid" }: FileCardPr
         onClick={handleClick}
       >
         {/* Preview/Icon */}
-        <div className="aspect-square mb-3 bg-muted/20 rounded-lg flex items-center justify-center overflow-hidden">
+        <div className="aspect-square mb-3 bg-muted/20 rounded-lg flex items-center justify-center">
           {shouldShowPreview ? (
             <Image
               src={file.dataUrl}
               alt={file.name}
-              className="w-full h-full object-cover object-top"
-              width={100}
-              height={100}
+              className="w-full h-full object-cover object-top rounded-lg"
             />
           ) : (
             <FileIconComponent className={cn("size-12", iconColor)} />
@@ -122,8 +120,8 @@ export default function FileCard({ file, onClick, variant = "grid" }: FileCardPr
             src={file.dataUrl}
             alt={file.name}
             className="size-10 object-cover object-top rounded-lg"
-            width={40}
-            height={40}
+            width={200}
+            height={200}
           />
         ) : (
           <div className="p-2 bg-muted/20 rounded-lg">
