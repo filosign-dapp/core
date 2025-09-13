@@ -6,9 +6,10 @@ import Logo from "@/src/lib/components/custom/Logo"
 import DocumentsSection from "./_components/DocumentUpload"
 import RecipientsSection from "./_components/RecipientsSection"
 import MessageSection from "./_components/MessageSection"
-import { useNavigate } from "@tanstack/react-router"
+import { Link, useNavigate } from "@tanstack/react-router"
 import type { EnvelopeForm } from "../types"
 import { useStorePersist } from "@/src/lib/hooks/use-store"
+import { motion } from "motion/react"
 
 export default function CreateEnvelopePage() {
     const navigate = useNavigate();
@@ -79,7 +80,7 @@ export default function CreateEnvelopePage() {
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)}>
                     <main className="p-8 mx-auto space-y-8 max-w-4xl">
-                        <DocumentsSection 
+                        <DocumentsSection
                             control={form.control}
                             fields={documentFields}
                             append={appendDocument}
@@ -95,12 +96,26 @@ export default function CreateEnvelopePage() {
                         />
                         <MessageSection control={form.control} isOnlySigner={isOnlySigner} />
                     </main>
-                    <div className="flex justify-end p-8 pt-0 mx-auto max-w-4xl">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{
+                            type: "spring",
+                            stiffness: 230,
+                            damping: 25,
+                            delay: 0.7
+                        }}
+                        className="flex justify-end p-8 pt-0 mx-auto max-w-4xl gap-4">
+                        <Link to="/dashboard">
+                            <Button type="button" variant="ghost" size="lg" className="gap-2">
+                                Cancel
+                            </Button>
+                        </Link>
                         <Button type="submit" variant="primary" size="lg" className="gap-2">
                             Next
                             <CaretLeftIcon className="w-4 h-4 rotate-180" />
                         </Button>
-                    </div>
+                    </motion.div>
                 </form>
             </Form>
         </div>
