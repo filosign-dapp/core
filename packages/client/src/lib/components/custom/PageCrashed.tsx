@@ -65,16 +65,6 @@ export function PageCrashed({
           transition={{ delay: 0.6, duration: 0.5 }}
           className="flex flex-col gap-3 sm:flex-row sm:justify-center"
         >
-          {showRetryButton && (
-            <Button
-              variant="primary"
-              onClick={onRetry}
-              className="gap-2"
-            >
-              <ArrowClockwiseIcon className="w-4 h-4" />
-              Try Again
-            </Button>
-          )}
           {showBackButton && (
             <Button
               variant="ghost"
@@ -93,6 +83,16 @@ export function PageCrashed({
             >
               <HouseIcon className="w-4 h-4" />
               Go Home
+            </Button>
+          )}
+          {showRetryButton && (
+            <Button
+              variant="primary"
+              onClick={onRetry}
+              className="gap-2"
+            >
+              <ArrowClockwiseIcon className="w-4 h-4" />
+              Try Again
             </Button>
           )}
         </motion.div>

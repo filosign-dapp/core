@@ -9,11 +9,13 @@ import { withPageErrorBoundary } from "@/src/lib/components/errors/PageErrorBoun
 import LandingPage from "./landing";
 import { useAnalytics } from '../lib/hooks/use-analytics';
 import DocumentAllPage from './dashboard/document/all';
+import DocumentFolderPage from './dashboard/document/folder/$folderId';
 import CreateEnvelopePage from './dashboard/envelope/create/create-envelope';
 import AddSignaturePage from './dashboard/envelope/create/add-sign';
 import CreateNewSignaturePage from './dashboard/signature/create';
 import PitchPage from './pitch';  
 import FilesPage from './dashboard/files';
+import DashboardPage from './dashboard';
 
 const rootRoute = createRootRoute({
   component: () => {
@@ -46,11 +48,8 @@ const pitchRoute = createRoute({
 const dashboardRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/dashboard',
-  beforeLoad: () => {
-    throw redirect({
-      to: '/dashboard/document/all',
-      replace: true,
-    });
+  component: function Dashboard() {
+    return withPageErrorBoundary(DashboardPage)({});
   },
 })
 
@@ -59,6 +58,14 @@ const dashboardDocumentAllRoute = createRoute({
   path: '/dashboard/document/all',
   component: function DocumentAll() {
     return withPageErrorBoundary(DocumentAllPage)({});
+  },
+})
+
+const dashboardDocumentFolderRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/dashboard/document/folder/$folderId',
+  component: function DocumentFolder() {
+    return withPageErrorBoundary(DocumentFolderPage)({});
   },
 })
 
@@ -96,7 +103,7 @@ const allDocsRoute = createRoute({
 
 
 
-const routeTree = rootRoute.addChildren([indexRoute, pitchRoute, dashboardRoute, dashboardDocumentAllRoute, createEnvelopeRoute, addSignatureRoute, createSignatureRoute, allDocsRoute])
+const routeTree = rootRoute.addChildren([indexRoute, pitchRoute, dashboardRoute, dashboardDocumentAllRoute, dashboardDocumentFolderRoute, createEnvelopeRoute, addSignatureRoute, createSignatureRoute, allDocsRoute])
 const router = createRouter({
   routeTree,
 })

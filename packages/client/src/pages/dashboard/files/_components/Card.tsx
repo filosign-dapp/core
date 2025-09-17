@@ -7,9 +7,10 @@ import { Button } from "@/src/lib/components/ui/button"
 interface CardProps {
     item: FileOrFolder;
     viewMode: 'grid' | 'list';
+    onClick?: (item: FileOrFolder) => void;
 }
 
-function Card({ item, viewMode }: CardProps) {
+function Card({ item, viewMode, onClick }: CardProps) {
     const Icon = item.type === 'folder' 
         ? fileTypeIcons.folder 
         : fileTypeIcons[item.fileType || 'other'];
@@ -21,7 +22,8 @@ function Card({ item, viewMode }: CardProps) {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="flex items-center justify-between p-3 bg-card/50 hover:bg-card rounded-lg transition-colors w-full"
+                className="flex items-center justify-between p-3 bg-card/50 hover:bg-card rounded-lg transition-colors w-full cursor-pointer"
+                onClick={() => onClick?.(item)}
             >
                 <div className="flex items-center gap-4">
                     <Icon className="size-6 text-muted-foreground" />
@@ -44,6 +46,7 @@ function Card({ item, viewMode }: CardProps) {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
             className="group/card rounded-lg border bg-card/30 hover:bg-card/90 hover:border-primary/20 transition-all cursor-pointer flex flex-col"
+            onClick={() => onClick?.(item)}
         >
             <div className="p-4 flex-grow">
                 <div className="flex items-center justify-between mb-4">

@@ -1,14 +1,17 @@
 import { useState, useMemo } from "react";
 import DashboardLayout from "../layout";
-import { initialFilesAndFolders } from "./_components/data";
+import { initialFilesAndFolders, type FileOrFolder } from "./_components/data";
 import Header from "./_components/Header";
 import Card from "./_components/Card";
 import { AnimatePresence, motion } from "framer-motion";
+import { FileViewer } from "@/src/lib/components/custom/FileViewer";
 
 export default function DashboardPage() {
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [searchQuery, setSearchQuery] = useState('');
     const [sortCriteria, setSortCriteria] = useState('name');
+    const [viewerOpen, setViewerOpen] = useState(false);
+    const [selectedFileId, setSelectedFileId] = useState<string | null>(null);
 
     const filteredAndSortedItems = useMemo(() => {
         return initialFilesAndFolders
@@ -26,6 +29,14 @@ export default function DashboardPage() {
 
     const folders = filteredAndSortedItems.filter(item => item.type === 'folder');
     const files = filteredAndSortedItems.filter(item => item.type === 'file');
+
+    const handleItemClick = (item: FileOrFolder) => {
+        if (item.type === 'file') {
+            setSelectedFileId(item.id);
+            setViewerOpen(true);
+        }
+        // For folders, we could navigate to a folder view, but for now we'll just ignore
+    };
 
     return (
         <DashboardLayout>
@@ -49,7 +60,7 @@ export default function DashboardPage() {
                             >
                                 <h2 className="text-xl font-bold mb-4">Folders</h2>
                                 <div className={`grid ${viewMode === 'grid' ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5' : 'grid-cols-1'} gap-4`}>
-                                    {folders.map(item => <Card key={item.id} item={item} viewMode={viewMode} />)}
+                                    {folders.map(item => <Card key={item.id} item={item} viewMode={viewMode} onClick={handleItemClick} />)}
                                 </div>
                             </motion.section>
                         )}
@@ -63,13 +74,18 @@ export default function DashboardPage() {
                             >
                                 <h2 className="text-xl font-bold mb-4">Files</h2>
                                 <div className={`grid ${viewMode === 'grid' ? 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5' : 'grid-cols-1'} gap-4`}>
-                                    {files.map(item => <Card key={item.id} item={item} viewMode={viewMode} />)}
+                                    {files.map(item => <Card key={item.id} item={item} viewMode={viewMode} onClick={handleItemClick} />)}
                                 </div>
                             </motion.section>
                         )}
                     </AnimatePresence>
                 </motion.div>
             </div>
+            <FileViewer
+                open={viewerOpen}
+                onOpenChange={setViewerOpen}
+                fileId={selectedFileId || ''}
+            />
         </DashboardLayout>
     );
 }

@@ -6,27 +6,29 @@ import {
   FileTextIcon,
   MagnifyingGlassIcon,
   FunnelIcon,
-  PlusIcon,
   GridFourIcon,
   ListIcon,
+  ArrowLeftIcon,
+  CaretLeftIcon,
 } from "@phosphor-icons/react"
 import { motion } from "motion/react"
 import DashboardLayout from "../../layout"
-import { Link, useNavigate } from "@tanstack/react-router"
+import { Link, useParams } from "@tanstack/react-router"
 import { useState } from "react"
-import { getRootItems } from "./mock"
-import FolderCard from "./_components/FolderCard"
-import FileCard from "./_components/FileCard"
+import { getFilesInFolder, getFolderById } from "../all/mock"
+import FileCard from "../all/_components/FileCard"
 import { FileViewer } from "@/src/lib/components/custom/FileViewer"
-import type { MockFolder, MockFile } from "./mock"
+import type { MockFile } from "../all/mock"
 
-export default function DocumentAllPage() {
-  const navigate = useNavigate()
+export default function DocumentFolderPage() {
+  const { folderId } = useParams({ from: '/dashboard/document/folder/$folderId' })
   const [viewMode, setViewMode] = useState<"list" | "grid">("grid")
   const [isViewSwitching, setIsViewSwitching] = useState(false)
   const [viewerOpen, setViewerOpen] = useState(false)
   const [selectedFileId, setSelectedFileId] = useState<string | null>(null)
-  const items = getRootItems()
+
+  const folder = getFolderById(folderId!)
+  const files = getFilesInFolder(folderId!)
 
   const handleViewModeChange = (newViewMode: "list" | "grid") => {
     if (newViewMode !== viewMode) {
@@ -39,22 +41,31 @@ export default function DocumentAllPage() {
     }
   }
 
-  const handleItemClick = (item: MockFolder | MockFile) => {
-    if ('documentCount' in item) {
-      // It's a folder, navigate to folder page
-      navigate({ to: '/dashboard/document/folder/$folderId', params: { folderId: item.id } })
-    } else {
-      // It's a file, open file viewer
-      setSelectedFileId(item.id)
-      setViewerOpen(true)
-    }
+  const handleFileClick = (file: MockFile) => {
+    setSelectedFileId(file.id)
+    setViewerOpen(true)
+  }
+
+  if (!folder) {
+    return (
+      <DashboardLayout>
+        <div className="flex flex-col h-full rounded-tl-2xl bg-background @container">
+          <div className="flex flex-1 flex-col items-center justify-center">
+            <h2 className="text-lg font-medium text-foreground">Folder not found</h2>
+            <Link to="/dashboard/document/all">
+              <Button variant="outline" className="mt-4">
+                Back to All Documents
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </DashboardLayout>
+    )
   }
 
   return (
     <DashboardLayout>
       <div className="flex flex-col h-full rounded-tl-2xl bg-background @container">
-
-
         {/* Main Content */}
         <div className="flex flex-1 flex-col">
           {/* Header with view mode toggle */}
@@ -65,8 +76,14 @@ export default function DocumentAllPage() {
             transition={{ duration: 0.2, delay: 0.2 }}
           >
             <div className="flex items-center gap-4">
+              <Link to="/dashboard/document/all">
+                <Button variant="ghost" size="sm" className="gap-2">
+                  <CaretLeftIcon className="size-4" />
+                  Back
+                </Button>
+              </Link>
               <h2 className="text-lg font-medium text-foreground">
-                All Documents ({items.length})
+                {folder.name} ({files.length} files)
               </h2>
             </div>
 
@@ -81,7 +98,7 @@ export default function DocumentAllPage() {
                   <div className="relative">
                     <MagnifyingGlassIcon className="absolute transform -translate-y-1/2 left-3 top-1/2 size-4 text-muted-foreground" />
                     <Input
-                      placeholder="Search documents..."
+                      placeholder="Search files..."
                       className="w-64 pl-10"
                       size="sm"
                     />
@@ -89,12 +106,13 @@ export default function DocumentAllPage() {
 
                   <Select>
                     <SelectTrigger className="w-full min-w-40" size="sm">
-                      <SelectValue placeholder="Sender: All" />
+                      <SelectValue placeholder="Type: All" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All</SelectItem>
-                      <SelectItem value="me">Me</SelectItem>
-                      <SelectItem value="others">Others</SelectItem>
+                      <SelectItem value="all">All Types</SelectItem>
+                      <SelectItem value="pdf">PDF</SelectItem>
+                      <SelectItem value="image">Images</SelectItem>
+                      <SelectItem value="text">Text Files</SelectItem>
                     </SelectContent>
                   </Select>
 
@@ -127,12 +145,13 @@ export default function DocumentAllPage() {
 
                         <Select>
                           <SelectTrigger className="w-full" size="sm">
-                            <SelectValue placeholder="Sender: All" />
+                            <SelectValue placeholder="Type: All" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="all">All</SelectItem>
-                            <SelectItem value="me">Me</SelectItem>
-                            <SelectItem value="others">Others</SelectItem>
+                            <SelectItem value="all">All Types</SelectItem>
+                            <SelectItem value="pdf">PDF</SelectItem>
+                            <SelectItem value="image">Images</SelectItem>
+                            <SelectItem value="text">Text Files</SelectItem>
                           </SelectContent>
                         </Select>
 
@@ -183,7 +202,7 @@ export default function DocumentAllPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.2, delay: 0.3 }}
           >
-            {items.length === 0 ? (
+            {files.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -194,91 +213,46 @@ export default function DocumentAllPage() {
                   <div className="size-40 mx-auto mb-6">
                     <FileTextIcon className="size-full text-muted-foreground/50" weight="light" />
                   </div>
-                  <h2 className="font-semibold text-foreground">No documents</h2>
+                  <h2 className="font-semibold text-foreground">No files in this folder</h2>
                   <p className="max-w-md px-4 text-muted-foreground">
-                    You have not yet created or received any documents. Get started by creating a new envelope.
+                    This folder is empty. Upload some documents to get started.
                   </p>
-                  <Link to="/dashboard/envelope/create">
-                    <Button variant="primary" className="gap-2">
-                      <PlusIcon className="size-4" weight="bold" />
-                      Create New Envelope
-                    </Button>
-                  </Link>
                 </motion.div>
               </div>
             ) : (
-              <>
-                {/* Folders Section */}
-                {(() => {
-                  const folders = items.filter(item => 'documentCount' in item) as MockFolder[]
-                  const files = items.filter(item => !('documentCount' in item)) as MockFile[]
-
-                  return (
-                    <>
-                      {/* Folders */}
-                      {folders.length > 0 && (
-                        <motion.div
-                          className="space-y-4"
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.2, delay: 0.4 }}
-                        >
-                          <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-                            Folders ({folders.length})
-                          </h3>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
-                            {folders.map((folder) => (
-                              <FolderCard
-                                key={`folder-${folder.id}`}
-                                folder={folder}
-                                onClick={handleItemClick}
-                                variant="grid"
-                              />
-                            ))}
-                          </div>
-                        </motion.div>
-                      )}
-
-                      {/* Files Section */}
-                      {files.length > 0 && (
-                        <motion.div
-                          className="space-y-4"
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.2, delay: 0.5 }}
-                        >
-                          <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-                            Files ({files.length})
-                          </h3>
-                          {viewMode === "list" ? (
-                            <div className="space-y-2">
-                              {files.map((file) => (
-                                <FileCard
-                                  key={`file-${file.id}`}
-                                  file={file}
-                                  onClick={handleItemClick}
-                                  variant="list"
-                                />
-                              ))}
-                            </div>
-                          ) : (
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-                              {files.map((file) => (
-                                <FileCard
-                                  key={`file-${file.id}`}
-                                  file={file}
-                                  onClick={handleItemClick}
-                                  variant="grid"
-                                />
-                              ))}
-                            </div>
-                          )}
-                        </motion.div>
-                      )}
-                    </>
-                  )
-                })()}
-              </>
+              <motion.div
+                className="space-y-4"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2, delay: 0.4 }}
+              >
+                <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+                  Files ({files.length})
+                </h3>
+                {viewMode === "list" ? (
+                  <div className="space-y-2">
+                    {files.map((file) => (
+                      <FileCard
+                        key={`file-${file.id}`}
+                        file={file}
+                        onClick={handleFileClick}
+                        variant="list"
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                    {files.map((file) => (
+                      <FileCard
+                        key={`file-${file.id}`}
+                        file={file}
+                        onClick={handleFileClick}
+                        variant="grid"
+                      />
+                    ))}
+                  </div>
+                )}
+              </motion.div>
             )}
           </motion.div>
         </div>

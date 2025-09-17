@@ -6,7 +6,7 @@
 :root {
   --background: hsl(90,55%,98%);
   --foreground: hsl(210, 6%, 13%);
-  --card: hsl(0, 0%, 96%);
+  --card: hsl(90,55%,98%);
   --card-foreground: hsl(210, 6%, 13%);
   --popover: hsl(75, 20%, 99%);
   --popover-foreground: hsl(210, 6%, 13%);
