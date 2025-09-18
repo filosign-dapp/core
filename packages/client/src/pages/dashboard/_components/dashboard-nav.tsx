@@ -1,6 +1,9 @@
 import { SidebarTrigger } from "@/src/lib/components/ui/sidebar";
 import { UserDropdown } from "./user-dropdown";
 import Logo from "@/src/lib/components/custom/Logo";
+import { Link } from "@tanstack/react-router";
+import { Button } from "@/src/lib/components/ui/button";
+import { FileTextIcon, PlusIcon } from "@phosphor-icons/react";
 
 export default function DashboardNav() {
   return (
@@ -11,6 +14,12 @@ export default function DashboardNav() {
       </div>
 
       <div className="flex gap-4 items-center">
+        <Link to="/dashboard/envelope/create">
+          <Button variant="primary" className="gap-2">
+            <PlusIcon className="size-4" weight="bold" />
+            <p className="hidden sm:inline">New Envelope</p>
+          </Button>
+        </Link>
         <UserDropdown />
         <SidebarTrigger className="-ml-1 md:hidden" />
       </div>

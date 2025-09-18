@@ -114,8 +114,8 @@ export default function DocumentAllPage() {
                 <div className="@5xl:hidden">
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button variant="outline">
-                        <FunnelIcon className="size-5" />
+                      <Button variant="outline" size="sm" className="size-8 p-0">
+                        <FunnelIcon className="size-4" />
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="mt-2 w-80" align="end">

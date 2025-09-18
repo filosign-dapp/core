@@ -1,7 +1,6 @@
 import * as React from "react"
 
 import { NavMain } from "@/src/pages/dashboard/_components/sidebar/nav-main"
-import { TeamSwitcher } from "@/src/pages/dashboard/_components/sidebar/team-switcher"
 import { sidebarData } from "@/src/pages/dashboard/_components/sidebar/mock"
 import {
   Sidebar,
@@ -32,12 +31,9 @@ export function DashboardSidebar({ className, ...props }: React.ComponentProps<t
             }}
           />
         </SidebarHeader>
-        <SidebarContent>
+        <SidebarContent className="mt-4">
           <NavMain items={sidebarData.navMain} />
         </SidebarContent>
-        <SidebarFooter>
-          <TeamSwitcher orgs={sidebarData.orgs} />
-        </SidebarFooter>
         <SidebarRail />
       </Sidebar>
     </>

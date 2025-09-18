@@ -43,7 +43,7 @@ export function UserDropdown() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className="w-64 rounded-lg"
+        className="w-64 rounded-lg mt-1"
         align="end"
         side="bottom"
       >
@@ -52,11 +52,11 @@ export function UserDropdown() {
           Profile
         </DropdownMenuLabel>
         <motion.div
-          initial={{ opacity: 0, y: -10 }}
+          initial={{ opacity: 0, y: -5 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{
             type: "spring",
-            stiffness: 300,
+            stiffness: 500,
             damping: 20,
             delay: 0.05
           }}
@@ -91,11 +91,11 @@ export function UserDropdown() {
         ].map((item, index) => (
           <motion.div
             key={item.label}
-            initial={{ opacity: 0, y: -10 }}
+            initial={{ opacity: 0, y: -5 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{
               type: "spring",
-              stiffness: 300,
+              stiffness: 500,
               damping: 20,
               delay: 0.1 + index * 0.03
             }}
@@ -116,11 +116,11 @@ export function UserDropdown() {
 
         {/* Sign Out */}
         <motion.div
-          initial={{ opacity: 0, y: -10 }}
+          initial={{ opacity: 0, y: -5 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{
             type: "spring",
-            stiffness: 300,
+            stiffness: 500,
             damping: 20,
             delay: 0.2
           }}

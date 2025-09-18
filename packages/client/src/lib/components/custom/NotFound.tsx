@@ -20,7 +20,7 @@ export function NotFound({
   onHome,
 }: NotFoundProps) {
   return (
-    <div className="flex flex-col flex-1 gap-4 justify-center items-center px-4 text-center">
+    <div className="flex flex-col flex-1 gap-4 justify-center items-center px-4 text-center h-screen w-screen">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -37,14 +37,6 @@ export function NotFound({
           <div className="mx-auto flex h-32 w-32 items-center justify-center rounded-full bg-muted/20">
             <MagnifyingGlassIcon className="h-16 w-16 text-muted-foreground" />
           </div>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.8, duration: 0.3 }}
-            className="absolute -top-2 -right-2 flex h-8 w-8 items-center justify-center rounded-full bg-destructive/10"
-          >
-            <span className="text-xs font-bold text-destructive">?</span>
-          </motion.div>
         </motion.div>
 
         {/* Content */}
@@ -57,7 +49,7 @@ export function NotFound({
           <h1 className="text-4xl font-bold tracking-tight text-foreground">
             {title}
           </h1>
-          <p className="text-lg text-muted-foreground">
+          <p className="text-sm sm:text-lg text-muted-foreground">
             {description}
           </p>
         </motion.div>
@@ -71,8 +63,7 @@ export function NotFound({
         >
           {showBackButton && (
             <Button
-              variant="secondary"
-              onClick={onBack}
+              variant="primary"
               className="gap-2"
             >
               <CaretLeftIcon className="h-4 w-4" />
@@ -81,7 +72,6 @@ export function NotFound({
           )}
           {showHomeButton && (
             <Button
-              onClick={onHome}
               className="gap-2"
             >
               <HouseIcon className="h-4 w-4" />

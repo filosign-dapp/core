@@ -16,6 +16,7 @@ import CreateNewSignaturePage from './dashboard/signature/create';
 import PitchPage from './pitch';  
 import FilesPage from './dashboard/files';
 import DashboardPage from './dashboard';
+import { NotFound } from '../lib/components/custom/NotFound';
 
 const rootRoute = createRootRoute({
   component: () => {
@@ -101,9 +102,15 @@ const allDocsRoute = createRoute({
   },
 })
 
+const notFoundRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '$',
+  component: function NotFoundPage() {
+    return <NotFound />;
+  },
+})
 
-
-const routeTree = rootRoute.addChildren([indexRoute, pitchRoute, dashboardRoute, dashboardDocumentAllRoute, dashboardDocumentFolderRoute, createEnvelopeRoute, addSignatureRoute, createSignatureRoute, allDocsRoute])
+const routeTree = rootRoute.addChildren([indexRoute, pitchRoute, dashboardRoute, dashboardDocumentAllRoute, dashboardDocumentFolderRoute, createEnvelopeRoute, addSignatureRoute, createSignatureRoute, allDocsRoute, notFoundRoute])
 const router = createRouter({
   routeTree,
 })

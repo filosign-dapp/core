@@ -1,17 +1,11 @@
 import DashboardLayout from "./layout"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/lib/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/src/lib/components/ui/avatar"
 import { Badge } from "@/src/lib/components/ui/badge"
 import { Button } from "@/src/lib/components/ui/button"
 import {
   FileTextIcon,
   SignatureIcon,
   CalendarIcon,
-  DotsThreeIcon,
-  CaretRightIcon,
-  CheckCircleIcon,
-  ClockIcon,
-  TriangleIcon,
 } from "@phosphor-icons/react"
 import { motion } from "motion/react"
 import { Link } from "@tanstack/react-router"
@@ -43,40 +37,10 @@ const statsCards = [
   }
 ]
 
-const recentActivity = [
-  {
-    id: 1,
-    type: "signed",
-    title: "Service Agreement - Acme Corp",
-    assignee: { name: "Sarah Chen", avatar: undefined, initials: "SC" },
-    dueDate: "Jan 15, 2025",
-    priority: "completed",
-    value: "$12,450"
-  },
-  {
-    id: 2,
-    type: "pending",
-    title: "NDA - TechStart Inc",
-    assignee: { name: "David Kim", avatar: undefined, initials: "DK" },
-    dueDate: "Jan 18, 2025",
-    priority: "urgent",
-    value: "$8,200"
-  },
-  {
-    id: 3,
-    type: "review",
-    title: "Partnership Agreement",
-    assignee: { name: "Alex Rivera", avatar: undefined, initials: "AR" },
-    dueDate: "Jan 20, 2025",
-    priority: "normal",
-    value: "$25,000"
-  }
-]
-
 export default function DashboardPage() {
   return (
     <DashboardLayout>
-      <div className="flex flex-col h-full rounded-tl-2xl bg-background">
+      <div className="flex flex-col h-full rounded-tl-2xl bg-background @container">
         {/* Header */}
         <motion.div
           className="flex items-center justify-between px-8 py-6 border-b border-border"
@@ -88,33 +52,27 @@ export default function DashboardPage() {
             <h1 className="text-2xl font-semibold">Dashboard</h1>
             <p className="text-muted-foreground">Overview of your document signing activity</p>
           </div>
-          <Link to="/dashboard/envelope/create">
-            <Button variant="primary" className="gap-2">
-              <FileTextIcon className="size-4" weight="bold" />
-              New Envelope
-            </Button>
-          </Link>
         </motion.div>
 
         <div className="flex-1 p-8 space-y-8">
           {/* Stats Cards */}
           <motion.div
-            className="grid grid-cols-1 md:grid-cols-3 gap-6"
+            className="grid grid-cols-1 @3xl:grid-cols-3 gap-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.2 }}
           >
-            {statsCards.map((stat, index) => (
+            {statsCards.map((stat) => (
               <Card key={stat.title}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardDescription className="text-sm font-medium">
+                  <CardDescription className="text-sm font-medium flex items-center gap-2">
+                    <stat.icon className={`size-6 ${stat.color}`} weight="duotone" />
                     {stat.title}
                   </CardDescription>
-                  <stat.icon className={`size-8 ${stat.color}`} weight="duotone" />
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">{stat.value}</div>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <div className="flex flex-col mt-3 text-xs text-muted-foreground">
                     <span className={stat.trend.startsWith('+') ? 'text-primary' : 'text-destructive'}>
                       {stat.trend}
                     </span>
@@ -125,7 +83,7 @@ export default function DashboardPage() {
             ))}
           </motion.div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 @3xl:grid-cols-2 gap-8">
             {/* Document Status Overview */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -139,7 +97,7 @@ export default function DashboardPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="p-4 bg-primary/5 rounded-lg text-center">
+                    <div className="p-4 bg-secondary/50 rounded-lg text-center">
                       <div className="text-2xl font-bold text-primary">18</div>
                       <div className="text-sm text-muted-foreground">Awaiting Signatures</div>
                     </div>
@@ -189,7 +147,7 @@ export default function DashboardPage() {
                   <CardTitle className="text-lg">Wallet</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="p-4 bg-primary/5 rounded-lg">
+                  <div className="p-4 bg-secondary/50 rounded-lg">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium">FIL Balance</span>
                       <Badge variant="secondary" className="text-xs">Active</Badge>
@@ -221,64 +179,6 @@ export default function DashboardPage() {
               </Card>
             </motion.div>
           </div>
-
-          {/* Recent Activity */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.5 }}
-          >
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle>Recent Activity</CardTitle>
-                  <CardDescription>Latest document signing requests and updates</CardDescription>
-                </div>
-                <Button variant="ghost" size="sm" className="gap-2">
-                  View All
-                  <CaretRightIcon className="size-4" />
-                </Button>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {recentActivity.map((item) => (
-                    <div key={item.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/20 transition-colors">
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2">
-                          {item.type === "signed" && <CheckCircleIcon className="size-6 text-primary" weight="fill" />}
-                          {item.type === "pending" && <ClockIcon className="size-6 text-secondary-dark" weight="fill" />}
-                          {item.type === "review" && <TriangleIcon className="size-6 text-primary-medium" weight="fill" />}
-                        </div>
-
-                        <div>
-                          <p className="font-medium">{item.title}</p>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Avatar className="size-4">
-                              <AvatarImage src={item.assignee.avatar} />
-                              <AvatarFallback className="text-xs">{item.assignee.initials}</AvatarFallback>
-                            </Avatar>
-                            <span>{item.assignee.name}</span>
-                            <span>•</span>
-                            <span>{item.dueDate}</span>
-                            {item.priority === "urgent" && (
-                              <Badge variant="destructive" className="text-xs">Urgent</Badge>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="text-right">
-                        <p className="font-semibold">{item.value}</p>
-                        <Button variant="ghost" size="sm">
-                          <DotsThreeIcon className="size-5" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
         </div>
       </div>
     </DashboardLayout>

@@ -46,7 +46,7 @@ export const sidebarData = {
           url: "/dashboard/document/all",
         },
         {
-          title: "Draft Contracts",
+          title: "All Drafts",
           url: "#",
         },
         {
@@ -54,34 +54,11 @@ export const sidebarData = {
           url: "#",
         },
         {
-          title: "Signed & Verified",
+          title: "Signed Documents",
           url: "#",
         },
         {
           title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Templates",
-      url: "#",
-      icon: FileIcon,
-      items: [
-        {
-          title: "Contract Templates",
-          url: "#",
-        },
-        {
-          title: "Legal Forms",
-          url: "#",
-        },
-        {
-          title: "NDA Templates",
-          url: "#",
-        },
-        {
-          title: "Create Template",
           url: "#",
         },
       ],
@@ -92,42 +69,11 @@ export const sidebarData = {
       icon: SignatureIcon,
       items: [
         {
-          title: "Digital Signatures",
-          url: "#",
-        },
-        {
           title: "Create Signature",
-          url: "#",
-        },
-        {
-          title: "Initials",
-          url: "#",
+          url: "/dashboard/signature/create",
         },
         {
           title: "Signature History",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Team",
-      url: "#",
-      icon: UsersIcon,
-      items: [
-        {
-          title: "Team Members",
-          url: "#",
-        },
-        {
-          title: "Client Access",
-          url: "#",
-        },
-        {
-          title: "Signing Permissions",
-          url: "#",
-        },
-        {
-          title: "Audit Trail",
           url: "#",
         },
       ],
@@ -138,15 +84,11 @@ export const sidebarData = {
       icon: ChartBarIcon,
       items: [
         {
-          title: "Dashboard",
-          url: "#",
+          title: "Overview",
+          url: "/dashboard",
         },
         {
-          title: "Signing Analytics",
-          url: "#",
-        },
-        {
-          title: "Document Metrics",
+          title: "Profile Metrics",
           url: "#",
         },
         {
@@ -162,7 +104,7 @@ export const sidebarData = {
       items: [
         {
           title: "Profile",
-          url: "#",
+          url: "/dashboard/settings/profile",
         },
         {
           title: "Security & Keys",
