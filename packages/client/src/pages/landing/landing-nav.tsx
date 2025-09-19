@@ -1,6 +1,5 @@
 import Logo from "@/src/lib/components/custom/Logo";
 import { Button } from "@/src/lib/components/ui/button";
-import { LightningIcon, ListIcon, XIcon } from "@phosphor-icons/react";
 import { usePrivy } from "@privy-io/react-auth";
 import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";

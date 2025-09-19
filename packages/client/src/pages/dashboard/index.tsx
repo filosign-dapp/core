@@ -60,9 +60,9 @@ export default function DashboardPage() {
             <h4 className="font-semibold mb-1">No signature?</h4>
             <p className="text-muted-foreground">Create your signature to start signing documents</p>
           </div>
-          <Button variant="primary" asChild>
+          <Button variant="primary" asChild className="group">
             <Link to="/dashboard/signature/create">
-              <PlusIcon className="size-4" />
+              <PlusIcon weight="bold" className="group-hover:rotate-90 transition-transform duration-200" />
               Create New Signature
             </Link>
           </Button>

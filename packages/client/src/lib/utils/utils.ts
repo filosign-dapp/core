@@ -9,3 +9,8 @@ export function truncateText(text: string, length: number = 20) {
   if (text.length <= length) return text;
   return `${text.slice(0, length)}...`;
 }
+
+export function truncateAddress(address: string | undefined) {
+  if (!address) return "";
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+}

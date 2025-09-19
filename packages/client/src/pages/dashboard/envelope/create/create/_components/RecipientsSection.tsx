@@ -128,7 +128,7 @@ export default function RecipientsSection({
                             {fields.map((field, index) => (
                                 <motion.div
                                     key={field.id}
-                                    className="bg-muted/5 border border-border rounded-lg p-6 space-y-6"
+                                    className="bg-card rounded-lg p-6 space-y-6"
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{

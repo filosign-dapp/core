@@ -9,12 +9,13 @@ import LandingPage from "./landing";
 import { useAnalytics } from '../lib/hooks/use-analytics';
 import DocumentAllPage from './dashboard/document/all';
 import DocumentFolderPage from './dashboard/document/folder/$folderId';
-import CreateEnvelopePage from './dashboard/envelope/create/create-envelope';
+import CreateEnvelopePage from './dashboard/envelope/create/create';
 import AddSignaturePage from './dashboard/envelope/create/add-sign';
 import CreateNewSignaturePage from './dashboard/signature/create';
-import PitchPage from './pitch';  
+import PitchPage from './pitch';
 import FilesPage from './dashboard/files';
 import DashboardPage from './dashboard';
+import ProfilePage from './dashboard/profile';
 import { NotFound } from '../lib/components/custom/NotFound';
 
 const rootRoute = createRootRoute({
@@ -50,6 +51,14 @@ const dashboardRoute = createRoute({
   path: '/dashboard',
   component: function Dashboard() {
     return withPageErrorBoundary(DashboardPage)({});
+  },
+})
+
+const profileRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/dashboard/settings/profile',
+  component: function Profile() {
+    return withPageErrorBoundary(ProfilePage)({});
   },
 })
 
@@ -109,7 +118,7 @@ const notFoundRoute = createRoute({
   },
 })
 
-const routeTree = rootRoute.addChildren([indexRoute, pitchRoute, dashboardRoute, dashboardDocumentAllRoute, dashboardDocumentFolderRoute, createEnvelopeRoute, addSignatureRoute, createSignatureRoute, allDocsRoute, notFoundRoute])
+const routeTree = rootRoute.addChildren([indexRoute, pitchRoute, dashboardRoute, profileRoute, dashboardDocumentAllRoute, dashboardDocumentFolderRoute, createEnvelopeRoute, addSignatureRoute, createSignatureRoute, allDocsRoute, notFoundRoute])
 const router = createRouter({
   routeTree,
 })

@@ -15,8 +15,8 @@ export default function DashboardNav() {
 
       <div className="flex gap-4 items-center">
         <Link to="/dashboard/envelope/create">
-          <Button variant="primary" className="gap-2">
-            <PlusIcon className="size-4" weight="bold" />
+          <Button variant="primary" className="gap-2 group">
+            <PlusIcon weight="bold" className="group-hover:rotate-90 transition-transform duration-200" />
             <p className="hidden sm:inline">New Envelope</p>
           </Button>
         </Link>

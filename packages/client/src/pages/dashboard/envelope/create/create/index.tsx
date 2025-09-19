@@ -106,14 +106,14 @@ export default function CreateEnvelopePage() {
                             delay: 0.7
                         }}
                         className="flex justify-end p-8 pt-0 mx-auto max-w-4xl gap-4">
-                        <Link to="/dashboard">
-                            <Button type="button" variant="ghost" size="lg" className="gap-2">
-                                Cancel
-                            </Button>
-                        </Link>
-                        <Button type="submit" variant="primary" size="lg" className="gap-2">
-                            Next
-                            <CaretLeftIcon className="w-4 h-4 rotate-180" />
+                        <Button type="button" variant="ghost" size="lg" className="gap-2" asChild>
+                            <Link to="/dashboard">
+                                Back
+                            </Link>
+                        </Button>
+                        <Button type="submit" variant="primary" size="lg" className="gap-2 group transition-all duration-200">
+                            Next Step
+                            <CaretLeftIcon className="w-4 h-4 rotate-180 group-hover:translate-x-1 transition-transform duration-200" />
                         </Button>
                     </motion.div>
                 </form>
