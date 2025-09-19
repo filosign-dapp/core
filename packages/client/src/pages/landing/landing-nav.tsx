@@ -106,8 +106,8 @@ export default function LandingNavbar() {
         >
           {ready && authenticated ? (
             <Button variant="secondary" asChild>
-              <Link to="/dashboard">
-                Dashboard
+              <Link to="/onboarding">
+                Get started
               </Link>
             </Button>
           ) : (

@@ -23,7 +23,7 @@ export default function WaitlistSection() {
   };
 
   return (
-    <section ref={waitlistRef} className="sm:max-w-[80dvw] mx-auto min-h-screen flex items-center justify-center p-8 md:p-page">
+    <section ref={waitlistRef} className="lg:max-w-[80dvw] mx-auto min-h-screen flex items-center justify-center p-8 md:p-page">
       <AnimatePresence mode="wait">
         {!isSubmitted ? (
           <motion.div

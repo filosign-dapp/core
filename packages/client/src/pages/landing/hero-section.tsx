@@ -7,7 +7,7 @@ import { Image } from "@/src/lib/components/custom/Image";
 
 export default function HeroSection() {
   return (
-    <section className="sm:max-w-[80dvw] mx-auto flex flex-col gap-6 md:gap-8 py-12 p-8 md:p-page">
+    <section className="lg:max-w-[80dvw] mx-auto flex flex-col gap-6 md:gap-8 py-12 p-8 md:p-page">
       {/* Text Content Group */}
       <motion.div
         className="flex flex-col gap-4"

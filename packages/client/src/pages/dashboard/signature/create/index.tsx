@@ -10,11 +10,12 @@ import { Image } from "@/src/lib/components/custom/Image"
 import SignatureUpload from "./_components/SignatureUpload"
 import SignatureDraw from "./_components/SignatureDraw"
 import SignatureChoose from "./_components/SignatureChoose"
-import { Link } from "@tanstack/react-router"
+import { Link, useNavigate } from "@tanstack/react-router"
 
-export default function CreateNewSignaturePage() {
-    const [fullName, setFullName] = useState("Kartikay Tiwari")
-    const [initials, setInitials] = useState("KT")
+export default function CreateNewSignaturePage({ onboarding }: { onboarding?: boolean }) {
+    const [fullName, setFullName] = useState("John Doe")
+    const [initials, setInitials] = useState("JD")
+    const navigate = useNavigate()
 
     // Tab state
     const [activeTab, setActiveTab] = useState("choose")
@@ -34,12 +35,18 @@ export default function CreateNewSignaturePage() {
     const handleSignatureSave = (data: string) => {
         setSignatureData(data)
         setIsSignatureDialogOpen(false)
+        if (onboarding) {
+            navigate({ to: '/onboarding/welcome' })
+        }
     }
 
     // Handle initials save
     const handleInitialsSave = (data: string) => {
         setInitialsData(data)
         setIsInitialsDialogOpen(false)
+        if (onboarding) {
+            navigate({ to: '/onboarding/welcome' })
+        }
     }
 
     // Handle clear signature
@@ -62,10 +69,16 @@ export default function CreateNewSignaturePage() {
     // Handle file uploads
     const handleSignatureUpload = (data: string) => {
         setSignatureData(data)
+        if (onboarding) {
+            navigate({ to: '/onboarding/welcome' })
+        }
     }
 
     const handleInitialsUpload = (data: string) => {
         setInitialsData(data)
+        if (onboarding) {
+            navigate({ to: '/onboarding/welcome' })
+        }
     }
 
     // Handle create signature
@@ -77,6 +90,9 @@ export default function CreateNewSignaturePage() {
         console.log('Initials:', initials)
 
         // For now, just log the data - you can implement saving logic here
+        if (onboarding) {
+            navigate({ to: '/onboarding/welcome' })
+        }
     }
 
     const handleTabChange = (value: string) => {

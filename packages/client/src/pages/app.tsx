@@ -16,6 +16,10 @@ import PitchPage from './pitch';
 import FilesPage from './dashboard/files';
 import DashboardPage from './dashboard';
 import ProfilePage from './dashboard/profile';
+import OnboardingWelcomePage from './onboarding';
+import OnboardingSetPinPage from './onboarding/set-pin';
+import OnboardingCreateSignaturePage from './onboarding/create-signature';
+import OnboardingWelcomeCompletePage from './onboarding/welcome';
 import { NotFound } from '../lib/components/custom/NotFound';
 
 const rootRoute = createRootRoute({
@@ -110,6 +114,39 @@ const allDocsRoute = createRoute({
   },
 })
 
+// Onboarding Routes
+const onboardingWelcomeRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/onboarding',
+  component: function OnboardingWelcome() {
+    return withPageErrorBoundary(OnboardingWelcomePage)({});
+  },
+})
+
+const onboardingSetPinRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/onboarding/set-pin',
+  component: function OnboardingSetPin() {
+    return withPageErrorBoundary(OnboardingSetPinPage)({});
+  },
+})
+
+const onboardingCreateSignatureRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/onboarding/create-signature',
+  component: function OnboardingCreateSignature() {
+    return withPageErrorBoundary(OnboardingCreateSignaturePage)({});
+  },
+})
+
+const onboardingWelcomeCompleteRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/onboarding/welcome',
+  component: function OnboardingWelcomeComplete() {
+    return withPageErrorBoundary(OnboardingWelcomeCompletePage)({});
+  },
+})
+
 const notFoundRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '$',
@@ -118,7 +155,7 @@ const notFoundRoute = createRoute({
   },
 })
 
-const routeTree = rootRoute.addChildren([indexRoute, pitchRoute, dashboardRoute, profileRoute, dashboardDocumentAllRoute, dashboardDocumentFolderRoute, createEnvelopeRoute, addSignatureRoute, createSignatureRoute, allDocsRoute, notFoundRoute])
+const routeTree = rootRoute.addChildren([indexRoute, pitchRoute, dashboardRoute, profileRoute, dashboardDocumentAllRoute, dashboardDocumentFolderRoute, createEnvelopeRoute, addSignatureRoute, createSignatureRoute, allDocsRoute, onboardingWelcomeRoute, onboardingSetPinRoute, onboardingCreateSignatureRoute, onboardingWelcomeCompleteRoute, notFoundRoute])
 const router = createRouter({
   routeTree,
 })
