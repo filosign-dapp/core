@@ -97,11 +97,11 @@ export default function DashboardPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="p-4 bg-secondary/50 rounded-lg text-center">
+                    <div className="p-4 bg-muted/20 rounded-lg text-center">
                       <div className="text-2xl font-bold text-primary">18</div>
                       <div className="text-sm text-muted-foreground">Awaiting Signatures</div>
                     </div>
-                    <div className="p-4 bg-secondary/5 rounded-lg text-center">
+                    <div className="p-4 bg-muted/20 rounded-lg text-center">
                       <div className="text-2xl font-bold text-secondary-dark">7</div>
                       <div className="text-sm text-muted-foreground">Under Review</div>
                     </div>
@@ -147,10 +147,10 @@ export default function DashboardPage() {
                   <CardTitle className="text-lg">Wallet</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="p-4 bg-secondary/50 rounded-lg">
+                  <div className="p-4 bg-muted/20 rounded-lg">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium">FIL Balance</span>
-                      <Badge variant="secondary" className="text-xs">Active</Badge>
+                      <Badge variant="primary" className="text-xs">Active</Badge>
                     </div>
                     <div className="text-2xl font-bold text-primary">124.85 FIL</div>
                     <div className="text-xs text-muted-foreground">≈ $892.40 USD</div>

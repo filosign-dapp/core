@@ -8,6 +8,8 @@ import { Toaster } from "sonner";
 import { RouterProvider } from "@tanstack/react-router";
 import "./globals.css";
 import { IconContext } from "@phosphor-icons/react";
+import { PrivyProvider } from "./lib/context/privy-provider";
+import { WagmiProvider } from "./lib/context/wagmi-provider";
 
 // Root element
 const rootElement = document.getElementById("root")!;
@@ -19,13 +21,17 @@ const app = (
     <ErrorBoundary>
       <QueryClientProvider>
         <ThemeProvider defaultTheme="dark" storageKey="theme">
-          <IconContext.Provider value={{
-            mirrored: false,
-            weight: "regular"
-          }}>
-            <RouterProvider router={router} />
-            <Toaster position="bottom-right" />
-          </IconContext.Provider>
+          <PrivyProvider>
+            <WagmiProvider>
+              <IconContext.Provider value={{
+                mirrored: false,
+                weight: "regular"
+              }}>
+                <RouterProvider router={router} />
+                <Toaster position="bottom-right" />
+              </IconContext.Provider>
+            </WagmiProvider>
+          </PrivyProvider>
         </ThemeProvider>
       </QueryClientProvider>
     </ErrorBoundary>

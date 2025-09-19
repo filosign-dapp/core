@@ -90,35 +90,6 @@ export default function WaitlistSection() {
                   </motion.div>
                 </motion.div>
 
-                {/* Exhaust trail */}
-                <motion.div
-                  animate={{ 
-                    scaleY: [1, 1.3, 1],
-                    opacity: [0.6, 0.8, 0.6]
-                  }}
-                  transition={{
-                    duration: 1.5,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                  className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 w-8 h-16 bg-gradient-to-t from-orange-500/60 via-yellow-400/40 to-transparent rounded-full blur-sm"
-                />
-
-                {/* Glow effect */}
-                <motion.div
-                  animate={{ 
-                    scale: [1, 1.2, 1],
-                    opacity: [0.4, 0.7, 0.4]
-                  }}
-                  transition={{
-                    duration: 3,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                    delay: 0.5
-                  }}
-                  className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/30 via-primary/20 to-primary/10 blur-2xl"
-                />
-
                 {/* Orbiting particles */}
                 <motion.div
                   animate={{ rotate: 360 }}
@@ -170,7 +141,7 @@ export default function WaitlistSection() {
                   placeholder="enter your email address"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="flex-1 text-base sm:text-lg md:text-2xl lg:text-4xl p-3 sm:p-4 md:p-5 rounded-large border-2 focus-visible:border-primary focus-visible:ring-primary/20 bg-background/50 backdrop-blur-sm"
+                  className="flex-1 text-base sm:text-lg md:text-2xl lg:text-4xl p-3 sm:p-4 md:p-5 rounded-main border-2 focus-visible:border-primary focus-visible:ring-primary/20 bg-background/50 backdrop-blur-sm"
                   required
                 />
 

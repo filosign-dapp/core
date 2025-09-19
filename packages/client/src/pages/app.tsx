@@ -3,7 +3,6 @@ import {
   createRouter,
   createRoute,
   createRootRoute,
-  redirect,
 } from '@tanstack/react-router'
 import { withPageErrorBoundary } from "@/src/lib/components/errors/PageErrorBoundary";
 import LandingPage from "./landing";
