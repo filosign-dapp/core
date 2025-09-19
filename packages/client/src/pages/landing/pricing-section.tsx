@@ -82,7 +82,7 @@ export default function PricingSection() {
     const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
 
     return (
-        <section ref={sectionRef} className="max-w-[90dvw] md:max-w-[70dvw] mx-auto flex flex-col gap-6 md:gap-8 py-8 md:py-12 p-4 md:p-page">
+        <section ref={sectionRef} className="max-w-[90dvw] mx-auto flex flex-col gap-6 md:gap-8 py-8 md:py-12 p-4 md:p-page">
             <motion.div
                 className="text-center"
                 initial={{ opacity: 0, y: 30 }}
@@ -125,11 +125,11 @@ export default function PricingSection() {
             </motion.div>
 
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-6 xl:gap-8">
                 {plans.map((plan, index) => (
                     <motion.div
                         key={plan.name}
-                        className="flex flex-col p-4 sm:p-6 bg-background border rounded-large"
+                        className="flex flex-col p-4 sm:p-6 bg-card border rounded-large"
                         initial={{ opacity: 0, y: 50 }}
                         animate={isInView ? { opacity: 1, y: 0 } : {}}
                         transition={{ type: "spring", stiffness: 200, damping: 25, delay: 0.4 + index * 0.1 }}

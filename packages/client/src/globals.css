@@ -4,9 +4,9 @@
 @plugin "tailwindcss-animate";
 
 :root {
-  --background: hsl(90,55%,98%);
+  --background: hsl(0, 0%, 100%);
   --foreground: hsl(210, 6%, 13%);
-  --card: hsl(90,55%,98%);
+  --card: hsl(240,11%,96%);
   --card-foreground: hsl(210, 6%, 13%);
   --popover: hsl(75, 20%, 99%);
   --popover-foreground: hsl(210, 6%, 13%);
@@ -20,7 +20,7 @@
   --accent-foreground: hsl(210, 6%, 13%);
   --destructive: hsl(0, 84%, 58%);
   --destructive-foreground: hsl(0, 0%, 100%);
-  --border: hsl(0, 0%, 83%);
+  --border: hsl(240,11%,96%);
   --input: hsl(30, 4%, 95%);
   --ring: hsl(90, 50%, 38%);
   --chart-1: hsl(38, 92%, 50%);

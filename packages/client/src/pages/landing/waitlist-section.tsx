@@ -23,7 +23,7 @@ export default function WaitlistSection() {
   };
 
   return (
-    <section ref={waitlistRef} className="max-w-[90dvw] md:max-w-[70dvw] mx-auto min-h-screen flex items-center justify-center p-4 sm:p-6 md:p-page">
+    <section ref={waitlistRef} className="max-w-[90dvw] lg:max-w-[80dvw] mx-auto min-h-screen flex items-center justify-center p-4 sm:p-6 md:p-page">
       <AnimatePresence mode="wait">
         {!isSubmitted ? (
           <motion.div
@@ -63,7 +63,7 @@ export default function WaitlistSection() {
                     repeat: Infinity,
                     ease: "easeInOut"
                   }}
-                  className="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 lg:w-56 lg:h-56 xl:w-64 xl:h-64 rounded-full bg-gradient-to-br from-primary/20 via-primary/10 to-primary/5 border-2 border-primary/30 flex items-center justify-center relative overflow-hidden"
+                  className="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 lg:w-56 lg:h-56 xl:w-64 xl:h-64 rounded-full bg-card border flex items-center justify-center relative overflow-hidden"
                 >
                   {/* Rocket icon */}
                   <RocketLaunchIcon 
@@ -118,9 +118,6 @@ export default function WaitlistSection() {
               <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-9xl font-semibold leading-tight">
                 Join the waitlist
               </h1>
-              <p className="text-base sm:text-lg xl:text-lg text-muted-foreground leading-relaxed mx-auto mt-4">
-                Be the first one to try Filosign when it goes live on the mainnet.
-              </p>
             </motion.div>
 
             <motion.form
@@ -141,7 +138,7 @@ export default function WaitlistSection() {
                   placeholder="enter your email address"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="flex-1 text-base sm:text-lg md:text-2xl lg:text-4xl p-3 sm:p-4 md:p-5 rounded-main border-2 focus-visible:border-primary focus-visible:ring-primary/20 bg-background/50 backdrop-blur-sm"
+                  className="flex-1 text-base sm:text-lg md:text-2xl lg:text-4xl p-3 sm:p-4 md:p-5 rounded-main border-2 focus-visible:border-primary focus-visible:ring-primary/20 bg-card backdrop-blur-sm"
                   required
                 />
 
