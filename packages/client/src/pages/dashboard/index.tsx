@@ -6,6 +6,7 @@ import {
   FileTextIcon,
   SignatureIcon,
   CalendarIcon,
+  PlusIcon,
 } from "@phosphor-icons/react"
 import { motion } from "motion/react"
 import { Link } from "@tanstack/react-router"
@@ -13,27 +14,27 @@ import { Link } from "@tanstack/react-router"
 const statsCards = [
   {
     title: "Documents Signed",
-    value: "247",
+    value: "0",
     description: "Total this month",
     icon: FileTextIcon,
-    trend: "+12.5%",
+    trend: "+ 0%",
     color: "text-primary"
   },
   {
     title: "Pending Signatures",
-    value: "18",
+    value: "0",
     description: "Awaiting completion",
     icon: SignatureIcon,
-    trend: "-3.2%",
-    color: "text-secondary-dark"
+    trend: "+ 0%",
+    color: "text-primary"
   },
   {
     title: "Active Envelopes",
-    value: "42",
+    value: "0",
     description: "In progress",
     icon: CalendarIcon,
-    trend: "+8.1%",
-    color: "text-primary-medium"
+    trend: "+ 0%",
+    color: "text-primary"
   }
 ]
 
@@ -43,7 +44,7 @@ export default function DashboardPage() {
       <div className="flex flex-col h-full rounded-tl-2xl bg-background @container">
         {/* Header */}
         <motion.div
-          className="flex items-center justify-between px-8 py-6 border-b border-border"
+          className="flex items-center justify-between px-8 py-6 border-b"
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2, delay: 0.1 }}
@@ -53,6 +54,19 @@ export default function DashboardPage() {
             <p className="text-muted-foreground">Overview of your document signing activity</p>
           </div>
         </motion.div>
+
+        <div className="p-8 rounded-large mx-8 mt-8 bg-card gap-4 @3xl:gap-8 flex flex-col @3xl:flex-row items-start @3xl:items-center justify-between">
+          <div>
+            <h4 className="font-semibold mb-1">No signature?</h4>
+            <p className="text-muted-foreground">Create your signature to start signing documents</p>
+          </div>
+          <Button variant="primary" asChild>
+            <Link to="/dashboard/signature/create">
+              <PlusIcon className="size-4" />
+              Create New Signature
+            </Link>
+          </Button>
+        </div>
 
         <div className="flex-1 p-8 space-y-8">
           {/* Stats Cards */}
@@ -97,12 +111,12 @@ export default function DashboardPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="p-4 bg-muted/20 rounded-lg text-center">
-                      <div className="text-2xl font-bold text-primary">18</div>
-                      <div className="text-sm text-muted-foreground">Awaiting Signatures</div>
+                    <div className="p-4 bg-primary text-primary-foreground rounded-lg text-center">
+                      <div className="text-2xl font-bold">0</div>
+                      <div className="text-sm">Awaiting Signatures</div>
                     </div>
                     <div className="p-4 bg-muted/20 rounded-lg text-center">
-                      <div className="text-2xl font-bold text-secondary-dark">7</div>
+                      <div className="text-2xl font-bold text-secondary-dark">0</div>
                       <div className="text-sm text-muted-foreground">Under Review</div>
                     </div>
                   </div>
@@ -113,7 +127,7 @@ export default function DashboardPage() {
                         <div className="size-2 bg-primary rounded-full"></div>
                         <span className="text-sm font-medium">Completed This Week</span>
                       </div>
-                      <span className="text-sm font-bold">24</span>
+                      <span className="text-sm font-bold">0</span>
                     </div>
 
                     <div className="flex items-center justify-between p-3 bg-muted/20 rounded-lg">
@@ -121,7 +135,7 @@ export default function DashboardPage() {
                         <div className="size-2 bg-secondary-dark rounded-full"></div>
                         <span className="text-sm font-medium">Average Completion Time</span>
                       </div>
-                      <span className="text-sm font-bold">2.3 days</span>
+                      <span className="text-sm font-bold">0 days</span>
                     </div>
 
                     <div className="flex items-center justify-between p-3 bg-muted/20 rounded-lg">
@@ -129,7 +143,7 @@ export default function DashboardPage() {
                         <div className="size-2 bg-primary-medium rounded-full"></div>
                         <span className="text-sm font-medium">Success Rate</span>
                       </div>
-                      <span className="text-sm font-bold">94.2%</span>
+                      <span className="text-sm font-bold">0%</span>
                     </div>
                   </div>
                 </CardContent>
@@ -147,32 +161,31 @@ export default function DashboardPage() {
                   <CardTitle className="text-lg">Wallet</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="p-4 bg-muted/20 rounded-lg">
+                  <div className="p-4 bg-primary text-primary-foreground rounded-lg">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium">FIL Balance</span>
                       <Badge variant="primary" className="text-xs">Active</Badge>
                     </div>
-                    <div className="text-2xl font-bold text-primary">124.85 FIL</div>
-                    <div className="text-xs text-muted-foreground">≈ $892.40 USD</div>
+                    <div className="text-2xl font-bold">0 USDFC</div>
                   </div>
 
-                  <div className="p-4 border rounded-lg">
+                  <div className="p-4 bg-muted/20 rounded-lg">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium">Gas Reserve</span>
                       <Badge variant="outline" className="text-xs">Reserve</Badge>
                     </div>
-                    <div className="text-lg font-semibold">12.34 FIL</div>
+                    <div className="text-lg font-semibold">0 FIL</div>
                     <div className="text-xs text-muted-foreground">For transaction fees</div>
                   </div>
 
                   <div className="space-y-2 pt-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">This Month</span>
-                      <span className="font-medium">247 signatures</span>
+                      <span className="font-medium">0 signatures</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Avg. Cost/Signature</span>
-                      <span className="font-medium">0.013 FIL</span>
+                      <span className="font-medium">0 FIL</span>
                     </div>
                   </div>
                 </CardContent>

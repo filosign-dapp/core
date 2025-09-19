@@ -25,7 +25,7 @@ export default function FolderCard({ folder, onClick, variant = "grid" }: Folder
   if (variant === "grid") {
     return (
       <motion.div
-        className="flex-shrink-0 p-2 min-w-0 rounded-lg border transition-colors cursor-pointer group bg-background border-border hover:bg-accent/50"
+        className="flex-shrink-0 p-2 min-w-0 rounded-lg border transition-colors cursor-pointer group bg-card border-border hover:bg-accent/50"
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{

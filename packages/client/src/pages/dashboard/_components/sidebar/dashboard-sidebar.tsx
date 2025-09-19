@@ -5,7 +5,6 @@ import { sidebarData } from "@/src/pages/dashboard/_components/sidebar/mock"
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarHeader,
   SidebarRail,
   useSidebar,
@@ -22,7 +21,7 @@ export function DashboardSidebar({ className, ...props }: React.ComponentProps<t
       <Sidebar className={className} collapsible="icon" {...props}>
         <SidebarHeader>
           <Logo 
-            textClassName="text-foreground font-bold" 
+            textClassName="text-foreground font-semibold" 
             isCollapsed={isCollapsed}
             onIconClick={() => {
               if (isCollapsed) {
@@ -31,7 +30,7 @@ export function DashboardSidebar({ className, ...props }: React.ComponentProps<t
             }}
           />
         </SidebarHeader>
-        <SidebarContent className="mt-4">
+        <SidebarContent className="">
           <NavMain items={sidebarData.navMain} />
         </SidebarContent>
         <SidebarRail />

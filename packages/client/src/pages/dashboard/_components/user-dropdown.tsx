@@ -15,14 +15,18 @@ import {
 import { Button } from "@/src/lib/components/ui/button"
 import { Image } from "@/src/lib/components/custom/Image"
 import { userData } from "./sidebar/mock"
+import { usePrivy } from "@privy-io/react-auth"
+import { useNavigate } from "@tanstack/react-router"
 
 export function UserDropdown() {
   const [isOpen, setIsOpen] = React.useState(false)
+  const { logout } = usePrivy();
+  const navigate = useNavigate();
 
   const handleSignOut = () => {
-    // Handle sign out logic here
-    console.log("Signing out...")
-  }
+    logout();
+    navigate({ to: "/", replace: true });
+  };
 
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>

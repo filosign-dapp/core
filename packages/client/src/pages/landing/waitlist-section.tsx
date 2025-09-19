@@ -23,7 +23,7 @@ export default function WaitlistSection() {
   };
 
   return (
-    <section ref={waitlistRef} className="max-w-[90dvw] lg:max-w-[80dvw] mx-auto min-h-screen flex items-center justify-center p-4 sm:p-6 md:p-page">
+    <section ref={waitlistRef} className="max-w-[90dvw] mx-auto min-h-screen flex items-center justify-center p-4 sm:p-6 md:p-page">
       <AnimatePresence mode="wait">
         {!isSubmitted ? (
           <motion.div
@@ -37,7 +37,7 @@ export default function WaitlistSection() {
               damping: 25,
               delay: 0.2
             }}
-            className="w-full flex flex-col gap-8"
+            className="flex flex-col gap-8 w-full"
           >
             {/* Funky Rocket Icon */}
             <motion.div
@@ -63,11 +63,11 @@ export default function WaitlistSection() {
                     repeat: Infinity,
                     ease: "easeInOut"
                   }}
-                  className="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 lg:w-56 lg:h-56 xl:w-64 xl:h-64 rounded-full bg-card border flex items-center justify-center relative overflow-hidden"
+                  className="flex overflow-hidden relative justify-center items-center w-32 h-32 rounded-full border sm:w-40 sm:h-40 md:w-48 md:h-48 lg:w-56 lg:h-56 xl:w-64 xl:h-64 bg-card"
                 >
                   {/* Rocket icon */}
                   <RocketLaunchIcon 
-                    className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 xl:w-32 xl:h-32 text-primary drop-shadow-lg" 
+                    className="w-16 h-16 drop-shadow-lg sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 xl:w-32 xl:h-32 text-primary" 
                     weight="fill" 
                   />
                   
@@ -81,12 +81,12 @@ export default function WaitlistSection() {
                       rotate: { duration: 8, repeat: Infinity, ease: "linear" },
                       scale: { duration: 2, repeat: Infinity, ease: "easeInOut" }
                     }}
-                    className="absolute inset-0 flex items-center justify-center"
+                    className="flex absolute inset-0 justify-center items-center"
                   >
-                    <div className="w-2 h-2 bg-yellow-400 rounded-full absolute top-4 left-8 animate-pulse" />
-                    <div className="w-1 h-1 bg-blue-400 rounded-full absolute top-8 right-6 animate-pulse" style={{ animationDelay: '0.5s' }} />
+                    <div className="absolute top-4 left-8 w-2 h-2 bg-yellow-400 rounded-full animate-pulse" />
+                    <div className="absolute right-6 top-8 w-1 h-1 bg-blue-400 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }} />
                     <div className="w-1.5 h-1.5 bg-pink-400 rounded-full absolute bottom-6 left-6 animate-pulse" style={{ animationDelay: '1s' }} />
-                    <div className="w-1 h-1 bg-green-400 rounded-full absolute bottom-8 right-8 animate-pulse" style={{ animationDelay: '1.5s' }} />
+                    <div className="absolute right-8 bottom-8 w-1 h-1 bg-green-400 rounded-full animate-pulse" style={{ animationDelay: '1.5s' }} />
                   </motion.div>
                 </motion.div>
 
@@ -96,10 +96,10 @@ export default function WaitlistSection() {
                   transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
                   className="absolute inset-0"
                 >
-                  <div className="absolute top-0 left-1/2 w-1 h-1 bg-primary/60 rounded-full transform -translate-x-1/2 -translate-y-2" />
-                  <div className="absolute bottom-0 left-1/2 w-1 h-1 bg-primary/60 rounded-full transform -translate-x-1/2 translate-y-2" />
-                  <div className="absolute left-0 top-1/2 w-1 h-1 bg-primary/60 rounded-full transform -translate-y-1/2 -translate-x-2" />
-                  <div className="absolute right-0 top-1/2 w-1 h-1 bg-primary/60 rounded-full transform -translate-y-1/2 translate-x-2" />
+                  <div className="absolute top-0 left-1/2 w-1 h-1 rounded-full transform -translate-x-1/2 -translate-y-2 bg-primary/60" />
+                  <div className="absolute bottom-0 left-1/2 w-1 h-1 rounded-full transform -translate-x-1/2 translate-y-2 bg-primary/60" />
+                  <div className="absolute left-0 top-1/2 w-1 h-1 rounded-full transform -translate-x-2 -translate-y-1/2 bg-primary/60" />
+                  <div className="absolute right-0 top-1/2 w-1 h-1 rounded-full transform translate-x-2 -translate-y-1/2 bg-primary/60" />
                 </motion.div>
               </div>
             </motion.div>
@@ -115,14 +115,14 @@ export default function WaitlistSection() {
               }}
               className="text-center"
             >
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-9xl font-semibold leading-tight">
+              <h1 className="text-4xl font-semibold leading-tight sm:text-5xl md:text-6xl lg:text-7xl xl:text-9xl">
                 Join the waitlist
               </h1>
             </motion.div>
 
             <motion.form
               onSubmit={handleJoinWaitlist}
-              className="w-full max-w-7xl mx-auto"
+              className="mx-auto w-full max-w-7xl"
               initial={{ opacity: 0, y: 40 }}
               animate={waitlistInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
               transition={{
@@ -132,13 +132,13 @@ export default function WaitlistSection() {
                 delay: 0.4
               }}
             >
-              <div className="flex gap-3 sm:gap-4 w-full flex-col md:flex-row">
+              <div className="flex flex-col gap-3 w-full sm:gap-4 md:flex-row">
                 <input
                   type="email"
                   placeholder="enter your email address"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="flex-1 text-base sm:text-lg md:text-2xl lg:text-4xl p-3 sm:p-4 md:p-5 rounded-main border-2 focus-visible:border-primary focus-visible:ring-primary/20 bg-card backdrop-blur-sm"
+                  className="flex-1 p-3 text-base backdrop-blur-sm sm:text-lg md:text-2xl lg:text-4xl sm:p-4 md:p-5 focus-visible:border-primary focus-visible:ring-primary/20 bg-card"
                   required
                 />
 
@@ -150,10 +150,10 @@ export default function WaitlistSection() {
                     type="submit"
                     variant="primary"
                     disabled={!email}
-                    className="h-12 sm:h-16 md:h-20 px-4 sm:px-6 md:px-8 text-base sm:text-lg md:text-xl lg:text-2xl font-semibold rounded-large group relative overflow-hidden w-full md:w-auto min-w-[120px] sm:min-w-[140px] md:min-w-[160px]"
+                    className="h-12 sm:h-16 md:h-20 px-4 sm:px-6 md:px-8 text-base sm:text-lg md:text-xl lg:text-2xl rounded-none font-semibold group relative overflow-hidden w-full md:w-auto min-w-[120px] sm:min-w-[140px] md:min-w-[160px]"
                   >
                     <motion.div
-                      className="flex items-center justify-center gap-2 sm:gap-3"
+                      className="flex gap-2 justify-center items-center sm:gap-3"
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                     >
@@ -168,9 +168,9 @@ export default function WaitlistSection() {
                               duration: 0.3, 
                               ease: "easeInOut" 
                             }}
-                            className="flex items-center justify-center"
+                            className="flex justify-center items-center"
                           >
-                            <SpinnerBallIcon className="size-5 sm:size-6 md:size-8 lg:size-10 animate-spin" />
+                            <SpinnerBallIcon className="animate-spin size-5 sm:size-6 md:size-8 lg:size-10" />
                           </motion.div>
                         ) : (
                           <motion.div
@@ -182,21 +182,13 @@ export default function WaitlistSection() {
                               duration: 0.3, 
                               ease: "easeInOut" 
                             }}
-                            className="flex items-center justify-center"
+                            className="flex justify-center items-center"
                           >
-                            <PaperPlaneTiltIcon className="size-5 sm:size-6 md:size-8 lg:size-10 transition-transform duration-200 group-hover:translate-x-1 group-hover:-translate-y-1 group-active:translate-x-0 group-active:translate-y-0" />
+                            <PaperPlaneTiltIcon className="transition-transform duration-200 size-5 sm:size-6 md:size-8 lg:size-10 group-hover:translate-x-1 group-hover:-translate-y-1 group-active:translate-x-0 group-active:translate-y-0" />
                           </motion.div>
                         )}
                       </AnimatePresence>
                     </motion.div>
-
-                    {/* Animated background effect */}
-                    <motion.div
-                      className="absolute inset-0 bg-primary-foreground/10"
-                      initial={{ scaleX: 0, originX: 0 }}
-                      whileHover={{ scaleX: 1 }}
-                      transition={{ duration: 0.3, ease: "easeOut" }}
-                    />
                   </Button>
                 </motion.div>
               </div>
@@ -226,7 +218,7 @@ export default function WaitlistSection() {
               damping: 25,
               duration: 0.8
             }}
-            className="text-center space-y-6 p-8 rounded-large"
+            className="p-8 space-y-6 text-center rounded-large"
           >
           <motion.div
             initial={{ y: 50, opacity: 0 }}
@@ -237,7 +229,7 @@ export default function WaitlistSection() {
               damping: 25,
               delay: 0.4
             }}
-            className="size-20 sm:size-24 md:size-28 lg:size-32 mx-auto rounded-full bg-primary border flex items-center justify-center"
+            className="flex justify-center items-center mx-auto rounded-full border size-20 sm:size-24 md:size-28 lg:size-32 bg-primary"
           >
             <CheckIcon className="size-12 sm:size-16 md:size-18 lg:size-20 text-primary-foreground" weight="bold" />
           </motion.div>
@@ -261,7 +253,7 @@ export default function WaitlistSection() {
                 stiffness: 200,
                 damping: 25,
                 delay: 0.5
-              }} className="text-2xl sm:text-3xl md:text-4xl xl:text-7xl leading-tight">You're on the list!</motion.h1>
+              }} className="text-2xl leading-tight sm:text-3xl md:text-4xl xl:text-7xl">You're on the list!</motion.h1>
             <motion.p
               initial={{ y: 30, opacity: 0 }}
               animate={waitlistInView ? { y: 0, opacity: 1 } : { y: 30, opacity: 0 }}
@@ -270,7 +262,7 @@ export default function WaitlistSection() {
                 stiffness: 200,
                 damping: 25,
                 delay: 0.6
-              }} className="text-base sm:text-lg xl:text-lg text-muted-foreground leading-relaxed">
+              }} className="text-base leading-relaxed sm:text-lg xl:text-lg text-muted-foreground">
               We'll notify you as soon as we go live on the mainnet.
             </motion.p>
           </motion.div>

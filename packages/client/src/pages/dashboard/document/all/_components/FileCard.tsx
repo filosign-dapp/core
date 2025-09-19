@@ -4,10 +4,13 @@ import {
   FilePdfIcon,
   FileImageIcon,
   FileTextIcon,
+  DotsThreeVertical,
+  DotsThreeVerticalIcon,
 } from "@phosphor-icons/react"
 import { cn } from "@/src/lib/utils/utils"
 import type { MockFile } from "../mock"
 import { Image } from "@/src/lib/components/custom/Image"
+import { Button } from "@/src/lib/components/ui/button"
 
 interface FileCardProps {
   file: MockFile
@@ -60,7 +63,7 @@ export default function FileCard({ file, onClick, variant = "grid" }: FileCardPr
   if (variant === "grid") {
     return (
       <motion.div
-        className="group bg-background border border-border rounded-lg p-3 hover:bg-muted/20 transition-colors cursor-pointer"
+        className="group bg-background border rounded-lg p-3 hover:bg-accent/50 transition-colors cursor-pointer"
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{
@@ -72,7 +75,7 @@ export default function FileCard({ file, onClick, variant = "grid" }: FileCardPr
         onClick={handleClick}
       >
         {/* Preview/Icon */}
-        <div className="aspect-square mb-3 bg-muted/20 rounded-lg flex items-center justify-center">
+        <div className="aspect-square mb-3 bg-card rounded-lg flex items-center justify-center">
           {shouldShowPreview ? (
             <Image
               src={file.dataUrl}
@@ -114,26 +117,35 @@ export default function FileCard({ file, onClick, variant = "grid" }: FileCardPr
       }}
       onClick={handleClick}
     >
-      <div className="flex items-center gap-3">
-        {shouldShowPreview ? (
-          <Image
-            src={file.dataUrl}
-            alt={file.name}
-            className="size-10 object-cover object-top rounded-lg"
-            width={200}
-            height={200}
-          />
-        ) : (
-          <div className="p-2 bg-muted/20 rounded-lg">
-            <FileIconComponent className={cn("size-6", iconColor)} />
+      <div className="flex items-center justify-between w-full">
+        <div className="flex items-center gap-3">
+          {shouldShowPreview ? (
+            <Image
+              src={file.dataUrl}
+              alt={file.name}
+              className="size-10 object-cover object-top rounded-lg"
+              width={200}
+              height={200}
+            />
+          ) : (
+            <div className="p-2 bg-muted/20 rounded-lg">
+              <FileIconComponent className={cn("size-6", iconColor)} />
+            </div>
+          )}
+          <div>
+            <p className="text-sm font-medium">{file.name}</p>
+            <p className="text-xs text-muted-foreground">
+              {formatFileSize(file.size)} • {formatDate(file.createdAt)}
+            </p>
           </div>
-        )}
-        <div>
-          <p className="text-sm font-medium">{file.name}</p>
-          <p className="text-xs text-muted-foreground">
-            {formatFileSize(file.size)} • {formatDate(file.createdAt)}
-          </p>
         </div>
+
+        <Button variant="ghost" size="icon" onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}>
+          <DotsThreeVerticalIcon className="size-5" />
+        </Button>
       </div>
     </motion.div>
   )

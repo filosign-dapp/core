@@ -8,7 +8,7 @@ import PricingSection from "./pricing-section";
 export default function LandingPage() {
 
   return (
-    <div className="[--section-gap:2rem] md:[--section-gap:4rem]">
+    <div className="[--section-gap:4rem]">
       {/* Navbar */}
       <LandingNavbar />
 

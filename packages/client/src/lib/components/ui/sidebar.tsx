@@ -1,7 +1,7 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
-import { SidebarSimpleIcon } from "@phosphor-icons/react"
+import { ListIcon, SidebarSimpleIcon } from "@phosphor-icons/react"
 
 import { useIsMobile } from "@/src/lib/hooks/use-mobile"
 import { cn } from "@/src/lib/utils/index"
@@ -185,7 +185,7 @@ function Sidebar({
           data-sidebar="sidebar"
           data-slot="sidebar"
           data-mobile="true"
-          className="text-foreground w-(--sidebar-width) p-0 [&>button]:hidden"
+          className="bg-card text-card-foreground w-(--sidebar-width) p-0 [&>button]:hidden"
           style={
             {
               "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
@@ -271,7 +271,7 @@ function SidebarTrigger({
       }}
       {...props}
     >
-      <SidebarSimpleIcon className="size-6 text-foreground" weight="fill" />
+      <ListIcon className="size-6 text-foreground" />
       <span className="sr-only">Toggle Sidebar</span>
     </Button>
   )

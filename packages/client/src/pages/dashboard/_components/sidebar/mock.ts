@@ -44,23 +44,7 @@ export const sidebarData = {
         {
           title: "All Documents",
           url: "/dashboard/document/all",
-        },
-        {
-          title: "All Drafts",
-          url: "#",
-        },
-        {
-          title: "Awaiting Signatures",
-          url: "#",
-        },
-        {
-          title: "Signed Documents",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
+        }
       ],
     },
     {
@@ -72,10 +56,6 @@ export const sidebarData = {
           title: "Create Signature",
           url: "/dashboard/signature/create",
         },
-        {
-          title: "Signature History",
-          url: "#",
-        },
       ],
     },
     {
@@ -84,17 +64,9 @@ export const sidebarData = {
       icon: ChartBarIcon,
       items: [
         {
-          title: "Overview",
+          title: "Dashboard",
           url: "/dashboard",
-        },
-        {
-          title: "Profile Metrics",
-          url: "#",
-        },
-        {
-          title: "Compliance Reports",
-          url: "#",
-        },
+        }
       ],
     },
     {
@@ -105,18 +77,6 @@ export const sidebarData = {
         {
           title: "Profile",
           url: "/dashboard/settings/profile",
-        },
-        {
-          title: "Security & Keys",
-          url: "#",
-        },
-        {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "API & Webhooks",
-          url: "#",
         },
       ],
     },

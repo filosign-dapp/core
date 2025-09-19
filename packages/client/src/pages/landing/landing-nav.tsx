@@ -1,6 +1,7 @@
 import Logo from "@/src/lib/components/custom/Logo";
 import { Button } from "@/src/lib/components/ui/button";
 import { LightningIcon, ListIcon, XIcon } from "@phosphor-icons/react";
+import { usePrivy } from "@privy-io/react-auth";
 import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
@@ -20,7 +21,7 @@ const navLinks: NavLink[] = [
 export default function LandingNavbar() {
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { ready, authenticated, login } = usePrivy();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -76,7 +77,7 @@ export default function LandingNavbar() {
             <motion.a
               key={link.label}
               href={link.href}
-              className="font-medium transition-colors duration-200 hover:bg-foreground/50 hover:text-primary rounded-md px-3 py-2"
+              className="font-medium transition-colors duration-200 hover:bg-foreground/50 rounded-md px-3 py-2"
               initial={{ opacity: 0, y: -15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{
@@ -104,11 +105,19 @@ export default function LandingNavbar() {
             delay: 0.78
           }}
         >
-          <Button variant="secondary" asChild>
-            <Link to="/dashboard">
-              Sign in
-            </Link>
-          </Button>
+          {ready && authenticated ? (
+            <Button variant="secondary" asChild>
+              <Link to="/dashboard">
+                Dashboard
+              </Link>
+            </Button>
+          ) : (
+            <Button variant="secondary" onClick={() => {
+              login();
+            }}>
+                Connect
+            </Button>
+          )}
         </motion.div>
       </motion.nav>
       

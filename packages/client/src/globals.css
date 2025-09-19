@@ -8,6 +8,7 @@
   --foreground: hsl(210, 6%, 13%);
   --card: hsl(240,11%,96%);
   --card-foreground: hsl(210, 6%, 13%);
+  --border: hsl(240,11%, 90%);
   --popover: hsl(75, 20%, 99%);
   --popover-foreground: hsl(210, 6%, 13%);
   --primary: hsl(75, 67%, 13%);
@@ -16,11 +17,10 @@
   --secondary-foreground: hsl(210, 6%, 13%);
   --muted: hsl(92, 11%, 79%);
   --muted-foreground: hsl(0, 1%, 44%);
-  --accent: hsl(90, 67%, 83%);
+  --accent: hsla(90, 67%, 83%);
   --accent-foreground: hsl(210, 6%, 13%);
   --destructive: hsl(0, 84%, 58%);
   --destructive-foreground: hsl(0, 0%, 100%);
-  --border: hsl(240,11%,96%);
   --input: hsl(30, 4%, 95%);
   --ring: hsl(90, 50%, 38%);
   --chart-1: hsl(38, 92%, 50%);

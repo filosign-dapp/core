@@ -153,7 +153,7 @@ export default function DocumentAllPage() {
                 </div>
               </motion.div>
 
-              <div className="flex items-center gap-2 bg-muted/20 rounded-lg p-1">
+              <div className="flex items-center gap-2 bg-card rounded-lg p-1">
                 <Button
                   type="button"
                   variant={viewMode === "grid" ? "default" : "ghost"}
