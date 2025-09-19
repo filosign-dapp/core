@@ -1,5 +1,6 @@
 import { useState } from "react"
-import { cn } from "@/src/lib/utils"
+import { Button } from "@/src/lib/components/ui/button"
+import { cn } from "@/src/lib/utils/utils"
 
 interface SignatureOption {
     id: string
@@ -8,11 +9,14 @@ interface SignatureOption {
     style: string
 }
 
-interface SignatureOptionsProps {
+interface SignatureChooseProps {
     fullName: string
     initials: string
-    onSelect: (signature: string, initials: string) => void
+    signatureData: string | null
+    initialsData: string | null
     selectedSignatureId?: string
+    onSignatureSelection: (signature: string, initials: string) => void
+    onCreateSignature: () => void
 }
 
 // Generate different signature styles using actual handwritten fonts
@@ -31,7 +35,7 @@ const generateSignatureStyles = (fullName: string, initials: string): SignatureO
             initials: initials
         },
         {
-            id: "gloria-hallelujah", 
+            id: "gloria-hallelujah",
             style: "gloria-hallelujah",
             signature: fullName,
             initials: initials
@@ -65,19 +69,27 @@ const generateSignatureStyles = (fullName: string, initials: string): SignatureO
     return styles
 }
 
-export default function SignatureOptions({ fullName, initials, onSelect, selectedSignatureId }: SignatureOptionsProps) {
+export default function SignatureChoose({
+    fullName,
+    initials,
+    signatureData,
+    initialsData,
+    selectedSignatureId,
+    onSignatureSelection,
+    onCreateSignature
+}: SignatureChooseProps) {
     const [selectedId, setSelectedId] = useState<string | null>(selectedSignatureId || null)
-    
+
     const signatureOptions = generateSignatureStyles(fullName, initials)
 
     const handleSelect = (option: SignatureOption) => {
         setSelectedId(option.id)
-        onSelect(option.signature, option.initials)
+        onSignatureSelection(option.signature, option.initials)
     }
 
     const getSignatureStyle = (style: string) => {
         const baseClasses = "text-foreground"
-        
+
         switch (style) {
             case "typed":
                 return `${baseClasses} font-mono text-sm` // Typed is monospace
@@ -100,7 +112,7 @@ export default function SignatureOptions({ fullName, initials, onSelect, selecte
 
     const getInitialsStyle = (style: string) => {
         const baseClasses = "text-foreground"
-        
+
         switch (style) {
             case "typed":
                 return `${baseClasses} font-mono text-xs` // Typed initials
@@ -122,18 +134,18 @@ export default function SignatureOptions({ fullName, initials, onSelect, selecte
     }
 
     return (
-        <div className="space-y-4">
-            <p className="text-muted-foreground">Choose from pre-generated signature styles</p>
-            
-            <div className="grid gap-3 max-h-96 overflow-y-auto">
+        <div className="">
+            <h4 className="text-muted-foreground">Choose Signature Style</h4>
+
+            <div className="grid gap-3 max-h-80 overflow-y-auto border-2 border-dashed p-4 rounded-large mt-4 hide-scrollbar">
                 {signatureOptions.map((option) => (
                     <div
                         key={option.id}
                         className={cn(
-                            "flex items-center gap-4 p-4 border rounded-lg cursor-pointer transition-all hover:bg-muted/50",
-                            selectedId === option.id 
-                                ? "border-primary bg-primary/5 ring-2 ring-primary/20" 
-                                : "border-border hover:border-primary/50"
+                            "flex items-center gap-4 p-4 border rounded-lg cursor-pointer transition-all hover:bg-card",
+                            selectedId === option.id
+                                ? "border-primary/30 bg-primary/5"
+                                : ""
                         )}
                         onClick={() => handleSelect(option)}
                     >
@@ -141,8 +153,8 @@ export default function SignatureOptions({ fullName, initials, onSelect, selecte
                         <div className="flex-shrink-0">
                             <div className={cn(
                                 "w-4 h-4 rounded-full border-2 flex items-center justify-center",
-                                selectedId === option.id 
-                                    ? "border-primary bg-primary" 
+                                selectedId === option.id
+                                    ? "border-primary bg-primary"
                                     : "border-muted-foreground"
                             )}>
                                 {selectedId === option.id && (
@@ -155,7 +167,7 @@ export default function SignatureOptions({ fullName, initials, onSelect, selecte
                         <div className="flex-1 min-w-0">
                             <div className="space-y-2">
                                 <div className="text-xs text-muted-foreground">Signed by:</div>
-                                <div 
+                                <div
                                     className={cn(
                                         getSignatureStyle(option.style),
                                         `font-${option.style}`
@@ -170,7 +182,7 @@ export default function SignatureOptions({ fullName, initials, onSelect, selecte
                         <div className="flex-shrink-0 text-right">
                             <div className="space-y-2">
                                 <div className="text-xs text-muted-foreground">DS</div>
-                                <div 
+                                <div
                                     className={cn(
                                         getInitialsStyle(option.style),
                                         `font-${option.style}`
@@ -184,13 +196,14 @@ export default function SignatureOptions({ fullName, initials, onSelect, selecte
                 ))}
             </div>
 
-            {selectedId && (
-                <div className="mt-4 p-3 bg-muted/30 rounded-lg">
-                    <p className="text-sm text-muted-foreground">
-                        Selected: {signatureOptions.find(opt => opt.id === selectedId)?.style.replace('-', ' ').toUpperCase()} style
-                    </p>
-                </div>
-            )}
+            <div className="flex justify-end mx-auto max-w-6xl w-full gap-4 mt-4">
+                <Button variant="ghost" size="lg">
+                    <p className="hidden sm:block">Cancel</p>
+                </Button>
+                <Button variant="primary" size="lg" onClick={onCreateSignature}>
+                    Save
+                </Button>
+            </div>
         </div>
     )
 }

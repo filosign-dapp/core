@@ -10,24 +10,40 @@ import {
   useSidebar,
 } from "@/src/lib/components/ui/sidebar"
 import Logo from "@/src/lib/components/custom/Logo"
+import { useStorePersist } from "@/src/lib/hooks/use-store"
 
 
 export function DashboardSidebar({ className, ...props }: React.ComponentProps<typeof Sidebar>) {
   const { state, setOpen } = useSidebar()
+  const { sidebar, setSidebar } = useStorePersist()
   const isCollapsed = state === "collapsed"
+  const isInitialized = React.useRef(false)
+
+  // Initialize sidebar state from persisted state on mount
+  React.useEffect(() => {
+    if (!isInitialized.current) {
+      setOpen(sidebar.isOpen)
+      isInitialized.current = true
+    }
+  }, [sidebar.isOpen, setOpen])
+
+  // Update persisted state when UI state changes (only after initialization)
+  React.useEffect(() => {
+    if (isInitialized.current) {
+      const isOpen = state === "expanded"
+      if (isOpen !== sidebar.isOpen) {
+        setSidebar({ isOpen })
+      }
+    }
+  }, [state, sidebar.isOpen, setSidebar])
 
   return (
     <>
       <Sidebar className={className} collapsible="icon" {...props}>
         <SidebarHeader>
-          <Logo 
-            textClassName="text-foreground font-semibold" 
+          <Logo
+            textClassName="text-foreground font-semibold"
             isCollapsed={isCollapsed}
-            onIconClick={() => {
-              if (isCollapsed) {
-                setOpen(true)
-              }
-            }}
           />
         </SidebarHeader>
         <SidebarContent className="">

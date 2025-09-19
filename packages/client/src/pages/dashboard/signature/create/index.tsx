@@ -1,14 +1,16 @@
 import { useState } from "react"
-import { PaintBrushIcon, PaletteIcon, SignatureIcon, TextAaIcon, TrashIcon, UploadIcon } from "@phosphor-icons/react"
+import { CaretLeftIcon, PaintBrushIcon, PaletteIcon, SignatureIcon, TextAaIcon, TrashIcon, UploadIcon } from "@phosphor-icons/react"
 import { motion } from "motion/react"
 import { Button } from "@/src/lib/components/ui/button"
 import { Input } from "@/src/lib/components/ui/input"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/src/lib/components/ui/tabs"
 import Logo from "@/src/lib/components/custom/Logo"
 import SignatureDialog from "./_components/SignatureDialog"
-import SignatureOptions from "./_components/SignatureOptions"
 import { Image } from "@/src/lib/components/custom/Image"
 import SignatureUpload from "./_components/SignatureUpload"
+import SignatureDraw from "./_components/SignatureDraw"
+import SignatureChoose from "./_components/SignatureChoose"
+import { Link } from "@tanstack/react-router"
 
 export default function CreateNewSignaturePage() {
     const [fullName, setFullName] = useState("Kartikay Tiwari")
@@ -102,6 +104,12 @@ export default function CreateNewSignaturePage() {
 
             {/* Main Content */}
             <main className="p-8 mx-auto max-w-6xl space-y-8 flex flex-col items-center justify-center min-h-[calc(100dvh-4rem)]">
+                <Button variant="ghost" size="lg" className="self-start mb-4" asChild>
+                    <Link to="/dashboard">
+                        <CaretLeftIcon className="size-5" weight="bold" />
+                        <p>Back</p>
+                    </Link>
+                </Button>
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -164,157 +172,41 @@ export default function CreateNewSignaturePage() {
                         </TabsList>
 
                         <TabsContent value="choose" className="mt-6">
-                            <SignatureOptions
+                            <SignatureChoose
                                 fullName={fullName}
                                 initials={initials}
-                                onSelect={handleSignatureSelection}
+                                signatureData={signatureData}
+                                initialsData={initialsData}
                                 selectedSignatureId={selectedSignatureId || undefined}
+                                onSignatureSelection={handleSignatureSelection}
+                                onCreateSignature={handleCreateSignature}
                             />
                         </TabsContent>
 
                         <TabsContent value="draw" className="mt-6">
-                            <div className="space-y-4">
-                                <h4 className="text-muted-foreground">Draw Signature</h4>
-                                <div className="grid grid-cols-2 gap-4">
-                                    {/* Signature drawing area */}
-                                    <div className="space-y-3">
-                                        <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center min-h-[16rem] flex flex-col items-center justify-center bg-background">
-                                            {signatureData ? (
-                                                <div className="space-y-3">
-                                                    <img
-                                                        src={signatureData}
-                                                        alt="Signature"
-                                                        className="max-w-full max-h-32 object-contain"
-                                                    />
-                                                    <div className="flex gap-2 justify-center">
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            onClick={() => setIsSignatureDialogOpen(true)}
-                                                        >
-                                                            Edit Signature
-                                                        </Button>
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            onClick={handleClearSignature}
-                                                            className="text-destructive hover:text-destructive"
-                                                        >
-                                                            <TrashIcon className="size-4" />
-                                                        </Button>
-                                                    </div>
-                                                </div>
-                                            ) : (
-                                                <div className="space-y-3 flex flex-col items-center justify-center">
-                                                    <SignatureIcon className="size-16 text-muted-foreground" />
-                                                    <Button
-                                                        variant="primary"
-                                                        onClick={() => setIsSignatureDialogOpen(true)}
-                                                    >
-                                                        <PaintBrushIcon className="size-4" weight="bold" />
-                                                        Draw Signature
-                                                    </Button>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                    {/* Initials drawing area */}
-                                    <div className="space-y-3">
-                                        <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center min-h-[16rem] flex flex-col items-center justify-center bg-background">
-                                            {initialsData ? (
-                                                <div className="space-y-3">
-                                                    <img
-                                                        src={initialsData}
-                                                        alt="Initials"
-                                                        className="max-w-full max-h-32 object-contain"
-                                                    />
-                                                    <div className="flex gap-2 justify-center">
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            onClick={() => setIsInitialsDialogOpen(true)}
-                                                        >
-                                                            Edit Initials
-                                                        </Button>
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            onClick={handleClearInitials}
-                                                            className="text-destructive hover:text-destructive"
-                                                        >
-                                                            <TrashIcon className="size-4" />
-                                                        </Button>
-                                                    </div>
-                                                </div>
-                                            ) : (
-                                                <div className="space-y-3 flex flex-col items-center justify-center">
-                                                    <TextAaIcon className="size-16 text-muted-foreground" />
-                                                    <Button
-                                                        variant="primary"
-                                                        onClick={() => setIsInitialsDialogOpen(true)}
-                                                    >
-                                                        <PaintBrushIcon className="size-4" weight="bold" />
-                                                        Draw Initials
-                                                    </Button>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="flex justify-end mx-auto max-w-6xl w-full gap-4">
-                                    <Button variant="ghost" size="lg">
-                                        <p className="hidden sm:block">Cancel</p>
-                                    </Button>
-                                    <Button variant="primary" size="lg" onClick={handleCreateSignature}>
-                                        Save
-                                    </Button>
-                                </div>
-                            </div>
+                            <SignatureDraw
+                                signatureData={signatureData}
+                                initialsData={initialsData}
+                                onSignatureDialogOpen={() => setIsSignatureDialogOpen(true)}
+                                onInitialsDialogOpen={() => setIsInitialsDialogOpen(true)}
+                                onSignatureClear={handleClearSignature}
+                                onInitialsClear={handleClearInitials}
+                                onCreateSignature={handleCreateSignature}
+                            />
                         </TabsContent>
 
                         <TabsContent value="upload" className="mt-6">
-                            <div className="space-y-4">
-                                <h4 className="text-muted-foreground">Upload Signature</h4>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <SignatureUpload
-                                        title="Upload Signature"
-                                        icon={<SignatureIcon className="size-16 text-muted-foreground" />}
-                                        onFileUpload={handleSignatureUpload}
-                                        onFileClear={handleClearSignature}
-                                        uploadedFile={signatureData}
-                                    />
-                                    <SignatureUpload
-                                        title="Upload Initials"
-                                        icon={<TextAaIcon className="size-16 text-muted-foreground" />}
-                                        onFileUpload={handleInitialsUpload}
-                                        onFileClear={handleClearInitials}
-                                        uploadedFile={initialsData}
-                                    />
-                                </div>
-                                <p className="text-sm text-muted-foreground">
-                                    Accepted File Formats: GIF, JPG, PNG, BMP. Max file size 2MB.
-                                </p>
-                                <div className="flex justify-end mx-auto max-w-6xl w-full gap-4">
-                                    <Button variant="ghost" size="lg">
-                                        <p className="hidden sm:block">Cancel</p>
-                                    </Button>
-                                    <Button variant="primary" size="lg" onClick={handleCreateSignature}>
-                                        Save
-                                    </Button>
-                                </div>
-                            </div>
+                            <SignatureUpload
+                                signatureData={signatureData}
+                                initialsData={initialsData}
+                                onSignatureUpload={handleSignatureUpload}
+                                onInitialsUpload={handleInitialsUpload}
+                                onSignatureClear={handleClearSignature}
+                                onInitialsClear={handleClearInitials}
+                                onCreateSignature={handleCreateSignature}
+                            />
                         </TabsContent>
                     </Tabs>
-                </motion.div>
-
-                {/* Legal Disclaimer */}
-                <motion.div
-                    className="text-sm text-muted-foreground"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ type: "spring", stiffness: 200, damping: 25, delay: 0.5 }}
-                >
-                    By clicking Save, I agree that the signature and initials will be the electronic representation of my signature and initials for all purposes when I (or my agent) use them on envelopes, including legally binding contracts.
                 </motion.div>
             </main>
 

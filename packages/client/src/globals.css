@@ -171,6 +171,14 @@
   @apply mx-6 my-4;
 }
 
+/* Hide Scrollbar Utility */
+@utility hide-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 /* Handwritten Signature Font Classes */
 .font-caveat {
   font-family: "Caveat", cursive;

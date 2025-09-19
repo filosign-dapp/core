@@ -1,6 +1,5 @@
 import { useState, useRef, useCallback } from "react"
-import { motion } from "framer-motion"
-import { TrashIcon, UploadIcon } from "@phosphor-icons/react"
+import { SignatureIcon, TextAaIcon, TrashIcon, UploadIcon } from "@phosphor-icons/react"
 import { Button } from "@/src/lib/components/ui/button"
 import { cn } from "@/src/lib/utils/utils"
 
@@ -8,14 +7,24 @@ const ACCEPTED_FILE_TYPES = ["image/gif", "image/jpeg", "image/png", "image/bmp"
 const MAX_FILE_SIZE = 2 * 1024 * 1024 // 2MB
 
 interface SignatureUploadProps {
-    onFileUpload: (dataUrl: string) => void
-    onFileClear: () => void
+    signatureData: string | null
+    initialsData: string | null
+    onSignatureUpload: (dataUrl: string) => void
+    onInitialsUpload: (dataUrl: string) => void
+    onSignatureClear: () => void
+    onInitialsClear: () => void
+    onCreateSignature: () => void
+}
+
+interface UploadAreaProps {
     title: string
     icon: React.ReactNode
     uploadedFile: string | null
+    onFileUpload: (dataUrl: string) => void
+    onFileClear: () => void
 }
 
-export default function SignatureUpload({ onFileUpload, onFileClear, title, icon, uploadedFile }: SignatureUploadProps) {
+function UploadArea({ title, icon, uploadedFile, onFileUpload, onFileClear }: UploadAreaProps) {
     const [isDragOver, setIsDragOver] = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
     const [error, setError] = useState<string | null>(null)
@@ -93,7 +102,7 @@ export default function SignatureUpload({ onFileUpload, onFileClear, title, icon
                         <img
                             src={uploadedFile}
                             alt="Uploaded preview"
-                            className="max-w-full max-h-32 object-contain"
+                            className="object-contain max-w-full max-h-32"
                         />
                         <div className="flex gap-2 justify-center">
                             <Button
@@ -114,11 +123,8 @@ export default function SignatureUpload({ onFileUpload, onFileClear, title, icon
                         </div>
                     </div>
                 ) : (
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ type: "spring", stiffness: 230, damping: 25 }}
-                        className="space-y-3 flex flex-col items-center justify-center"
+                    <div
+                        className="flex flex-col justify-center items-center space-y-3"
                     >
                         {icon}
                         <p className="text-sm text-muted-foreground">
@@ -129,15 +135,58 @@ export default function SignatureUpload({ onFileUpload, onFileClear, title, icon
                             variant="primary"
                             onClick={handleUploadClick}
                         >
-                            <UploadIcon className="size-4 mr-2" weight="bold" />
+                            <UploadIcon className="mr-2 size-4" weight="bold" />
                             {title}
                         </Button>
-                    </motion.div>
+                    </div>
                 )}
             </div>
             {error && (
-                <p className="text-sm text-destructive text-center">{error}</p>
+                <p className="text-sm text-center text-destructive">{error}</p>
             )}
+        </div>
+    )
+}
+
+export default function SignatureUpload({
+    signatureData,
+    initialsData,
+    onSignatureUpload,
+    onInitialsUpload,
+    onSignatureClear,
+    onInitialsClear,
+    onCreateSignature
+}: SignatureUploadProps) {
+    return (
+        <div className="space-y-4">
+            <h4 className="text-muted-foreground">Upload Signature</h4>
+            <div className="grid grid-cols-2 gap-4">
+                <UploadArea
+                    title="Upload Signature"
+                    icon={<SignatureIcon className="size-16 text-muted-foreground" />}
+                    uploadedFile={signatureData}
+                    onFileUpload={onSignatureUpload}
+                    onFileClear={onSignatureClear}
+                />
+                <UploadArea
+                    title="Upload Initials"
+                    icon={<TextAaIcon className="size-16 text-muted-foreground" />}
+                    uploadedFile={initialsData}
+                    onFileUpload={onInitialsUpload}
+                    onFileClear={onInitialsClear}
+                />
+            </div>
+            <p className="text-sm text-muted-foreground">
+                Accepted File Formats: GIF, JPG, PNG, BMP. Max file size 2MB.
+            </p>
+            <div className="flex justify-end mx-auto max-w-6xl w-full gap-4">
+                <Button variant="ghost" size="lg">
+                    <p className="hidden sm:block">Cancel</p>
+                </Button>
+                <Button variant="primary" size="lg" onClick={onCreateSignature}>
+                    Save
+                </Button>
+            </div>
         </div>
     )
 }

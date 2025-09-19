@@ -10,9 +10,9 @@ import {
 
 // This is sample data.
 export const userData = {
-  name: "Sarah Chen",
-  email: "sarah.chen@filosign.com",
-  avatar: undefined, // Set to undefined to show fallback icon
+  name: "Styles",
+  email: "styles@filosign.com",
+  avatar: "https://cdn.dribbble.com/userupload/32112291/file/original-4d4ef0e9749c47c0e20c93e61583233c.jpg?resize=400x0",
 }
 
 export const sidebarData = {

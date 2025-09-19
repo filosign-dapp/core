@@ -1,7 +1,7 @@
 
 
 import * as React from "react"
-import { CaretDownIcon, UserIcon, GearIcon, BellIcon, SignOutIcon } from "@phosphor-icons/react"
+import { UserIcon, GearIcon, BellIcon, SignOutIcon } from "@phosphor-icons/react"
 import { motion } from "framer-motion"
 
 import {

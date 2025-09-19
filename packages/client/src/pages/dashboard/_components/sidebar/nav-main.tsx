@@ -12,6 +12,7 @@ import {
   useSidebar,
 } from "@/src/lib/components/ui/sidebar"
 import { Link } from "@tanstack/react-router"
+import { useStorePersist } from "@/src/lib/hooks/use-store"
 
 export function NavMain({
   items,
@@ -28,17 +29,17 @@ export function NavMain({
   }[]
 }) {
   const { state, setOpen } = useSidebar()
+  const { sidebar, setSidebar } = useStorePersist()
   const isCollapsed = state === "collapsed"
-  const [openItems, setOpenItems] = React.useState<Set<string>>(
-    new Set(items.filter(item => item.isActive).map(item => item.title))
-  )
+  const openItems = new Set(sidebar.expandedItems)
 
   // Collapse all items when sidebar collapses
   React.useEffect(() => {
     if (state === "collapsed") {
-      setOpenItems(new Set())
+      // Clear all expanded items when sidebar collapses
+      setSidebar({ expandedItems: [] })
     }
-  }, [state])
+  }, [state, setSidebar])
 
   const handleIconClick = () => {
     if (state === "collapsed") {
@@ -47,13 +48,10 @@ export function NavMain({
   }
 
   const toggleItem = (title: string) => {
-    setOpenItems(prev => {
-      const newSet = new Set<string>()
-      if (!prev.has(title)) {
-        newSet.add(title)
-      }
-      return newSet
-    })
+    const expandedItems = sidebar.expandedItems.includes(title)
+      ? [] // If clicking on expanded item, collapse it (clear all)
+      : [title]; // If clicking on collapsed item, expand only this one
+    setSidebar({ expandedItems, lastClickedMenu: title })
   }
 
   return (
@@ -64,11 +62,12 @@ export function NavMain({
           
           return (
             <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton 
+              <SidebarMenuButton
                 tooltip={item.title}
                 size="lg"
                 onClick={() => {
                   handleIconClick()
+                  setSidebar({ lastClickedMenu: item.title })
                   if (item.items && item.items.length > 0) {
                     toggleItem(item.title)
                   }
@@ -118,11 +117,11 @@ export function NavMain({
                       <SidebarMenuSub className="mt-1">
                         {item.items.map((subItem) => (
                           <SidebarMenuSubItem key={subItem.title}>
-                            <SidebarMenuSubButton 
+                            <SidebarMenuSubButton
                               asChild
                               className="text-sm font-medium transition-all duration-100 hover:bg-accent/50 hover:text-accent-foreground data-[active=true]:bg-accent/50 data-[active=true]:text-accent-foreground data-[active=true]:font-semibold px-5 py-2"
                             >
-                              <Link to={subItem.url}>
+                              <Link to={subItem.url} onClick={() => setSidebar({ lastClickedMenu: subItem.title })}>
                                 <span>{subItem.title}</span>
                               </Link>
                             </SidebarMenuSubButton>
