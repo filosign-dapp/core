@@ -89,7 +89,9 @@ export function UserDropdown() {
           Actions
         </DropdownMenuLabel>
         {[
-          { icon: UserIcon, label: "Profile Settings", action: () => console.log("Profile settings") },
+          { icon: UserIcon, label: "Manage Profile", action: () => {
+            navigate({ to: '/dashboard/settings/profile'})
+          } },
           { icon: GearIcon, label: "Preferences", action: () => console.log("Preferences") },
           { icon: BellIcon, label: "Notifications", action: () => console.log("Notifications") },
         ].map((item, index) => (
