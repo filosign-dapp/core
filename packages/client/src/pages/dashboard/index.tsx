@@ -3,38 +3,36 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src
 import { Badge } from "@/src/lib/components/ui/badge"
 import { Button } from "@/src/lib/components/ui/button"
 import {
-  FileTextIcon,
-  SignatureIcon,
-  CalendarIcon,
   PlusIcon,
 } from "@phosphor-icons/react"
 import { motion } from "motion/react"
 import { Link } from "@tanstack/react-router"
+import { Image } from "@/src/lib/components/custom/Image"
 
 const statsCards = [
   {
-    title: "Documents Signed",
+    title: "Your Documents",
     value: "0",
     description: "Total this month",
-    icon: FileTextIcon,
-    trend: "+ 0%",
-    color: "text-primary"
+    color: "text-primary",
+    link: "/dashboard/document/all",
+    image: "https://cdn-icons-png.flaticon.com/512/2786/2786356.png"
   },
   {
-    title: "Pending Signatures",
+    title: "Your Signatures",
     value: "0",
     description: "Awaiting completion",
-    icon: SignatureIcon,
-    trend: "+ 0%",
-    color: "text-primary"
+    color: "text-primary",
+    link: "/dashboard",
+    image: "https://cdn-icons-png.flaticon.com/512/10186/10186368.png"
   },
   {
-    title: "Active Envelopes",
+    title: "Your Envelopes",
     value: "0",
     description: "In progress",
-    icon: CalendarIcon,
-    trend: "+ 0%",
-    color: "text-primary"
+    color: "text-primary",
+    link: "/dashboard",
+    image: "https://cdn-icons-png.flaticon.com/512/3814/3814611.png"
   }
 ]
 
@@ -77,23 +75,24 @@ export default function DashboardPage() {
             transition={{ duration: 0.3, delay: 0.2 }}
           >
             {statsCards.map((stat) => (
-              <Card key={stat.title}>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardDescription className="text-sm font-medium flex items-center gap-2">
-                    <stat.icon className={`size-6 ${stat.color}`} weight="duotone" />
-                    {stat.title}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stat.value}</div>
-                  <div className="flex flex-col mt-3 text-xs text-muted-foreground">
-                    <span className={stat.trend.startsWith('+') ? 'text-primary' : 'text-destructive'}>
-                      {stat.trend}
-                    </span>
-                    <span>{stat.description}</span>
-                  </div>
-                </CardContent>
-              </Card>
+              <Link to={stat.link} key={stat.title}>
+                <Card key={stat.title} className="hover:bg-muted/40 transition-all">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardDescription className="text-sm font-medium flex items-center gap-2">
+                      {stat.title}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="flex items-center justify-between">
+                    <div className="flex flex-col gap-2">
+                      <p className="text-4xl font-bold">{stat.value}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {stat.description}
+                      </p>
+                    </div>
+                    <Image src={stat.image} alt={stat.title} className="object-contain p-2" width={100} height={100} />
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </motion.div>
 

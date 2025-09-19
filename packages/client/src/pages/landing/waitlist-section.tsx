@@ -7,7 +7,7 @@ export default function WaitlistSection() {
   const [email, setEmail] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // Refs for scroll-triggered animations
   const waitlistRef = useRef(null);
   const waitlistInView = useInView(waitlistRef, { once: true, margin: "-100px" });
@@ -23,7 +23,7 @@ export default function WaitlistSection() {
   };
 
   return (
-    <section ref={waitlistRef} className="max-w-[90dvw] mx-auto min-h-screen flex items-center justify-center p-4 sm:p-6 md:p-page">
+    <section ref={waitlistRef} className="sm:max-w-[80dvw] mx-auto min-h-screen flex items-center justify-center p-8 md:p-page">
       <AnimatePresence mode="wait">
         {!isSubmitted ? (
           <motion.div
@@ -54,7 +54,7 @@ export default function WaitlistSection() {
               <div className="relative">
                 {/* Main rocket container */}
                 <motion.div
-                  animate={{ 
+                  animate={{
                     y: [0, -10, 0],
                     rotate: [0, 2, -2, 0]
                   }}
@@ -66,14 +66,14 @@ export default function WaitlistSection() {
                   className="flex overflow-hidden relative justify-center items-center w-32 h-32 rounded-full border sm:w-40 sm:h-40 md:w-48 md:h-48 lg:w-56 lg:h-56 xl:w-64 xl:h-64 bg-card"
                 >
                   {/* Rocket icon */}
-                  <RocketLaunchIcon 
-                    className="w-16 h-16 drop-shadow-lg sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 xl:w-32 xl:h-32 text-primary" 
-                    weight="fill" 
+                  <RocketLaunchIcon
+                    className="w-16 h-16 drop-shadow-lg sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 xl:w-32 xl:h-32 text-primary"
+                    weight="fill"
                   />
-                  
+
                   {/* Sparkle effects */}
                   <motion.div
-                    animate={{ 
+                    animate={{
                       rotate: 360,
                       scale: [1, 1.2, 1]
                     }}
@@ -115,7 +115,7 @@ export default function WaitlistSection() {
               }}
               className="text-center"
             >
-              <h1 className="text-4xl font-semibold leading-tight sm:text-5xl md:text-6xl lg:text-7xl xl:text-9xl">
+              <h1 className="text-4xl font-semibold leading-tight sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl">
                 Join the waitlist
               </h1>
             </motion.div>
@@ -138,7 +138,7 @@ export default function WaitlistSection() {
                   placeholder="enter your email address"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="flex-1 p-3 text-base backdrop-blur-sm sm:text-lg md:text-2xl lg:text-4xl sm:p-4 md:p-5 focus-visible:border-primary focus-visible:ring-primary/20 bg-card"
+                  className="flex-1 p-3 text-base backdrop-blur-sm sm:text-lg md:text-2xl lg:text-4xl sm:p-4 md:p-5 rounded-main focus-visible:border-primary focus-visible:ring-primary/20 bg-card"
                   required
                 />
 
@@ -150,45 +150,39 @@ export default function WaitlistSection() {
                     type="submit"
                     variant="primary"
                     disabled={!email}
-                    className="h-12 sm:h-16 md:h-20 px-4 sm:px-6 md:px-8 text-base sm:text-lg md:text-xl lg:text-2xl rounded-none font-semibold group relative overflow-hidden w-full md:w-auto min-w-[120px] sm:min-w-[140px] md:min-w-[160px]"
+                    className="h-12 md:h-20 text-base sm:text-lg md:text-xl lg:text-2xl font-semibold group relative w-full px-12"
                   >
-                    <motion.div
-                      className="flex gap-2 justify-center items-center sm:gap-3"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <AnimatePresence mode="wait">
-                        {isLoading ? (
-                          <motion.div
-                            key="spinner"
-                            initial={{ opacity: 0, scale: 0.8, rotate: -180 }}
-                            animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                            exit={{ opacity: 0, scale: 0.5, rotate: 180 }}
-                            transition={{ 
-                              duration: 0.3, 
-                              ease: "easeInOut" 
-                            }}
-                            className="flex justify-center items-center"
-                          >
-                            <SpinnerBallIcon className="animate-spin size-5 sm:size-6 md:size-8 lg:size-10" />
-                          </motion.div>
-                        ) : (
-                          <motion.div
-                            key="send-icon"
-                            initial={{ opacity: 0, scale: 0.8, rotate: 180 }}
-                            animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                            exit={{ opacity: 0, scale: 0.5, rotate: 180 }}
-                            transition={{ 
-                              duration: 0.3, 
-                              ease: "easeInOut" 
-                            }}
-                            className="flex justify-center items-center"
-                          >
-                            <PaperPlaneTiltIcon className="transition-transform duration-200 size-5 sm:size-6 md:size-8 lg:size-10 group-hover:translate-x-1 group-hover:-translate-y-1 group-active:translate-x-0 group-active:translate-y-0" />
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </motion.div>
+                    <AnimatePresence mode="wait">
+                      {isLoading ? (
+                        <motion.div
+                          key="spinner"
+                          initial={{ opacity: 0, scale: 0.8, rotate: -180 }}
+                          animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                          exit={{ opacity: 0, scale: 0.5, rotate: 180 }}
+                          transition={{
+                            duration: 0.3,
+                            ease: "easeInOut"
+                          }}
+                          className="flex justify-center items-center"
+                        >
+                          <SpinnerBallIcon className="animate-spin size-5 sm:size-6 md:size-8 lg:size-10" />
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          key="send-icon"
+                          initial={{ opacity: 0, scale: 0.8, rotate: 180 }}
+                          animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                          exit={{ opacity: 0, scale: 0.5, rotate: 180 }}
+                          transition={{
+                            duration: 0.3,
+                            ease: "easeInOut"
+                          }}
+                          className="flex justify-center items-center"
+                        >
+                          <PaperPlaneTiltIcon className="transition-transform duration-200 size-5 sm:size-6 md:size-8 lg:size-10 group-hover:translate-x-1 group-hover:-translate-y-1 group-active:translate-x-0 group-active:translate-y-0" />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </Button>
                 </motion.div>
               </div>
@@ -220,32 +214,21 @@ export default function WaitlistSection() {
             }}
             className="p-8 space-y-6 text-center rounded-large"
           >
-          <motion.div
-            initial={{ y: 50, opacity: 0 }}
-            animate={waitlistInView ? { y: 0, opacity: 1 } : { y: 50, opacity: 0 }}
-            transition={{
-              type: "spring",
-              stiffness: 200,
-              damping: 25,
-              delay: 0.4
-            }}
-            className="flex justify-center items-center mx-auto rounded-full border size-20 sm:size-24 md:size-28 lg:size-32 bg-primary"
-          >
-            <CheckIcon className="size-12 sm:size-16 md:size-18 lg:size-20 text-primary-foreground" weight="bold" />
-          </motion.div>
+            <motion.div
+              initial={{ y: 50, opacity: 0 }}
+              animate={waitlistInView ? { y: 0, opacity: 1 } : { y: 50, opacity: 0 }}
+              transition={{
+                type: "spring",
+                stiffness: 200,
+                damping: 25,
+                delay: 0.4
+              }}
+              className="flex justify-center items-center mx-auto rounded-full border size-20 sm:size-24 md:size-28 lg:size-32 bg-primary"
+            >
+              <CheckIcon className="size-12 sm:size-16 md:size-18 lg:size-20 text-primary-foreground" weight="bold" />
+            </motion.div>
 
-          <motion.div
-            initial={{ y: 30, opacity: 0 }}
-            animate={waitlistInView ? { y: 0, opacity: 1 } : { y: 30, opacity: 0 }}
-            transition={{
-              type: "spring",
-              stiffness: 200,
-              damping: 25,
-              delay: 0.5
-            }}
-            className="space-y-2"
-          >
-            <motion.h1
+            <motion.div
               initial={{ y: 30, opacity: 0 }}
               animate={waitlistInView ? { y: 0, opacity: 1 } : { y: 30, opacity: 0 }}
               transition={{
@@ -253,19 +236,30 @@ export default function WaitlistSection() {
                 stiffness: 200,
                 damping: 25,
                 delay: 0.5
-              }} className="text-2xl leading-tight sm:text-3xl md:text-4xl xl:text-7xl">You're on the list!</motion.h1>
-            <motion.p
-              initial={{ y: 30, opacity: 0 }}
-              animate={waitlistInView ? { y: 0, opacity: 1 } : { y: 30, opacity: 0 }}
-              transition={{
-                type: "spring",
-                stiffness: 200,
-                damping: 25,
-                delay: 0.6
-              }} className="text-base leading-relaxed sm:text-lg xl:text-lg text-muted-foreground">
-              We'll notify you as soon as we go live on the mainnet.
-            </motion.p>
-          </motion.div>
+              }}
+              className="space-y-2"
+            >
+              <motion.h1
+                initial={{ y: 30, opacity: 0 }}
+                animate={waitlistInView ? { y: 0, opacity: 1 } : { y: 30, opacity: 0 }}
+                transition={{
+                  type: "spring",
+                  stiffness: 200,
+                  damping: 25,
+                  delay: 0.5
+                }} className="text-2xl leading-tight sm:text-3xl md:text-4xl xl:text-7xl">You're on the list!</motion.h1>
+              <motion.p
+                initial={{ y: 30, opacity: 0 }}
+                animate={waitlistInView ? { y: 0, opacity: 1 } : { y: 30, opacity: 0 }}
+                transition={{
+                  type: "spring",
+                  stiffness: 200,
+                  damping: 25,
+                  delay: 0.6
+                }} className="text-base leading-relaxed sm:text-lg xl:text-lg text-muted-foreground">
+                We'll notify you as soon as we go online.
+              </motion.p>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

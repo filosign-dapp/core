@@ -82,7 +82,7 @@ export default function PricingSection() {
     const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
 
     return (
-        <section ref={sectionRef} className="max-w-[90dvw] mx-auto flex flex-col gap-6 md:gap-8 py-8 md:py-12 p-4 md:p-page">
+        <section ref={sectionRef} className="sm:max-w-[80dvw] mx-auto flex flex-col gap-6 md:gap-8 py-8 md:py-12 p-8 md:p-page">
             <motion.div
                 className="text-center"
                 initial={{ opacity: 0, y: 30 }}

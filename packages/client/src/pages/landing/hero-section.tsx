@@ -7,7 +7,7 @@ import { Image } from "@/src/lib/components/custom/Image";
 
 export default function HeroSection() {
   return (
-    <section className="max-w-[90dvw] mx-auto flex flex-col gap-6 md:gap-8 py-12 p-4 md:p-page">
+    <section className="sm:max-w-[80dvw] mx-auto flex flex-col gap-6 md:gap-8 py-12 p-8 md:p-page">
       {/* Text Content Group */}
       <motion.div
         className="flex flex-col gap-4"
@@ -105,8 +105,9 @@ export default function HeroSection() {
           damping: 50,
           delay: 1.5
         }}
+        className="flex items-center justify-center bg-secondary p-4 md:p-6 rounded-3xl mt-4"
       >
-        <Image src="/static/hero.png" alt="Filosign" width={500} height={500} className="size-full mt-4 md:mt-0 rounded-large" />
+        <Image src="/static/hero_2.png" alt="Filosign" width={500} height={500} className="size-full rounded-large" />
       </motion.div>
     </section>
   );
