@@ -2,11 +2,11 @@ import { Database } from "bun:sqlite";
 import { existsSync, mkdirSync } from "fs";
 
 // Create data directory if it doesn't exist
-if (!existsSync("data")) {
-  mkdirSync("data", { recursive: true });
+if (!existsSync("db")) {
+  mkdirSync("db", { recursive: true });
 }
 
-const db = new Database("data/filosign.db", { safeIntegers: true });
+const db = new Database("db/filosign.db", { safeIntegers: true });
 
 // Initialize database schema
 db.run(`

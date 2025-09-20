@@ -132,4 +132,4 @@ dist/
 .vercel
 
 # Database and data files
-data/
+db/
