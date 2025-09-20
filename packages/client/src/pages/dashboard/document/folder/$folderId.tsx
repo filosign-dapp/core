@@ -1,6 +1,5 @@
 import { Input } from "@/src/lib/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/lib/components/ui/select"
-import { Popover, PopoverContent, PopoverTrigger } from "@/src/lib/components/ui/popover"
 import { Button } from "@/src/lib/components/ui/button"
 import {
   FileTextIcon,
@@ -26,6 +25,7 @@ export default function DocumentFolderPage() {
   const [isViewSwitching, setIsViewSwitching] = useState(false)
   const [viewerOpen, setViewerOpen] = useState(false)
   const [selectedFileId, setSelectedFileId] = useState<string | null>(null)
+  const [isFilterOpen, setIsFilterOpen] = useState(false)
 
   const folder = getFolderById(folderId!)
   const files = getFilesInFolder(folderId!)
@@ -129,47 +129,14 @@ export default function DocumentFolderPage() {
                   </Select>
                 </div>
 
-                <div className="@5xl:hidden">
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline">
-                        <FunnelIcon className="size-5" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="mt-2 w-80" align="end">
-                      <div className="space-y-4">
-                        <div>
-                          <h3 className="font-medium leading-none text-md text-foreground">Filters</h3>
-                          <p className="mt-2 text-sm text-muted-foreground">Select at least one filter</p>
-                        </div>
-
-                        <Select>
-                          <SelectTrigger className="w-full" size="sm">
-                            <SelectValue placeholder="Type: All" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="all">All Types</SelectItem>
-                            <SelectItem value="pdf">PDF</SelectItem>
-                            <SelectItem value="image">Images</SelectItem>
-                            <SelectItem value="text">Text Files</SelectItem>
-                          </SelectContent>
-                        </Select>
-
-                        <Select>
-                          <SelectTrigger className="w-full" size="sm">
-                            <SelectValue placeholder="All Time" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="all">All Time</SelectItem>
-                            <SelectItem value="today">Today</SelectItem>
-                            <SelectItem value="week">This Week</SelectItem>
-                            <SelectItem value="month">This Month</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                </div>
+                <Button
+                  variant={isFilterOpen ? "default" : "outline"}
+                  size="sm"
+                  className="size-8 p-0"
+                  onClick={() => setIsFilterOpen(!isFilterOpen)}
+                >
+                  <FunnelIcon className="size-4" />
+                </Button>
               </motion.div>
 
               <div className="flex items-center gap-2 bg-muted/20 rounded-lg p-1">
@@ -191,6 +158,56 @@ export default function DocumentFolderPage() {
                 >
                   <ListIcon className="h-4 w-4" />
                 </Button>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Animated Filter Row */}
+          <motion.div
+            className="overflow-hidden border-b border-border"
+            initial={false}
+            animate={{
+              height: isFilterOpen ? "auto" : 0,
+              opacity: isFilterOpen ? 1 : 0
+            }}
+            transition={{
+              duration: 0.3,
+              ease: "easeInOut",
+              opacity: { duration: 0.2 }
+            }}
+          >
+            <div className="px-8 py-4 bg-background/50 backdrop-blur-sm">
+              <div className="flex flex-col gap-4 @md:flex-row @md:items-center">
+                <div className="flex items-center gap-2">
+                  <FunnelIcon className="size-4 text-muted-foreground" />
+                  <span className="text-sm font-medium text-foreground">Filters</span>
+                </div>
+
+                <div className="flex flex-col gap-3 @md:flex-row @md:gap-4 @md:flex-1">
+                  <Select>
+                    <SelectTrigger className="w-full @md:w-auto @md:min-w-40" size="sm">
+                      <SelectValue placeholder="Type: All" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Types</SelectItem>
+                      <SelectItem value="pdf">PDF</SelectItem>
+                      <SelectItem value="image">Images</SelectItem>
+                      <SelectItem value="text">Text Files</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Select>
+                    <SelectTrigger className="w-full @md:w-auto @md:min-w-40" size="sm">
+                      <SelectValue placeholder="All Time" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Time</SelectItem>
+                      <SelectItem value="today">Today</SelectItem>
+                      <SelectItem value="week">This Week</SelectItem>
+                      <SelectItem value="month">This Month</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
           </motion.div>

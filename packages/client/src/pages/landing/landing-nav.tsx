@@ -3,7 +3,7 @@ import { Button } from "@/src/lib/components/ui/button";
 import { useStorePersist } from "@/src/lib/hooks/use-store";
 import { usePrivy } from "@privy-io/react-auth";
 import { Link } from "@tanstack/react-router";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 
 interface NavLink {
@@ -23,6 +23,14 @@ export default function LandingNavbar() {
   const [lastScrollY, setLastScrollY] = useState(0);
   const { ready, authenticated, login } = usePrivy();
   const { onboardingForm } = useStorePersist();
+
+  // Determine button state for smooth transitions
+  const getButtonState = () => {
+    if (!ready) return 'loading';
+    if (!authenticated) return 'signin';
+    if (!onboardingForm?.hasOnboarded) return 'get-started';
+    return 'dashboard';
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -106,19 +114,50 @@ export default function LandingNavbar() {
             delay: 0.78
           }}
         >
-          {ready && authenticated ? (
-            <Button variant="secondary" asChild>
-              <Link to={onboardingForm?.hasOnboarded ? '/dashboard' : '/onboarding'}>
-                {onboardingForm?.hasOnboarded ? 'Dashboard' : 'Get started'}
+          <Button
+            variant="secondary"
+            onClick={getButtonState() === 'signin' ? () => login() : undefined}
+            asChild={getButtonState() === 'get-started' || getButtonState() === 'dashboard'}
+            className="min-w-28"
+          >
+            {getButtonState() === 'get-started' || getButtonState() === 'dashboard' ? (
+              <Link to={getButtonState() === 'dashboard' ? '/dashboard' : '/onboarding'}>
+                <AnimatePresence mode="wait">
+                  <motion.span
+                    key={getButtonState()}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{
+                      duration: 0.2,
+                      ease: "easeInOut",
+                      layout: { duration: 0.3 }
+                    }}
+                    layout
+                  >
+                    {getButtonState() === 'dashboard' ? 'Dashboard' : 'Get started'}
+                  </motion.span>
+                </AnimatePresence>
               </Link>
-            </Button>
-          ) : (
-            <Button variant="secondary" onClick={() => {
-              login();
-            }}>
-                Connect
-            </Button>
-          )}
+            ) : (
+              <AnimatePresence mode="wait">
+                <motion.span
+                  key={getButtonState()}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{
+                    duration: 0.2,
+                    ease: "easeInOut",
+                    layout: { duration: 0.3 }
+                  }}
+                  layout
+                >
+                  Sign In
+                </motion.span>
+              </AnimatePresence>
+            )}
+          </Button>
         </motion.div>
       </motion.nav>
       

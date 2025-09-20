@@ -25,7 +25,7 @@ export default function Logo({
     isCollapsed = false,
     onIconClick,
     showText = true,
-    textDelay = 0.2,
+    textDelay = 0.1,
     iconDelay = 0.26
 }: LogoProps) {
     const navigate = useNavigate();

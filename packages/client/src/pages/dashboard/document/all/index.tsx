@@ -1,6 +1,5 @@
 import { Input } from "@/src/lib/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/lib/components/ui/select"
-import { Popover, PopoverContent, PopoverTrigger } from "@/src/lib/components/ui/popover"
 import { Button } from "@/src/lib/components/ui/button"
 import {
   FileTextIcon,
@@ -26,6 +25,7 @@ export default function DocumentAllPage() {
   const [isViewSwitching, setIsViewSwitching] = useState(false)
   const [viewerOpen, setViewerOpen] = useState(false)
   const [selectedFileId, setSelectedFileId] = useState<string | null>(null)
+  const [isFilterOpen, setIsFilterOpen] = useState(false)
   const items = getRootItems()
 
   const handleViewModeChange = (newViewMode: "list" | "grid") => {
@@ -53,8 +53,6 @@ export default function DocumentAllPage() {
   return (
     <DashboardLayout>
       <div className="flex flex-col h-full rounded-tl-2xl bg-background @container">
-
-
         {/* Main Content */}
         <div className="flex flex-1 flex-col">
           {/* Header with view mode toggle */}
@@ -111,46 +109,14 @@ export default function DocumentAllPage() {
                   </Select>
                 </div>
 
-                <div className="@5xl:hidden">
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" size="sm" className="size-8 p-0">
-                        <FunnelIcon className="size-4" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="mt-2 w-80" align="end">
-                      <div className="space-y-4">
-                        <div>
-                          <h3 className="font-medium leading-none text-md text-foreground">Filters</h3>
-                          <p className="mt-2 text-sm text-muted-foreground">Select at least one filter</p>
-                        </div>
-
-                        <Select>
-                          <SelectTrigger className="w-full" size="sm">
-                            <SelectValue placeholder="Sender: All" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="all">All</SelectItem>
-                            <SelectItem value="me">Me</SelectItem>
-                            <SelectItem value="others">Others</SelectItem>
-                          </SelectContent>
-                        </Select>
-
-                        <Select>
-                          <SelectTrigger className="w-full" size="sm">
-                            <SelectValue placeholder="All Time" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="all">All Time</SelectItem>
-                            <SelectItem value="today">Today</SelectItem>
-                            <SelectItem value="week">This Week</SelectItem>
-                            <SelectItem value="month">This Month</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                </div>
+                <Button
+                  variant={isFilterOpen ? "default" : "outline"}
+                  size="sm"
+                  className="size-8 p-0"
+                  onClick={() => setIsFilterOpen(!isFilterOpen)}
+                >
+                  <FunnelIcon className="size-4" />
+                </Button>
               </motion.div>
 
               <div className="flex items-center gap-2 bg-card rounded-lg p-1">
@@ -172,6 +138,55 @@ export default function DocumentAllPage() {
                 >
                   <ListIcon className="h-4 w-4" />
                 </Button>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Animated Filter Row */}
+          <motion.div
+            className="overflow-hidden border-b border-border"
+            initial={false}
+            animate={{
+              height: isFilterOpen ? "auto" : 0,
+              opacity: isFilterOpen ? 1 : 0
+            }}
+            transition={{
+              duration: 0.3,
+              ease: "easeInOut",
+              opacity: { duration: 0.2 }
+            }}
+          >
+            <div className="px-8 py-4 bg-background/50 backdrop-blur-sm">
+              <div className="flex flex-col gap-4 @md:flex-row @md:items-center">
+                <div className="flex items-center gap-2">
+                  <FunnelIcon className="size-4 text-muted-foreground" />
+                  <span className="text-sm font-medium text-foreground">Filters</span>
+                </div>
+
+                <div className="flex flex-col gap-3 @md:flex-row @md:gap-4 @md:flex-1">
+                  <Select>
+                    <SelectTrigger className="w-full @md:w-auto @md:min-w-40" size="sm">
+                      <SelectValue placeholder="Sender: All" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All</SelectItem>
+                      <SelectItem value="me">Me</SelectItem>
+                      <SelectItem value="others">Others</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Select>
+                    <SelectTrigger className="w-full @md:w-auto @md:min-w-40" size="sm">
+                      <SelectValue placeholder="All Time" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Time</SelectItem>
+                      <SelectItem value="today">Today</SelectItem>
+                      <SelectItem value="week">This Week</SelectItem>
+                      <SelectItem value="month">This Month</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
           </motion.div>
@@ -226,7 +241,7 @@ export default function DocumentAllPage() {
                           <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
                             Folders ({folders.length})
                           </h3>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+                          <div className="grid grid-cols-1 @xl:grid-cols-2 @2xl:grid-cols-3 @3xl:grid-cols-4 @5xl:grid-cols-5 gap-3">
                             {folders.map((folder) => (
                               <FolderCard
                                 key={`folder-${folder.id}`}
@@ -262,7 +277,7 @@ export default function DocumentAllPage() {
                               ))}
                             </div>
                           ) : (
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+                            <div className="grid grid-cols-2 @xl:grid-cols-3 @2xl:grid-cols-4 @3xl:grid-cols-5 @5xl:grid-cols-5 gap-4">
                               {files.map((file) => (
                                 <FileCard
                                   key={`file-${file.id}`}

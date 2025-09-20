@@ -66,7 +66,8 @@ export function NavMain({
                 onClick={() => {
                   handleIconClick()
                   setSidebar({ lastClickedMenu: item.title })
-                  if (item.items && item.items.length > 0) {
+                  // Only toggle submenu if sidebar is not collapsed
+                  if (item.items && item.items.length > 0 && state !== "collapsed") {
                     toggleItem(item.title)
                   }
                 }}

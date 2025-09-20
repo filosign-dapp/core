@@ -55,13 +55,12 @@ export default function DashboardPage() {
 
         <div className="p-8 rounded-large mx-8 mt-8 bg-card gap-4 @3xl:gap-8 flex flex-col @3xl:flex-row items-start @3xl:items-center justify-between">
           <div>
-            <h4 className="font-semibold mb-1">No signature?</h4>
-            <p className="text-muted-foreground">Create your signature to start signing documents</p>
+            <h4 className="font-semibold mb-1">Finish setting up your account</h4>
+            <p className="text-muted-foreground">Check out your profile and update your information</p>
           </div>
           <Button variant="primary" asChild className="group">
-            <Link to="/dashboard/signature/create">
-              <PlusIcon weight="bold" className="group-hover:rotate-90 transition-transform duration-200" />
-              Create New Signature
+            <Link to="/dashboard/settings/profile">
+              Update Profile
             </Link>
           </Button>
         </div>
