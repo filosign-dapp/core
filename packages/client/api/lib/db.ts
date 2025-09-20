@@ -31,9 +31,4 @@ export function closeDatabase() {
   }
 }
 
-if (typeof process !== "undefined") {
-  process.on("SIGINT", closeDatabase);
-  process.on("SIGTERM", closeDatabase);
-}
-
 export { db };
