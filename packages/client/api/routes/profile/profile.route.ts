@@ -3,7 +3,7 @@ import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
 import { respond } from "@/api/lib/utils/respond";
 
-const example = new Hono()
+const profile = new Hono()
   .get(
     "/",
     zValidator(
@@ -30,5 +30,5 @@ const example = new Hono()
     }
   )
 
-export default example;
-export type ExampleType = typeof example;
+export default profile;
+export type ProfileType = typeof profile;

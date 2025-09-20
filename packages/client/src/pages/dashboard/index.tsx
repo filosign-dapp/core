@@ -162,7 +162,7 @@ export default function DashboardPage() {
                 <CardContent className="space-y-4">
                   <div className="p-4 bg-primary text-primary-foreground rounded-lg">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">FIL Balance</span>
+                      <span className="text-sm font-medium">Balance</span>
                       <Badge variant="primary" className="text-xs">Active</Badge>
                     </div>
                     <div className="text-2xl font-bold">0 USDFC</div>

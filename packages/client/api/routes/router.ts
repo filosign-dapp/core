@@ -1,7 +1,11 @@
 import { Hono } from "hono";
-import example from "./example";
+import profile from "./profile";
+import waitlist from "./waitlist";
 
 const routes = new Hono()
-.route("/example", example)
+.route("/profile", profile)
+.route("/waitlist", waitlist)
+// Handle trailing slash for waitlist
+.route("/waitlist/", waitlist)
 
 export default routes;

@@ -1,0 +1,41 @@
+import { Database } from "bun:sqlite";
+import { existsSync, mkdirSync } from "fs";
+
+// Create data directory if it doesn't exist
+if (!existsSync("data")) {
+  mkdirSync("data", { recursive: true });
+}
+
+const db = new Database("data/filosign.db", { safeIntegers: true });
+
+// Initialize database schema
+db.run(`
+  CREATE TABLE IF NOT EXISTS waitlist (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT NOT NULL UNIQUE,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )
+`);
+
+db.run("PRAGMA journal_mode = WAL");
+db.run("CREATE INDEX IF NOT EXISTS idx_waitlist_email ON waitlist(email)");
+
+// Cleanup function
+export function closeDatabase() {
+  try {
+    db.close(false);
+  } catch (error) {
+    try {
+      db.close(true);
+    } catch {}
+  }
+}
+
+// Handle graceful shutdown
+if (typeof process !== "undefined") {
+  process.on("SIGINT", closeDatabase);
+  process.on("SIGTERM", closeDatabase);
+}
+
+export { db };

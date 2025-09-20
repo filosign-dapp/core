@@ -1,16 +1,52 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import client from "../utils/api-client";
 import { toast } from "sonner";
 
 export function useApi() {
+    const queryClient = useQueryClient();
+
     return {
-        welcome: useMutation({
-            mutationFn: async (name: string) => {
-                const result = await client.example.index.$get({
-                    query: {
-                        name,
+        // Get all waitlist emails
+        getWaitlistEmails: useQuery({
+            queryKey: ["waitlist"],
+            queryFn: async () => {
+                const result = await client.waitlist.index.$get();
+                const parsed = await result.json();
+
+                if (!parsed.success) {
+                    throw new Error(parsed.error);
+                }
+
+                return parsed.data;
+            },
+        }),
+
+        // Check if email exists
+        checkEmailExists: (email: string) => useQuery({
+            queryKey: ["waitlist", "check", email],
+            queryFn: async () => {
+                const result = await client.waitlist.check[":email"].$get({
+                    param: { email }
+                });
+                const parsed = await result.json();
+
+                if (!parsed.success) {
+                    throw new Error(parsed.error);
+                }
+
+                return parsed.data;
+            },
+            enabled: !!email, // Only run when email is provided
+        }),
+
+        // Join waitlist
+        joinWaitlist: useMutation({
+            mutationFn: async (email: string) => {
+                const result = await client.waitlist.index.$post({
+                    json: {
+                        email,
                     },
-                })
+                });
 
                 const parsed = await result.json();
 
@@ -21,11 +57,39 @@ export function useApi() {
                 return parsed.data;
             },
             onSuccess: (res) => {
-                toast.success(`Success: ${res.name}`);
+                toast.success("Successfully joined the waitlist!");
+                // Invalidate waitlist queries to refresh data
+                queryClient.invalidateQueries({ queryKey: ["waitlist"] });
             },
             onError: (err) => {
                 console.error(err);
-                toast.error("Failed to fetch data");
+                toast.error(err.message || "Failed to join waitlist");
+            }
+        }),
+
+        // Remove email from waitlist
+        removeFromWaitlist: useMutation({
+            mutationFn: async (email: string) => {
+                const result = await client.waitlist[":email"].$delete({
+                    param: { email }
+                });
+
+                const parsed = await result.json();
+
+                if (!parsed.success) {
+                    throw new Error(parsed.error);
+                }
+
+                return parsed.data;
+            },
+            onSuccess: (res) => {
+                toast.success("Successfully removed from waitlist!");
+                // Invalidate waitlist queries to refresh data
+                queryClient.invalidateQueries({ queryKey: ["waitlist"] });
+            },
+            onError: (err) => {
+                console.error(err);
+                toast.error(err.message || "Failed to remove from waitlist");
             }
         }),
     }

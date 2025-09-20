@@ -1,7 +1,7 @@
 import { UserIcon, CameraIcon, TrashIcon } from "@phosphor-icons/react"
 import { Button } from "@/src/lib/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/lib/components/ui/card"
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/src/lib/components/ui/form"
+import { FormField } from "@/src/lib/components/ui/form"
 import { SaveButton } from "./components/SaveButton"
 
 interface ProfilePictureSectionProps {

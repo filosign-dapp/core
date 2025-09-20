@@ -2,24 +2,41 @@ import { Button } from "@/src/lib/components/ui/button";
 import { PaperPlaneTiltIcon, CheckIcon, SpinnerBallIcon, RocketLaunchIcon } from "@phosphor-icons/react";
 import { motion, AnimatePresence, useInView } from "motion/react";
 import { useState, useRef } from "react";
+import { useApi } from "@/src/lib/hooks/use-api";
 
 export default function WaitlistSection() {
   const [email, setEmail] = useState("");
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isDuplicate, setIsDuplicate] = useState(false);
 
   // Refs for scroll-triggered animations
   const waitlistRef = useRef(null);
   const waitlistInView = useInView(waitlistRef, { once: true, margin: "-100px" });
 
+  const { joinWaitlist } = useApi();
+
   const handleJoinWaitlist = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
 
-    setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setIsSubmitted(true);
-    setIsLoading(false);
+    try {
+      await joinWaitlist.mutateAsync(email);
+      setIsSubmitted(true);
+      setIsDuplicate(false); // New registration
+      setEmail(""); // Clear the email field on success
+    } catch (error: any) {
+      // Check if the error is specifically about duplicate email (409 status)
+      if (error?.message?.includes("Email already registered") ||
+          error?.message?.includes("already registered")) {
+        // Treat duplicate email as success - user is already registered
+        setIsSubmitted(true);
+        setIsDuplicate(true); // Mark as duplicate
+        setEmail(""); // Clear the email field
+        return;
+      }
+      // For other errors, let the mutation's onError callback handle it
+      console.error('Error joining waitlist:', error);
+    }
   };
 
   return (
@@ -149,11 +166,11 @@ export default function WaitlistSection() {
                   <Button
                     type="submit"
                     variant="primary"
-                    disabled={!email}
+                    disabled={!email || joinWaitlist.isPending}
                     className="h-12 md:h-20 text-base sm:text-lg md:text-xl lg:text-2xl font-semibold group relative w-full px-12"
                   >
                     <AnimatePresence mode="wait">
-                      {isLoading ? (
+                      {joinWaitlist.isPending ? (
                         <motion.div
                           key="spinner"
                           initial={{ opacity: 0, scale: 0.8, rotate: -180 }}
@@ -247,7 +264,9 @@ export default function WaitlistSection() {
                   stiffness: 200,
                   damping: 25,
                   delay: 0.5
-                }} className="text-2xl leading-tight sm:text-3xl md:text-4xl xl:text-7xl">You're on the list!</motion.h1>
+                }} className="text-2xl leading-tight sm:text-3xl md:text-4xl xl:text-7xl">
+                {isDuplicate ? "You're already on the list!" : "You're on the list!"}
+              </motion.h1>
               <motion.p
                 initial={{ y: 30, opacity: 0 }}
                 animate={waitlistInView ? { y: 0, opacity: 1 } : { y: 30, opacity: 0 }}

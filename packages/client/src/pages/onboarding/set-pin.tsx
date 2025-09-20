@@ -25,7 +25,7 @@ export default function OnboardingSetPinPage() {
         setIsSuccess(false)
         setLoadingProgress(0)
 
-        const duration = 3000 
+        const duration = 5000 
         const steps = 50 
         const increment = 50 / steps
 
@@ -35,7 +35,6 @@ export default function OnboardingSetPinPage() {
             }, (duration / steps) * i)
         }
 
-        // Show success state
         setTimeout(() => {
             if (onboardingForm) {
                 setOnboardingForm({ ...onboardingForm, pin })

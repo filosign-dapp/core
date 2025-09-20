@@ -7,6 +7,7 @@ interface OnboardingForm {
   pin: string;
   hasOnboarded: boolean;
   selectedSignature?: string;
+  image?: string;
 }
 
 interface SidebarState {
@@ -20,8 +21,8 @@ interface StorePersist {
   setCreateForm: (form: CreateForm) => void;
   clearCreateForm: () => void;
 
-  onboardingForm: OnboardingForm | null;
-  setOnboardingForm: (form: OnboardingForm | null) => void;
+  onboardingForm: OnboardingForm;
+  setOnboardingForm: (form: OnboardingForm) => void;
   clearOnboardingForm: () => void;
 
   sidebar: SidebarState;
@@ -35,9 +36,21 @@ export const useStorePersist = create<StorePersist>()(
       setCreateForm: (form: CreateForm) => set({ createForm: form }),
       clearCreateForm: () => set({ createForm: null }),
 
-      onboardingForm: null,
-      setOnboardingForm: (form: OnboardingForm | null) => set({ onboardingForm: form }),
-      clearOnboardingForm: () => set({ onboardingForm: null }),
+      onboardingForm: {
+        name: "",
+        pin: "",
+        hasOnboarded: false,
+        selectedSignature: undefined,
+        image: "https://cdn.dribbble.com/userupload/32112291/file/original-4d4ef0e9749c47c0e20c93e61583233c.jpg?resize=400x0",
+      },
+      setOnboardingForm: (form: OnboardingForm) => set({ onboardingForm: form }),
+      clearOnboardingForm: () => set({ onboardingForm: {
+        name: "",
+        pin: "",
+        hasOnboarded: false,
+        selectedSignature: undefined,
+        image: "https://cdn.dribbble.com/userupload/32112291/file/original-4d4ef0e9749c47c0e20c93e61583233c.jpg?resize=400x0",
+      } }),
 
       sidebar: {
         isOpen: true,
