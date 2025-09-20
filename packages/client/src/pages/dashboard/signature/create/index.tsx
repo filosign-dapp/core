@@ -11,11 +11,13 @@ import SignatureUpload from "./_components/SignatureUpload"
 import SignatureDraw from "./_components/SignatureDraw"
 import SignatureChoose from "./_components/SignatureChoose"
 import { Link, useNavigate } from "@tanstack/react-router"
+import { useStorePersist } from "@/src/lib/hooks/use-store"
 
 export default function CreateNewSignaturePage({ onboarding }: { onboarding?: boolean }) {
     const [fullName, setFullName] = useState("John Doe")
     const [initials, setInitials] = useState("JD")
     const navigate = useNavigate()
+    const { onboardingForm, setOnboardingForm } = useStorePersist()
 
     // Tab state
     const [activeTab, setActiveTab] = useState("choose")
@@ -35,7 +37,8 @@ export default function CreateNewSignaturePage({ onboarding }: { onboarding?: bo
     const handleSignatureSave = (data: string) => {
         setSignatureData(data)
         setIsSignatureDialogOpen(false)
-        if (onboarding) {
+        if (onboarding && onboardingForm) {
+            setOnboardingForm({ ...onboardingForm, hasOnboarded: true })
             navigate({ to: '/onboarding/welcome' })
         }
     }
@@ -44,7 +47,8 @@ export default function CreateNewSignaturePage({ onboarding }: { onboarding?: bo
     const handleInitialsSave = (data: string) => {
         setInitialsData(data)
         setIsInitialsDialogOpen(false)
-        if (onboarding) {
+        if (onboarding && onboardingForm) {
+            setOnboardingForm({ ...onboardingForm, hasOnboarded: true })
             navigate({ to: '/onboarding/welcome' })
         }
     }
@@ -60,10 +64,13 @@ export default function CreateNewSignaturePage({ onboarding }: { onboarding?: bo
     }
 
     // Handle signature selection from options
-    const handleSignatureSelection = (signature: string, initials: string) => {
-        setSignatureData(signature)
+    const handleSignatureSelection = (selectedSignatureId: string) => {
+        setSignatureData(selectedSignatureId)
         setInitialsData(initials)
-        setSelectedSignatureId(signature) // Use signature as unique identifier
+        setSelectedSignatureId(selectedSignatureId)
+        if (onboarding && onboardingForm) {
+            setOnboardingForm({ ...onboardingForm, selectedSignature: selectedSignatureId })
+        }
     }
 
     // Handle file uploads
@@ -80,6 +87,11 @@ export default function CreateNewSignaturePage({ onboarding }: { onboarding?: bo
             navigate({ to: '/onboarding/welcome' })
         }
     }
+
+    // Calculate if save button should be disabled for each tab
+    const isChooseDisabled = !selectedSignatureId || !fullName.trim() || !initials.trim()
+    const isDrawDisabled = !signatureData || !initialsData
+    const isUploadDisabled = !signatureData || !initialsData
 
     // Handle create signature
     const handleCreateSignature = () => {
@@ -121,7 +133,7 @@ export default function CreateNewSignaturePage({ onboarding }: { onboarding?: bo
             {/* Main Content */}
             <main className="p-8 mx-auto max-w-6xl space-y-8 flex flex-col items-center justify-center min-h-[calc(100dvh-4rem)]">
                 <Button variant="ghost" size="lg" className="self-start mb-4" asChild>
-                    <Link to="/dashboard">
+                    <Link to={onboarding ? '/onboarding/set-pin' : '/dashboard'}>
                         <CaretLeftIcon className="size-5" weight="bold" />
                         <p>Back</p>
                     </Link>
@@ -191,11 +203,10 @@ export default function CreateNewSignaturePage({ onboarding }: { onboarding?: bo
                             <SignatureChoose
                                 fullName={fullName}
                                 initials={initials}
-                                signatureData={signatureData}
-                                initialsData={initialsData}
                                 selectedSignatureId={selectedSignatureId || undefined}
                                 onSignatureSelection={handleSignatureSelection}
                                 onCreateSignature={handleCreateSignature}
+                                disabled={isChooseDisabled}
                             />
                         </TabsContent>
 
@@ -208,6 +219,7 @@ export default function CreateNewSignaturePage({ onboarding }: { onboarding?: bo
                                 onSignatureClear={handleClearSignature}
                                 onInitialsClear={handleClearInitials}
                                 onCreateSignature={handleCreateSignature}
+                                disabled={isDrawDisabled}
                             />
                         </TabsContent>
 
@@ -220,6 +232,7 @@ export default function CreateNewSignaturePage({ onboarding }: { onboarding?: bo
                                 onSignatureClear={handleClearSignature}
                                 onInitialsClear={handleClearInitials}
                                 onCreateSignature={handleCreateSignature}
+                                disabled={isUploadDisabled}
                             />
                         </TabsContent>
                     </Tabs>

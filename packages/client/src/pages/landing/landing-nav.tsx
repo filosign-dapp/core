@@ -1,5 +1,6 @@
 import Logo from "@/src/lib/components/custom/Logo";
 import { Button } from "@/src/lib/components/ui/button";
+import { useStorePersist } from "@/src/lib/hooks/use-store";
 import { usePrivy } from "@privy-io/react-auth";
 import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
@@ -21,6 +22,7 @@ export default function LandingNavbar() {
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const { ready, authenticated, login } = usePrivy();
+  const { onboardingForm } = useStorePersist();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -106,8 +108,8 @@ export default function LandingNavbar() {
         >
           {ready && authenticated ? (
             <Button variant="secondary" asChild>
-              <Link to="/onboarding">
-                Get started
+              <Link to={onboardingForm?.hasOnboarded ? '/dashboard' : '/onboarding'}>
+                {onboardingForm?.hasOnboarded ? 'Dashboard' : 'Get started'}
               </Link>
             </Button>
           ) : (

@@ -7,6 +7,8 @@ interface OtpInputProps {
     length?: number
     className?: string
     disabled?: boolean
+    autoFocus?: boolean
+    onSubmit?: () => void
 }
 
 export default function OtpInput({
@@ -14,7 +16,9 @@ export default function OtpInput({
     onChange,
     length = 6,
     className,
-    disabled = false
+    disabled = false,
+    autoFocus = false,
+    onSubmit
 }: OtpInputProps) {
     const [focusedIndex, setFocusedIndex] = useState<number | null>(null)
     const inputRefs = useRef<(HTMLInputElement | null)[]>([])
@@ -23,6 +27,20 @@ export default function OtpInput({
     useEffect(() => {
         inputRefs.current = inputRefs.current.slice(0, length)
     }, [length])
+
+    // Auto-focus first input
+    useEffect(() => {
+        if (autoFocus && inputRefs.current[0]) {
+            inputRefs.current[0]?.focus()
+        }
+    }, [autoFocus])
+
+    // Re-focus first input when value is reset (becomes empty)
+    useEffect(() => {
+        if (autoFocus && value === '' && inputRefs.current[0]) {
+            inputRefs.current[0]?.focus()
+        }
+    }, [value, autoFocus])
 
     const handleInputChange = (index: number, inputValue: string) => {
         // Only allow digits
@@ -60,6 +78,9 @@ export default function OtpInput({
             inputRefs.current[index - 1]?.focus()
         } else if (e.key === 'ArrowRight' && index < length - 1) {
             inputRefs.current[index + 1]?.focus()
+        } else if (e.key === 'Enter' && onSubmit && value.length === length) {
+            e.preventDefault()
+            onSubmit()
         }
     }
 
@@ -86,7 +107,9 @@ export default function OtpInput({
             {Array.from({ length }, (_, index) => (
                 <input
                     key={index}
-                    ref={(el) => (inputRefs.current[index] = el)}
+                    ref={el => {
+                        inputRefs.current[index] = el
+                    }}
                     type="text"
                     inputMode="numeric"
                     pattern="[0-9]*"

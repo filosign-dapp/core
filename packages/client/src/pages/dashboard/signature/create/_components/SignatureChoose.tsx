@@ -12,11 +12,10 @@ interface SignatureOption {
 interface SignatureChooseProps {
     fullName: string
     initials: string
-    signatureData: string | null
-    initialsData: string | null
     selectedSignatureId?: string
-    onSignatureSelection: (signature: string, initials: string) => void
+    onSignatureSelection: (selectedSignatureId: string) => void
     onCreateSignature: () => void
+    disabled?: boolean
 }
 
 // Generate different signature styles using actual handwritten fonts
@@ -72,19 +71,17 @@ const generateSignatureStyles = (fullName: string, initials: string): SignatureO
 export default function SignatureChoose({
     fullName,
     initials,
-    signatureData,
-    initialsData,
     selectedSignatureId,
     onSignatureSelection,
-    onCreateSignature
+    onCreateSignature,
+    disabled = false
 }: SignatureChooseProps) {
     const [selectedId, setSelectedId] = useState<string | null>(selectedSignatureId || null)
-
     const signatureOptions = generateSignatureStyles(fullName, initials)
 
     const handleSelect = (option: SignatureOption) => {
         setSelectedId(option.id)
-        onSignatureSelection(option.signature, option.initials)
+        onSignatureSelection(option.id)
     }
 
     const getSignatureStyle = (style: string) => {
@@ -200,7 +197,7 @@ export default function SignatureChoose({
                 <Button variant="ghost" size="lg">
                     <p className="hidden sm:block">Cancel</p>
                 </Button>
-                <Button variant="primary" size="lg" onClick={onCreateSignature}>
+                <Button variant="primary" size="lg" onClick={onCreateSignature} disabled={disabled}>
                     Save
                 </Button>
             </div>

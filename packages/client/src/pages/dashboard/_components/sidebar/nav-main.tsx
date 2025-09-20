@@ -33,10 +33,8 @@ export function NavMain({
   const isCollapsed = state === "collapsed"
   const openItems = new Set(sidebar.expandedItems)
 
-  // Collapse all items when sidebar collapses
   React.useEffect(() => {
     if (state === "collapsed") {
-      // Clear all expanded items when sidebar collapses
       setSidebar({ expandedItems: [] })
     }
   }, [state, setSidebar])

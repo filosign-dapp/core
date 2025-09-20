@@ -1,7 +1,6 @@
 import { useState, useRef, useCallback } from "react"
-import { SignatureIcon, TextAaIcon, TrashIcon, UploadIcon } from "@phosphor-icons/react"
+import { SignatureIcon, TextAaIcon, TrashIcon } from "@phosphor-icons/react"
 import { Button } from "@/src/lib/components/ui/button"
-import { cn } from "@/src/lib/utils/utils"
 
 const ACCEPTED_FILE_TYPES = ["image/gif", "image/jpeg", "image/png", "image/bmp"]
 const MAX_FILE_SIZE = 2 * 1024 * 1024 // 2MB
@@ -14,6 +13,7 @@ interface SignatureUploadProps {
     onSignatureClear: () => void
     onInitialsClear: () => void
     onCreateSignature: () => void
+    disabled?: boolean
 }
 
 interface UploadAreaProps {
@@ -25,7 +25,6 @@ interface UploadAreaProps {
 }
 
 function UploadArea({ title, icon, uploadedFile, onFileUpload, onFileClear }: UploadAreaProps) {
-    const [isDragOver, setIsDragOver] = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
     const [error, setError] = useState<string | null>(null)
 
@@ -62,22 +61,6 @@ function UploadArea({ title, icon, uploadedFile, onFileUpload, onFileClear }: Up
         fileInputRef.current?.click()
     }
 
-    const handleDragOver = (event: React.DragEvent) => {
-        event.preventDefault()
-        setIsDragOver(true)
-    }
-
-    const handleDragLeave = (event: React.DragEvent) => {
-        event.preventDefault()
-        setIsDragOver(false)
-    }
-
-    const handleDrop = (event: React.DragEvent) => {
-        event.preventDefault()
-        setIsDragOver(false)
-        handleFileSelect(event.dataTransfer.files?.[0] || null)
-    }
-
     return (
         <div className="space-y-3">
             <input
@@ -87,16 +70,7 @@ function UploadArea({ title, icon, uploadedFile, onFileUpload, onFileClear }: Up
                 className="hidden"
                 accept={ACCEPTED_FILE_TYPES.join(",")}
             />
-            <div
-                className={cn(
-                    "border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center min-h-[16rem] flex flex-col items-center justify-center transition-colors",
-                    isDragOver ? "border-primary bg-primary/5" : "hover:border-muted-foreground/50",
-                    uploadedFile && "p-4"
-                )}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-            >
+            <button type="button" className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center min-h-[16rem] flex flex-col items-center justify-center bg-card w-full" onClick={handleUploadClick}>
                 {uploadedFile ? (
                     <div className="space-y-3">
                         <img
@@ -123,24 +97,14 @@ function UploadArea({ title, icon, uploadedFile, onFileUpload, onFileClear }: Up
                         </div>
                     </div>
                 ) : (
-                    <div
-                        className="flex flex-col justify-center items-center space-y-3"
-                    >
+                    <div className="flex flex-col justify-center items-center p-4 space-y-3 bg-card rounded-large">
                         {icon}
                         <p className="text-sm text-muted-foreground">
-                            {isDragOver ? "Drop your file here" : `Drop file here or`}
+                            Click to upload file
                         </p>
-                        <Button
-                            type="button"
-                            variant="primary"
-                            onClick={handleUploadClick}
-                        >
-                            <UploadIcon className="mr-2 size-4" weight="bold" />
-                            {title}
-                        </Button>
                     </div>
                 )}
-            </div>
+            </button>
             {error && (
                 <p className="text-sm text-center text-destructive">{error}</p>
             )}
@@ -155,12 +119,13 @@ export default function SignatureUpload({
     onInitialsUpload,
     onSignatureClear,
     onInitialsClear,
-    onCreateSignature
+    onCreateSignature,
+    disabled = false
 }: SignatureUploadProps) {
     return (
         <div className="space-y-4">
             <h4 className="text-muted-foreground">Upload Signature</h4>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <UploadArea
                     title="Upload Signature"
                     icon={<SignatureIcon className="size-16 text-muted-foreground" />}
@@ -179,11 +144,11 @@ export default function SignatureUpload({
             <p className="text-sm text-muted-foreground">
                 Accepted File Formats: GIF, JPG, PNG, BMP. Max file size 2MB.
             </p>
-            <div className="flex justify-end mx-auto max-w-6xl w-full gap-4">
+            <div className="flex gap-4 justify-end mx-auto w-full max-w-6xl">
                 <Button variant="ghost" size="lg">
                     <p className="hidden sm:block">Cancel</p>
                 </Button>
-                <Button variant="primary" size="lg" onClick={onCreateSignature}>
+                <Button variant="primary" size="lg" onClick={onCreateSignature} disabled={disabled}>
                     Save
                 </Button>
             </div>

@@ -4,6 +4,9 @@ import type { CreateForm } from "@/src/pages/dashboard/envelope/create/types";
 
 interface OnboardingForm {
   name: string;
+  pin: string;
+  hasOnboarded: boolean;
+  selectedSignature?: string;
 }
 
 interface SidebarState {

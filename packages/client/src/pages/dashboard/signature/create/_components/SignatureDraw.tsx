@@ -9,6 +9,7 @@ interface SignatureDrawProps {
     onSignatureClear: () => void
     onInitialsClear: () => void
     onCreateSignature: () => void
+    disabled?: boolean
 }
 
 export default function SignatureDraw({
@@ -18,27 +19,27 @@ export default function SignatureDraw({
     onInitialsDialogOpen,
     onSignatureClear,
     onInitialsClear,
-    onCreateSignature
+    onCreateSignature,
+    disabled = false
 }: SignatureDrawProps) {
     return (
         <div className="space-y-4">
             <h4 className="text-muted-foreground">Draw Signature</h4>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 {/* Signature drawing area */}
                 <div className="space-y-3">
-                    <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center min-h-[16rem] flex flex-col items-center justify-center bg-background">
+                    <button type="button" className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center min-h-[16rem] flex flex-col items-center justify-center bg-card w-full" onClick={onSignatureDialogOpen}>
                         {signatureData ? (
                             <div className="space-y-3">
                                 <img
                                     src={signatureData}
                                     alt="Signature"
-                                    className="max-w-full max-h-32 object-contain"
+                                    className="object-contain max-w-full max-h-32"
                                 />
                                 <div className="flex gap-2 justify-center">
                                     <Button
                                         variant="outline"
                                         size="sm"
-                                        onClick={onSignatureDialogOpen}
                                     >
                                         Edit Signature
                                     </Button>
@@ -53,34 +54,31 @@ export default function SignatureDraw({
                                 </div>
                             </div>
                         ) : (
-                            <div className="space-y-3 flex flex-col items-center justify-center">
+                            <button type="button" className="flex flex-col justify-center items-center p-4 space-y-3 rounded-large">
                                 <SignatureIcon className="size-16 text-muted-foreground" />
-                                <Button
-                                    variant="primary"
-                                    onClick={onSignatureDialogOpen}
+                                <p
+                                    className="text-sm text-muted-foreground"
                                 >
-                                    <PaintBrushIcon className="size-4" weight="bold" />
-                                    Draw Signature
-                                </Button>
-                            </div>
+                                    Click to draw signature
+                                </p>
+                            </button>
                         )}
-                    </div>
+                    </button>
                 </div>
                 {/* Initials drawing area */}
                 <div className="space-y-3">
-                    <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center min-h-[16rem] flex flex-col items-center justify-center bg-background">
+                    <button type="button" className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center min-h-[16rem] flex flex-col items-center justify-center w-full bg-card" onClick={onInitialsDialogOpen}>
                         {initialsData ? (
                             <div className="space-y-3">
                                 <img
                                     src={initialsData}
                                     alt="Initials"
-                                    className="max-w-full max-h-32 object-contain"
+                                    className="object-contain max-w-full max-h-32"
                                 />
                                 <div className="flex gap-2 justify-center">
                                     <Button
                                         variant="outline"
                                         size="sm"
-                                        onClick={onInitialsDialogOpen}
                                     >
                                         Edit Initials
                                     </Button>
@@ -95,30 +93,28 @@ export default function SignatureDraw({
                                 </div>
                             </div>
                         ) : (
-                            <div className="space-y-3 flex flex-col items-center justify-center">
+                            <button type="button" className="flex flex-col justify-center items-center p-4 space-y-3 bg-card rounded-large">
                                 <TextAaIcon className="size-16 text-muted-foreground" />
-                                <Button
-                                    variant="primary"
-                                    onClick={onInitialsDialogOpen}
+                                <p
+                                    className="text-sm text-muted-foreground"
                                 >
-                                    <PaintBrushIcon className="size-4" weight="bold" />
-                                    Draw Initials
-                                </Button>
-                            </div>
+                                    Click to draw initials
+                                </p>
+                            </button>
                         )}
-                    </div>
+                    </button>
                 </div>
             </div>
-            
+
             <p className="text-sm text-muted-foreground">
                 Exported File Format: PNG
             </p>
 
-            <div className="flex justify-end mx-auto max-w-6xl w-full gap-4">
+            <div className="flex gap-4 justify-end mx-auto w-full max-w-6xl">
                 <Button variant="ghost" size="lg">
                     <p className="hidden sm:block">Cancel</p>
                 </Button>
-                <Button variant="primary" size="lg" onClick={onCreateSignature}>
+                <Button variant="primary" size="lg" onClick={onCreateSignature} disabled={disabled}>
                     Save
                 </Button>
             </div>
