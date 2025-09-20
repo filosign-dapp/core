@@ -13,7 +13,10 @@ export default function WaitlistSection() {
   const waitlistRef = useRef(null);
   const waitlistInView = useInView(waitlistRef, { once: true, margin: "-100px" });
 
-  const { joinWaitlist } = useApi();
+  const { joinWaitlist, getWaitlistEmails } = useApi();
+  const { data: waitlistEmails } = getWaitlistEmails;
+
+  console.log({ waitlistEmails });
 
   const handleJoinWaitlist = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,7 +30,7 @@ export default function WaitlistSection() {
     } catch (error: any) {
       // Check if the error is specifically about duplicate email (409 status)
       if (error?.message?.includes("Email already registered") ||
-          error?.message?.includes("already registered")) {
+        error?.message?.includes("already registered")) {
         // Treat duplicate email as success - user is already registered
         setIsSubmitted(true);
         setIsDuplicate(true); // Mark as duplicate
