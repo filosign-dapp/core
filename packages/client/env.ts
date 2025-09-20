@@ -1,7 +1,9 @@
 const envKeys = [
   "BUN_PUBLIC_SERVER_URL",
   "BUN_VERSION",
-  "PORT"
+  "PORT",
+  "BUN_PUBLIC_PRIVY_APP_ID",
+  "PRIVY_APP_SECRET"
 ] as const;
 
 type ENV = Record<(typeof envKeys)[number], string>;
