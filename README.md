@@ -26,6 +26,7 @@ Filosign replaces fragile platform trust with permanent mathematical proof.
 
 - **[Website](https://app.filosign.xyz)**: Check out the live website
 - **[GitHub Org](https://github.com/filosign-dapp)**: View all repositories and contribute
+- **[Demo Video](https://www.loom.com/share/8e142c8bb06f43edb0a18162222f96f8?t=262)**: Check out our demo video
 
 ## **Filosign Ecosystem**
 
