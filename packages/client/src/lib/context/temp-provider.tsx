@@ -1,10 +1,10 @@
 import { createConfig, http } from 'wagmi'
-import { mainnet } from 'wagmi/chains'
+import { filecoinCalibration } from 'wagmi/chains'
 
 export const config = createConfig({
-  chains: [mainnet],
+  chains: [filecoinCalibration],
   transports: {
-    [mainnet.id]: http(),
+    [filecoinCalibration.id]: http(),
   },
 })
 

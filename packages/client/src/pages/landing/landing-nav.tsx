@@ -6,13 +6,23 @@ import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
-import { useConnect, useWalletClient } from 'wagmi'
+import { useAccount, useConnect, useDisconnect } from 'wagmi'
 
 export function WalletOptions() {
   const { connectors, connect } = useConnect()
-  const { data: walletClient } = useWalletClient()
+  const { address } = useAccount()
+  const { disconnect } = useDisconnect()
 
-  console.log("walletClient", walletClient)
+  if (address) {
+    return (
+      <div className="flex items-center gap-2">
+        <Button variant="secondary" asChild>
+          <Link to="/onboarding">Get Started</Link>
+        </Button>
+        <Button variant="secondary" onClick={() => disconnect()}>Disconnect</Button>
+      </div>
+    )
+  }
 
   return connectors.map((connector) => (
     <Button variant="secondary" key={connector.uid} onClick={() => connect({ connector })}>

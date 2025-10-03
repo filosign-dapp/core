@@ -21,7 +21,6 @@ import OnboardingSetPinPage from './onboarding/set-pin';
 import OnboardingCreateSignaturePage from './onboarding/create-signature';
 import OnboardingWelcomeCompletePage from './onboarding/welcome';
 import { NotFound } from '../lib/components/custom/NotFound';
-import { useStorePersist } from '../lib/hooks/use-store';
 
 const rootRoute = createRootRoute({
   component: () => {
