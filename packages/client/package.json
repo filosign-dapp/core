@@ -8,7 +8,8 @@
     "dev": "bun --hot dev.ts",
     "start": "NODE_ENV=production bun prod.ts",
     "build": "bun run build.ts",
-    "analyze": "bun install --analyze src/**/*.tsx"
+    "analyze": "bun install --analyze src/**/*.tsx",
+    "sdk:update:force": "rm -rf node_modules/@filosign/sdk; bun install"
   },
   "dependencies": {
     "@filosign/sdk": "https://github.com/filosign-dapp/platform/raw/refs/heads/main/packages/lib/releases/filosign-sdk-0.1.9.tgz",
