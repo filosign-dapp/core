@@ -1,5 +1,5 @@
 import { http } from "wagmi";
-import { filecoinCalibration } from "viem/chains";
+import { mainnet } from "viem/chains";
 import {
   createConfig,
   WagmiProvider as WagmiProviderBase,
@@ -12,9 +12,9 @@ declare module "wagmi" {
 }
 
 export const config = createConfig({
-  chains: [filecoinCalibration],
+  chains: [mainnet],
   transports: {
-    [filecoinCalibration.id]: http(),
+    [mainnet.id]: http(),
   },
 });
 

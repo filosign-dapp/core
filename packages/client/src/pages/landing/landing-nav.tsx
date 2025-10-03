@@ -3,8 +3,23 @@ import { Button } from "@/src/lib/components/ui/button";
 import { useStorePersist } from "@/src/lib/hooks/use-store";
 import { usePrivy } from "@privy-io/react-auth";
 import { Link } from "@tanstack/react-router";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
+
+import { useConnect, useWalletClient } from 'wagmi'
+
+export function WalletOptions() {
+  const { connectors, connect } = useConnect()
+  const { data: walletClient } = useWalletClient()
+
+  console.log("walletClient", walletClient)
+
+  return connectors.map((connector) => (
+    <Button variant="secondary" key={connector.uid} onClick={() => connect({ connector })}>
+      {connector.name}
+    </Button>
+  ))
+}
 
 interface NavLink {
   label: string;
@@ -21,7 +36,7 @@ const navLinks: NavLink[] = [
 export default function LandingNavbar() {
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
-  const { ready, authenticated, login } = usePrivy();
+  const { ready, authenticated, login, logout } = usePrivy();
   const { onboardingForm } = useStorePersist();
 
   // Determine button state for smooth transitions
@@ -102,7 +117,7 @@ export default function LandingNavbar() {
         </motion.div>
 
         {/* Desktop CTA Button */}
-        <motion.div
+        {/* <motion.div
           className=""
           initial={{ opacity: 0, x: 30 }}
           animate={{ opacity: 1, x: 0 }}
@@ -158,9 +173,11 @@ export default function LandingNavbar() {
               </AnimatePresence>
             )}
           </Button>
-        </motion.div>
+        </motion.div> */}
+
+        <WalletOptions />
       </motion.nav>
-      
+
     </section>
   );
 }

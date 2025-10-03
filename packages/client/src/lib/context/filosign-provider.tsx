@@ -11,6 +11,6 @@ export function FilosignProvider({ children }: { children: React.ReactNode }) {
 
   return <FilosignProviderBase config={{
     apiBaseUrl: process.env.BUN_PUBLIC_PLATFORM_URL!,
-    wallet: walletClient!,
+    wallet: walletClient,
   }}>{children}</FilosignProviderBase>;
 }
