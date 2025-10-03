@@ -10,6 +10,7 @@ import "./globals.css";
 import { IconContext } from "@phosphor-icons/react";
 import { PrivyProvider } from "./lib/context/privy-provider";
 import { WagmiProvider } from "./lib/context/wagmi-provider";
+import { FilosignProvider } from "./lib/context/filosign-provider";
 
 // Root element
 const rootElement = document.getElementById("root")!;
@@ -19,21 +20,23 @@ if (!rootElement) throw new Error("Failed to find the root element");
 const app = (
   <StrictMode>
     <ErrorBoundary>
-      <QueryClientProvider>
-        <ThemeProvider defaultTheme="dark" storageKey="theme">
-          <PrivyProvider>
+      <PrivyProvider>
+        <QueryClientProvider>
+          <ThemeProvider defaultTheme="dark" storageKey="theme">
             <WagmiProvider>
-              <IconContext.Provider value={{
-                mirrored: false,
-                weight: "regular"
-              }}>
-                <RouterProvider router={router} />
-                <Toaster position="bottom-right" />
-              </IconContext.Provider>
+              <FilosignProvider>
+                <IconContext.Provider value={{
+                  mirrored: false,
+                  weight: "regular"
+                }}>
+                  <RouterProvider router={router} />
+                  <Toaster position="bottom-right" />
+                </IconContext.Provider>
+              </FilosignProvider>
             </WagmiProvider>
-          </PrivyProvider>
-        </ThemeProvider>
-      </QueryClientProvider>
+          </ThemeProvider>
+        </QueryClientProvider>
+      </PrivyProvider>
     </ErrorBoundary>
   </StrictMode >
 );

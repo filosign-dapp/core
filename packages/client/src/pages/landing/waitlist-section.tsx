@@ -13,10 +13,7 @@ export default function WaitlistSection() {
   const waitlistRef = useRef(null);
   const waitlistInView = useInView(waitlistRef, { once: true, margin: "-100px" });
 
-  const { joinWaitlist, getWaitlistEmails } = useApi();
-  const { data: waitlistEmails } = getWaitlistEmails;
-
-  console.log({ waitlistEmails });
+  const { joinWaitlist } = useApi();
 
   const handleJoinWaitlist = async (e: React.FormEvent) => {
     e.preventDefault();
