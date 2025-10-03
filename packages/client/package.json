@@ -11,7 +11,7 @@
     "analyze": "bun install --analyze src/**/*.tsx"
   },
   "dependencies": {
-    "@filosign/sdk": "https://github.com/filosign-dapp/platform/releases/download/v0.1.2/filosign-sdk.tgz",
+    "@filosign/sdk": "https://github.com/filosign-dapp/platform/raw/refs/heads/main/packages/lib/releases/filosign-sdk-0.1.9.tgz",
     "@hono/zod-validator": "^0.7.0",
     "@hookform/resolvers": "5.2.1",
     "@phosphor-icons/react": "2.1.10",
