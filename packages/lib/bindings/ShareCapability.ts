@@ -33,7 +33,7 @@ export default class ShareCapability {
     return response;
   }
 
-  async getPendingShareRequests() {
+  async getReceivedRequests() {
     const { apiClient } = this.defaults;
     apiClient.ensureJwt();
     const response = await apiClient.rpc.getSafe(
@@ -42,14 +42,93 @@ export default class ShareCapability {
           z.object({
             id: z.string(),
             senderWallet: z.string(),
+            recipientWallet: z.string(),
             message: z.string().nullable(),
             metadata: z.record(z.string(), z.any()).nullable(),
-            status: z.literal("PENDING"),
+            status: z.enum([
+              "PENDING",
+              "ACCEPTED",
+              "REJECTED",
+              "CANCELLED",
+              "EXPIRED",
+            ]),
+            createdAt: z.string(),
+            updatedAt: z.string(),
+          }),
+        ),
+      },
+      "/requests/received",
+    );
+    return response;
+  }
+
+  async getSentRequests() {
+    const { apiClient } = this.defaults;
+    apiClient.ensureJwt();
+    const response = await apiClient.rpc.getSafe(
+      {
+        requests: z.array(
+          z.object({
+            id: z.string(),
+            senderWallet: z.string(),
+            recipientWallet: z.string(),
+            message: z.string().nullable(),
+            metadata: z.record(z.string(), z.any()).nullable(),
+            status: z.enum([
+              "PENDING",
+              "ACCEPTED",
+              "REJECTED",
+              "CANCELLED",
+              "EXPIRED",
+            ]),
+            createdAt: z.string(),
+            updatedAt: z.string(),
+          }),
+        ),
+      },
+      "/requests/sent",
+    );
+    return response;
+  }
+
+  async getPeopleCanSendTo() {
+    const { apiClient } = this.defaults;
+    apiClient.ensureJwt();
+    const response = await apiClient.rpc.getSafe(
+      {
+        people: z.array(
+          z.object({
+            walletAddress: z.string(),
+            username: z.string().nullable(),
+            displayName: z.string().nullable(),
+            avatarUrl: z.string().nullable(),
+            active: z.boolean(),
             createdAt: z.string(),
           }),
         ),
       },
-      "/requests/pending",
+      "/requests/can-send-to",
+    );
+    return response;
+  }
+
+  async getPeopleCanReceiveFrom() {
+    const { apiClient } = this.defaults;
+    apiClient.ensureJwt();
+    const response = await apiClient.rpc.getSafe(
+      {
+        people: z.array(
+          z.object({
+            walletAddress: z.string(),
+            username: z.string().nullable(),
+            displayName: z.string().nullable(),
+            avatarUrl: z.string().nullable(),
+            active: z.boolean(),
+            createdAt: z.string(),
+          }),
+        ),
+      },
+      "/requests/can-receive-from",
     );
     return response;
   }
@@ -57,7 +136,7 @@ export default class ShareCapability {
   async cancelShareRequest(options: { requestId: string }) {
     const { apiClient } = this.defaults;
     apiClient.ensureJwt();
-    const response = await apiClient.rpc.postSafe(
+    const response = await apiClient.rpc.deleteSafe(
       { canceled: z.string() },
       `/requests/${options.requestId}/cancel`,
     );
