@@ -12,12 +12,17 @@ import { CaretRightIcon } from "@phosphor-icons/react";
 import Logo from "@/src/lib/components/custom/Logo";
 import { useStorePersist } from "@/src/lib/hooks/use-store";
 import { useNavigate } from "@tanstack/react-router";
+import { useFilosignMutation } from "@filosign/sdk/react";
+import OtpInput from "./_components/OtpInput";
+import { toast } from "sonner";
 
 export default function OnboardingWelcomeCompletePage() {
   const [userName, setUserName] = useState("");
+  const [pin, setPin] = useState("");
   const { onboardingForm, setOnboardingForm, clearOnboardingForm } =
     useStorePersist();
   const navigate = useNavigate();
+  const login = useFilosignMutation(["login"]);
 
   useEffect(() => {
     const name = onboardingForm?.name || "there";
@@ -27,16 +32,19 @@ export default function OnboardingWelcomeCompletePage() {
   console.log("onboardingForm", onboardingForm);
 
   async function handleSubmit() {
-    // Clear the onboarding form and navigate to dashboard
-    setOnboardingForm({
-      name: onboardingForm?.name,
-      pin: "",
-      selectedSignature: onboardingForm?.selectedSignature,
-      hasOnboarded: true,
-    });
-    console.log("onboardingForm", onboardingForm);
+    if (pin.length !== 6) return;
 
-    navigate({ to: "/dashboard" });
+    try {
+      console.log("onboardingForm", onboardingForm);
+      await login.mutateAsync({ pin });
+
+      toast.success("Welcome to Filosign!");
+      navigate({ to: "/dashboard" });
+    } catch (error) {
+      console.error("Failed to login", error);
+      toast.error("Login failed. Please check your PIN and try again.");
+      setPin(""); // Clear PIN on error
+    }
   }
 
   return (
@@ -51,19 +59,35 @@ export default function OnboardingWelcomeCompletePage() {
         <Card className="w-full">
           <CardHeader>
             <CardTitle>All Set, {userName.split(" ")[0]}!</CardTitle>
-            <CardDescription>Your Filosign account is ready.</CardDescription>
+            <CardDescription>
+              Your Filosign account is ready. Enter your PIN to login.
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium">Your PIN</label>
+              <OtpInput
+                value={pin}
+                onChange={setPin}
+                length={6}
+                autoFocus={true}
+                onSubmit={handleSubmit}
+              />
+            </div>
+
             <Button
               className="w-full group"
               variant="primary"
               onClick={handleSubmit}
+              disabled={pin.length !== 6 || login.isPending}
             >
-              Go to Dashboard
-              <CaretRightIcon
-                className="transition-transform duration-200 size-4 group-hover:translate-x-1"
-                weight="bold"
-              />
+              {login.isPending ? "Logging in..." : "Login to Dashboard"}
+              {!login.isPending && (
+                <CaretRightIcon
+                  className="transition-transform duration-200 size-4 group-hover:translate-x-1"
+                  weight="bold"
+                />
+              )}
             </Button>
           </CardContent>
         </Card>

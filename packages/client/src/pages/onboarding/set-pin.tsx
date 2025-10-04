@@ -43,9 +43,6 @@ export default function OnboardingSetPinPage() {
         pin: pin,
       });
 
-      // Update onboarding form with PIN
-      setOnboardingForm({ ...onboardingForm, pin });
-
       // Navigate to next step
       navigate({ to: "/onboarding/welcome" });
     } catch (error) {

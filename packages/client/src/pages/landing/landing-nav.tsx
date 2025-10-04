@@ -1,10 +1,6 @@
 import Logo from "@/src/lib/components/custom/Logo";
-import { Button } from "@/src/lib/components/ui/button";
-import { useStorePersist } from "@/src/lib/hooks/use-store";
-import { useFilosignQuery } from "@filosign/sdk/react";
-import { usePrivy } from "@privy-io/react-auth";
-import { Link } from "@tanstack/react-router";
-import { AnimatePresence, motion } from "motion/react";
+import ConnectButton from "../../lib/components/custom/ConnectButton";
+import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 
 interface NavLink {
@@ -22,16 +18,6 @@ const navLinks: NavLink[] = [
 export default function LandingNavbar() {
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
-  const { ready, authenticated, login } = usePrivy();
-  const isRegistered = useFilosignQuery(["isRegistered"], undefined);
-
-  // Determine button state for smooth transitions
-  const getButtonState = () => {
-    if (!ready) return "loading";
-    if (!authenticated || isRegistered.isPending) return "signin";
-    if (!isRegistered.data) return "get-started";
-    return "dashboard";
-  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -103,75 +89,7 @@ export default function LandingNavbar() {
         </motion.div>
 
         {/* Desktop CTA Button */}
-        <motion.div
-          className=""
-          initial={{ opacity: 0, x: 30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{
-            type: "spring",
-            stiffness: 230,
-            damping: 30,
-            mass: 1.2,
-            delay: 0.78,
-          }}
-        >
-          <Button
-            variant="secondary"
-            onClick={getButtonState() === "signin" ? () => login() : undefined}
-            asChild={
-              getButtonState() === "get-started" ||
-              getButtonState() === "dashboard"
-            }
-            className="min-w-28"
-          >
-            {getButtonState() === "get-started" ||
-            getButtonState() === "dashboard" ? (
-              <Link
-                to={
-                  getButtonState() === "dashboard"
-                    ? "/dashboard"
-                    : "/onboarding"
-                }
-              >
-                <AnimatePresence mode="wait">
-                  <motion.span
-                    key={getButtonState()}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{
-                      duration: 0.2,
-                      ease: "easeInOut",
-                      layout: { duration: 0.3 },
-                    }}
-                    layout
-                  >
-                    {getButtonState() === "dashboard"
-                      ? "Dashboard"
-                      : "Get started"}
-                  </motion.span>
-                </AnimatePresence>
-              </Link>
-            ) : (
-              <AnimatePresence mode="wait">
-                <motion.span
-                  key={getButtonState()}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{
-                    duration: 0.2,
-                    ease: "easeInOut",
-                    layout: { duration: 0.3 },
-                  }}
-                  layout
-                >
-                  Sign In
-                </motion.span>
-              </AnimatePresence>
-            )}
-          </Button>
-        </motion.div>
+        <ConnectButton />
       </motion.nav>
     </section>
   );

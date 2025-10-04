@@ -12,6 +12,10 @@ import { PlusIcon } from "@phosphor-icons/react";
 import { motion } from "motion/react";
 import { Link } from "@tanstack/react-router";
 import { Image } from "@/src/lib/components/custom/Image";
+import { usePrivy } from "@privy-io/react-auth";
+import { useBalance } from "wagmi";
+import { formatEther } from "viem";
+import { formatBalance } from "@/api/lib/utils/utils";
 
 const statsCards = [
   {
@@ -41,6 +45,11 @@ const statsCards = [
 ];
 
 export default function DashboardPage() {
+  const { user } = usePrivy();
+  const { data: balance } = useBalance({
+    address: user?.wallet?.address as `0x${string}`,
+  });
+
   return (
     <DashboardLayout>
       <div className="flex flex-col h-full rounded-tl-2xl bg-background @container">
@@ -205,7 +214,9 @@ export default function DashboardPage() {
                         Reserve
                       </Badge>
                     </div>
-                    <div className="text-lg font-semibold">0 FIL</div>
+                    <div className="text-lg font-semibold">
+                      {formatBalance(balance?.value, 6)} FIL
+                    </div>
                     <div className="text-xs text-muted-foreground">
                       For transaction fees
                     </div>
