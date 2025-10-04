@@ -11,15 +11,13 @@ import {
 import { CaretRightIcon } from "@phosphor-icons/react";
 import Logo from "@/src/lib/components/custom/Logo";
 import { useStorePersist } from "@/src/lib/hooks/use-store";
-import { useFilosignMutation } from "@filosign/sdk/react";
+import { useNavigate } from "@tanstack/react-router";
 
 export default function OnboardingWelcomeCompletePage() {
   const [userName, setUserName] = useState("");
   const { onboardingForm, setOnboardingForm, clearOnboardingForm } =
     useStorePersist();
-  const register = useFilosignMutation(["register"]);
-
-  console.log("register", register.isSuccess, register.isError);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const name = onboardingForm?.name || "there";
@@ -29,16 +27,7 @@ export default function OnboardingWelcomeCompletePage() {
   console.log("onboardingForm", onboardingForm);
 
   async function handleSubmit() {
-    if (!onboardingForm?.pin) {
-      alert("Please set a PIN");
-      return;
-    }
-
-    await register.mutateAsync({
-      pin: onboardingForm?.pin,
-    });
-
-    // clear the onboarding form
+    // Clear the onboarding form and navigate to dashboard
     setOnboardingForm({
       name: onboardingForm?.name,
       pin: "",
@@ -46,6 +35,8 @@ export default function OnboardingWelcomeCompletePage() {
       hasOnboarded: true,
     });
     console.log("onboardingForm", onboardingForm);
+
+    navigate({ to: "/dashboard" });
   }
 
   return (

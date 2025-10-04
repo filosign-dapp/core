@@ -43,11 +43,13 @@ export default function SignatureDialog({
       // Get shape IDs for export
       const shapeIds = shapes.map((shape) => shape.id);
 
-      // Export as image using the proper method
-      const { blob } = await editorRef.current.toImage(shapeIds, {
-        format: "svg",
+      // Export as WebP image using the native tldraw method
+      const result = await editorRef.current.toImage(shapeIds, {
+        format: "webp",
         scale: 2, // Higher resolution for crisp signatures
+        quality: 0.8, // WebP quality setting
       });
+      const blob = result.blob;
 
       // Convert blob to data URL
       const reader = new FileReader();

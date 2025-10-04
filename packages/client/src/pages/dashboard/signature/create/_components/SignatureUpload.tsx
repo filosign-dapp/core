@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from "react";
 import { SignatureIcon, TextAaIcon, TrashIcon } from "@phosphor-icons/react";
 import { Button } from "@/src/lib/components/ui/button";
+import { compressPng } from "@/src/lib/utils/compress-image";
 
 const ACCEPTED_FILE_TYPES = [
   "image/gif",
@@ -40,7 +41,7 @@ function UploadArea({
   const [error, setError] = useState<string | null>(null);
 
   const handleFileSelect = useCallback(
-    (file: File | null) => {
+    async (file: File | null) => {
       if (!file) return;
 
       setError(null);
@@ -55,11 +56,24 @@ function UploadArea({
         return;
       }
 
-      const reader = new FileReader();
-      reader.onload = () => {
-        onFileUpload(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      try {
+        // Compress the image before converting to data URL
+        const compressedFile = await compressPng(file);
+
+        const reader = new FileReader();
+        reader.onload = () => {
+          onFileUpload(reader.result as string);
+        };
+        reader.readAsDataURL(compressedFile);
+      } catch (compressionError) {
+        console.error("Image compression failed:", compressionError);
+        // Fallback to original file if compression fails
+        const reader = new FileReader();
+        reader.onload = () => {
+          onFileUpload(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+      }
     },
     [onFileUpload],
   );
@@ -99,9 +113,12 @@ function UploadArea({
               className="object-contain max-w-full max-h-32"
             />
             <div className="flex gap-2 justify-center">
-              <Button variant="outline" size="sm" onClick={handleUploadClick}>
+              <span
+                className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3 cursor-pointer"
+                onClick={handleUploadClick}
+              >
                 Change
-              </Button>
+              </span>
               <Button
                 variant="outline"
                 size="sm"

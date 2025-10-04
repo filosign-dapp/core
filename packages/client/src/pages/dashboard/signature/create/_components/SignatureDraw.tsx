@@ -60,15 +60,12 @@ export default function SignatureDraw({
                 </div>
               </div>
             ) : (
-              <button
-                type="button"
-                className="flex flex-col justify-center items-center p-4 space-y-3 rounded-large"
-              >
+              <div className="flex flex-col justify-center items-center p-4 space-y-3">
                 <SignatureIcon className="size-16 text-muted-foreground" />
                 <p className="text-sm text-muted-foreground">
                   Click to draw signature
                 </p>
-              </button>
+              </div>
             )}
           </button>
         </div>
@@ -101,21 +98,18 @@ export default function SignatureDraw({
                 </div>
               </div>
             ) : (
-              <button
-                type="button"
-                className="flex flex-col justify-center items-center p-4 space-y-3 bg-card rounded-large"
-              >
+              <div className="flex flex-col justify-center items-center p-4 space-y-3">
                 <TextAaIcon className="size-16 text-muted-foreground" />
                 <p className="text-sm text-muted-foreground">
                   Click to draw initials
                 </p>
-              </button>
+              </div>
             )}
           </button>
         </div>
       </div>
 
-      <p className="text-sm text-muted-foreground">Exported File Format: PNG</p>
+      <p className="text-sm text-muted-foreground">WebP</p>
 
       <div className="flex gap-4 justify-end mx-auto w-full max-w-6xl">
         <Button variant="ghost" size="lg">

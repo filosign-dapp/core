@@ -10,28 +10,49 @@ import {
 } from "@/src/lib/components/ui/card";
 import OtpInput from "./_components/OtpInput";
 import { useNavigate } from "@tanstack/react-router";
-import { CaretRightIcon, ArrowLeftIcon } from "@phosphor-icons/react";
+import { CaretRightIcon } from "@phosphor-icons/react";
 import Logo from "@/src/lib/components/custom/Logo";
 import { useStorePersist } from "@/src/lib/hooks/use-store";
+import { useFilosignMutation, useFilosignQuery } from "@filosign/sdk/react";
+import { toast } from "sonner";
 
 export default function OnboardingSetPinPage() {
   const [pin, setPin] = useState("");
   const [confirmPin, setConfirmPin] = useState("");
   const [step, setStep] = useState<"enter" | "confirm">("enter");
-  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { onboardingForm, setOnboardingForm } = useStorePersist();
+  const register = useFilosignMutation(["register"]);
+  const isRegistered = useFilosignQuery(["isRegistered"], undefined);
 
-  const simulateKeyGeneration = async () => {
-    setIsLoading(true);
+  const handleRegistration = async () => {
+    if (!onboardingForm) return;
 
-    setTimeout(() => {
-      if (onboardingForm) {
-        setOnboardingForm({ ...onboardingForm, pin });
+    try {
+      if (isRegistered.data) {
+        toast.warning("You are already registered!");
+
+        // setTimeout to navigate to dashboard
+        setTimeout(() => {
+          navigate({ to: "/dashboard" });
+        }, 1000);
+        return;
       }
-      setIsLoading(false);
-      navigate({ to: "/onboarding/create-signature" });
-    }, 2000);
+
+      await register.mutateAsync({
+        pin: pin,
+      });
+
+      // Update onboarding form with PIN
+      setOnboardingForm({ ...onboardingForm, pin });
+
+      // Navigate to next step
+      navigate({ to: "/onboarding/welcome" });
+    } catch (error) {
+      console.error("Registration failed:", error);
+      // Show user-friendly error message
+      toast.error("Registration failed. Please try again.");
+    }
   };
 
   const handlePinSubmit = () => {
@@ -41,7 +62,7 @@ export default function OnboardingSetPinPage() {
         setConfirmPin("");
       } else if (step === "confirm") {
         if (pin === confirmPin) {
-          simulateKeyGeneration();
+          handleRegistration();
         } else {
           setConfirmPin("");
         }
@@ -72,103 +93,66 @@ export default function OnboardingSetPinPage() {
         className="flex flex-col justify-center items-center px-8 mx-auto w-full max-w-lg"
       >
         <Logo className="mb-4" textClassName="text-foreground font-semibold" />
-        <AnimatePresence mode="wait">
-          {isLoading ? (
-            <motion.div
-              key="loading"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="flex flex-col justify-center items-center mx-auto w-full max-w-lg"
-            >
-              <Card className="w-full">
-                <CardContent className="p-8 text-center">
-                  <motion.div
-                    initial={{ scale: 0.8 }}
-                    animate={{ scale: 1 }}
-                    transition={{ duration: 0.3, ease: "easeOut" }}
-                    className="mb-6"
-                  >
-                    <div className="flex space-x-1 justify-center">
-                      <div className="w-3 h-3 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                      <div className="w-3 h-3 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                      <div className="w-3 h-3 bg-primary rounded-full animate-bounce"></div>
-                    </div>
-                  </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.2 }}
+          className="flex flex-col justify-center items-center px-8 mx-auto w-full max-w-lg"
+        >
+          <Card className="w-full">
+            <CardHeader>
+              <CardTitle>
+                {step === "enter" ? "Setup your PIN" : "Confirm PIN"}
+              </CardTitle>
+              <CardDescription>
+                {step === "enter"
+                  ? "Choose a 6-digit PIN for your account"
+                  : "Re-enter your PIN to confirm"}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex flex-col gap-2">
+                <OtpInput
+                  value={currentPin}
+                  onChange={step === "enter" ? setPin : setConfirmPin}
+                  length={6}
+                  autoFocus={true}
+                  onSubmit={handlePinSubmit}
+                />
+              </div>
 
-                  <div className="flex flex-col">
-                    <div className="space-y-1">
-                      <p className="font-semibold">Processing...</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ) : (
-            <motion.div
-              key="pin-input"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3, delay: 0.2 }}
-              className="flex flex-col justify-center items-center px-8 mx-auto w-full max-w-lg"
-            >
-              <Card className="w-full">
-                <CardHeader>
-                  <CardTitle>
-                    {step === "enter" ? "Setup your PIN" : "Confirm PIN"}
-                  </CardTitle>
-                  <CardDescription>
-                    {step === "enter"
-                      ? "Choose a 6-digit PIN for your account"
-                      : "Re-enter your PIN to confirm"}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex flex-col gap-2">
-                    <OtpInput
-                      value={currentPin}
-                      onChange={step === "enter" ? setPin : setConfirmPin}
-                      length={6}
-                      autoFocus={true}
-                      onSubmit={handlePinSubmit}
-                    />
-                  </div>
+              {isPinMismatch && (
+                <p className="text-destructive text-sm">
+                  PINs don't match. Please try again.
+                </p>
+              )}
 
-                  {isPinMismatch && (
-                    <p className="text-destructive text-sm">
-                      PINs don't match. Please try again.
-                    </p>
-                  )}
+              <div className="flex gap-3">
+                <Button variant="ghost" onClick={handleBack} className="flex-1">
+                  Back
+                </Button>
 
-                  <div className="flex gap-3">
-                    <Button
-                      variant="ghost"
-                      onClick={handleBack}
-                      className="flex-1"
-                    >
-                      Back
-                    </Button>
-
-                    <Button
-                      onClick={handlePinSubmit}
-                      disabled={!isComplete}
-                      className="flex-1 group"
-                      variant="primary"
-                    >
-                      {step === "enter" ? "Continue" : "Confirm"}
-                      <CaretRightIcon
-                        className="transition-transform duration-200 size-4 group-hover:translate-x-1 ml-2"
-                        weight="bold"
-                      />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                <Button
+                  onClick={handlePinSubmit}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && isComplete) {
+                      handlePinSubmit();
+                    }
+                  }}
+                  disabled={!isComplete}
+                  className="flex-1 group"
+                  variant="primary"
+                >
+                  {step === "enter" ? "Continue" : "Confirm"}
+                  <CaretRightIcon
+                    className="transition-transform duration-200 size-4 group-hover:translate-x-1"
+                    weight="bold"
+                  />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       </motion.div>
     </div>
   );

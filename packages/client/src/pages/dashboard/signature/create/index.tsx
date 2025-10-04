@@ -56,20 +56,12 @@ export default function CreateNewSignaturePage({
   const handleSignatureSave = (data: string) => {
     setSignatureData(data);
     setIsSignatureDialogOpen(false);
-    if (onboarding && onboardingForm) {
-      setOnboardingForm({ ...onboardingForm, hasOnboarded: true });
-      navigate({ to: "/onboarding/welcome" });
-    }
   };
 
   // Handle initials save
   const handleInitialsSave = (data: string) => {
     setInitialsData(data);
     setIsInitialsDialogOpen(false);
-    if (onboarding && onboardingForm) {
-      setOnboardingForm({ ...onboardingForm, hasOnboarded: true });
-      navigate({ to: "/onboarding/welcome" });
-    }
   };
 
   // Handle clear signature
@@ -98,16 +90,10 @@ export default function CreateNewSignaturePage({
   // Handle file uploads
   const handleSignatureUpload = (data: string) => {
     setSignatureData(data);
-    if (onboarding) {
-      navigate({ to: "/onboarding/welcome" });
-    }
   };
 
   const handleInitialsUpload = (data: string) => {
     setInitialsData(data);
-    if (onboarding) {
-      navigate({ to: "/onboarding/welcome" });
-    }
   };
 
   // Calculate if save button should be disabled for each tab
@@ -125,8 +111,9 @@ export default function CreateNewSignaturePage({
     console.log("Initials:", initials);
 
     // For now, just log the data - you can implement saving logic here
-    if (onboarding) {
-      navigate({ to: "/onboarding/welcome" });
+    if (onboarding && onboardingForm) {
+      setOnboardingForm({ ...onboardingForm, hasOnboarded: true });
+      navigate({ to: "/onboarding/set-pin" });
     }
   };
 
@@ -187,7 +174,7 @@ export default function CreateNewSignaturePage({
           />
         </motion.div>
         {/* Name and Initials Input */}
-        <motion.div
+        {/* <motion.div
           className="grid grid-cols-2 gap-4 w-full"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -220,9 +207,9 @@ export default function CreateNewSignaturePage({
               placeholder="Enter your initials"
             />
           </div>
-        </motion.div>
+        </motion.div> */}
 
-        {/* Signature Creation Tabs */}
+        {/* Signature Creation */}
         <motion.div
           className="w-full"
           initial={{ opacity: 0, y: 20 }}
@@ -235,15 +222,11 @@ export default function CreateNewSignaturePage({
           }}
         >
           <Tabs
-            defaultValue="choose"
+            defaultValue="draw"
             onValueChange={handleTabChange}
             className="w-full min-h-[32rem]"
           >
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="choose">
-                <PaletteIcon className="size-5" weight="bold" />
-                <p>Choose</p>
-              </TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="draw">
                 <PaintBrushIcon className="size-5" weight="bold" />
                 <p>Draw</p>
@@ -253,17 +236,6 @@ export default function CreateNewSignaturePage({
                 <p>Upload</p>
               </TabsTrigger>
             </TabsList>
-
-            <TabsContent value="choose" className="mt-6">
-              <SignatureChoose
-                fullName={fullName}
-                initials={initials}
-                selectedSignatureId={selectedSignatureId || undefined}
-                onSignatureSelection={handleSignatureSelection}
-                onCreateSignature={handleCreateSignature}
-                disabled={isChooseDisabled}
-              />
-            </TabsContent>
 
             <TabsContent value="draw" className="mt-6">
               <SignatureDraw

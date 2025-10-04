@@ -23,7 +23,7 @@ export default function OnboardingWelcomePage() {
   const handleContinue = () => {
     if (name.trim()) {
       setOnboardingForm({ name: name.trim(), pin: "", hasOnboarded: false });
-      navigate({ to: "/onboarding/set-pin" });
+      navigate({ to: "/onboarding/create-signature" });
     }
   };
 

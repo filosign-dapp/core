@@ -1,6 +1,7 @@
 import Logo from "@/src/lib/components/custom/Logo";
 import { Button } from "@/src/lib/components/ui/button";
 import { useStorePersist } from "@/src/lib/hooks/use-store";
+import { useFilosignQuery } from "@filosign/sdk/react";
 import { usePrivy } from "@privy-io/react-auth";
 import { Link } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
@@ -21,14 +22,14 @@ const navLinks: NavLink[] = [
 export default function LandingNavbar() {
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
-  const { ready, authenticated, login, logout } = usePrivy();
-  const { onboardingForm } = useStorePersist();
+  const { ready, authenticated, login } = usePrivy();
+  const isRegistered = useFilosignQuery(["isRegistered"], undefined);
 
   // Determine button state for smooth transitions
   const getButtonState = () => {
     if (!ready) return "loading";
-    if (!authenticated) return "signin";
-    if (!onboardingForm?.hasOnboarded) return "get-started";
+    if (!authenticated || isRegistered.isPending) return "signin";
+    if (!isRegistered.data) return "get-started";
     return "dashboard";
   };
 
