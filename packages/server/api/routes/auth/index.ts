@@ -39,7 +39,7 @@ export default new Hono()
     const validTill = Date.now() + 5 * 60 * 1000;
     messages[wallet] = { message, validTill };
 
-    return respond.ok(ctx, { message, nonce }, "SIWE message generated", 200);
+    return respond.ok(ctx, { message }, "SIWE message generated", 200);
   })
 
   .get("/verify", async (ctx) => {
