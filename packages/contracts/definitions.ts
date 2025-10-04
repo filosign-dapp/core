@@ -1,784 +1,784 @@
 export const definitions = {
-  FSManager: {
-    address: "0x44baf919dcf39f3417ea40a213a90169d4eb8ad4",
-    abi: [
+  "FSManager": {
+    "address": "0x776ea9aec36fc5795d834d4e43e11a0c13456426",
+    "abi": [
       {
-        inputs: [],
-        stateMutability: "nonpayable",
-        type: "constructor",
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
       },
       {
-        anonymous: false,
-        inputs: [
+        "anonymous": false,
+        "inputs": [
           {
-            indexed: true,
-            internalType: "address",
-            name: "recipient",
-            type: "address",
+            "indexed": true,
+            "internalType": "address",
+            "name": "recipient",
+            "type": "address"
           },
           {
-            indexed: true,
-            internalType: "address",
-            name: "sender",
-            type: "address",
-          },
+            "indexed": true,
+            "internalType": "address",
+            "name": "sender",
+            "type": "address"
+          }
         ],
-        name: "SenderApproved",
-        type: "event",
+        "name": "SenderApproved",
+        "type": "event"
       },
       {
-        anonymous: false,
-        inputs: [
+        "anonymous": false,
+        "inputs": [
           {
-            indexed: true,
-            internalType: "address",
-            name: "recipient",
-            type: "address",
+            "indexed": true,
+            "internalType": "address",
+            "name": "recipient",
+            "type": "address"
           },
           {
-            indexed: true,
-            internalType: "address",
-            name: "sender",
-            type: "address",
-          },
+            "indexed": true,
+            "internalType": "address",
+            "name": "sender",
+            "type": "address"
+          }
         ],
-        name: "SenderRevoked",
-        type: "event",
+        "name": "SenderRevoked",
+        "type": "event"
       },
       {
-        inputs: [
+        "inputs": [
           {
-            internalType: "address",
-            name: "sender_",
-            type: "address",
-          },
+            "internalType": "address",
+            "name": "sender_",
+            "type": "address"
+          }
         ],
-        name: "approveSender",
-        outputs: [],
-        stateMutability: "nonpayable",
-        type: "function",
+        "name": "approveSender",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
       },
       {
-        inputs: [
+        "inputs": [
           {
-            internalType: "address",
-            name: "",
-            type: "address",
+            "internalType": "address",
+            "name": "",
+            "type": "address"
           },
           {
-            internalType: "address",
-            name: "",
-            type: "address",
-          },
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
         ],
-        name: "approvedSenders",
-        outputs: [
+        "name": "approvedSenders",
+        "outputs": [
           {
-            internalType: "bool",
-            name: "",
-            type: "bool",
-          },
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
         ],
-        stateMutability: "view",
-        type: "function",
+        "stateMutability": "view",
+        "type": "function"
       },
       {
-        inputs: [],
-        name: "cidRegistry",
-        outputs: [
+        "inputs": [],
+        "name": "cidRegistry",
+        "outputs": [
           {
-            internalType: "address",
-            name: "",
-            type: "address",
-          },
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
         ],
-        stateMutability: "view",
-        type: "function",
+        "stateMutability": "view",
+        "type": "function"
       },
       {
-        inputs: [],
-        name: "fileRegistry",
-        outputs: [
+        "inputs": [],
+        "name": "fileRegistry",
+        "outputs": [
           {
-            internalType: "address",
-            name: "",
-            type: "address",
-          },
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
         ],
-        stateMutability: "view",
-        type: "function",
+        "stateMutability": "view",
+        "type": "function"
       },
       {
-        inputs: [],
-        name: "keyRegistry",
-        outputs: [
+        "inputs": [],
+        "name": "keyRegistry",
+        "outputs": [
           {
-            internalType: "address",
-            name: "",
-            type: "address",
-          },
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
         ],
-        stateMutability: "view",
-        type: "function",
+        "stateMutability": "view",
+        "type": "function"
       },
       {
-        inputs: [
+        "inputs": [
           {
-            internalType: "address",
-            name: "sender_",
-            type: "address",
-          },
+            "internalType": "address",
+            "name": "sender_",
+            "type": "address"
+          }
         ],
-        name: "revokeSender",
-        outputs: [],
-        stateMutability: "nonpayable",
-        type: "function",
+        "name": "revokeSender",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
       },
       {
-        inputs: [],
-        name: "server",
-        outputs: [
+        "inputs": [],
+        "name": "server",
+        "outputs": [
           {
-            internalType: "address",
-            name: "",
-            type: "address",
-          },
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
         ],
-        stateMutability: "view",
-        type: "function",
+        "stateMutability": "view",
+        "type": "function"
       },
       {
-        inputs: [
+        "inputs": [
           {
-            internalType: "uint8",
-            name: "version_",
-            type: "uint8",
-          },
+            "internalType": "uint8",
+            "name": "version_",
+            "type": "uint8"
+          }
         ],
-        name: "setActiveVersion",
-        outputs: [],
-        stateMutability: "nonpayable",
-        type: "function",
+        "name": "setActiveVersion",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
       },
       {
-        inputs: [],
-        name: "version",
-        outputs: [
+        "inputs": [],
+        "name": "version",
+        "outputs": [
           {
-            internalType: "uint8",
-            name: "",
-            type: "uint8",
-          },
+            "internalType": "uint8",
+            "name": "",
+            "type": "uint8"
+          }
         ],
-        stateMutability: "view",
-        type: "function",
-      },
-    ],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ]
   },
-  FSFileRegistry: {
-    address: "0x1aca97d94140d2fe1C4B6907294c99E3Aa9a41b5",
-    abi: [
+  "FSFileRegistry": {
+    "address": "0x373e563b079f3806F9578701A53b8d211D92AD08",
+    "abi": [
       {
-        inputs: [],
-        stateMutability: "nonpayable",
-        type: "constructor",
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
       },
       {
-        inputs: [],
-        name: "ECDSAInvalidSignature",
-        type: "error",
+        "inputs": [],
+        "name": "ECDSAInvalidSignature",
+        "type": "error"
       },
       {
-        inputs: [
+        "inputs": [
           {
-            internalType: "uint256",
-            name: "length",
-            type: "uint256",
-          },
+            "internalType": "uint256",
+            "name": "length",
+            "type": "uint256"
+          }
         ],
-        name: "ECDSAInvalidSignatureLength",
-        type: "error",
+        "name": "ECDSAInvalidSignatureLength",
+        "type": "error"
       },
       {
-        inputs: [
+        "inputs": [
           {
-            internalType: "bytes32",
-            name: "s",
-            type: "bytes32",
-          },
+            "internalType": "bytes32",
+            "name": "s",
+            "type": "bytes32"
+          }
         ],
-        name: "ECDSAInvalidSignatureS",
-        type: "error",
+        "name": "ECDSAInvalidSignatureS",
+        "type": "error"
       },
       {
-        inputs: [],
-        name: "InvalidShortString",
-        type: "error",
+        "inputs": [],
+        "name": "InvalidShortString",
+        "type": "error"
       },
       {
-        inputs: [
+        "inputs": [
           {
-            internalType: "string",
-            name: "str",
-            type: "string",
-          },
+            "internalType": "string",
+            "name": "str",
+            "type": "string"
+          }
         ],
-        name: "StringTooLong",
-        type: "error",
+        "name": "StringTooLong",
+        "type": "error"
       },
       {
-        anonymous: false,
-        inputs: [],
-        name: "EIP712DomainChanged",
-        type: "event",
+        "anonymous": false,
+        "inputs": [],
+        "name": "EIP712DomainChanged",
+        "type": "event"
       },
       {
-        anonymous: false,
-        inputs: [
+        "anonymous": false,
+        "inputs": [
           {
-            indexed: true,
-            internalType: "bytes32",
-            name: "cidIdentifier",
-            type: "bytes32",
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "cidIdentifier",
+            "type": "bytes32"
           },
           {
-            indexed: true,
-            internalType: "address",
-            name: "recipient",
-            type: "address",
+            "indexed": true,
+            "internalType": "address",
+            "name": "recipient",
+            "type": "address"
           },
           {
-            indexed: false,
-            internalType: "uint48",
-            name: "timestamp",
-            type: "uint48",
-          },
+            "indexed": false,
+            "internalType": "uint48",
+            "name": "timestamp",
+            "type": "uint48"
+          }
         ],
-        name: "FileAcknowledged",
-        type: "event",
+        "name": "FileAcknowledged",
+        "type": "event"
       },
       {
-        anonymous: false,
-        inputs: [
+        "anonymous": false,
+        "inputs": [
           {
-            indexed: true,
-            internalType: "bytes32",
-            name: "cidIdentifier",
-            type: "bytes32",
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "cidIdentifier",
+            "type": "bytes32"
           },
           {
-            indexed: true,
-            internalType: "address",
-            name: "sender",
-            type: "address",
+            "indexed": true,
+            "internalType": "address",
+            "name": "sender",
+            "type": "address"
           },
           {
-            indexed: true,
-            internalType: "address",
-            name: "recipient",
-            type: "address",
+            "indexed": true,
+            "internalType": "address",
+            "name": "recipient",
+            "type": "address"
           },
           {
-            indexed: false,
-            internalType: "uint48",
-            name: "timestamp",
-            type: "uint48",
-          },
+            "indexed": false,
+            "internalType": "uint48",
+            "name": "timestamp",
+            "type": "uint48"
+          }
         ],
-        name: "FileRegistered",
-        type: "event",
+        "name": "FileRegistered",
+        "type": "event"
       },
       {
-        anonymous: false,
-        inputs: [
+        "anonymous": false,
+        "inputs": [
           {
-            indexed: true,
-            internalType: "bytes32",
-            name: "cidIdentifier",
-            type: "bytes32",
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "cidIdentifier",
+            "type": "bytes32"
           },
           {
-            indexed: true,
-            internalType: "address",
-            name: "signer",
-            type: "address",
+            "indexed": true,
+            "internalType": "address",
+            "name": "signer",
+            "type": "address"
           },
           {
-            indexed: false,
-            internalType: "uint48",
-            name: "timestamp",
-            type: "uint48",
-          },
+            "indexed": false,
+            "internalType": "uint48",
+            "name": "timestamp",
+            "type": "uint48"
+          }
         ],
-        name: "SignatureSubmitted",
-        type: "event",
+        "name": "SignatureSubmitted",
+        "type": "event"
       },
       {
-        inputs: [
+        "inputs": [
           {
-            internalType: "bytes32",
-            name: "cidIdentifier_",
-            type: "bytes32",
-          },
+            "internalType": "bytes32",
+            "name": "cidIdentifier_",
+            "type": "bytes32"
+          }
         ],
-        name: "acknowledge",
-        outputs: [],
-        stateMutability: "nonpayable",
-        type: "function",
+        "name": "acknowledge",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
       },
       {
-        inputs: [
+        "inputs": [
           {
-            internalType: "bytes32",
-            name: "pieceCidPrefix_",
-            type: "bytes32",
+            "internalType": "bytes32",
+            "name": "pieceCidPrefix_",
+            "type": "bytes32"
           },
           {
-            internalType: "uint16",
-            name: "pieceCidTail_",
-            type: "uint16",
-          },
+            "internalType": "uint16",
+            "name": "pieceCidTail_",
+            "type": "uint16"
+          }
         ],
-        name: "cidIdentifier",
-        outputs: [
+        "name": "cidIdentifier",
+        "outputs": [
           {
-            internalType: "bytes32",
-            name: "",
-            type: "bytes32",
-          },
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
         ],
-        stateMutability: "pure",
-        type: "function",
+        "stateMutability": "pure",
+        "type": "function"
       },
       {
-        inputs: [],
-        name: "eip712Domain",
-        outputs: [
+        "inputs": [],
+        "name": "eip712Domain",
+        "outputs": [
           {
-            internalType: "bytes1",
-            name: "fields",
-            type: "bytes1",
+            "internalType": "bytes1",
+            "name": "fields",
+            "type": "bytes1"
           },
           {
-            internalType: "string",
-            name: "name",
-            type: "string",
+            "internalType": "string",
+            "name": "name",
+            "type": "string"
           },
           {
-            internalType: "string",
-            name: "version",
-            type: "string",
+            "internalType": "string",
+            "name": "version",
+            "type": "string"
           },
           {
-            internalType: "uint256",
-            name: "chainId",
-            type: "uint256",
+            "internalType": "uint256",
+            "name": "chainId",
+            "type": "uint256"
           },
           {
-            internalType: "address",
-            name: "verifyingContract",
-            type: "address",
+            "internalType": "address",
+            "name": "verifyingContract",
+            "type": "address"
           },
           {
-            internalType: "bytes32",
-            name: "salt",
-            type: "bytes32",
+            "internalType": "bytes32",
+            "name": "salt",
+            "type": "bytes32"
           },
           {
-            internalType: "uint256[]",
-            name: "extensions",
-            type: "uint256[]",
-          },
+            "internalType": "uint256[]",
+            "name": "extensions",
+            "type": "uint256[]"
+          }
         ],
-        stateMutability: "view",
-        type: "function",
+        "stateMutability": "view",
+        "type": "function"
       },
       {
-        inputs: [
+        "inputs": [
           {
-            internalType: "bytes32",
-            name: "cidIdentifier_",
-            type: "bytes32",
-          },
+            "internalType": "bytes32",
+            "name": "cidIdentifier_",
+            "type": "bytes32"
+          }
         ],
-        name: "getFileData",
-        outputs: [
+        "name": "getFileData",
+        "outputs": [
           {
-            components: [
+            "components": [
               {
-                internalType: "bytes32",
-                name: "pieceCidPrefix",
-                type: "bytes32",
+                "internalType": "bytes32",
+                "name": "pieceCidPrefix",
+                "type": "bytes32"
               },
               {
-                internalType: "address",
-                name: "sender",
-                type: "address",
+                "internalType": "address",
+                "name": "sender",
+                "type": "address"
               },
               {
-                internalType: "address",
-                name: "recipient",
-                type: "address",
+                "internalType": "address",
+                "name": "recipient",
+                "type": "address"
               },
               {
-                internalType: "uint16",
-                name: "pieceCidTail",
-                type: "uint16",
+                "internalType": "uint16",
+                "name": "pieceCidTail",
+                "type": "uint16"
               },
               {
-                internalType: "bool",
-                name: "acked",
-                type: "bool",
-              },
+                "internalType": "bool",
+                "name": "acked",
+                "type": "bool"
+              }
             ],
-            internalType: "struct FSFileRegistry.FileData",
-            name: "",
-            type: "tuple",
-          },
+            "internalType": "struct FSFileRegistry.FileData",
+            "name": "",
+            "type": "tuple"
+          }
         ],
-        stateMutability: "view",
-        type: "function",
+        "stateMutability": "view",
+        "type": "function"
       },
       {
-        inputs: [
+        "inputs": [
           {
-            internalType: "bytes32",
-            name: "cidIdentifier_",
-            type: "bytes32",
-          },
+            "internalType": "bytes32",
+            "name": "cidIdentifier_",
+            "type": "bytes32"
+          }
         ],
-        name: "getSignatureData",
-        outputs: [
+        "name": "getSignatureData",
+        "outputs": [
           {
-            components: [
+            "components": [
               {
-                internalType: "address",
-                name: "signer",
-                type: "address",
+                "internalType": "address",
+                "name": "signer",
+                "type": "address"
               },
               {
-                internalType: "uint48",
-                name: "timestamp",
-                type: "uint48",
+                "internalType": "uint48",
+                "name": "timestamp",
+                "type": "uint48"
               },
               {
-                internalType: "bytes32",
-                name: "signatureVisualHash",
-                type: "bytes32",
+                "internalType": "bytes32",
+                "name": "signatureVisualHash",
+                "type": "bytes32"
               },
               {
-                internalType: "uint8",
-                name: "v",
-                type: "uint8",
+                "internalType": "uint8",
+                "name": "v",
+                "type": "uint8"
               },
               {
-                internalType: "bytes32",
-                name: "r",
-                type: "bytes32",
+                "internalType": "bytes32",
+                "name": "r",
+                "type": "bytes32"
               },
               {
-                internalType: "bytes32",
-                name: "s",
-                type: "bytes32",
-              },
+                "internalType": "bytes32",
+                "name": "s",
+                "type": "bytes32"
+              }
             ],
-            internalType: "struct FSFileRegistry.SignatureData",
-            name: "",
-            type: "tuple",
-          },
+            "internalType": "struct FSFileRegistry.SignatureData",
+            "name": "",
+            "type": "tuple"
+          }
         ],
-        stateMutability: "view",
-        type: "function",
+        "stateMutability": "view",
+        "type": "function"
       },
       {
-        inputs: [],
-        name: "manager",
-        outputs: [
+        "inputs": [],
+        "name": "manager",
+        "outputs": [
           {
-            internalType: "contract IFSManager",
-            name: "",
-            type: "address",
-          },
+            "internalType": "contract IFSManager",
+            "name": "",
+            "type": "address"
+          }
         ],
-        stateMutability: "view",
-        type: "function",
+        "stateMutability": "view",
+        "type": "function"
       },
       {
-        inputs: [
+        "inputs": [
           {
-            internalType: "bytes32",
-            name: "pieceCidPrefix_",
-            type: "bytes32",
+            "internalType": "bytes32",
+            "name": "pieceCidPrefix_",
+            "type": "bytes32"
           },
           {
-            internalType: "uint16",
-            name: "pieceCidTail_",
-            type: "uint16",
+            "internalType": "uint16",
+            "name": "pieceCidTail_",
+            "type": "uint16"
           },
           {
-            internalType: "address",
-            name: "recipient_",
-            type: "address",
-          },
+            "internalType": "address",
+            "name": "recipient_",
+            "type": "address"
+          }
         ],
-        name: "registerFile",
-        outputs: [],
-        stateMutability: "nonpayable",
-        type: "function",
+        "name": "registerFile",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
       },
       {
-        inputs: [
+        "inputs": [
           {
-            internalType: "bytes32",
-            name: "cidIdentifier_",
-            type: "bytes32",
+            "internalType": "bytes32",
+            "name": "cidIdentifier_",
+            "type": "bytes32"
           },
           {
-            internalType: "bytes32",
-            name: "signatureVisualHash_",
-            type: "bytes32",
+            "internalType": "bytes32",
+            "name": "signatureVisualHash_",
+            "type": "bytes32"
           },
           {
-            internalType: "uint8",
-            name: "v_",
-            type: "uint8",
+            "internalType": "uint8",
+            "name": "v_",
+            "type": "uint8"
           },
           {
-            internalType: "bytes32",
-            name: "r_",
-            type: "bytes32",
+            "internalType": "bytes32",
+            "name": "r_",
+            "type": "bytes32"
           },
           {
-            internalType: "bytes32",
-            name: "s_",
-            type: "bytes32",
-          },
+            "internalType": "bytes32",
+            "name": "s_",
+            "type": "bytes32"
+          }
         ],
-        name: "submitSignature",
-        outputs: [],
-        stateMutability: "nonpayable",
-        type: "function",
-      },
-    ],
+        "name": "submitSignature",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      }
+    ]
   },
-  FSKeyRegistry: {
-    address: "0xE14B963e259EE2bF617DFd216A2e8F1D4a0C9213",
-    abi: [
+  "FSKeyRegistry": {
+    "address": "0xaf56A2B1830C4204034514127576a07D98e4495e",
+    "abi": [
       {
-        inputs: [],
-        stateMutability: "nonpayable",
-        type: "constructor",
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
       },
       {
-        anonymous: false,
-        inputs: [
+        "anonymous": false,
+        "inputs": [
           {
-            indexed: true,
-            internalType: "address",
-            name: "user",
-            type: "address",
+            "indexed": true,
+            "internalType": "address",
+            "name": "user",
+            "type": "address"
           },
           {
-            indexed: false,
-            internalType: "bytes32",
-            name: "publicKey",
-            type: "bytes32",
+            "indexed": false,
+            "internalType": "bytes32",
+            "name": "publicKey",
+            "type": "bytes32"
           },
           {
-            indexed: false,
-            internalType: "uint8",
-            name: "version",
-            type: "uint8",
-          },
+            "indexed": false,
+            "internalType": "uint8",
+            "name": "version",
+            "type": "uint8"
+          }
         ],
-        name: "KeygenDataRegistered",
-        type: "event",
+        "name": "KeygenDataRegistered",
+        "type": "event"
       },
       {
-        inputs: [
+        "inputs": [
           {
-            internalType: "address",
-            name: "user_",
-            type: "address",
-          },
+            "internalType": "address",
+            "name": "user_",
+            "type": "address"
+          }
         ],
-        name: "isRegistered",
-        outputs: [
+        "name": "isRegistered",
+        "outputs": [
           {
-            internalType: "bool",
-            name: "",
-            type: "bool",
-          },
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
         ],
-        stateMutability: "view",
-        type: "function",
+        "stateMutability": "view",
+        "type": "function"
       },
       {
-        inputs: [
+        "inputs": [
           {
-            internalType: "address",
-            name: "",
-            type: "address",
-          },
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
         ],
-        name: "keygenData",
-        outputs: [
+        "name": "keygenData",
+        "outputs": [
           {
-            internalType: "bytes32",
-            name: "salt_auth",
-            type: "bytes32",
+            "internalType": "bytes32",
+            "name": "salt_auth",
+            "type": "bytes32"
           },
           {
-            internalType: "bytes32",
-            name: "salt_wrap",
-            type: "bytes32",
+            "internalType": "bytes32",
+            "name": "salt_wrap",
+            "type": "bytes32"
           },
           {
-            internalType: "bytes32",
-            name: "salt_pin",
-            type: "bytes32",
+            "internalType": "bytes32",
+            "name": "salt_pin",
+            "type": "bytes32"
           },
           {
-            internalType: "bytes32",
-            name: "nonce",
-            type: "bytes32",
+            "internalType": "bytes32",
+            "name": "nonce",
+            "type": "bytes32"
           },
           {
-            internalType: "bytes20",
-            name: "seed_head",
-            type: "bytes20",
+            "internalType": "bytes20",
+            "name": "seed_head",
+            "type": "bytes20"
           },
           {
-            internalType: "bytes32",
-            name: "seed_word",
-            type: "bytes32",
+            "internalType": "bytes32",
+            "name": "seed_word",
+            "type": "bytes32"
           },
           {
-            internalType: "bytes20",
-            name: "seed_tail",
-            type: "bytes20",
+            "internalType": "bytes20",
+            "name": "seed_tail",
+            "type": "bytes20"
           },
           {
-            internalType: "bytes20",
-            name: "commitment_pin",
-            type: "bytes20",
-          },
+            "internalType": "bytes20",
+            "name": "commitment_pin",
+            "type": "bytes20"
+          }
         ],
-        stateMutability: "view",
-        type: "function",
+        "stateMutability": "view",
+        "type": "function"
       },
       {
-        inputs: [
+        "inputs": [
           {
-            internalType: "address",
-            name: "",
-            type: "address",
-          },
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
         ],
-        name: "keygenDataVersion",
-        outputs: [
+        "name": "keygenDataVersion",
+        "outputs": [
           {
-            internalType: "uint8",
-            name: "",
-            type: "uint8",
-          },
+            "internalType": "uint8",
+            "name": "",
+            "type": "uint8"
+          }
         ],
-        stateMutability: "view",
-        type: "function",
+        "stateMutability": "view",
+        "type": "function"
       },
       {
-        inputs: [],
-        name: "manager",
-        outputs: [
+        "inputs": [],
+        "name": "manager",
+        "outputs": [
           {
-            internalType: "contract IFSManager",
-            name: "",
-            type: "address",
-          },
+            "internalType": "contract IFSManager",
+            "name": "",
+            "type": "address"
+          }
         ],
-        stateMutability: "view",
-        type: "function",
+        "stateMutability": "view",
+        "type": "function"
       },
       {
-        inputs: [
+        "inputs": [
           {
-            internalType: "address",
-            name: "",
-            type: "address",
-          },
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
         ],
-        name: "publicKeys",
-        outputs: [
+        "name": "publicKeys",
+        "outputs": [
           {
-            internalType: "bytes32",
-            name: "",
-            type: "bytes32",
-          },
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
         ],
-        stateMutability: "view",
-        type: "function",
+        "stateMutability": "view",
+        "type": "function"
       },
       {
-        inputs: [
+        "inputs": [
           {
-            components: [
+            "components": [
               {
-                internalType: "bytes32",
-                name: "salt_auth",
-                type: "bytes32",
+                "internalType": "bytes32",
+                "name": "salt_auth",
+                "type": "bytes32"
               },
               {
-                internalType: "bytes32",
-                name: "salt_wrap",
-                type: "bytes32",
+                "internalType": "bytes32",
+                "name": "salt_wrap",
+                "type": "bytes32"
               },
               {
-                internalType: "bytes32",
-                name: "salt_pin",
-                type: "bytes32",
+                "internalType": "bytes32",
+                "name": "salt_pin",
+                "type": "bytes32"
               },
               {
-                internalType: "bytes32",
-                name: "nonce",
-                type: "bytes32",
+                "internalType": "bytes32",
+                "name": "nonce",
+                "type": "bytes32"
               },
               {
-                internalType: "bytes20",
-                name: "seed_head",
-                type: "bytes20",
+                "internalType": "bytes20",
+                "name": "seed_head",
+                "type": "bytes20"
               },
               {
-                internalType: "bytes32",
-                name: "seed_word",
-                type: "bytes32",
+                "internalType": "bytes32",
+                "name": "seed_word",
+                "type": "bytes32"
               },
               {
-                internalType: "bytes20",
-                name: "seed_tail",
-                type: "bytes20",
+                "internalType": "bytes20",
+                "name": "seed_tail",
+                "type": "bytes20"
               },
               {
-                internalType: "bytes20",
-                name: "commitment_pin",
-                type: "bytes20",
-              },
+                "internalType": "bytes20",
+                "name": "commitment_pin",
+                "type": "bytes20"
+              }
             ],
-            internalType: "struct FSKeyRegistry.KeygenData",
-            name: "data_",
-            type: "tuple",
+            "internalType": "struct FSKeyRegistry.KeygenData",
+            "name": "data_",
+            "type": "tuple"
           },
           {
-            internalType: "bytes32",
-            name: "publicKey_",
-            type: "bytes32",
-          },
+            "internalType": "bytes32",
+            "name": "publicKey_",
+            "type": "bytes32"
+          }
         ],
-        name: "registerKeygenData",
-        outputs: [],
-        stateMutability: "nonpayable",
-        type: "function",
-      },
-    ],
-  },
+        "name": "registerKeygenData",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      }
+    ]
+  }
 } as const;
-export const contractsDeployedAtBlock = 3073516n;
+export const contractsDeployedAtBlock = 3075005n;

@@ -15,11 +15,10 @@
   "scripts": {
     "localnode": "hardhat node",
     "compile": "bun gen:interfaces; bun --bun hardhat compile",
-    "build": "tsc -p tsconfig.build.json",
     "pretest": "bun compile",
     "tests": "bun compile; bunx --bun hardhat test",
     "gen:interfaces": "bun run scripts/generateInterfaces.ts",
-    "migrate": "bun compile; bunx --bun hardhat run scripts/deploy.ts --network filecoinCalibration; bun run build"
+    "migrate": "bun compile; bunx --bun hardhat run scripts/deploy.ts --network filecoinCalibration"
   },
   "devDependencies": {
     "@filoz/synapse-sdk": "^0.25.1",
