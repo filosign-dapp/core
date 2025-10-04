@@ -30,6 +30,8 @@ import Logger from "./bindings/Logger";
 import ApiClient from "./bindings/ApiClient";
 import { Crypto } from "./bindings/Crypto";
 import ShareCapability from "./bindings/ShareCapability";
+import z from "zod";
+import { privateKeyToAddress, signMessage } from "viem/accounts";
 
 const info = `Replace with relevant shit`; // temporary, todo replace
 const primaryChain = filecoinCalibration;
@@ -168,6 +170,7 @@ export class FilosignClient {
     );
 
     this.crypto.encryptionKey = Uint8Array.fromBase64(encryptionKey);
+    await this.requestAndSetJwt();
   }
 
   async login(options: { pin: string }) {
@@ -229,5 +232,42 @@ export class FilosignClient {
     );
 
     this.crypto.encryptionKey = Uint8Array.fromBase64(encryptionKey);
+    await this.requestAndSetJwt();
+  }
+
+  async requestAndSetJwt() {
+    if (!this.crypto.encryptionKey) {
+      throw new Error("Client is not logged in");
+    }
+
+    const nonce = await this.apiClient.rpc.getSafe(
+      { nonce: z.string() },
+      "/auth/nonce",
+      {
+        params: {
+          address: privateKeyToAddress(
+            `0x${this.crypto.encryptionKey.toHex()}`,
+          ),
+        },
+      },
+    );
+
+    const signature = signMessage({
+      message: nonce.data.nonce,
+      privateKey: `0x${this.crypto.encryptionKey.toHex()}`,
+    });
+
+    const jwt = await this.apiClient.rpc.getSafe(
+      { token: z.string() },
+      "/auth/verify",
+      {
+        params: {
+          address: this.address,
+          signature: signature,
+        },
+      },
+    );
+
+    this.apiClient.setJwt(jwt.data.token);
   }
 }
