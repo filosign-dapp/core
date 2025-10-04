@@ -1,4 +1,5 @@
 import env from "../../env";
+import { jsonStringify } from "../utils/json";
 
 const BOT_TOKEN = env.TG_ANALYTICS_BOT_TOKEN;
 const GROUP_ID = env.TG_ANALYTICS_BOT_GROUP_ID;
@@ -10,7 +11,7 @@ function log(message?: any, ...optionalParams: any[]) {
     message,
     ...optionalParams,
   ]
-    .map((j) => j.toString())
+    .map((j) => jsonStringify(j))
     .join(" ")}
     `;
 

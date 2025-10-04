@@ -3,6 +3,7 @@ import { eq, sql } from "drizzle-orm";
 import db from "../db";
 import type { TypedWorker } from "./worker";
 import tryCatchSync, { tryCatch } from "../utils/tryCatch";
+import analytics from "../analytics/logger";
 
 const { pendingJobs } = db.schema;
 
@@ -124,6 +125,11 @@ async function handleJobFailure(jobId: string, errMsg: string) {
         })
         .where(eq(pendingJobs.id, job.id))
         .run();
+      analytics.log(
+        "Job permanently failed",
+        { jobType: job.type, jobId: job.id },
+        { error: job.lastError },
+      );
     } else {
       const nextAt = Date.now() + computeBackoffMs(tries);
 

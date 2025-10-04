@@ -10,6 +10,7 @@ import {
   toHex,
 } from "viem";
 import { and, eq } from "drizzle-orm";
+import analytics from "../analytics/logger";
 
 type Job = typeof schema.pendingJobs.$inferSelect;
 type Incoming = Job;
@@ -58,7 +59,7 @@ addEventListener("message", (ev: MessageEvent<Incoming>) => {
 
 async function processJob(job: Job, dbC: ReturnType<typeof createDbClient>) {
   try {
-    dbC.transaction(async (db) => {
+    await dbC.transaction(async (db) => {
       const contracts = getContracts(getProvider());
       // @ts-ignore This is th best we can do for now
       const log: ProviderLogEntry = job.payload;
@@ -268,26 +269,33 @@ async function processJob(job: Job, dbC: ReturnType<typeof createDbClient>) {
               log.args.user,
             ]);
 
-            db.insert(schema.users).values({
-              walletAddress: log.args.user,
-              encryptionPublicKey: publicKey,
-              lastActiveAt: Date.now(),
-
-              keygenDataJson: {
-                salt_auth: keyData[0],
-                salt_wrap: keyData[1],
-                salt_pin: keyData[2],
-                nonce: keyData[3],
-                seed_head: keyData[4],
-                seed_word: keyData[5],
-                seed_tail: keyData[6],
-                commitment_pin: keyData[7],
-              },
+            analytics.log("Register new user", {
+              wallet: log.args.user,
             });
+
+            db.insert(schema.users)
+              .values({
+                walletAddress: log.args.user,
+                encryptionPublicKey: publicKey,
+                lastActiveAt: Date.now(),
+
+                keygenDataJson: {
+                  salt_auth: keyData[0],
+                  salt_wrap: keyData[1],
+                  salt_pin: keyData[2],
+                  nonce: keyData[3],
+                  seed_head: keyData[4],
+                  seed_word: keyData[5],
+                  seed_tail: keyData[6],
+                  commitment_pin: keyData[7],
+                },
+              })
+              .run();
           }
         }
       }
     });
+    return true;
   } finally {
     dbC.$client.close();
   }

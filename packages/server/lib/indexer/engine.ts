@@ -131,7 +131,7 @@ export async function startIndexer(contract: keyof typeof contracts) {
         continue;
       }
 
-      const from = bigIntMax(0n, checkpoint.blockHeight);
+      const from = bigIntMax(0n, checkpoint.blockHeight + 1n);
 
       const { number: lookableBlock } = await findLookableBlockAtOrAfter(from);
 
@@ -142,18 +142,24 @@ export async function startIndexer(contract: keyof typeof contracts) {
         continue;
       }
 
+      const actualFrom = bigIntMax(from, lookableBlock);
       const to = bigIntMin(
         safeLatest,
-        lookableBlock + config.INDEXER.MAX_BATCH_BLOCKS - 1n,
+        actualFrom + config.INDEXER.MAX_BATCH_BLOCKS - 1n,
+      );
+
+      console.log(
+        `fetching logs from block ${actualFrom} to ${to} (checkpoint was at ${checkpoint.blockHeight})`,
       );
 
       const logs = await provider.getLogs({
-        fromBlock: lookableBlock,
+        fromBlock: actualFrom,
         toBlock: to,
         address: contracts[contract].address,
         events: contracts[contract].abi.filter((x: any) => x.type === "event"),
         strict: true,
       });
+      console.log(`${identifier} found ${logs.length} logs`);
 
       logs.sort((a, b) => {
         if (a.blockNumber !== b.blockNumber)
@@ -162,6 +168,7 @@ export async function startIndexer(contract: keyof typeof contracts) {
       });
 
       for (const log of logs) {
+        console.log(`found log for event: ${log.eventName}`);
         enqueueJob({
           type: `EVENT:${contract}:${log.eventName}`,
           payload: log,
