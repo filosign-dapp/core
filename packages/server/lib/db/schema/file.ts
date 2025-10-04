@@ -20,7 +20,7 @@ export const files = t.sqliteTable(
     recipientWallet: tEvmAddress().references(() => users.walletAddress),
 
     encryptedKey: tHex(),
-    proxyPublicKey: tBytes32(),
+    encryptedKeyIv: tHex(),
     metadata: tJsonString(),
 
     onchainTxHash: tBytes32(),
