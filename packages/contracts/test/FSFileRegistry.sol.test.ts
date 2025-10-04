@@ -49,7 +49,7 @@ describe("FSFileRegistry", () => {
       parsePieceCid(samplePieceCid);
 
     const txHash = await fileRegistry.write.registerFile(
-      [pieceCidPrefix, pieceCidTail, recipient.account.address],
+      [pieceCidPrefix, pieceCidTail, [recipient.account.address]],
       { account: sender.account },
     );
 
@@ -63,10 +63,13 @@ describe("FSFileRegistry", () => {
     expect(fileData.sender.toLowerCase()).to.equal(
       sender.account.address.toLowerCase(),
     );
-    expect(fileData.recipient.toLowerCase()).to.equal(
-      recipient.account.address.toLowerCase(),
-    );
     expect(fileData.acked).to.equal(false);
+
+    const isRecipient = await fileRegistry.read.isRecipient([
+      cidIdentifier,
+      recipient.account.address,
+    ]);
+    expect(isRecipient).to.equal(true);
   });
 
   it("fails to register file when sender is not approved", async () => {
@@ -77,7 +80,7 @@ describe("FSFileRegistry", () => {
 
     await expect(
       fileRegistry.write.registerFile(
-        [pieceCidPrefix, pieceCidTail, recipient.account.address],
+        [pieceCidPrefix, pieceCidTail, [recipient.account.address]],
         { account: other.account },
       ),
     ).to.be.rejectedWith("Sender not approved by recipient");
@@ -91,14 +94,14 @@ describe("FSFileRegistry", () => {
       parsePieceCid(samplePieceCid);
 
     const txHash = await fileRegistry.write.registerFile(
-      [pieceCidPrefix, pieceCidTail, recipient.account.address],
+      [pieceCidPrefix, pieceCidTail, [recipient.account.address]],
       { account: sender.account },
     );
     await admin.waitForTransactionReceipt({ hash: txHash });
 
     await expect(
       fileRegistry.write.registerFile(
-        [pieceCidPrefix, pieceCidTail, recipient.account.address],
+        [pieceCidPrefix, pieceCidTail, [recipient.account.address]],
         { account: sender.account },
       ),
     ).to.be.rejectedWith("File already registered");
@@ -112,7 +115,7 @@ describe("FSFileRegistry", () => {
       parsePieceCid(samplePieceCid);
 
     const registerTxHash = await fileRegistry.write.registerFile(
-      [pieceCidPrefix, pieceCidTail, recipient.account.address],
+      [pieceCidPrefix, pieceCidTail, [recipient.account.address]],
       { account: sender.account },
     );
     await admin.waitForTransactionReceipt({ hash: registerTxHash });
@@ -135,7 +138,7 @@ describe("FSFileRegistry", () => {
       parsePieceCid(samplePieceCid);
 
     const registerTxHash = await fileRegistry.write.registerFile(
-      [pieceCidPrefix, pieceCidTail, recipient.account.address],
+      [pieceCidPrefix, pieceCidTail, [recipient.account.address]],
       { account: sender.account },
     );
     await admin.waitForTransactionReceipt({ hash: registerTxHash });
@@ -169,7 +172,7 @@ describe("FSFileRegistry", () => {
       parsePieceCid(samplePieceCid);
 
     const registerTxHash = await fileRegistry.write.registerFile(
-      [pieceCidPrefix, pieceCidTail, recipient.account.address],
+      [pieceCidPrefix, pieceCidTail, [recipient.account.address]],
       { account: sender.account },
     );
     await admin.waitForTransactionReceipt({ hash: registerTxHash });
@@ -197,7 +200,7 @@ describe("FSFileRegistry", () => {
     const signatureVisualHash = keccak256(toBytes("signature-visual-data"));
 
     const registerTxHash = await fileRegistry.write.registerFile(
-      [pieceCidPrefix, pieceCidTail, recipient.account.address],
+      [pieceCidPrefix, pieceCidTail, [recipient.account.address]],
       { account: sender.account },
     );
     await admin.waitForTransactionReceipt({ hash: registerTxHash });
@@ -240,7 +243,7 @@ describe("FSFileRegistry", () => {
     const signatureVisualHash = keccak256(toBytes("signature-visual-data"));
 
     const registerTxHash = await fileRegistry.write.registerFile(
-      [pieceCidPrefix, pieceCidTail, recipient.account.address],
+      [pieceCidPrefix, pieceCidTail, [recipient.account.address]],
       { account: sender.account },
     );
     await admin.waitForTransactionReceipt({ hash: registerTxHash });
@@ -279,7 +282,7 @@ describe("FSFileRegistry", () => {
     const signatureVisualHash = keccak256(toBytes("signature-visual-data"));
 
     const registerTxHash = await fileRegistry.write.registerFile(
-      [pieceCidPrefix, pieceCidTail, recipient.account.address],
+      [pieceCidPrefix, pieceCidTail, [recipient.account.address]],
       { account: sender.account },
     );
     await admin.waitForTransactionReceipt({ hash: registerTxHash });
@@ -324,7 +327,7 @@ describe("FSFileRegistry", () => {
     const signatureVisualHash = keccak256(toBytes("signature-visual-data"));
 
     const registerTxHash = await fileRegistry.write.registerFile(
-      [pieceCidPrefix, pieceCidTail, recipient.account.address],
+      [pieceCidPrefix, pieceCidTail, [recipient.account.address]],
       { account: sender.account },
     );
     await admin.waitForTransactionReceipt({ hash: registerTxHash });
@@ -366,7 +369,7 @@ describe("FSFileRegistry", () => {
     const signatureVisualHash = keccak256(toBytes("signature-visual-data"));
 
     const registerTxHash = await fileRegistry.write.registerFile(
-      [pieceCidPrefix, pieceCidTail, recipient.account.address],
+      [pieceCidPrefix, pieceCidTail, [recipient.account.address]],
       { account: sender.account },
     );
     await admin.waitForTransactionReceipt({ hash: registerTxHash });
@@ -419,9 +422,6 @@ describe("FSFileRegistry", () => {
     );
     expect(fileData.pieceCidTail).to.equal(0);
     expect(fileData.sender).to.equal(
-      "0x0000000000000000000000000000000000000000",
-    );
-    expect(fileData.recipient).to.equal(
       "0x0000000000000000000000000000000000000000",
     );
     expect(fileData.acked).to.equal(false);
