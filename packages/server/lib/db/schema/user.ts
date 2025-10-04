@@ -49,7 +49,8 @@ export const userSignatures = t.sqliteTable("user_signatures", {
   walletAddress: tEvmAddress().references(() => users.walletAddress, {
     onDelete: "cascade",
   }),
-  signatureUrl: t.text().notNull(),
+  storageBucketPath: t.text().notNull(),
+  visualHash: tBytes32().notNull(),
   name: t.text().notNull(),
 
   ...timestamps,
