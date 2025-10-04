@@ -1,8 +1,10 @@
 import { useFilosignMutation, useFilosignQuery } from "@filosign/sdk/react";
 import { Button } from "../lib/components/ui/button";
+import { Input } from "../lib/components/ui/input";
 import { usePrivy } from "@privy-io/react-auth";
 import { useBalance, useWalletClient } from "wagmi";
 import { formatEther } from "viem";
+import { useState } from "react";
 
 export default function TestPage() {
   const { user, login: loginPrivy, logout: logoutPrivy } = usePrivy();
@@ -45,6 +47,12 @@ export default function TestPage() {
     undefined,
   );
 
+  // Input states for shareCapability testing
+  const [sendToAddress, setSendToAddress] = useState("");
+  const [sendMessage, setSendMessage] = useState("");
+  const [requestIdToCancel, setRequestIdToCancel] = useState("");
+  const [senderWalletToAllow, setSenderWalletToAllow] = useState("");
+
   async function handleRegisterFilosign() {
     try {
       await register.mutateAsync({ pin: "222222" });
@@ -62,6 +70,51 @@ export default function TestPage() {
       alert("Logged in with Filosign");
     } catch (error) {
       console.error("Failed to login", error);
+    }
+  }
+
+  async function handleSendShareRequest() {
+    if (!sendToAddress.trim() || !sendMessage.trim()) return;
+    try {
+      await sendShareRequest.mutateAsync({
+        recipientWallet: sendToAddress as `0x${string}`,
+        message: sendMessage,
+      });
+      console.log("Sent share request");
+      alert("Share request sent!");
+      setSendToAddress("");
+      setSendMessage("");
+    } catch (error) {
+      console.error("Failed to send share request", error);
+      alert("Failed to send share request");
+    }
+  }
+
+  async function handleCancelShareRequest() {
+    if (!requestIdToCancel.trim()) return;
+    try {
+      await cancelShareRequest.mutateAsync({ requestId: requestIdToCancel });
+      console.log("Cancelled share request");
+      alert("Share request cancelled!");
+      setRequestIdToCancel("");
+    } catch (error) {
+      console.error("Failed to cancel share request", error);
+      alert("Failed to cancel share request");
+    }
+  }
+
+  async function handleAllowSharing() {
+    if (!senderWalletToAllow.trim()) return;
+    try {
+      await allowSharing.mutateAsync({
+        senderWallet: senderWalletToAllow as `0x${string}`,
+      });
+      console.log("Allowed sharing");
+      alert("Sharing allowed!");
+      setSenderWalletToAllow("");
+    } catch (error) {
+      console.error("Failed to allow sharing", error);
+      alert("Failed to allow sharing");
     }
   }
 
@@ -102,7 +155,7 @@ export default function TestPage() {
           </div>
         </div>
       )}
-      <div className="flex gap-2">
+      <div className="flex gap-2 flex-wrap">
         {!user && <Button onClick={() => loginPrivy()}>Login Privy</Button>}
         {user && <Button onClick={() => logoutPrivy()}>Logout Privy</Button>}
         {!isRegistered && (
@@ -110,6 +163,79 @@ export default function TestPage() {
         )}
         <Button onClick={handleLoginFilosign}>Login Filosign</Button>
       </div>
+
+      {/* ShareCapability Testing Inputs */}
+      {user && (
+        <div className="mt-8 p-4 border rounded-lg w-full max-w-2xl">
+          <h3 className="text-lg font-semibold mb-4">
+            ShareCapability Testing
+          </h3>
+
+          <div className="space-y-4">
+            {/* Send Share Request */}
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Recipient wallet address"
+                  value={sendToAddress}
+                  onChange={(e) => setSendToAddress(e.target.value)}
+                  className="flex-1"
+                />
+                <Input
+                  placeholder="Message"
+                  value={sendMessage}
+                  onChange={(e) => setSendMessage(e.target.value)}
+                  className="flex-1"
+                />
+                <Button
+                  onClick={handleSendShareRequest}
+                  disabled={
+                    !sendToAddress.trim() ||
+                    !sendMessage.trim() ||
+                    sendShareRequest.isPending
+                  }
+                >
+                  Send Request
+                </Button>
+              </div>
+            </div>
+
+            {/* Cancel Share Request */}
+            <div className="flex gap-2">
+              <Input
+                placeholder="Request ID to cancel"
+                value={requestIdToCancel}
+                onChange={(e) => setRequestIdToCancel(e.target.value)}
+                className="flex-1"
+              />
+              <Button
+                onClick={handleCancelShareRequest}
+                disabled={
+                  !requestIdToCancel.trim() || cancelShareRequest.isPending
+                }
+              >
+                Cancel Request
+              </Button>
+            </div>
+
+            {/* Allow Sharing */}
+            <div className="flex gap-2">
+              <Input
+                placeholder="Sender wallet address to allow"
+                value={senderWalletToAllow}
+                onChange={(e) => setSenderWalletToAllow(e.target.value)}
+                className="flex-1"
+              />
+              <Button
+                onClick={handleAllowSharing}
+                disabled={!senderWalletToAllow.trim() || allowSharing.isPending}
+              >
+                Allow Sharing
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

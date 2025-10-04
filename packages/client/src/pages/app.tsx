@@ -21,6 +21,7 @@ import OnboardingSetPinPage from "./onboarding/set-pin";
 import OnboardingCreateSignaturePage from "./onboarding/create-signature";
 import OnboardingWelcomeCompletePage from "./onboarding/welcome";
 import { NotFound } from "../lib/components/custom/NotFound";
+import DashboardProtector from "../lib/components/custom/DashboardProtector";
 import TestPage from "./test";
 
 const rootRoute = createRootRoute({
@@ -55,7 +56,11 @@ const dashboardRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/dashboard",
   component: function Dashboard() {
-    return withPageErrorBoundary(DashboardPage)({});
+    return (
+      <DashboardProtector>
+        {withPageErrorBoundary(DashboardPage)({})}
+      </DashboardProtector>
+    );
   },
 });
 
@@ -63,7 +68,11 @@ const profileRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/dashboard/settings/profile",
   component: function Profile() {
-    return withPageErrorBoundary(ProfilePage)({});
+    return (
+      <DashboardProtector>
+        {withPageErrorBoundary(ProfilePage)({})}
+      </DashboardProtector>
+    );
   },
 });
 
@@ -71,7 +80,11 @@ const dashboardDocumentAllRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/dashboard/document/all",
   component: function DocumentAll() {
-    return withPageErrorBoundary(DocumentAllPage)({});
+    return (
+      <DashboardProtector>
+        {withPageErrorBoundary(DocumentAllPage)({})}
+      </DashboardProtector>
+    );
   },
 });
 
@@ -79,7 +92,11 @@ const dashboardDocumentFolderRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/dashboard/document/folder/$folderId",
   component: function DocumentFolder() {
-    return withPageErrorBoundary(DocumentFolderPage)({});
+    return (
+      <DashboardProtector>
+        {withPageErrorBoundary(DocumentFolderPage)({})}
+      </DashboardProtector>
+    );
   },
 });
 
@@ -87,7 +104,11 @@ const createSignatureRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/dashboard/signature/create",
   component: function CreateSignature() {
-    return withPageErrorBoundary(CreateNewSignaturePage)({});
+    return (
+      <DashboardProtector>
+        {withPageErrorBoundary(CreateNewSignaturePage)({})}
+      </DashboardProtector>
+    );
   },
 });
 
@@ -95,7 +116,11 @@ const createEnvelopeRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/dashboard/envelope/create",
   component: function Create() {
-    return withPageErrorBoundary(CreateEnvelopePage)({});
+    return (
+      <DashboardProtector>
+        {withPageErrorBoundary(CreateEnvelopePage)({})}
+      </DashboardProtector>
+    );
   },
 });
 
@@ -103,7 +128,11 @@ const addSignatureRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/dashboard/envelope/create/add-sign",
   component: function AddSignature() {
-    return withPageErrorBoundary(AddSignaturePage)({});
+    return (
+      <DashboardProtector>
+        {withPageErrorBoundary(AddSignaturePage)({})}
+      </DashboardProtector>
+    );
   },
 });
 
@@ -111,7 +140,11 @@ const allDocsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/dashboard/files",
   component: function Files() {
-    return withPageErrorBoundary(FilesPage)({});
+    return (
+      <DashboardProtector>
+        {withPageErrorBoundary(FilesPage)({})}
+      </DashboardProtector>
+    );
   },
 });
 

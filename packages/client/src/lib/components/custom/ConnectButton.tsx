@@ -23,18 +23,6 @@ export default function ConnectButton() {
     return "dashboard";
   };
 
-  // Show PIN dialog when registered user logs in with Privy
-  useEffect(() => {
-    if (
-      ready &&
-      authenticated &&
-      isRegistered.data &&
-      !isRegistered.isPending
-    ) {
-      setShowPinDialog(true);
-    }
-  }, [ready, authenticated, isRegistered.data, isRegistered.isPending]);
-
   const handlePinSubmit = async (pin: string) => {
     try {
       await loginMutation.mutateAsync({ pin });
