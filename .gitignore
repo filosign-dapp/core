@@ -130,3 +130,6 @@ dist/
 .pnp.*
 .bun
 .vercel
+
+packages/client/db/filosign.db-shm
+packages/client/db/filosign.db-wal
