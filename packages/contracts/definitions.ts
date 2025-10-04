@@ -1,6 +1,6 @@
 export const definitions = {
   FSManager: {
-    address: "0xe6250c242cf1deb2aefdc9798042420c5ccea3a1",
+    address: "0x8b9cee15a18f50a22ae274bec1b20b8b1dfd9d2d",
     abi: [
       {
         inputs: [],
@@ -176,7 +176,7 @@ export const definitions = {
     ],
   },
   FSFileRegistry: {
-    address: "0x4aB2F69b109D23Daf1C0CF3A053c35628AcF6854",
+    address: "0xc65CaD092c6d2DF0246076e0017430C907C3A4d4",
     abi: [
       {
         inputs: [],
@@ -416,22 +416,12 @@ export const definitions = {
                 type: "address",
               },
               {
-                internalType: "address",
-                name: "recipient",
-                type: "address",
-              },
-              {
                 internalType: "uint16",
                 name: "pieceCidTail",
                 type: "uint16",
               },
-              {
-                internalType: "bool",
-                name: "acked",
-                type: "bool",
-              },
             ],
-            internalType: "struct FSFileRegistry.FileData",
+            internalType: "struct FSFileRegistry.FileDataView",
             name: "",
             type: "tuple",
           },
@@ -452,24 +442,9 @@ export const definitions = {
           {
             components: [
               {
-                internalType: "address",
-                name: "signer",
-                type: "address",
-              },
-              {
-                internalType: "uint48",
-                name: "timestamp",
-                type: "uint48",
-              },
-              {
                 internalType: "bytes32",
                 name: "signatureVisualHash",
                 type: "bytes32",
-              },
-              {
-                internalType: "uint8",
-                name: "v",
-                type: "uint8",
               },
               {
                 internalType: "bytes32",
@@ -481,10 +456,83 @@ export const definitions = {
                 name: "s",
                 type: "bytes32",
               },
+              {
+                internalType: "address",
+                name: "signer",
+                type: "address",
+              },
+              {
+                internalType: "uint48",
+                name: "timestamp",
+                type: "uint48",
+              },
+              {
+                internalType: "uint8",
+                name: "signatureVisualPositionTop",
+                type: "uint8",
+              },
+              {
+                internalType: "uint8",
+                name: "signatureVisualPositionLeft",
+                type: "uint8",
+              },
+              {
+                internalType: "uint8",
+                name: "v",
+                type: "uint8",
+              },
             ],
             internalType: "struct FSFileRegistry.SignatureData",
             name: "",
             type: "tuple",
+          },
+        ],
+        stateMutability: "view",
+        type: "function",
+      },
+      {
+        inputs: [
+          {
+            internalType: "bytes32",
+            name: "cidIdentifier_",
+            type: "bytes32",
+          },
+          {
+            internalType: "address",
+            name: "recipient_",
+            type: "address",
+          },
+        ],
+        name: "isAcknowledged",
+        outputs: [
+          {
+            internalType: "bool",
+            name: "",
+            type: "bool",
+          },
+        ],
+        stateMutability: "view",
+        type: "function",
+      },
+      {
+        inputs: [
+          {
+            internalType: "bytes32",
+            name: "cidIdentifier_",
+            type: "bytes32",
+          },
+          {
+            internalType: "address",
+            name: "recipient_",
+            type: "address",
+          },
+        ],
+        name: "isRecipient",
+        outputs: [
+          {
+            internalType: "bool",
+            name: "",
+            type: "bool",
           },
         ],
         stateMutability: "view",
@@ -516,9 +564,9 @@ export const definitions = {
             type: "uint16",
           },
           {
-            internalType: "address",
-            name: "recipient_",
-            type: "address",
+            internalType: "address[]",
+            name: "recipients_",
+            type: "address[]",
           },
         ],
         name: "registerFile",
@@ -562,7 +610,7 @@ export const definitions = {
     ],
   },
   FSKeyRegistry: {
-    address: "0x09e90B5545D599BAc02df361078B1374DEbB5C72",
+    address: "0x96e867F6BC2FC3eD1B58bd1F50439c1A78Ee664E",
     abi: [
       {
         inputs: [],
@@ -781,4 +829,4 @@ export const definitions = {
     ],
   },
 } as const;
-export const contractsDeployedAtBlock = 3075517n;
+export const contractsDeployedAtBlock = 3076233n;
