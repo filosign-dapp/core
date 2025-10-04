@@ -1,5 +1,5 @@
 import config from "../../config";
-import { eq, lte, sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import db from "../db";
 import type { TypedWorker } from "./worker";
 import tryCatchSync, { tryCatch } from "../utils/tryCatch";

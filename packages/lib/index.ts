@@ -177,10 +177,6 @@ export class FilosignClient {
       throw new Error("Address is not registered");
     }
 
-    const pinCommitment = ripemd160(
-      keccak256(encodePacked(["string", "string"], [toB64(pin), pin])),
-    );
-
     const [
       stored_salt_auth,
       stored_salt_wrap,
@@ -191,6 +187,11 @@ export class FilosignClient {
       stored_seed_tail,
       stored_commitment_pin,
     ] = await this.contracts.FSKeyRegistry.read.keygenData([this.address]);
+    const pinCommitment = ripemd160(
+      keccak256(
+        encodePacked(["string", "string"], [toB64(stored_salt_pin), pin]),
+      ),
+    );
 
     if (stored_commitment_pin !== pinCommitment) {
       throw new Error("Invalid PIN");
