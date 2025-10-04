@@ -9,7 +9,7 @@ contract FSFileRegistry is EIP712 {
     struct FileData {
         bytes32 pieceCidPrefix;
         address sender;
-        address[] recipients;
+        mapping(address => bool) recipients;
         uint16 pieceCidTail;
         bool acked;
     }
@@ -23,6 +23,13 @@ contract FSFileRegistry is EIP712 {
         uint8 v;
         bytes32 r;
         bytes32 s;
+    }
+
+    struct FileDataView {
+        bytes32 pieceCidPrefix;
+        address sender;
+        uint16 pieceCidTail;
+        bool acked;
     }
 
     mapping(bytes32 => FileData) private _files;
@@ -59,7 +66,9 @@ contract FSFileRegistry is EIP712 {
     function acknowledge(bytes32 cidIdentifier_) external {
         FileData storage file = _files[cidIdentifier_];
         require(file.sender != address(0), "File not registered");
-        require(file.recipient == msg.sender, "Only recipient can ack");
+
+        require(file.recipients[msg.sender], "Only recipient can ack");
+
         require(file.acked == false, "Already acknowledged");
 
         file.acked = true;
@@ -74,17 +83,13 @@ contract FSFileRegistry is EIP712 {
     function registerFile(
         bytes32 pieceCidPrefix_,
         uint16 pieceCidTail_,
-        address[] recipients_
+        address[] calldata recipients_
     ) external {
         FileData storage file = _files[
             cidIdentifier(pieceCidPrefix_, pieceCidTail_)
         ];
 
         require(file.sender == address(0), "File already registered");
-        require(
-            manager.approvedSenders(recipient_, msg.sender),
-            "Sender not approved by recipient"
-        );
 
         file.pieceCidPrefix = pieceCidPrefix_;
         file.pieceCidTail = pieceCidTail_;
@@ -94,8 +99,11 @@ contract FSFileRegistry is EIP712 {
         bytes32 cid = cidIdentifier(pieceCidPrefix_, pieceCidTail_);
         uint48 timestamp = uint48(block.timestamp);
         for (uint i = 0; i < recipients_.length; i++) {
-            require(recipients_[i] != address(0), "Invalid recipient");
-            file.recipients.push(recipients_[i]);
+            require(
+                manager.approvedSenders(recipients_[i], msg.sender),
+                "Sender not approved by recipient"
+            );
+            file.recipients[recipients_[i]] = true;
             emit FileRegistered(cid, msg.sender, recipients_[i], timestamp);
         }
     }
@@ -111,7 +119,7 @@ contract FSFileRegistry is EIP712 {
         SignatureData storage signature = _signatures[cidIdentifier_];
         require(file.sender != address(0), "File not registered");
         require(
-            file.recipient == msg.sender,
+            file.recipients[msg.sender],
             "Only recipient can submit signature"
         );
         require(signature.signer == address(0), "Signature already submitted");
@@ -157,8 +165,22 @@ contract FSFileRegistry is EIP712 {
 
     function getFileData(
         bytes32 cidIdentifier_
-    ) external view returns (FileData memory) {
-        return _files[cidIdentifier_];
+    ) external view returns (FileDataView memory) {
+        FileData storage file = _files[cidIdentifier_];
+        return
+            FileDataView(
+                file.pieceCidPrefix,
+                file.sender,
+                file.pieceCidTail,
+                file.acked
+            );
+    }
+
+    function isRecipient(
+        bytes32 cidIdentifier_,
+        address recipient_
+    ) external view returns (bool) {
+        return _files[cidIdentifier_].recipients[recipient_];
     }
 
     function getSignatureData(
@@ -166,16 +188,4 @@ contract FSFileRegistry is EIP712 {
     ) external view returns (SignatureData memory) {
         return _signatures[cidIdentifier_];
     }
-
-    // // kept for backward compatibility or other verififcation uses
-    // function verifySignature(
-    //     address signer_,
-    //     bytes32 messageHash_,
-    //     uint8 v_,
-    //     bytes32 r_,
-    //     bytes32 s_
-    // ) internal pure returns (bool) {
-    //     address recovered = ECDSA.recover(messageHash_, v_, r_, s_);
-    //     return recovered == signer_;
-    // }
 }
