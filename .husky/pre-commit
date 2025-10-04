@@ -1,4 +1,3 @@
+bun fmt
 cd packages/contracts
 bun tests
-
-bunx prettier --write .

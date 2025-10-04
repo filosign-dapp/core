@@ -109,7 +109,7 @@ export class FilosignClient {
     const { challenge } = generateRegisterChallenge(
       this.address,
       this.version.toString(),
-      nonce
+      nonce,
     );
     const signature = await signRegisterChallenge({
       walletClient: this.wallet,
@@ -122,11 +122,11 @@ export class FilosignClient {
       salts.pinSalt,
       salts.authSalt,
       salts.wrapperSalt,
-      info
+      info,
     );
 
     const pinCommitment = ripemd160(
-      keccak256(encodePacked(["string", "string"], [salts.pinSalt, pin]))
+      keccak256(encodePacked(["string", "string"], [salts.pinSalt, pin])),
     );
 
     const { publicKey } = getPublicKeyFromRegenerated(
@@ -136,7 +136,7 @@ export class FilosignClient {
       salts.authSalt,
       salts.wrapperSalt,
       encSeed,
-      info
+      info,
     );
 
     const encSeedHex = `0x${toHex(encSeed)}` as const;
@@ -154,7 +154,7 @@ export class FilosignClient {
           commitment_pin: pinCommitment,
         },
         `0x${toHex(publicKey)}`,
-      ])
+      ]),
     );
 
     const { encryptionKey } = regenerateEncryptionKey(
@@ -164,7 +164,7 @@ export class FilosignClient {
       salts.authSalt,
       salts.wrapperSalt,
       encSeed,
-      info
+      info,
     );
 
     this.crypto.encryptionKey = Uint8Array.fromBase64(encryptionKey);
@@ -178,7 +178,7 @@ export class FilosignClient {
     }
 
     const pinCommitment = ripemd160(
-      keccak256(encodePacked(["string", "string"], [toB64(pin), pin]))
+      keccak256(encodePacked(["string", "string"], [toB64(pin), pin])),
     );
 
     const [
@@ -202,14 +202,14 @@ export class FilosignClient {
       salt_pin: toB64(stored_salt_pin),
       nonce: toB64(stored_nonce),
       seed: toB64(
-        concatHex([stored_seed_head, stored_seed_word, stored_seed_tail])
+        concatHex([stored_seed_head, stored_seed_word, stored_seed_tail]),
       ),
     };
 
     const { challenge } = generateRegisterChallenge(
       this.address,
       this.version.toString(),
-      stored.nonce
+      stored.nonce,
     );
 
     const regenerated_signature = await signRegisterChallenge({
@@ -224,7 +224,7 @@ export class FilosignClient {
       stored.salt_auth,
       stored.salt_wrap,
       stored.seed,
-      info
+      info,
     );
 
     this.crypto.encryptionKey = Uint8Array.fromBase64(encryptionKey);

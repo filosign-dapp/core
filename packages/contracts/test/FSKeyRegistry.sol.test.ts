@@ -7,6 +7,7 @@ import {
   publicActions,
   sliceHex,
   concatHex,
+  ripemd160,
 } from "viem";
 import {
   generateRegisterChallenge,
@@ -17,10 +18,12 @@ import {
   generateNonce,
   toB64,
   getPublicKeyFromRegenerated,
+  ensureWasmInitialized,
 } from "filosign-crypto-utils";
 import { describe, it } from "mocha";
 
 async function setupFixture() {
+  await ensureWasmInitialized();
   const [deployer, user] = await hre.viem.getWalletClients();
   const admin = (await hre.viem.getTestClient()).extend(publicActions);
 
@@ -73,8 +76,10 @@ describe("FSKeyRegistry", () => {
       "test",
     );
 
-    const commitment_pin = keccak256(
-      encodePacked(["string", "string"], [base_material.pinSalt, pin]),
+    const commitment_pin = ripemd160(
+      keccak256(
+        encodePacked(["string", "string"], [base_material.pinSalt, pin]),
+      ),
     );
 
     const { publicKey } = getPublicKeyFromRegenerated(
