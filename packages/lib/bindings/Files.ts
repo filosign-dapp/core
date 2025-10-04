@@ -2,6 +2,9 @@ import type { Address } from "viem";
 import type { Defaults } from "../types/client";
 import type Logger from "./Logger";
 import z from "zod";
+import { calculate as calculatePieceCid } from "@filoz/synapse-sdk/piece";
+import { generatePrivateKey } from "viem/accounts";
+import { parsePieceCid } from "@filosign/contracts";
 
 const zFileProfile = z.object({
   username: z.string().nullable(),
@@ -100,59 +103,93 @@ export default class Files {
     return response;
   }
 
-  //   async uploadFile(options: {
-  //     pieceCid: string;
-  //     file: File | ArrayBuffer;
-  //   }) {
-  //     const { apiClient } = this.defaults;
-  //     apiClient.ensureJwt();
+  async uploadFile(options: {
+    data: Uint8Array;
+    recipientAddress: string;
+    metadata?: Record<string, any>;
+  }) {
+    const { apiClient, crypto, tx, contracts } = this.defaults;
+    apiClient.ensureJwt();
 
-  //     const uploadStartResponse = await apiClient.rpc.postSafe(
-  //       {
-  //         uploadUrl: z.string(),
-  //         key: z.string(),
-  //       },
-  //       "/files/upload/start",
-  //       {
-  //         pieceCid: options.pieceCid,
-  //       }
-  //     );
+    const dataEncryptionKey = generatePrivateKey();
 
-  //     const uploadResponse = await fetch(uploadStartResponse.uploadUrl, {
-  //       method: "PUT",
-  //       headers: {
-  //         "Content-Type": "application/octet-stream",
-  //       },
-  //       body: options.file,
-  //     });
+    const { encrypted: encryptedData, iv: dataIv } =
+      await crypto.encryptWithKey(options.data, dataEncryptionKey);
 
-  //     if (!uploadResponse.ok) {
-  //       throw new Error(`Upload failed: ${uploadResponse.statusText}`);
-  //     }
+    const pieceCid = calculatePieceCid(new Uint8Array(encryptedData));
 
-  //     // Register the file upload
-  //     const registerResponse = await apiClient.rpc.postSafe(
-  //       {
-  //         pieceCid: z.string(),
-  //         ownerWallet: z.string(),
-  //         recipientWallet: z.string().nullable(),
-  //         encryptedKey: z.string().nullable(),
-  //         proxyPublicKey: z.string().nullable(),
-  //         metadata: z.record(z.string(), z.any()).nullable(),
-  //         onchainTxHash: z.string().nullable(),
-  //         acknowledged: z.boolean(),
-  //         acknowledgedTxHash: z.string().nullable(),
-  //         createdAt: z.string(),
-  //         updatedAt: z.string(),
-  //       },
-  //       "/files",
-  //       {
-  //         pieceCid: options.pieceCid,
-  //       }
-  //     );
+    const uploadStartResponse = await apiClient.rpc.postSafe(
+      {
+        uploadUrl: z.string(),
+        key: z.string(),
+      },
+      "/files/upload/start",
+      {
+        pieceCid: pieceCid,
+      },
+    );
 
-  //     return registerResponse;
-  //   }
+    const uploadResponse = await fetch(uploadStartResponse.data.uploadUrl, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/octet-stream",
+      },
+      body: encryptedData,
+    });
+
+    if (!uploadResponse.ok) {
+      throw new Error(`Upload failed: ${uploadResponse.statusText}`);
+    }
+
+    const recipientPubKeyResponse = await apiClient.rpc.getSafe(
+      {
+        publicKey: z.string(),
+      },
+      `/user/publickey?address=${options.recipientAddress}`,
+    );
+
+    const { encrypted: encryptedKeyBuffer, iv: keyIv } = await crypto.encrypt(
+      Uint8Array.fromHex(dataEncryptionKey.replace("0x", "")),
+      recipientPubKeyResponse.data.publicKey,
+    );
+
+    const encryptedKey = Buffer.from(encryptedKeyBuffer).toString("base64");
+    const keyIvBase64 = Buffer.from(keyIv).toString("base64");
+
+    const registerResponse = await apiClient.rpc.postSafe(
+      {
+        pieceCid: z.string(),
+        ownerWallet: z.string(),
+        metadata: z.record(z.string(), z.any()).nullable(),
+        encryptedKey: z.string().nullable(),
+        encryptedKeyIv: z.string().nullable(),
+        createdAt: z.string(),
+        updatedAt: z.string(),
+      },
+      "/files",
+      {
+        pieceCid: pieceCid,
+        iv: keyIvBase64,
+        encryptedKey: encryptedKey,
+        metaData: options.metadata || null,
+      },
+    );
+
+    const { digestPrefix, digestTail } = parsePieceCid(pieceCid.toString());
+
+    const receipt = await tx(
+      contracts.FSFileRegistry.write.registerFile([
+        digestPrefix,
+        digestTail,
+        [options.recipientAddress as Address],
+      ]),
+    );
+
+    return {
+      ...registerResponse,
+      onchainTxHash: receipt.transactionHash,
+    };
+  }
 
   //   async acknowledgeFile(options: { pieceCid: string }) {
   //     const { contracts, tx } = this.defaults;
