@@ -4,10 +4,8 @@ import {
   keccak256,
   sliceHex,
   concatHex,
-  type Address,
   type Hash,
   type PublicClient,
-  type Transport,
   http,
   ripemd160,
 } from "viem";
