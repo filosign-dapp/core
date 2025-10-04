@@ -9,9 +9,7 @@
   ],
   "exports": {
     ".": {
-      "types": "./dist/exports.d.ts",
-      "require": "./dist/exports.js",
-      "import": "./dist/exports.js"
+      "default": "./exports.ts"
     }
   },
   "scripts": {
