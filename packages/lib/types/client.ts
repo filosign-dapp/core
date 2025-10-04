@@ -10,6 +10,7 @@ import type ApiClient from "../bindings/ApiClient";
 import type Logger from "../bindings/Logger";
 import { getContracts } from "@filosign/contracts";
 import type { Crypto } from "../bindings/Crypto";
+import type { FilosignStore } from "../store";
 
 export type FilosignClientConfig = {
   debug?: boolean;
@@ -25,6 +26,7 @@ export type Defaults = {
   contracts: ReturnType<typeof getContracts<Wallet>>;
   publicClient: PublicClient;
   crypto: Crypto;
+  store: FilosignStore;
   tx: (txnPromise: Promise<`0x${string}`>) => Promise<TransactionReceipt>;
 
   //   store: FilosignStore;

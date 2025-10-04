@@ -30,6 +30,7 @@ import { Crypto } from "./bindings/Crypto";
 import ShareCapability from "./bindings/ShareCapability";
 import z from "zod";
 import { privateKeyToAddress, signMessage } from "viem/accounts";
+import { FilosignStore } from "./store";
 
 const info = `Replace with relevant shit`; // temporary, todo replace
 const primaryChain = filecoinCalibration;
@@ -44,6 +45,7 @@ export class FilosignClient {
   private apiClient: ApiClient;
 
   public version = 1;
+  public store: FilosignStore;
 
   constructor(config: FilosignClientConfig) {
     const { wallet, apiBaseUrl } = config;
@@ -56,6 +58,7 @@ export class FilosignClient {
     });
     this.apiClient = new ApiClient(apiBaseUrl);
     this.crypto = new Crypto();
+    this.store = new FilosignStore({});
 
     this.logger = new Logger("FilosignClient", config.debug);
     this.defaults = {
@@ -64,6 +67,7 @@ export class FilosignClient {
       publicClient: this.publicClient,
       logger: this.logger,
       crypto: this.crypto,
+      store: this.store,
       tx: async (txnPromise: Promise<Hash>) => {
         const hash = await txnPromise;
         return await this.publicClient.waitForTransactionReceipt({ hash });
