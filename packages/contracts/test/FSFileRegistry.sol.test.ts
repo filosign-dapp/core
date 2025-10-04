@@ -22,7 +22,7 @@ const samplePieceCid =
   "bafkzcibcbub2cd46abwvhoohwhmmjugyjibda32vn4a4qlcrv5dc76s24s67qai";
 
 async function setupFixture() {
-  const [deployer, sender, recipient, other] =
+  const [deployer, sender, recipient1, recipient2, other] =
     await hre.viem.getWalletClients();
   const admin = (await hre.viem.getTestClient()).extend(publicActions);
 
@@ -34,16 +34,32 @@ async function setupFixture() {
   );
 
   await manager.write.approveSender([sender.account.address], {
-    account: recipient.account,
+    account: recipient1.account,
+  });
+  await manager.write.approveSender([sender.account.address], {
+    account: recipient2.account,
   });
 
-  return { deployer, sender, recipient, other, manager, fileRegistry, admin };
+  return {
+    deployer,
+    sender,
+    recipient1,
+    recipient2,
+    other,
+    manager,
+    fileRegistry,
+    admin,
+  };
 }
 
 describe("FSFileRegistry", () => {
   it("registers a file successfully when sender is approved", async () => {
-    const { fileRegistry, sender, recipient, admin } =
-      await loadFixture(setupFixture);
+    const {
+      fileRegistry,
+      sender,
+      recipient1: recipient,
+      admin,
+    } = await loadFixture(setupFixture);
 
     const { digestPrefix: pieceCidPrefix, digestTail: pieceCidTail } =
       parsePieceCid(samplePieceCid);
@@ -63,7 +79,6 @@ describe("FSFileRegistry", () => {
     expect(fileData.sender.toLowerCase()).to.equal(
       sender.account.address.toLowerCase(),
     );
-    expect(fileData.acked).to.equal(false);
 
     const isRecipient = await fileRegistry.read.isRecipient([
       cidIdentifier,
@@ -73,7 +88,11 @@ describe("FSFileRegistry", () => {
   });
 
   it("fails to register file when sender is not approved", async () => {
-    const { fileRegistry, other, recipient } = await loadFixture(setupFixture);
+    const {
+      fileRegistry,
+      other,
+      recipient1: recipient,
+    } = await loadFixture(setupFixture);
 
     const { digestPrefix: pieceCidPrefix, digestTail: pieceCidTail } =
       parsePieceCid(samplePieceCid);
@@ -87,8 +106,12 @@ describe("FSFileRegistry", () => {
   });
 
   it("fails to register file that already exists", async () => {
-    const { fileRegistry, sender, recipient, admin } =
-      await loadFixture(setupFixture);
+    const {
+      fileRegistry,
+      sender,
+      recipient1: recipient,
+      admin,
+    } = await loadFixture(setupFixture);
 
     const { digestPrefix: pieceCidPrefix, digestTail: pieceCidTail } =
       parsePieceCid(samplePieceCid);
@@ -108,8 +131,12 @@ describe("FSFileRegistry", () => {
   });
 
   it("allows recipient to acknowledge a file", async () => {
-    const { fileRegistry, sender, recipient, admin } =
-      await loadFixture(setupFixture);
+    const {
+      fileRegistry,
+      sender,
+      recipient1: recipient,
+      admin,
+    } = await loadFixture(setupFixture);
 
     const { digestPrefix: pieceCidPrefix, digestTail: pieceCidTail } =
       parsePieceCid(samplePieceCid);
@@ -127,12 +154,22 @@ describe("FSFileRegistry", () => {
     await admin.waitForTransactionReceipt({ hash: ackTxHash });
 
     const fileData = await fileRegistry.read.getFileData([cidIdentifier]);
-    expect(fileData.acked).to.equal(true);
+    // acked is now per recipient, check with isAcknowledged
+    const isAcked = await fileRegistry.read.isAcknowledged([
+      cidIdentifier,
+      recipient.account.address,
+    ]);
+    expect(isAcked).to.equal(true);
   });
 
   it("fails when non-recipient tries to acknowledge", async () => {
-    const { fileRegistry, sender, recipient, other, admin } =
-      await loadFixture(setupFixture);
+    const {
+      fileRegistry,
+      sender,
+      recipient1: recipient,
+      other,
+      admin,
+    } = await loadFixture(setupFixture);
 
     const { digestPrefix: pieceCidPrefix, digestTail: pieceCidTail } =
       parsePieceCid(samplePieceCid);
@@ -153,7 +190,8 @@ describe("FSFileRegistry", () => {
   });
 
   it("fails to acknowledge non-existent file", async () => {
-    const { fileRegistry, recipient } = await loadFixture(setupFixture);
+    const { fileRegistry, recipient1: recipient } =
+      await loadFixture(setupFixture);
 
     const fakeCidIdentifier = keccak256(toBytes("fake-identifier"));
 
@@ -165,8 +203,12 @@ describe("FSFileRegistry", () => {
   });
 
   it("fails to acknowledge already acknowledged file", async () => {
-    const { fileRegistry, sender, recipient, admin } =
-      await loadFixture(setupFixture);
+    const {
+      fileRegistry,
+      sender,
+      recipient1: recipient,
+      admin,
+    } = await loadFixture(setupFixture);
 
     const { digestPrefix: pieceCidPrefix, digestTail: pieceCidTail } =
       parsePieceCid(samplePieceCid);
@@ -192,8 +234,12 @@ describe("FSFileRegistry", () => {
   });
 
   it("allows recipient to submit signature after acknowledgment", async () => {
-    const { fileRegistry, sender, recipient, admin } =
-      await loadFixture(setupFixture);
+    const {
+      fileRegistry,
+      sender,
+      recipient1: recipient,
+      admin,
+    } = await loadFixture(setupFixture);
 
     const { digestPrefix: pieceCidPrefix, digestTail: pieceCidTail } =
       parsePieceCid(samplePieceCid);
@@ -235,8 +281,12 @@ describe("FSFileRegistry", () => {
   });
 
   it("fails to submit signature before acknowledgment", async () => {
-    const { fileRegistry, sender, recipient, admin } =
-      await loadFixture(setupFixture);
+    const {
+      fileRegistry,
+      sender,
+      recipient1: recipient,
+      admin,
+    } = await loadFixture(setupFixture);
 
     const { digestPrefix: pieceCidPrefix, digestTail: pieceCidTail } =
       parsePieceCid(samplePieceCid);
@@ -274,8 +324,13 @@ describe("FSFileRegistry", () => {
   });
 
   it("fails when non-recipient tries to submit signature", async () => {
-    const { fileRegistry, sender, recipient, other, admin } =
-      await loadFixture(setupFixture);
+    const {
+      fileRegistry,
+      sender,
+      recipient1: recipient,
+      other,
+      admin,
+    } = await loadFixture(setupFixture);
 
     const { digestPrefix: pieceCidPrefix, digestTail: pieceCidTail } =
       parsePieceCid(samplePieceCid);
@@ -319,8 +374,12 @@ describe("FSFileRegistry", () => {
   });
 
   it("fails to submit signature twice", async () => {
-    const { fileRegistry, sender, recipient, admin } =
-      await loadFixture(setupFixture);
+    const {
+      fileRegistry,
+      sender,
+      recipient1: recipient,
+      admin,
+    } = await loadFixture(setupFixture);
 
     const { digestPrefix: pieceCidPrefix, digestTail: pieceCidTail } =
       parsePieceCid(samplePieceCid);
@@ -361,8 +420,12 @@ describe("FSFileRegistry", () => {
   });
 
   it("fails with invalid signature", async () => {
-    const { fileRegistry, sender, recipient, admin } =
-      await loadFixture(setupFixture);
+    const {
+      fileRegistry,
+      sender,
+      recipient1: recipient,
+      admin,
+    } = await loadFixture(setupFixture);
 
     const { digestPrefix: pieceCidPrefix, digestTail: pieceCidTail } =
       parsePieceCid(samplePieceCid);
@@ -411,6 +474,144 @@ describe("FSFileRegistry", () => {
     expect(calculatedIdentifier).to.equal(expectedIdentifier);
   });
 
+  it("isAcknowledged returns true after acknowledgment", async () => {
+    const {
+      fileRegistry,
+      sender,
+      recipient1: recipient,
+      admin,
+    } = await loadFixture(setupFixture);
+
+    const { digestPrefix: pieceCidPrefix, digestTail: pieceCidTail } =
+      parsePieceCid(samplePieceCid);
+
+    const registerTxHash = await fileRegistry.write.registerFile(
+      [pieceCidPrefix, pieceCidTail, [recipient.account.address]],
+      { account: sender.account },
+    );
+    await admin.waitForTransactionReceipt({ hash: registerTxHash });
+
+    const cidIdentifier = computeCidIdentifier(samplePieceCid);
+
+    let isAcked = await fileRegistry.read.isAcknowledged([
+      cidIdentifier,
+      recipient.account.address,
+    ]);
+    expect(isAcked).to.equal(false);
+
+    const ackTxHash = await fileRegistry.write.acknowledge([cidIdentifier], {
+      account: recipient.account,
+    });
+    await admin.waitForTransactionReceipt({ hash: ackTxHash });
+
+    isAcked = await fileRegistry.read.isAcknowledged([
+      cidIdentifier,
+      recipient.account.address,
+    ]);
+    expect(isAcked).to.equal(true);
+  });
+
+  it("handles multiple recipients correctly", async () => {
+    const { fileRegistry, sender, recipient1, recipient2, admin } =
+      await loadFixture(setupFixture);
+
+    const { digestPrefix: pieceCidPrefix, digestTail: pieceCidTail } =
+      parsePieceCid(samplePieceCid);
+
+    const registerTxHash = await fileRegistry.write.registerFile(
+      [
+        pieceCidPrefix,
+        pieceCidTail,
+        [recipient1.account.address, recipient2.account.address],
+      ],
+      { account: sender.account },
+    );
+    await admin.waitForTransactionReceipt({ hash: registerTxHash });
+
+    const cidIdentifier = computeCidIdentifier(samplePieceCid);
+
+    // Check both are recipients
+    let isRecipient1 = await fileRegistry.read.isRecipient([
+      cidIdentifier,
+      recipient1.account.address,
+    ]);
+    expect(isRecipient1).to.equal(true);
+
+    let isRecipient2 = await fileRegistry.read.isRecipient([
+      cidIdentifier,
+      recipient2.account.address,
+    ]);
+    expect(isRecipient2).to.equal(true);
+
+    // Neither has acknowledged yet
+    let isAcked1 = await fileRegistry.read.isAcknowledged([
+      cidIdentifier,
+      recipient1.account.address,
+    ]);
+    expect(isAcked1).to.equal(false);
+
+    let isAcked2 = await fileRegistry.read.isAcknowledged([
+      cidIdentifier,
+      recipient2.account.address,
+    ]);
+    expect(isAcked2).to.equal(false);
+
+    // Recipient1 acknowledges
+    const ackTxHash1 = await fileRegistry.write.acknowledge([cidIdentifier], {
+      account: recipient1.account,
+    });
+    await admin.waitForTransactionReceipt({ hash: ackTxHash1 });
+
+    isAcked1 = await fileRegistry.read.isAcknowledged([
+      cidIdentifier,
+      recipient1.account.address,
+    ]);
+    expect(isAcked1).to.equal(true);
+
+    isAcked2 = await fileRegistry.read.isAcknowledged([
+      cidIdentifier,
+      recipient2.account.address,
+    ]);
+    expect(isAcked2).to.equal(false);
+
+    // Recipient2 cannot submit signature yet (not acknowledged)
+    const signatureVisualHash = keccak256(toBytes("signature-visual-data"));
+    const { r, s, v } = await signFileSignature({
+      walletClient: recipient1,
+      contractAddress: fileRegistry.address,
+      pieceCid: samplePieceCid,
+      signatureVisualHash,
+    });
+
+    await expect(
+      fileRegistry.write.submitSignature(
+        [cidIdentifier, signatureVisualHash, Number(v), r, s],
+        { account: recipient2.account },
+      ),
+    ).to.be.rejectedWith(
+      "file needs to be acknowledged before submitting signature",
+    );
+
+    // Recipient1 can submit signature
+    const submitSigTxHash = await fileRegistry.write.submitSignature(
+      [cidIdentifier, signatureVisualHash, Number(v), r, s],
+      { account: recipient1.account },
+    );
+    await admin.waitForTransactionReceipt({ hash: submitSigTxHash });
+
+    // Recipient2 acknowledges
+    const ackTxHash2 = await fileRegistry.write.acknowledge([cidIdentifier], {
+      account: recipient2.account,
+    });
+    await admin.waitForTransactionReceipt({ hash: ackTxHash2 });
+
+    isAcked2 = await fileRegistry.read.isAcknowledged([
+      cidIdentifier,
+      recipient2.account.address,
+    ]);
+    expect(isAcked2).to.equal(true);
+  });
+
   it("returns empty data for non-existent file", async () => {
     const { fileRegistry } = await loadFixture(setupFixture);
 
@@ -424,7 +625,6 @@ describe("FSFileRegistry", () => {
     expect(fileData.sender).to.equal(
       "0x0000000000000000000000000000000000000000",
     );
-    expect(fileData.acked).to.equal(false);
   });
 
   it("returns empty signature data for non-existent signature", async () => {
