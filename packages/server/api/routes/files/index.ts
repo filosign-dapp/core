@@ -4,9 +4,15 @@ import db from "../../../lib/db";
 import { authenticated } from "../../middleware/auth";
 import { bucket } from "../../../lib/s3/client";
 import { getOrCreateUserDataset } from "../../../lib/synapse";
-import { and, desc, eq, isNotNull } from "drizzle-orm";
+import { and, desc, eq, isNotNull, sql } from "drizzle-orm";
 
-const { files, fileSignatures, profiles } = db.schema;
+const {
+  files,
+  fileSignatures,
+  profiles,
+  fileRecipients,
+  fileAcknowledgements,
+} = db.schema;
 const MAX_FILE_SIZE = 30 * 1024 * 1024;
 
 export default new Hono()
@@ -97,11 +103,11 @@ export default new Hono()
     const sentFiles = db
       .select({
         pieceCid: files.pieceCid,
-        recipientWallet: files.recipientWallet,
+        recipientWallet: fileRecipients.recipientWallet,
         metadata: files.metadata,
-        acknowledged: files.acknowledged,
+        acknowledged: sql<boolean>`${fileAcknowledgements.acknowledgedTxHash} IS NOT NULL`,
         onchainTxHash: files.onchainTxHash,
-        acknowledgedTxHash: files.acknowledgedTxHash,
+        acknowledgedTxHash: fileAcknowledgements.acknowledgedTxHash,
         createdAt: files.createdAt,
         updatedAt: files.updatedAt,
         recipientProfile: {
@@ -111,14 +117,25 @@ export default new Hono()
         },
       })
       .from(files)
-      .leftJoin(profiles, eq(files.recipientWallet, profiles.walletAddress))
-      .where(
+      .innerJoin(
+        fileRecipients,
+        eq(files.pieceCid, fileRecipients.filePieceCid),
+      )
+      .leftJoin(
+        profiles,
+        eq(fileRecipients.recipientWallet, profiles.walletAddress),
+      )
+      .leftJoin(
+        fileAcknowledgements,
         and(
-          eq(files.ownerWallet, wallet),
-          isNotNull(files.recipientWallet),
-          isNotNull(files.onchainTxHash),
+          eq(fileAcknowledgements.filePieceCid, files.pieceCid),
+          eq(
+            fileAcknowledgements.recipientWallet,
+            fileRecipients.recipientWallet,
+          ),
         ),
       )
+      .where(and(eq(files.ownerWallet, wallet), isNotNull(files.onchainTxHash)))
       .orderBy(desc(files.createdAt))
       .limit(limit)
       .offset(offset)
@@ -182,10 +199,11 @@ export default new Hono()
       .select({
         pieceCid: files.pieceCid,
         ownerWallet: files.ownerWallet,
+        recipientWallet: fileRecipients.recipientWallet,
         metadata: files.metadata,
-        acknowledged: files.acknowledged,
+        acknowledged: sql<boolean>`${fileAcknowledgements.acknowledgedTxHash} IS NOT NULL`,
         onchainTxHash: files.onchainTxHash,
-        acknowledgedTxHash: files.acknowledgedTxHash,
+        acknowledgedTxHash: fileAcknowledgements.acknowledgedTxHash,
         createdAt: files.createdAt,
         updatedAt: files.updatedAt,
         senderProfile: {
@@ -195,8 +213,22 @@ export default new Hono()
         },
       })
       .from(files)
+      .innerJoin(
+        fileRecipients,
+        eq(files.pieceCid, fileRecipients.filePieceCid),
+      )
       .leftJoin(profiles, eq(files.ownerWallet, profiles.walletAddress))
-      .where(eq(files.recipientWallet, wallet))
+      .leftJoin(
+        fileAcknowledgements,
+        and(
+          eq(fileAcknowledgements.filePieceCid, files.pieceCid),
+          eq(
+            fileAcknowledgements.recipientWallet,
+            fileRecipients.recipientWallet,
+          ),
+        ),
+      )
+      .where(eq(fileRecipients.recipientWallet, wallet))
       .orderBy(desc(files.createdAt))
       .limit(limit)
       .offset(offset)
