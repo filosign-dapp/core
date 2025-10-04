@@ -3,33 +3,8 @@ import { Button } from "@/src/lib/components/ui/button";
 import { useStorePersist } from "@/src/lib/hooks/use-store";
 import { usePrivy } from "@privy-io/react-auth";
 import { Link } from "@tanstack/react-router";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
-
-import { useAccount, useConnect, useDisconnect } from 'wagmi'
-
-export function WalletOptions() {
-  const { connectors, connect } = useConnect()
-  const { address } = useAccount()
-  const { disconnect } = useDisconnect()
-
-  if (address) {
-    return (
-      <div className="flex items-center gap-2">
-        <Button variant="secondary" asChild>
-          <Link to="/onboarding">Get Started</Link>
-        </Button>
-        <Button variant="secondary" onClick={() => disconnect()}>Disconnect</Button>
-      </div>
-    )
-  }
-
-  return connectors.map((connector) => (
-    <Button variant="secondary" key={connector.uid} onClick={() => connect({ connector })}>
-      {connector.name}
-    </Button>
-  ))
-}
 
 interface NavLink {
   label: string;
@@ -127,7 +102,7 @@ export default function LandingNavbar() {
         </motion.div>
 
         {/* Desktop CTA Button */}
-        {/* <motion.div
+        <motion.div
           className=""
           initial={{ opacity: 0, x: 30 }}
           animate={{ opacity: 1, x: 0 }}
@@ -183,9 +158,7 @@ export default function LandingNavbar() {
               </AnimatePresence>
             )}
           </Button>
-        </motion.div> */}
-
-        <WalletOptions />
+        </motion.div>
       </motion.nav>
 
     </section>

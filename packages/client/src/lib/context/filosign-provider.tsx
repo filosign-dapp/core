@@ -13,7 +13,6 @@ export function FilosignProvider({ children }: { children: React.ReactNode }) {
         wallet: walletClient,
       }}
     >
-      <div className="bg-blue-400/30 inset-0 absolute z-20 pointer-events-none" />
       {children}
     </FilosignProviderBase>
   );
