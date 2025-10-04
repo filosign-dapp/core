@@ -26,7 +26,7 @@ export class Crypto {
 
   async encryptWithKey(data: Uint8Array, keyBytes32: Hex) {
     const cryptoKey = await this.deriveRawAesKey(
-      Uint8Array.fromBase64(keyBytes32),
+      Uint8Array.fromHex(keyBytes32.replace("0x", "")),
     );
 
     const iv = crypto.getRandomValues(new Uint8Array(12));
