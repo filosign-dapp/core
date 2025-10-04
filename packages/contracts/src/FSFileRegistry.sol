@@ -9,27 +9,26 @@ contract FSFileRegistry is EIP712 {
     struct FileData {
         bytes32 pieceCidPrefix;
         address sender;
-        mapping(address => bool) recipients;
         uint16 pieceCidTail;
-        bool acked;
+        mapping(address => bool) recipients;
+        mapping(address => bool) acked;
     }
 
     struct SignatureData {
+        bytes32 signatureVisualHash;
+        bytes32 r;
+        bytes32 s;
         address signer;
         uint48 timestamp;
-        bytes32 signatureVisualHash;
         uint8 signatureVisualPositionTop;
         uint8 signatureVisualPositionLeft;
         uint8 v;
-        bytes32 r;
-        bytes32 s;
     }
 
     struct FileDataView {
         bytes32 pieceCidPrefix;
         address sender;
         uint16 pieceCidTail;
-        bool acked;
     }
 
     mapping(bytes32 => FileData) private _files;
@@ -69,9 +68,9 @@ contract FSFileRegistry is EIP712 {
 
         require(file.recipients[msg.sender], "Only recipient can ack");
 
-        require(file.acked == false, "Already acknowledged");
+        require(!file.acked[msg.sender], "Already acknowledged");
 
-        file.acked = true;
+        file.acked[msg.sender] = true;
 
         emit FileAcknowledged(
             cidIdentifier_,
@@ -94,7 +93,6 @@ contract FSFileRegistry is EIP712 {
         file.pieceCidPrefix = pieceCidPrefix_;
         file.pieceCidTail = pieceCidTail_;
         file.sender = msg.sender;
-        file.acked = false;
 
         bytes32 cid = cidIdentifier(pieceCidPrefix_, pieceCidTail_);
         uint48 timestamp = uint48(block.timestamp);
@@ -124,7 +122,7 @@ contract FSFileRegistry is EIP712 {
         );
         require(signature.signer == address(0), "Signature already submitted");
         require(
-            file.acked == true,
+            file.acked[msg.sender],
             "file needs to be acknowledged before submitting signature"
         );
 
@@ -168,12 +166,7 @@ contract FSFileRegistry is EIP712 {
     ) external view returns (FileDataView memory) {
         FileData storage file = _files[cidIdentifier_];
         return
-            FileDataView(
-                file.pieceCidPrefix,
-                file.sender,
-                file.pieceCidTail,
-                file.acked
-            );
+            FileDataView(file.pieceCidPrefix, file.sender, file.pieceCidTail);
     }
 
     function isRecipient(
@@ -181,6 +174,13 @@ contract FSFileRegistry is EIP712 {
         address recipient_
     ) external view returns (bool) {
         return _files[cidIdentifier_].recipients[recipient_];
+    }
+
+    function isAcknowledged(
+        bytes32 cidIdentifier_,
+        address recipient_
+    ) external view returns (bool) {
+        return _files[cidIdentifier_].acked[recipient_];
     }
 
     function getSignatureData(
