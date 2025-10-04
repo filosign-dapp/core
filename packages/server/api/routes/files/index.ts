@@ -5,6 +5,7 @@ import { authenticated } from "../../middleware/auth";
 import { bucket } from "../../../lib/s3/client";
 import { getOrCreateUserDataset } from "../../../lib/synapse";
 import { and, desc, eq, isNotNull, sql } from "drizzle-orm";
+import { calculate as calculatePieceCid } from "@filoz/synapse-sdk/piece";
 
 const {
   files,
@@ -19,7 +20,6 @@ export default new Hono()
   .post("/upload/start", authenticated, async (ctx) => {
     const { pieceCid } = await ctx.req.json();
 
-    const userWallet = ctx.var.userWallet;
     const key = `uploads/${pieceCid}`;
 
     const presignedUrl = bucket.presign(key, {
@@ -29,13 +29,26 @@ export default new Hono()
       acl: "public-read",
     });
 
-    return ctx.json({ uploadUrl: presignedUrl, key });
+    return respond.ok(
+      ctx,
+      { uploadUrl: presignedUrl, key },
+      "Presigned URL generated",
+      200,
+    );
   })
 
   .post("/", authenticated, async (ctx) => {
-    const { pieceCid } = await ctx.req.json();
+    const { pieceCid, iv, encryptedKey, metaData } = await ctx.req.json();
     if (!pieceCid || typeof pieceCid !== "string") {
       return respond.err(ctx, "Invalid pieceCid", 400);
+    }
+
+    if (iv && typeof iv !== "string") {
+      return respond.err(ctx, "Invalid iv", 400);
+    }
+
+    if (encryptedKey && typeof encryptedKey !== "string") {
+      return respond.err(ctx, "Invalid encryptedKey", 400);
     }
 
     const fileExists = bucket.exists(`uploads/${pieceCid}`);
@@ -81,6 +94,9 @@ export default new Hono()
       .values({
         pieceCid: pieceCid,
         ownerWallet: ctx.var.userWallet,
+        metadata: metaData,
+        encryptedKey: encryptedKey,
+        encryptedKeyIv: iv,
         // recipientWallet: null,
       })
       .returning()
