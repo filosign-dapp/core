@@ -3,8 +3,13 @@ import HeroSection from "./hero-section";
 import WaitlistSection from "./waitlist-section";
 import FooterSection from "./footer-section";
 import { Separator } from "@/src/lib/components/ui/separator";
+import { SignOutIcon } from "@phosphor-icons/react";
+import { Button } from "@/src/lib/components/ui/button";
+import { usePrivy } from "@privy-io/react-auth";
 
 export default function LandingPage() {
+  const { logout } = usePrivy();
+
   return (
     <div className="[--section-gap:4rem]">
       {/* Navbar */}

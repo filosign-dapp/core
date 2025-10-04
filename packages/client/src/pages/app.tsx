@@ -21,6 +21,7 @@ import OnboardingSetPinPage from "./onboarding/set-pin";
 import OnboardingCreateSignaturePage from "./onboarding/create-signature";
 import OnboardingWelcomeCompletePage from "./onboarding/welcome";
 import { NotFound } from "../lib/components/custom/NotFound";
+import TestPage from "./test";
 
 const rootRoute = createRootRoute({
   component: () => {
@@ -155,6 +156,14 @@ const notFoundRoute = createRoute({
   },
 });
 
+const testRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/test",
+  component: function Test() {
+    return withPageErrorBoundary(TestPage)({});
+  },
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   pitchRoute,
@@ -171,6 +180,7 @@ const routeTree = rootRoute.addChildren([
   onboardingCreateSignatureRoute,
   onboardingWelcomeCompleteRoute,
   notFoundRoute,
+  testRoute,
 ]);
 const router = createRouter({
   routeTree,

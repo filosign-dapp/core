@@ -15,7 +15,8 @@ import { useFilosignMutation } from "@filosign/sdk/react";
 
 export default function OnboardingWelcomeCompletePage() {
   const [userName, setUserName] = useState("");
-  const { onboardingForm, setOnboardingForm } = useStorePersist();
+  const { onboardingForm, setOnboardingForm, clearOnboardingForm } =
+    useStorePersist();
   const register = useFilosignMutation(["register"]);
 
   console.log("register", register.isSuccess, register.isError);
@@ -27,19 +28,23 @@ export default function OnboardingWelcomeCompletePage() {
 
   console.log("onboardingForm", onboardingForm);
 
-  function handleSubmit() {
-    if (onboardingForm) {
-      setOnboardingForm({ ...onboardingForm, hasOnboarded: true });
-    }
-
+  async function handleSubmit() {
     if (!onboardingForm?.pin) {
+      alert("Please set a PIN");
       return;
     }
 
-    register.mutateAsync({
+    await register.mutateAsync({
       pin: onboardingForm?.pin,
     });
 
+    // clear the onboarding form
+    setOnboardingForm({
+      name: onboardingForm?.name,
+      pin: "",
+      selectedSignature: onboardingForm?.selectedSignature,
+      hasOnboarded: true,
+    });
     console.log("onboardingForm", onboardingForm);
   }
 
