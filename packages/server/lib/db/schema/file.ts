@@ -18,8 +18,6 @@ export const files = t.sqliteTable(
       .notNull()
       .references(() => users.walletAddress),
 
-    encryptedKey: tHex(),
-    encryptedKeyIv: tHex(),
     metadata: tJsonString(),
 
     onchainTxHash: tBytes32(),
@@ -89,4 +87,25 @@ export const fileSignatures = t.sqliteTable(
     ...timestamps,
   },
   (table) => [t.index("idx_signatures_file").on(table.filePieceCid)],
+);
+
+export const fileKeys = t.sqliteTable(
+  "file_keys",
+  {
+    filePieceCid: t
+      .text()
+      .notNull()
+      .references(() => files.pieceCid, { onDelete: "cascade" }),
+    recipientWallet: tEvmAddress().notNull(),
+    encryptedKey: tHex().notNull(),
+    encryptedKeyIv: tHex().notNull(),
+
+    ...timestamps,
+  },
+  (table) => [
+    t
+      .uniqueIndex("ux_file_keys_file_recipient")
+      .on(table.filePieceCid, table.recipientWallet),
+    t.index("idx_file_keys_file").on(table.filePieceCid),
+  ],
 );

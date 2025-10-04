@@ -1,9 +1,15 @@
-import { createPublicClient, http } from "viem";
-import { filecoinCalibration } from "viem/chains";
+import { synapse } from "./packages/server/lib/synapse";
+import { jsonStringify } from "./packages/server/lib/utils/json";
+import { calculate } from "@filoz/synapse-sdk/piece";
 
-const view = createPublicClient({
-  transport: http("https://api.calibration.node.glif.io/rpc/v1"),
-  chain: filecoinCalibration,
-});
+const bytes = crypto.getRandomValues(new Uint8Array(360));
 
-console.log(await view.getBlockNumber());
+const expect = calculate(bytes);
+
+console.log(jsonStringify(expect.toString()));
+
+console.log("=======");
+
+const piece = await synapse.storage.upload(bytes);
+
+console.log(jsonStringify(piece));
