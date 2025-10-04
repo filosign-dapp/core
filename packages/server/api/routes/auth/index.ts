@@ -1,79 +1,74 @@
 import { Hono } from "hono";
-import { isAddress, type Address } from "viem";
+import { isAddress, isHex, keccak256, verifyMessage, type Address } from "viem";
 import { respond } from "../../../lib/utils/respond";
-import {
-  createSiweMessage,
-  generateSiweNonce,
-  verifySiweMessage,
-} from "viem/siwe";
-import { primaryChain } from "../../../config";
-import { DOMAIN, URI } from "../../../constants";
-import { provider } from "../../../lib/indexer/provider";
 import { issueJwtToken } from "../../../lib/utils/jwt";
 import { authenticated } from "../../middleware/auth";
 import db from "../../../lib/db";
 import { eq } from "drizzle-orm";
+import { MINUTE } from "../../../constants";
+import { publicKeyToAddress } from "viem/utils";
 
-const messages: Record<Address, { message: string; validTill: number }> = {};
+const nonces: Record<Address, { nonce: string; validTill: number }> = {};
 const { users, profiles } = db.schema;
 
 export default new Hono()
 
-  .get("/message", async (ctx) => {
+  .get("/nonce", async (ctx) => {
     const wallet = ctx.req.query("wallet_address");
     if (!wallet || !isAddress(wallet)) {
       return respond.err(ctx, "Missing wallet address", 400);
     }
 
-    const nonce = generateSiweNonce();
+    const nonce = keccak256(Uint8Array.from(Bun.randomUUIDv7()));
+    nonces[wallet] = { nonce, validTill: Date.now() + 1 * MINUTE };
 
-    const message = createSiweMessage({
-      address: wallet,
-      chainId: primaryChain.id,
-      domain: DOMAIN,
-      nonce: nonce,
-      uri: URI,
-      version: "1",
-    });
-
-    const validTill = Date.now() + 5 * 60 * 1000;
-    messages[wallet] = { message, validTill };
-
-    return respond.ok(ctx, { message }, "SIWE message generated", 200);
+    return respond.ok(ctx, { nonce }, "nonce generated", 200);
   })
 
   .get("/verify", async (ctx) => {
-    const { signature, wallet } = await ctx.req.json();
+    const pubKey = ctx.req.query("pub_key");
+    const signature = ctx.req.query("signature");
 
-    if (!signature) {
+    if (!pubKey || !isHex(pubKey)) {
+      return respond.err(ctx, "Missing or invalid public key", 400);
+    }
+
+    const address = publicKeyToAddress(pubKey);
+
+    if (!signature || !isHex(signature)) {
       return respond.err(ctx, "Missing signature", 400);
     }
 
-    if (!wallet || !isAddress(wallet)) {
-      return respond.err(ctx, "Missing or invalid wallet address", 400);
-    }
-
-    const msgData = messages[wallet];
-    delete messages[wallet];
+    const msgData = nonces[address];
+    delete nonces[address];
 
     if (!msgData || msgData.validTill < Date.now()) {
       return respond.err(ctx, "Message expired or not found", 400);
     }
 
-    const { message } = msgData;
+    const { nonce } = msgData;
 
-    // todo move public client
-    const valid = await verifySiweMessage(provider, {
-      message,
+    const valid = await verifyMessage({
+      message: nonce,
       signature,
-      address: wallet,
+      address,
     });
 
     if (!valid) {
       return respond.err(ctx, "Invalid signature", 400);
     }
 
-    const token = issueJwtToken(wallet);
+    const user = db
+      .select()
+      .from(users)
+      .where(eq(users.encryptionPublicKey, pubKey))
+      .get();
+
+    if (!user) {
+      return respond.err(ctx, "User not found", 404);
+    }
+
+    const token = issueJwtToken(user.walletAddress);
     return respond.ok(ctx, { valid, token }, "Signature verified", 200);
   })
 
