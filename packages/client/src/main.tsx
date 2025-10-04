@@ -12,8 +12,8 @@ import { IconContext } from "@phosphor-icons/react";
 // import { WagmiProvider } from "./lib/context/wagmi-provider";
 import { FilosignProvider } from "./lib/context/filosign-provider";
 
-import { WagmiProvider } from 'wagmi'
-import { config } from './lib/context/temp-provider'
+import { WagmiProvider } from "wagmi";
+import { config } from "./lib/context/temp-provider";
 
 // Root element
 const rootElement = document.getElementById("root")!;
@@ -28,10 +28,12 @@ const app = (
         <WagmiProvider config={config}>
           <QueryClientProvider>
             <FilosignProvider>
-              <IconContext.Provider value={{
-                mirrored: false,
-                weight: "regular"
-              }}>
+              <IconContext.Provider
+                value={{
+                  mirrored: false,
+                  weight: "regular",
+                }}
+              >
                 <RouterProvider router={router} />
                 <Toaster position="bottom-right" />
               </IconContext.Provider>
@@ -41,7 +43,7 @@ const app = (
         {/* </PrivyProvider> */}
       </ThemeProvider>
     </ErrorBoundary>
-  </StrictMode >
+  </StrictMode>
 );
 
 // Hot module replacement
