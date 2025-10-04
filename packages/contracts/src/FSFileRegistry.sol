@@ -9,7 +9,7 @@ contract FSFileRegistry is EIP712 {
     struct FileData {
         bytes32 pieceCidPrefix;
         address sender;
-        address recipient;
+        address[] recipients;
         uint16 pieceCidTail;
         bool acked;
     }
@@ -18,6 +18,8 @@ contract FSFileRegistry is EIP712 {
         address signer;
         uint48 timestamp;
         bytes32 signatureVisualHash;
+        uint8 signatureVisualPositionTop;
+        uint8 signatureVisualPositionLeft;
         uint8 v;
         bytes32 r;
         bytes32 s;
@@ -72,7 +74,7 @@ contract FSFileRegistry is EIP712 {
     function registerFile(
         bytes32 pieceCidPrefix_,
         uint16 pieceCidTail_,
-        address recipient_
+        address[] recipients_
     ) external {
         FileData storage file = _files[
             cidIdentifier(pieceCidPrefix_, pieceCidTail_)
@@ -87,15 +89,15 @@ contract FSFileRegistry is EIP712 {
         file.pieceCidPrefix = pieceCidPrefix_;
         file.pieceCidTail = pieceCidTail_;
         file.sender = msg.sender;
-        file.recipient = recipient_;
         file.acked = false;
 
-        emit FileRegistered(
-            cidIdentifier(pieceCidPrefix_, pieceCidTail_),
-            msg.sender,
-            recipient_,
-            uint48(block.timestamp)
-        );
+        bytes32 cid = cidIdentifier(pieceCidPrefix_, pieceCidTail_);
+        uint48 timestamp = uint48(block.timestamp);
+        for (uint i = 0; i < recipients_.length; i++) {
+            require(recipients_[i] != address(0), "Invalid recipient");
+            file.recipients.push(recipients_[i]);
+            emit FileRegistered(cid, msg.sender, recipients_[i], timestamp);
+        }
     }
 
     function submitSignature(
