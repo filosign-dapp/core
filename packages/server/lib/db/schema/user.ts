@@ -40,3 +40,17 @@ export const usersDatasets = t.sqliteTable("users_datasets", {
 
   ...timestamps,
 });
+
+export const userSignatures = t.sqliteTable("user_signatures", {
+  id: t
+    .text()
+    .primaryKey()
+    .$default(() => Bun.randomUUIDv7()),
+  walletAddress: tEvmAddress().references(() => users.walletAddress, {
+    onDelete: "cascade",
+  }),
+  signatureUrl: t.text().notNull(),
+  name: t.text().notNull(),
+
+  ...timestamps,
+});
