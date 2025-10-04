@@ -13,6 +13,7 @@ const {
   profiles,
   fileRecipients,
   fileAcknowledgements,
+  fileKeys,
 } = db.schema;
 const MAX_FILE_SIZE = 30 * 1024 * 1024;
 
@@ -38,17 +39,28 @@ export default new Hono()
   })
 
   .post("/", authenticated, async (ctx) => {
-    const { pieceCid, iv, encryptedKey, metaData } = await ctx.req.json();
+    const { pieceCid, recipients, metaData } = await ctx.req.json();
     if (!pieceCid || typeof pieceCid !== "string") {
       return respond.err(ctx, "Invalid pieceCid", 400);
     }
 
-    if (iv && typeof iv !== "string") {
-      return respond.err(ctx, "Invalid iv", 400);
+    if (!Array.isArray(recipients) || recipients.length === 0) {
+      return respond.err(ctx, "Recipients must be a non-empty array", 400);
     }
 
-    if (encryptedKey && typeof encryptedKey !== "string") {
-      return respond.err(ctx, "Invalid encryptedKey", 400);
+    for (const recipient of recipients) {
+      if (!recipient.wallet || typeof recipient.wallet !== "string") {
+        return respond.err(ctx, "Invalid recipient wallet", 400);
+      }
+      if (
+        !recipient.encryptedKey ||
+        typeof recipient.encryptedKey !== "string"
+      ) {
+        return respond.err(ctx, "Invalid encryptedKey for recipient", 400);
+      }
+      if (!recipient.iv || typeof recipient.iv !== "string") {
+        return respond.err(ctx, "Invalid iv for recipient", 400);
+      }
     }
 
     const fileExists = bucket.exists(`uploads/${pieceCid}`);
@@ -89,22 +101,37 @@ export default new Hono()
       return respond.err(ctx, "Invalid pieceCid claimed", 403);
     }
 
-    const inserResult = db
+    const insertResult = db
       .insert(files)
       .values({
         pieceCid: pieceCid,
         ownerWallet: ctx.var.userWallet,
         metadata: metaData,
-        encryptedKey: encryptedKey,
-        encryptedKeyIv: iv,
-        // recipientWallet: null,
       })
       .returning()
       .get();
 
+    for (const recipient of recipients) {
+      db.insert(fileRecipients)
+        .values({
+          filePieceCid: pieceCid,
+          recipientWallet: recipient.wallet,
+        })
+        .run();
+
+      db.insert(fileKeys)
+        .values({
+          filePieceCid: pieceCid,
+          recipientWallet: recipient.wallet,
+          encryptedKey: recipient.encryptedKey,
+          encryptedKeyIv: recipient.iv,
+        })
+        .run();
+    }
+
     return respond.ok(
       ctx,
-      inserResult,
+      insertResult,
       "File uploaded to filecoin warmstorage",
       201,
     );
