@@ -94,11 +94,9 @@ export default new Hono()
       return respond.err(ctx, "Unauthorized", 403);
     }
 
-    // Delete from S3
     const file = bucket.file(signature.storageBucketPath);
     await file.delete();
 
-    // Delete from DB
     db.delete(userSignatures).where(eq(userSignatures.id, id)).run();
 
     return respond.ok(ctx, {}, "Signature deleted successfully", 200);
