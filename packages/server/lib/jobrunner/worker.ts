@@ -163,9 +163,15 @@ async function processJob(job: Job, dbC: ReturnType<typeof createDbClient>) {
             db.update(schema.files)
               .set({
                 onchainTxHash: log.transactionHash,
-                recipientWallet: log.args.recipient,
               })
               .where(eq(schema.files.pieceCid, cid))
+              .run();
+
+            db.insert(schema.fileRecipients)
+              .values({
+                filePieceCid: cid,
+                recipientWallet: log.args.recipient,
+              })
               .run();
           }
 
@@ -185,32 +191,12 @@ async function processJob(job: Job, dbC: ReturnType<typeof createDbClient>) {
               toHex(fileData.pieceCidTail),
             ]);
 
-            const file = db
-              .select()
-              .from(schema.files)
-              .where(eq(schema.files.pieceCid, cid))
-              .get();
-
-            if (!file) {
-              throw new Error("File not found for FileAcknowledged event");
-            }
-
-            if (file.acknowledged) {
-              if (file.acknowledgedTxHash === log.transactionHash) {
-                return;
-              } else {
-                throw new Error(
-                  "Panic! File acknowledged yet event emitted again!",
-                );
-              }
-            }
-
-            db.update(schema.files)
-              .set({
-                acknowledged: true,
+            db.insert(schema.fileAcknowledgements)
+              .values({
+                filePieceCid: cid,
+                recipientWallet: log.args.recipient,
                 acknowledgedTxHash: log.transactionHash,
               })
-              .where(eq(schema.files.pieceCid, cid))
               .run();
           }
 

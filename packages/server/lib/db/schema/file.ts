@@ -17,7 +17,6 @@ export const files = t.sqliteTable(
     ownerWallet: tEvmAddress()
       .notNull()
       .references(() => users.walletAddress),
-    recipientWallet: tEvmAddress().references(() => users.walletAddress),
 
     encryptedKey: tHex(),
     encryptedKeyIv: tHex(),
@@ -25,16 +24,51 @@ export const files = t.sqliteTable(
 
     onchainTxHash: tBytes32(),
 
-    acknowledged: tBoolean().notNull().default(false),
+    ...timestamps,
+  },
+  (table) => [
+    t.index("idx_files_owner").on(table.ownerWallet),
+    t.uniqueIndex("ux_files_pieceCid").on(table.pieceCid),
+    t.uniqueIndex("ux_files_onchainTxHash").on(table.onchainTxHash),
+  ],
+);
+
+export const fileAcknowledgements = t.sqliteTable(
+  "file_acknowledgements",
+  {
+    filePieceCid: t
+      .text()
+      .notNull()
+      .references(() => files.pieceCid, { onDelete: "cascade" }),
+    recipientWallet: tEvmAddress().notNull(),
     acknowledgedTxHash: tBytes32(),
 
     ...timestamps,
   },
   (table) => [
-    t.index("idx_files_owner").on(table.ownerWallet),
-    t.index("idx_files_recipient").on(table.recipientWallet),
-    t.uniqueIndex("ux_files_pieceCid").on(table.pieceCid),
-    t.uniqueIndex("ux_files_onchainTxHash").on(table.onchainTxHash),
+    t
+      .uniqueIndex("ux_file_acknowledgements_file_recipient")
+      .on(table.filePieceCid, table.recipientWallet),
+    t.index("idx_file_acknowledgements_file").on(table.filePieceCid),
+  ],
+);
+
+export const fileRecipients = t.sqliteTable(
+  "file_recipients",
+  {
+    filePieceCid: t
+      .text()
+      .notNull()
+      .references(() => files.pieceCid, { onDelete: "cascade" }),
+    recipientWallet: tEvmAddress().notNull(),
+
+    ...timestamps,
+  },
+  (table) => [
+    t
+      .uniqueIndex("ux_file_recipients_file_recipient")
+      .on(table.filePieceCid, table.recipientWallet),
+    t.index("idx_file_recipients_file").on(table.filePieceCid),
   ],
 );
 
