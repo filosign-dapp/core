@@ -59,12 +59,12 @@ class ExtendedAxios {
       .object({
         success: z.literal(true),
         data: zodType,
-        message: z.string().optional(),
+        message: z.string(),
       })
       .or(
         z.object({
           success: z.literal(false),
-          error: z.string().optional(),
+          error: z.string(),
         }),
       );
   }
