@@ -105,7 +105,7 @@ export default class Files {
 
   async uploadFile(options: {
     data: Uint8Array;
-    recipientAddress: string;
+    recipientAddresses: Address[];
     metadata?: Record<string, any>;
   }) {
     const { apiClient, crypto, tx, contracts } = this.defaults;
@@ -141,36 +141,42 @@ export default class Files {
       throw new Error(`Upload failed: ${uploadResponse.statusText}`);
     }
 
-    const recipientPubKeyResponse = await apiClient.rpc.getSafe(
-      {
-        publicKey: z.string(),
-      },
-      `/user/publickey?address=${options.recipientAddress}`,
-    );
+    const recipients = [];
+    for (const recipientAddress of options.recipientAddresses) {
+      const recipientPubKeyResponse = await apiClient.rpc.getSafe(
+        {
+          publicKey: z.string(),
+        },
+        `/user/publickey?address=${recipientAddress}`,
+      );
 
-    const { encrypted: encryptedKeyBuffer, iv: keyIv } = await crypto.encrypt(
-      Uint8Array.fromHex(dataEncryptionKey.replace("0x", "")),
-      recipientPubKeyResponse.data.publicKey,
-    );
+      const { encrypted: encryptedKeyBuffer, iv: keyIv } = await crypto.encrypt(
+        Uint8Array.fromHex(dataEncryptionKey.replace("0x", "")),
+        recipientPubKeyResponse.data.publicKey,
+      );
 
-    const encryptedKey = Buffer.from(encryptedKeyBuffer).toString("base64");
-    const keyIvBase64 = Buffer.from(keyIv).toString("base64");
+      const encryptedKey = Buffer.from(encryptedKeyBuffer).toString("base64");
+      const keyIvBase64 = Buffer.from(keyIv).toString("base64");
+
+      recipients.push({
+        wallet: recipientAddress,
+        encryptedKey,
+        iv: keyIvBase64,
+      });
+    }
 
     const registerResponse = await apiClient.rpc.postSafe(
       {
         pieceCid: z.string(),
         ownerWallet: z.string(),
         metadata: z.record(z.string(), z.any()).nullable(),
-        encryptedKey: z.string().nullable(),
-        encryptedKeyIv: z.string().nullable(),
         createdAt: z.string(),
         updatedAt: z.string(),
       },
       "/files",
       {
         pieceCid: pieceCid,
-        iv: keyIvBase64,
-        encryptedKey: encryptedKey,
+        recipients,
         metaData: options.metadata || null,
       },
     );
@@ -181,7 +187,7 @@ export default class Files {
       contracts.FSFileRegistry.write.registerFile([
         digestPrefix,
         digestTail,
-        [options.recipientAddress as Address],
+        options.recipientAddresses,
       ]),
     );
 
@@ -190,53 +196,4 @@ export default class Files {
       onchainTxHash: receipt.transactionHash,
     };
   }
-
-  //   async acknowledgeFile(options: { pieceCid: string }) {
-  //     const { contracts, tx } = this.defaults;
-
-  //     const receipt = await tx(
-  //       contracts.FSFileRegistry.write.acknowledgeFile([options.pieceCid])
-  //     );
-  //     return receipt;
-  //   }
-
-  //   async signFile(options: {
-  //     pieceCid: string;
-  //     signatureVisualHash: string;
-  //     compactSignature: string;
-  //     timestamp: number;
-  //   }) {
-  //     const { contracts, tx } = this.defaults;
-
-  //     const receipt = await tx(
-  //       contracts.FSFileRegistry.write.submitSignature([
-  //         options.pieceCid,
-  //         options.signatureVisualHash,
-  //         options.compactSignature,
-  //         options.timestamp,
-  //       ])
-  //     );
-  //     return receipt;
-  //   }
-
-  //   async shareFile(options: {
-  //     pieceCid: string;
-  //     recipientWallet: Address;
-  //     encryptedKey: string;
-  //     proxyPublicKey: string;
-  //     metadata?: Record<string, any>;
-  //   }) {
-  //     const { contracts, tx } = this.defaults;
-
-  //     const receipt = await tx(
-  //       contracts.FSFileRegistry.write.shareFile([
-  //         options.pieceCid,
-  //         options.recipientWallet,
-  //         options.encryptedKey,
-  //         options.proxyPublicKey,
-  //         JSON.stringify(options.metadata || {}),
-  //       ])
-  //     );
-  //     return receipt;
-  //   }
 }
