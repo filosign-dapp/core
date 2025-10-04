@@ -8,6 +8,19 @@ const { users, profiles } = db.schema;
 
 export default new Hono()
 
+  .get("/exists", authenticated, async (ctx) => {
+    const wallet = ctx.var.userWallet;
+    const profileExists = db
+      .select()
+      .from(profiles)
+      .where(eq(profiles.walletAddress, wallet))
+      .get();
+    if (profileExists) {
+      return respond.ok(ctx, { exists: true }, "Profile exists", 200);
+    }
+    return respond.ok(ctx, { exists: false }, "Profile does not exist", 200);
+  })
+
   .get("/", authenticated, async (ctx) => {
     const wallet = ctx.var.userWallet;
 
