@@ -1,4 +1,5 @@
 import { createSharedKey } from "filosign-crypto-utils";
+import { type Hex } from "viem";
 
 export class Crypto {
   private _encryptionKey: Uint8Array | null = null;
@@ -21,6 +22,24 @@ export class Crypto {
       false, // non-extractable means cant export raw bytes
       ["encrypt", "decrypt"],
     );
+  }
+
+  async encryptWithKey(data: Uint8Array, keyBytes32: Hex) {
+    const cryptoKey = await this.deriveRawAesKey(
+      Uint8Array.fromBase64(keyBytes32),
+    );
+
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const encrypted = await crypto.subtle.encrypt(
+      {
+        name: "AES-GCM",
+        iv,
+      },
+      cryptoKey,
+      data,
+    );
+
+    return { encrypted, iv };
   }
 
   async encrypt(data: Uint8Array, recipientPubKeyB64: string) {
