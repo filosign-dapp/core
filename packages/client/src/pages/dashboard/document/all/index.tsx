@@ -1,6 +1,12 @@
-import { Input } from "@/src/lib/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/lib/components/ui/select"
-import { Button } from "@/src/lib/components/ui/button"
+import { Input } from "@/src/lib/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/src/lib/components/ui/select";
+import { Button } from "@/src/lib/components/ui/button";
 import {
   FileTextIcon,
   MagnifyingGlassIcon,
@@ -8,47 +14,50 @@ import {
   PlusIcon,
   GridFourIcon,
   ListIcon,
-} from "@phosphor-icons/react"
-import { motion } from "motion/react"
-import DashboardLayout from "../../layout"
-import { Link, useNavigate } from "@tanstack/react-router"
-import { useState } from "react"
-import { getRootItems } from "./mock"
-import FolderCard from "./_components/FolderCard"
-import FileCard from "./_components/FileCard"
-import { FileViewer } from "@/src/lib/components/custom/FileViewer"
-import type { MockFolder, MockFile } from "./mock"
+} from "@phosphor-icons/react";
+import { motion } from "motion/react";
+import DashboardLayout from "../../layout";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
+import { getRootItems } from "./mock";
+import FolderCard from "./_components/FolderCard";
+import FileCard from "./_components/FileCard";
+import { FileViewer } from "@/src/lib/components/custom/FileViewer";
+import type { MockFolder, MockFile } from "./mock";
 
 export default function DocumentAllPage() {
-  const navigate = useNavigate()
-  const [viewMode, setViewMode] = useState<"list" | "grid">("grid")
-  const [isViewSwitching, setIsViewSwitching] = useState(false)
-  const [viewerOpen, setViewerOpen] = useState(false)
-  const [selectedFileId, setSelectedFileId] = useState<string | null>(null)
-  const [isFilterOpen, setIsFilterOpen] = useState(false)
-  const items = getRootItems()
+  const navigate = useNavigate();
+  const [viewMode, setViewMode] = useState<"list" | "grid">("grid");
+  const [isViewSwitching, setIsViewSwitching] = useState(false);
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [selectedFileId, setSelectedFileId] = useState<string | null>(null);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const items = getRootItems();
 
   const handleViewModeChange = (newViewMode: "list" | "grid") => {
     if (newViewMode !== viewMode) {
-      setIsViewSwitching(true)
-      setViewMode(newViewMode)
+      setIsViewSwitching(true);
+      setViewMode(newViewMode);
       // Reset the switching state after animation completes
       setTimeout(() => {
-        setIsViewSwitching(false)
-      }, 300)
+        setIsViewSwitching(false);
+      }, 300);
     }
-  }
+  };
 
   const handleItemClick = (item: MockFolder | MockFile) => {
-    if ('documentCount' in item) {
+    if ("documentCount" in item) {
       // It's a folder, navigate to folder page
-      navigate({ to: '/dashboard/document/folder/$folderId', params: { folderId: item.id } })
+      navigate({
+        to: "/dashboard/document/folder/$folderId",
+        params: { folderId: item.id },
+      });
     } else {
       // It's a file, open file viewer
-      setSelectedFileId(item.id)
-      setViewerOpen(true)
+      setSelectedFileId(item.id);
+      setViewerOpen(true);
     }
-  }
+  };
 
   return (
     <DashboardLayout>
@@ -148,24 +157,29 @@ export default function DocumentAllPage() {
             initial={false}
             animate={{
               height: isFilterOpen ? "auto" : 0,
-              opacity: isFilterOpen ? 1 : 0
+              opacity: isFilterOpen ? 1 : 0,
             }}
             transition={{
               duration: 0.3,
               ease: "easeInOut",
-              opacity: { duration: 0.2 }
+              opacity: { duration: 0.2 },
             }}
           >
             <div className="px-8 py-4 bg-background/50 backdrop-blur-sm">
               <div className="flex flex-col gap-4 @md:flex-row @md:items-center">
                 <div className="flex items-center gap-2">
                   <FunnelIcon className="size-4 text-muted-foreground" />
-                  <span className="text-sm font-medium text-foreground">Filters</span>
+                  <span className="text-sm font-medium text-foreground">
+                    Filters
+                  </span>
                 </div>
 
                 <div className="flex flex-col gap-3 @md:flex-row @md:gap-4 @md:flex-1">
                   <Select>
-                    <SelectTrigger className="w-full @md:w-auto @md:min-w-40" size="sm">
+                    <SelectTrigger
+                      className="w-full @md:w-auto @md:min-w-40"
+                      size="sm"
+                    >
                       <SelectValue placeholder="Sender: All" />
                     </SelectTrigger>
                     <SelectContent>
@@ -176,7 +190,10 @@ export default function DocumentAllPage() {
                   </Select>
 
                   <Select>
-                    <SelectTrigger className="w-full @md:w-auto @md:min-w-40" size="sm">
+                    <SelectTrigger
+                      className="w-full @md:w-auto @md:min-w-40"
+                      size="sm"
+                    >
                       <SelectValue placeholder="All Time" />
                     </SelectTrigger>
                     <SelectContent>
@@ -207,11 +224,17 @@ export default function DocumentAllPage() {
                   className="space-y-4 text-center"
                 >
                   <div className="size-40 mx-auto mb-6">
-                    <FileTextIcon className="size-full text-muted-foreground/50" weight="light" />
+                    <FileTextIcon
+                      className="size-full text-muted-foreground/50"
+                      weight="light"
+                    />
                   </div>
-                  <h2 className="font-semibold text-foreground">No documents</h2>
+                  <h2 className="font-semibold text-foreground">
+                    No documents
+                  </h2>
                   <p className="max-w-md px-4 text-muted-foreground">
-                    You have not yet created or received any documents. Get started by creating a new envelope.
+                    You have not yet created or received any documents. Get
+                    started by creating a new envelope.
                   </p>
                   <Link to="/dashboard/envelope/create">
                     <Button variant="primary" className="gap-2">
@@ -225,8 +248,12 @@ export default function DocumentAllPage() {
               <>
                 {/* Folders Section */}
                 {(() => {
-                  const folders = items.filter(item => 'documentCount' in item) as MockFolder[]
-                  const files = items.filter(item => !('documentCount' in item)) as MockFile[]
+                  const folders = items.filter(
+                    (item) => "documentCount" in item,
+                  ) as MockFolder[];
+                  const files = items.filter(
+                    (item) => !("documentCount" in item),
+                  ) as MockFile[];
 
                   return (
                     <>
@@ -291,7 +318,7 @@ export default function DocumentAllPage() {
                         </motion.div>
                       )}
                     </>
-                  )
+                  );
                 })()}
               </>
             )}
@@ -301,8 +328,8 @@ export default function DocumentAllPage() {
       <FileViewer
         open={viewerOpen}
         onOpenChange={setViewerOpen}
-        fileId={selectedFileId || ''}
+        fileId={selectedFileId || ""}
       />
     </DashboardLayout>
-  )
+  );
 }

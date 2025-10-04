@@ -12,10 +12,12 @@ const server = serve({
   idleTimeout: 60,
 
   routes: {
-    "/api": new Response(JSON.stringify({
-      message: "Bun Server",
-      version: "v1.0.0",
-    })),
+    "/api": new Response(
+      JSON.stringify({
+        message: "Bun Server",
+        version: "v1.0.0",
+      }),
+    ),
     // CATCHES ONLY GET REQUESTS
     "/api/v1/*": (req) => {
       return hono.fetch(req);

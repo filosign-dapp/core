@@ -1,6 +1,12 @@
 import { motion } from "motion/react";
 import { Link } from "@tanstack/react-router";
-import { GithubLogoIcon, TwitterLogoIcon, LinkedinLogoIcon, EnvelopeIcon, LightningIcon } from "@phosphor-icons/react";
+import {
+  GithubLogoIcon,
+  TwitterLogoIcon,
+  LinkedinLogoIcon,
+  EnvelopeIcon,
+  LightningIcon,
+} from "@phosphor-icons/react";
 import Logo from "@/src/lib/components/custom/Logo";
 
 export default function FooterSection() {
@@ -14,7 +20,7 @@ export default function FooterSection() {
             type: "spring",
             stiffness: 200,
             damping: 25,
-            duration: 0.6
+            duration: 0.6,
           }}
           viewport={{ once: true, margin: "-50px" }}
           className="flex flex-col gap-8 md:gap-12"
@@ -23,7 +29,10 @@ export default function FooterSection() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
             {/* Brand Section */}
             <div className="col-span-1 sm:col-span-2 md:col-span-2 space-y-4">
-              <Logo className="px-0" textClassName="text-foreground font-bold" />
+              <Logo
+                className="px-0"
+                textClassName="text-foreground font-bold"
+              />
               <motion.p
                 initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -31,7 +40,8 @@ export default function FooterSection() {
                 viewport={{ once: true }}
                 className="text-sm sm:text-base text-muted-foreground leading-relaxed max-w-sm"
               >
-                Trustless document signing for the modern web. Secure, fast, and easy-to-use document signing on Filecoin.
+                Trustless document signing for the modern web. Secure, fast, and
+                easy-to-use document signing on Filecoin.
               </motion.p>
             </div>
 
@@ -53,16 +63,28 @@ export default function FooterSection() {
                 viewport={{ once: true }}
                 className="flex flex-col gap-2 md:gap-3"
               >
-                <Link to="/dashboard" className="text-sm sm:text-base text-muted-foreground hover:text-foreground transition-colors duration-200 hover:underline hover:underline-offset-4">
+                <Link
+                  to="/dashboard"
+                  className="text-sm sm:text-base text-muted-foreground hover:text-foreground transition-colors duration-200 hover:underline hover:underline-offset-4"
+                >
                   Get Started
                 </Link>
-                <a href="#" className="text-sm sm:text-base text-muted-foreground hover:text-foreground transition-colors duration-200 hover:underline hover:underline-offset-4">
+                <a
+                  href="#"
+                  className="text-sm sm:text-base text-muted-foreground hover:text-foreground transition-colors duration-200 hover:underline hover:underline-offset-4"
+                >
                   Features
                 </a>
-                <a href="#" className="text-sm sm:text-base text-muted-foreground hover:text-foreground transition-colors duration-200 hover:underline hover:underline-offset-4">
+                <a
+                  href="#"
+                  className="text-sm sm:text-base text-muted-foreground hover:text-foreground transition-colors duration-200 hover:underline hover:underline-offset-4"
+                >
                   Pricing
                 </a>
-                <a href="#" className="text-sm sm:text-base text-muted-foreground hover:text-foreground transition-colors duration-200 hover:underline hover:underline-offset-4">
+                <a
+                  href="#"
+                  className="text-sm sm:text-base text-muted-foreground hover:text-foreground transition-colors duration-200 hover:underline hover:underline-offset-4"
+                >
                   Documentation
                 </a>
               </motion.nav>
@@ -86,16 +108,28 @@ export default function FooterSection() {
                 viewport={{ once: true }}
                 className="flex flex-col gap-2 md:gap-3"
               >
-                <a href="#" className="text-sm sm:text-base text-muted-foreground hover:text-foreground transition-colors duration-200 hover:underline hover:underline-offset-4">
+                <a
+                  href="#"
+                  className="text-sm sm:text-base text-muted-foreground hover:text-foreground transition-colors duration-200 hover:underline hover:underline-offset-4"
+                >
                   About
                 </a>
-                <a href="#" className="text-sm sm:text-base text-muted-foreground hover:text-foreground transition-colors duration-200 hover:underline hover:underline-offset-4">
+                <a
+                  href="#"
+                  className="text-sm sm:text-base text-muted-foreground hover:text-foreground transition-colors duration-200 hover:underline hover:underline-offset-4"
+                >
                   Blog
                 </a>
-                <a href="#" className="text-sm sm:text-base text-muted-foreground hover:text-foreground transition-colors duration-200 hover:underline hover:underline-offset-4">
+                <a
+                  href="#"
+                  className="text-sm sm:text-base text-muted-foreground hover:text-foreground transition-colors duration-200 hover:underline hover:underline-offset-4"
+                >
                   Careers
                 </a>
-                <a href="#" className="text-sm sm:text-base text-muted-foreground hover:text-foreground transition-colors duration-200 hover:underline hover:underline-offset-4">
+                <a
+                  href="#"
+                  className="text-sm sm:text-base text-muted-foreground hover:text-foreground transition-colors duration-200 hover:underline hover:underline-offset-4"
+                >
                   Contact
                 </a>
               </motion.nav>
@@ -162,10 +196,16 @@ export default function FooterSection() {
                 © 2025 Filosign. All rights reserved.
               </p>
               <div className="flex items-center gap-4 sm:gap-6">
-                <a href="#" className="text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors duration-200 hover:underline hover:underline-offset-4">
+                <a
+                  href="#"
+                  className="text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors duration-200 hover:underline hover:underline-offset-4"
+                >
                   Privacy Policy
                 </a>
-                <a href="#" className="text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors duration-200 hover:underline hover:underline-offset-4">
+                <a
+                  href="#"
+                  className="text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors duration-200 hover:underline hover:underline-offset-4"
+                >
                   Terms of Service
                 </a>
               </div>

@@ -46,7 +46,7 @@ FiloSign's architecture prioritizes three core principles: **secure custody of d
 
 ![portal.png](portal.png)
 
-*Diagram: High-Level System Flow*
+_Diagram: High-Level System Flow_
 
 The system is composed of four primary components that interact to create a trustless workflow:
 
@@ -57,9 +57,9 @@ The system is composed of four primary components that interact to create a trus
 
 ### **4.2. Encryption Architecture**
 
-![portal (1).png](portal_(1).png)
+![portal (1).png](<portal_(1).png>)
 
-*Diagram: File encryption architecture*
+_Diagram: File encryption architecture_
 
 Our architecture is fully non-custodial, based on a two-factor model that combines a user's Web3 wallet (something they have) with a PIN (something they know).
 
@@ -77,13 +77,13 @@ Our architecture is fully non-custodial, based on a two-factor model that combin
 2. **Client-Side Encryption:** Once the receiver's public key is available, the sender generates a random file_encryption_key using x25519 and encrypts the file locally on their device.
 3. **Upload File to Filecoin on-chain Cloud:** The encrypted file is then uploaded to the Filecoin network using FilCDN, which returns a unique Content ID (CID) for the file.
 4. **Shared Key Generation:**
-    - A key_encryption_private_key is derived using the sender's seed and the file’s CID as input to an HKDF (HMAC-based Key Derivation Function).
-    - This private key is then combined with the receiver's public key to generate a shared secret.
+   - A key_encryption_private_key is derived using the sender's seed and the file’s CID as input to an HKDF (HMAC-based Key Derivation Function).
+   - This private key is then combined with the receiver's public key to generate a shared secret.
 5. **Secure Key Storage:** This newly created shared key, which can only be accessed by the receiver, is then stored on the blockchain.
 
-![portal (2).png](portal_(2).png)
+![portal (2).png](<portal_(2).png>)
 
-*Diagram: File sharing flow*
+_Diagram: File sharing flow_
 
 **C. Document Decryption:**
 

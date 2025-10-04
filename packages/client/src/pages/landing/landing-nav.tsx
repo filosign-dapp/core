@@ -26,10 +26,10 @@ export default function LandingNavbar() {
 
   // Determine button state for smooth transitions
   const getButtonState = () => {
-    if (!ready) return 'loading';
-    if (!authenticated) return 'signin';
-    if (!onboardingForm?.hasOnboarded) return 'get-started';
-    return 'dashboard';
+    if (!ready) return "loading";
+    if (!authenticated) return "signin";
+    if (!onboardingForm?.hasOnboarded) return "get-started";
+    return "dashboard";
   };
 
   useEffect(() => {
@@ -45,9 +45,9 @@ export default function LandingNavbar() {
       setLastScrollY(currentScrollY);
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener("scroll", handleScroll, { passive: true });
 
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
 
   return (
@@ -57,7 +57,7 @@ export default function LandingNavbar() {
         initial={{ opacity: 0, y: -50 }}
         animate={{
           opacity: 1,
-          y: isVisible ? 0 : -200
+          y: isVisible ? 0 : -200,
         }}
         transition={{
           type: "spring",
@@ -79,7 +79,7 @@ export default function LandingNavbar() {
             type: "spring",
             stiffness: 230,
             damping: 25,
-            delay: 0.43
+            delay: 0.43,
           }}
         >
           {navLinks.map((link, index) => (
@@ -93,7 +93,7 @@ export default function LandingNavbar() {
                 type: "spring",
                 stiffness: 230,
                 damping: 25,
-                delay: 0.52 + (index * 0.087)
+                delay: 0.52 + index * 0.087,
               }}
             >
               {link.label}
@@ -111,17 +111,27 @@ export default function LandingNavbar() {
             stiffness: 230,
             damping: 30,
             mass: 1.2,
-            delay: 0.78
+            delay: 0.78,
           }}
         >
           <Button
             variant="secondary"
-            onClick={getButtonState() === 'signin' ? () => login() : undefined}
-            asChild={getButtonState() === 'get-started' || getButtonState() === 'dashboard'}
+            onClick={getButtonState() === "signin" ? () => login() : undefined}
+            asChild={
+              getButtonState() === "get-started" ||
+              getButtonState() === "dashboard"
+            }
             className="min-w-28"
           >
-            {getButtonState() === 'get-started' || getButtonState() === 'dashboard' ? (
-              <Link to={getButtonState() === 'dashboard' ? '/dashboard' : '/onboarding'}>
+            {getButtonState() === "get-started" ||
+            getButtonState() === "dashboard" ? (
+              <Link
+                to={
+                  getButtonState() === "dashboard"
+                    ? "/dashboard"
+                    : "/onboarding"
+                }
+              >
                 <AnimatePresence mode="wait">
                   <motion.span
                     key={getButtonState()}
@@ -131,11 +141,13 @@ export default function LandingNavbar() {
                     transition={{
                       duration: 0.2,
                       ease: "easeInOut",
-                      layout: { duration: 0.3 }
+                      layout: { duration: 0.3 },
                     }}
                     layout
                   >
-                    {getButtonState() === 'dashboard' ? 'Dashboard' : 'Get started'}
+                    {getButtonState() === "dashboard"
+                      ? "Dashboard"
+                      : "Get started"}
                   </motion.span>
                 </AnimatePresence>
               </Link>
@@ -149,7 +161,7 @@ export default function LandingNavbar() {
                   transition={{
                     duration: 0.2,
                     ease: "easeInOut",
-                    layout: { duration: 0.3 }
+                    layout: { duration: 0.3 },
                   }}
                   layout
                 >
@@ -160,7 +172,6 @@ export default function LandingNavbar() {
           </Button>
         </motion.div>
       </motion.nav>
-
     </section>
   );
 }

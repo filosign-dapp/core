@@ -11,13 +11,13 @@ type Props = {
   [key: string]: any;
 };
 
-export function Image({ 
-  src, 
+export function Image({
+  src,
   alt,
-  className, 
+  className,
   fallback = "/images/placeholder.png",
   children,
-  ...props 
+  ...props
 }: Props) {
   const [hasError, setHasError] = useState(false);
 

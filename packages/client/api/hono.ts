@@ -16,7 +16,7 @@ const hono = new Hono()
       limit: 300,
       standardHeaders: "draft-6",
       keyGenerator: async (ctx) => ctx.req.header("X-Api-Key")!,
-    })
+    }),
   )
   .route("/api/v1", routes)
   .get("*", (ctx) => {

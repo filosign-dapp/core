@@ -1,8 +1,11 @@
-
-
-import * as React from "react"
-import { UserIcon, GearIcon, BellIcon, SignOutIcon } from "@phosphor-icons/react"
-import { motion } from "framer-motion"
+import * as React from "react";
+import {
+  UserIcon,
+  GearIcon,
+  BellIcon,
+  SignOutIcon,
+} from "@phosphor-icons/react";
+import { motion } from "framer-motion";
 
 import {
   DropdownMenu,
@@ -11,15 +14,15 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/src/lib/components/ui/dropdown-menu"
-import { Button } from "@/src/lib/components/ui/button"
-import { Image } from "@/src/lib/components/custom/Image"
-import { userData } from "./sidebar/mock"
-import { usePrivy } from "@privy-io/react-auth"
-import { useNavigate } from "@tanstack/react-router"
+} from "@/src/lib/components/ui/dropdown-menu";
+import { Button } from "@/src/lib/components/ui/button";
+import { Image } from "@/src/lib/components/custom/Image";
+import { userData } from "./sidebar/mock";
+import { usePrivy } from "@privy-io/react-auth";
+import { useNavigate } from "@tanstack/react-router";
 
 export function UserDropdown() {
-  const [isOpen, setIsOpen] = React.useState(false)
+  const [isOpen, setIsOpen] = React.useState(false);
   const { logout } = usePrivy();
   const navigate = useNavigate();
 
@@ -41,7 +44,10 @@ export function UserDropdown() {
               alt={userData.name}
               className="size-8 rounded-full object-cover"
             >
-              <UserIcon className="size-5 text-muted-foreground" weight="bold" />
+              <UserIcon
+                className="size-5 text-muted-foreground"
+                weight="bold"
+              />
             </Image>
           </div>
         </Button>
@@ -62,7 +68,7 @@ export function UserDropdown() {
             type: "spring",
             stiffness: 500,
             damping: 20,
-            delay: 0.05
+            delay: 0.05,
           }}
         >
           <DropdownMenuItem className="gap-3 p-3 cursor-default">
@@ -89,11 +95,23 @@ export function UserDropdown() {
           Actions
         </DropdownMenuLabel>
         {[
-          { icon: UserIcon, label: "Manage Profile", action: () => {
-            navigate({ to: '/dashboard/settings/profile'})
-          } },
-          { icon: GearIcon, label: "Preferences", action: () => console.log("Preferences") },
-          { icon: BellIcon, label: "Notifications", action: () => console.log("Notifications") },
+          {
+            icon: UserIcon,
+            label: "Manage Profile",
+            action: () => {
+              navigate({ to: "/dashboard/settings/profile" });
+            },
+          },
+          {
+            icon: GearIcon,
+            label: "Preferences",
+            action: () => console.log("Preferences"),
+          },
+          {
+            icon: BellIcon,
+            label: "Notifications",
+            action: () => console.log("Notifications"),
+          },
         ].map((item, index) => (
           <motion.div
             key={item.label}
@@ -103,7 +121,7 @@ export function UserDropdown() {
               type: "spring",
               stiffness: 500,
               damping: 20,
-              delay: 0.1 + index * 0.03
+              delay: 0.1 + index * 0.03,
             }}
           >
             <DropdownMenuItem
@@ -128,7 +146,7 @@ export function UserDropdown() {
             type: "spring",
             stiffness: 500,
             damping: 20,
-            delay: 0.2
+            delay: 0.2,
           }}
         >
           <DropdownMenuItem
@@ -143,5 +161,5 @@ export function UserDropdown() {
         </motion.div>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }

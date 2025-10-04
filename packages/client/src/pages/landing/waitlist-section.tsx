@@ -1,5 +1,10 @@
 import { Button } from "@/src/lib/components/ui/button";
-import { PaperPlaneTiltIcon, CheckIcon, SpinnerBallIcon, RocketLaunchIcon } from "@phosphor-icons/react";
+import {
+  PaperPlaneTiltIcon,
+  CheckIcon,
+  SpinnerBallIcon,
+  RocketLaunchIcon,
+} from "@phosphor-icons/react";
 import { motion, AnimatePresence, useInView } from "motion/react";
 import { useState, useRef } from "react";
 import { useApi } from "@/src/lib/hooks/use-api";
@@ -11,7 +16,10 @@ export default function WaitlistSection() {
 
   // Refs for scroll-triggered animations
   const waitlistRef = useRef(null);
-  const waitlistInView = useInView(waitlistRef, { once: true, margin: "-100px" });
+  const waitlistInView = useInView(waitlistRef, {
+    once: true,
+    margin: "-100px",
+  });
 
   const { joinWaitlist } = useApi();
 
@@ -26,8 +34,10 @@ export default function WaitlistSection() {
       setEmail(""); // Clear the email field on success
     } catch (error: any) {
       // Check if the error is specifically about duplicate email (409 status)
-      if (error?.message?.includes("Email already registered") ||
-        error?.message?.includes("already registered")) {
+      if (
+        error?.message?.includes("Email already registered") ||
+        error?.message?.includes("already registered")
+      ) {
         // Treat duplicate email as success - user is already registered
         setIsSubmitted(true);
         setIsDuplicate(true); // Mark as duplicate
@@ -35,36 +45,45 @@ export default function WaitlistSection() {
         return;
       }
       // For other errors, let the mutation's onError callback handle it
-      console.error('Error joining waitlist:', error);
+      console.error("Error joining waitlist:", error);
     }
   };
 
   return (
-    <section ref={waitlistRef} className="lg:max-w-[80dvw] mx-auto min-h-screen flex items-center justify-center p-8 md:p-page">
+    <section
+      ref={waitlistRef}
+      className="lg:max-w-[80dvw] mx-auto min-h-screen flex items-center justify-center p-8 md:p-page"
+    >
       <AnimatePresence mode="wait">
         {!isSubmitted ? (
           <motion.div
             key="waitlist-form"
             initial={{ opacity: 0, y: 50 }}
-            animate={waitlistInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+            animate={
+              waitlistInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }
+            }
             exit={{ opacity: 0, y: -20 }}
             transition={{
               type: "spring",
               stiffness: 200,
               damping: 25,
-              delay: 0.2
+              delay: 0.2,
             }}
             className="flex flex-col gap-8 w-full"
           >
             {/* Funky Rocket Icon */}
             <motion.div
               initial={{ opacity: 0, scale: 0.5, rotate: -180 }}
-              animate={waitlistInView ? { opacity: 1, scale: 1, rotate: 0 } : { opacity: 0, scale: 0.5, rotate: -180 }}
+              animate={
+                waitlistInView
+                  ? { opacity: 1, scale: 1, rotate: 0 }
+                  : { opacity: 0, scale: 0.5, rotate: -180 }
+              }
               transition={{
                 type: "spring",
                 stiffness: 300,
                 damping: 20,
-                delay: 0.2
+                delay: 0.2,
               }}
               className="flex justify-center"
             >
@@ -73,12 +92,12 @@ export default function WaitlistSection() {
                 <motion.div
                   animate={{
                     y: [0, -10, 0],
-                    rotate: [0, 2, -2, 0]
+                    rotate: [0, 2, -2, 0],
                   }}
                   transition={{
                     duration: 2.5,
                     repeat: Infinity,
-                    ease: "easeInOut"
+                    ease: "easeInOut",
                   }}
                   className="flex overflow-hidden relative justify-center items-center w-32 h-32 rounded-full border sm:w-40 sm:h-40 md:w-48 md:h-48 lg:w-56 lg:h-56 xl:w-64 xl:h-64 bg-card"
                 >
@@ -92,18 +111,31 @@ export default function WaitlistSection() {
                   <motion.div
                     animate={{
                       rotate: 360,
-                      scale: [1, 1.2, 1]
+                      scale: [1, 1.2, 1],
                     }}
                     transition={{
                       rotate: { duration: 8, repeat: Infinity, ease: "linear" },
-                      scale: { duration: 2, repeat: Infinity, ease: "easeInOut" }
+                      scale: {
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                      },
                     }}
                     className="flex absolute inset-0 justify-center items-center"
                   >
                     <div className="absolute top-4 left-8 w-2 h-2 bg-yellow-400 rounded-full animate-pulse" />
-                    <div className="absolute right-6 top-8 w-1 h-1 bg-blue-400 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }} />
-                    <div className="w-1.5 h-1.5 bg-pink-400 rounded-full absolute bottom-6 left-6 animate-pulse" style={{ animationDelay: '1s' }} />
-                    <div className="absolute right-8 bottom-8 w-1 h-1 bg-green-400 rounded-full animate-pulse" style={{ animationDelay: '1.5s' }} />
+                    <div
+                      className="absolute right-6 top-8 w-1 h-1 bg-blue-400 rounded-full animate-pulse"
+                      style={{ animationDelay: "0.5s" }}
+                    />
+                    <div
+                      className="w-1.5 h-1.5 bg-pink-400 rounded-full absolute bottom-6 left-6 animate-pulse"
+                      style={{ animationDelay: "1s" }}
+                    />
+                    <div
+                      className="absolute right-8 bottom-8 w-1 h-1 bg-green-400 rounded-full animate-pulse"
+                      style={{ animationDelay: "1.5s" }}
+                    />
                   </motion.div>
                 </motion.div>
 
@@ -123,12 +155,14 @@ export default function WaitlistSection() {
 
             <motion.div
               initial={{ opacity: 0, y: 30 }}
-              animate={waitlistInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+              animate={
+                waitlistInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }
+              }
               transition={{
                 type: "spring",
                 stiffness: 200,
                 damping: 25,
-                delay: 0.3
+                delay: 0.3,
               }}
               className="text-center"
             >
@@ -141,12 +175,14 @@ export default function WaitlistSection() {
               onSubmit={handleJoinWaitlist}
               className="mx-auto w-full max-w-7xl"
               initial={{ opacity: 0, y: 40 }}
-              animate={waitlistInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
+              animate={
+                waitlistInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }
+              }
               transition={{
                 type: "spring",
                 stiffness: 200,
                 damping: 25,
-                delay: 0.4
+                delay: 0.4,
               }}
             >
               <div className="flex flex-col gap-3 w-full sm:gap-4 md:flex-row">
@@ -178,7 +214,7 @@ export default function WaitlistSection() {
                           exit={{ opacity: 0, scale: 0.5, rotate: 180 }}
                           transition={{
                             duration: 0.3,
-                            ease: "easeInOut"
+                            ease: "easeInOut",
                           }}
                           className="flex justify-center items-center"
                         >
@@ -192,7 +228,7 @@ export default function WaitlistSection() {
                           exit={{ opacity: 0, scale: 0.5, rotate: 180 }}
                           transition={{
                             duration: 0.3,
-                            ease: "easeInOut"
+                            ease: "easeInOut",
                           }}
                           className="flex justify-center items-center"
                         >
@@ -212,13 +248,17 @@ export default function WaitlistSection() {
               y: 100,
               opacity: 0,
             }}
-            animate={waitlistInView ? {
-              y: 0,
-              opacity: 1,
-            } : {
-              y: 100,
-              opacity: 0,
-            }}
+            animate={
+              waitlistInView
+                ? {
+                    y: 0,
+                    opacity: 1,
+                  }
+                : {
+                    y: 100,
+                    opacity: 0,
+                  }
+            }
             exit={{
               y: -100,
               opacity: 0,
@@ -227,55 +267,72 @@ export default function WaitlistSection() {
               type: "spring",
               stiffness: 200,
               damping: 25,
-              duration: 0.8
+              duration: 0.8,
             }}
             className="p-8 space-y-6 text-center rounded-large"
           >
             <motion.div
               initial={{ y: 50, opacity: 0 }}
-              animate={waitlistInView ? { y: 0, opacity: 1 } : { y: 50, opacity: 0 }}
+              animate={
+                waitlistInView ? { y: 0, opacity: 1 } : { y: 50, opacity: 0 }
+              }
               transition={{
                 type: "spring",
                 stiffness: 200,
                 damping: 25,
-                delay: 0.4
+                delay: 0.4,
               }}
               className="flex justify-center items-center mx-auto rounded-full border size-20 sm:size-24 md:size-28 lg:size-32 bg-primary"
             >
-              <CheckIcon className="size-12 sm:size-16 md:size-18 lg:size-20 text-primary-foreground" weight="bold" />
+              <CheckIcon
+                className="size-12 sm:size-16 md:size-18 lg:size-20 text-primary-foreground"
+                weight="bold"
+              />
             </motion.div>
 
             <motion.div
               initial={{ y: 30, opacity: 0 }}
-              animate={waitlistInView ? { y: 0, opacity: 1 } : { y: 30, opacity: 0 }}
+              animate={
+                waitlistInView ? { y: 0, opacity: 1 } : { y: 30, opacity: 0 }
+              }
               transition={{
                 type: "spring",
                 stiffness: 200,
                 damping: 25,
-                delay: 0.5
+                delay: 0.5,
               }}
               className="space-y-2"
             >
               <motion.h1
                 initial={{ y: 30, opacity: 0 }}
-                animate={waitlistInView ? { y: 0, opacity: 1 } : { y: 30, opacity: 0 }}
+                animate={
+                  waitlistInView ? { y: 0, opacity: 1 } : { y: 30, opacity: 0 }
+                }
                 transition={{
                   type: "spring",
                   stiffness: 200,
                   damping: 25,
-                  delay: 0.5
-                }} className="text-2xl leading-tight sm:text-3xl md:text-4xl xl:text-7xl">
-                {isDuplicate ? "You're already on the list!" : "You're on the list!"}
+                  delay: 0.5,
+                }}
+                className="text-2xl leading-tight sm:text-3xl md:text-4xl xl:text-7xl"
+              >
+                {isDuplicate
+                  ? "You're already on the list!"
+                  : "You're on the list!"}
               </motion.h1>
               <motion.p
                 initial={{ y: 30, opacity: 0 }}
-                animate={waitlistInView ? { y: 0, opacity: 1 } : { y: 30, opacity: 0 }}
+                animate={
+                  waitlistInView ? { y: 0, opacity: 1 } : { y: 30, opacity: 0 }
+                }
                 transition={{
                   type: "spring",
                   stiffness: 200,
                   damping: 25,
-                  delay: 0.6
-                }} className="text-base leading-relaxed sm:text-lg xl:text-lg text-muted-foreground">
+                  delay: 0.6,
+                }}
+                className="text-base leading-relaxed sm:text-lg xl:text-lg text-muted-foreground"
+              >
                 We'll notify you as soon as we go online.
               </motion.p>
             </motion.div>

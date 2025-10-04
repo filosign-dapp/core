@@ -1,0 +1,22 @@
+{
+  "name": "server",
+  "scripts": {
+    "db:migrate": "bunx --bun drizzle-kit push"
+  },
+  "dependencies": {
+    "@filosign/contracts": "workspace:*",
+    "@filoz/synapse-sdk": "^0.28.0",
+    "@hono/zod-validator": "^0.7.3",
+    "@libsql/client": "^0.14.0",
+    "drizzle-orm": "^0.44.5",
+    "drizzle-zod": "^0.8.3",
+    "ethers": "^6.15.0",
+    "hono": "^4.9.8",
+    "jsonwebtoken": "^9.0.2",
+    "fast-json-stable-stringify": "^2.1.0"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.10",
+    "drizzle-kit": "^0.30.5"
+  }
+}

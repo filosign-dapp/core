@@ -35,7 +35,7 @@ const MAX_FILE_SIZE = 1024 * 1024; // 1MB
 
 const aspectRatioOptions: Record<
   AspectRatio,
-  { value: number; label: string; }
+  { value: number; label: string }
 > = {
   square: { value: 1, label: "Square (1:1)" },
   portrait: { value: 3 / 4, label: "Portrait (3:4)" },

@@ -1,25 +1,29 @@
-import { motion } from "motion/react"
-import { FolderIcon } from "@phosphor-icons/react"
-import type { MockFolder } from "../mock"
+import { motion } from "motion/react";
+import { FolderIcon } from "@phosphor-icons/react";
+import type { MockFolder } from "../mock";
 
 interface FolderCardProps {
-  folder: MockFolder
-  onClick?: (folder: MockFolder) => void
-  variant?: "list" | "grid"
+  folder: MockFolder;
+  onClick?: (folder: MockFolder) => void;
+  variant?: "list" | "grid";
 }
 
-export default function FolderCard({ folder, onClick, variant = "grid" }: FolderCardProps) {
+export default function FolderCard({
+  folder,
+  onClick,
+  variant = "grid",
+}: FolderCardProps) {
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    })
-  }
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
 
   const handleClick = () => {
-    onClick?.(folder)
-  }
+    onClick?.(folder);
+  };
 
   // Compact grid variant
   if (variant === "grid") {
@@ -32,23 +36,27 @@ export default function FolderCard({ folder, onClick, variant = "grid" }: Folder
           type: "spring",
           stiffness: 230,
           damping: 25,
-          duration: 0.3
+          duration: 0.3,
         }}
         onClick={handleClick}
       >
         <div className="flex gap-2 items-center">
           <FolderIcon className="size-10 text-primary" weight="fill" />
           <div className="space-y-0.5">
-            <h3 className="text-xs font-medium truncate text-foreground max-w-24" title={folder.name}>
+            <h3
+              className="text-xs font-medium truncate text-foreground max-w-24"
+              title={folder.name}
+            >
               {folder.name}
             </h3>
             <p className="text-xs text-muted-foreground">
-              {folder.documentCount} {folder.documentCount === 1 ? 'file' : 'files'}
+              {folder.documentCount}{" "}
+              {folder.documentCount === 1 ? "file" : "files"}
             </p>
           </div>
         </div>
       </motion.div>
-    )
+    );
   }
 
   // Compact list variant
@@ -61,7 +69,7 @@ export default function FolderCard({ folder, onClick, variant = "grid" }: Folder
         type: "spring",
         stiffness: 230,
         damping: 25,
-        duration: 0.3
+        duration: 0.3,
       }}
       onClick={handleClick}
     >
@@ -70,12 +78,15 @@ export default function FolderCard({ folder, onClick, variant = "grid" }: Folder
           <FolderIcon className="size-4 text-primary" />
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-xs font-medium truncate text-foreground">{folder.name}</h3>
+          <h3 className="text-xs font-medium truncate text-foreground">
+            {folder.name}
+          </h3>
           <p className="text-xs truncate text-muted-foreground">
-            {folder.documentCount} {folder.documentCount === 1 ? 'doc' : 'docs'} • {formatDate(folder.createdAt)}
+            {folder.documentCount} {folder.documentCount === 1 ? "doc" : "docs"}{" "}
+            • {formatDate(folder.createdAt)}
           </p>
         </div>
       </div>
     </motion.div>
-  )
+  );
 }

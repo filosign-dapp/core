@@ -34,12 +34,12 @@ Filosign consists of multiple specialized repositories, each handling different 
 
 ### **Core Repositories**
 
-| Repository | Purpose | Status | Link |
-|------------|---------|--------|------|
-| **filosign/client** | React frontend application | 🕒 Work in Progress | [github.com/filosign-dapp/client](https://github.com/filosign-dapp/client) |
-| **filosign/contracts** | FVM smart contracts | ✅ Deployed on Testnet | [github.com/filosign-dapp/contracts](https://github.com/filosign-dapp/contracts) |
-| **filosign/crypto-utils** | WebAssembly crypto SDK | ✅ Published | [github.com/filosign-dapp/crypto-utils](https://github.com/filosign-dapp/crypto-utils) |
-| **filosign/platform** | TypeScript client library | 🕒 Work in Progress | [github.com/filosign-dapp/platform](https://github.com/filosign-dapp/platform) |
+| Repository                | Purpose                    | Status                 | Link                                                                                   |
+| ------------------------- | -------------------------- | ---------------------- | -------------------------------------------------------------------------------------- |
+| **filosign/client**       | React frontend application | 🕒 Work in Progress    | [github.com/filosign-dapp/client](https://github.com/filosign-dapp/client)             |
+| **filosign/contracts**    | FVM smart contracts        | ✅ Deployed on Testnet | [github.com/filosign-dapp/contracts](https://github.com/filosign-dapp/contracts)       |
+| **filosign/crypto-utils** | WebAssembly crypto SDK     | ✅ Published           | [github.com/filosign-dapp/crypto-utils](https://github.com/filosign-dapp/crypto-utils) |
+| **filosign/platform**     | TypeScript client library  | 🕒 Work in Progress    | [github.com/filosign-dapp/platform](https://github.com/filosign-dapp/platform)         |
 
 ### **Key Dependencies**
 
@@ -54,7 +54,9 @@ Filosign consists of multiple specialized repositories, each handling different 
 ### **Core Components**
 
 #### **1. Frontend (React + TypeScript)**
+
 Modern, responsive UI built with:
+
 - **React 19** with hooks and modern patterns
 - **Tailwind CSS** for consistent design system
 - **shadcn/ui** for accessible, reusable components
@@ -62,20 +64,26 @@ Modern, responsive UI built with:
 - **TanStack Router** for type-safe routing
 
 #### **2. Client SDK (TypeScript)**
+
 Non-custodial cryptographic operations:
+
 - **PIN + Wallet Dual-Factor**: Argon2id key derivation
 - **XChaCha20Poly1305**: Authenticated encryption
 - **ECDH Key Exchange**: Secure document sharing
 - **Session-Based Keys**: Never stored long-term
 
 #### **3. Smart Contracts (Solidity)**
+
 Decentralized business logic on FVM:
+
 - **FSManager**: Trust and access management
 - **FSFileRegistry**: Document lifecycle management
 - **FSKeyRegistry**: Cryptographic identity storage
 
 #### **4. Filecoin Onchain Cloud**
+
 Decentralized storage infrastructure:
+
 - **Synapse SDK**: On-chain interactions
 - **FilCDN**: Fast document retrieval
 - **FWSS**: Permanent verifiable storage
@@ -91,7 +99,6 @@ Wrapper Key → XChaCha20 → Encrypted Seed
 Seed → HKDF → Document Encryption Keys
 ```
 
-
 ## **Getting Started**
 
 ### **Prerequisites**
@@ -102,7 +109,7 @@ Seed → HKDF → Document Encryption Keys
 
 ### **Installation**
 
-   ```bash
+```bash
 # Clone the repository
 git clone https://github.com/filosign-dapp/client.git
 cd client
@@ -119,7 +126,7 @@ bun run dev
 
 ### **Development Workflow**
 
-   ```bash
+````bash
 # Start development server with hot reload
 bun run dev
 
@@ -177,7 +184,7 @@ React PDF + PDF annotation tools
 
 // Signature Input
 React Signature Canvas + Tldraw
-```
+````
 
 ### **Filecoin Integration**
 
@@ -192,7 +199,7 @@ React Signature Canvas + Tldraw
 ### **Client SDK Integration**
 
 ```typescript
-import { FilosignClient } from '@filosign/platform';
+import { FilosignClient } from "@filosign/platform";
 
 // Initialize with wallet
 const client = new FilosignClient(walletClient);
@@ -305,7 +312,6 @@ bun run dev
 - **Mobile Apps**: React Native iOS/Android applications
 - **Compliance**: SOC 2, GDPR, ISO certifications
 - **Mainnet Launch**: Production deployment on Filecoin mainnet
-
 
 ## **Support & Community**
 

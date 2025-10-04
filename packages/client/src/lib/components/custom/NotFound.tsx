@@ -1,15 +1,19 @@
-import { Button } from "@/src/lib/components/ui/button"
-import { CaretLeftIcon, HouseIcon, MagnifyingGlassIcon } from "@phosphor-icons/react"
-import { motion } from "framer-motion"
+import { Button } from "@/src/lib/components/ui/button";
+import {
+  CaretLeftIcon,
+  HouseIcon,
+  MagnifyingGlassIcon,
+} from "@phosphor-icons/react";
+import { motion } from "framer-motion";
 
 type NotFoundProps = {
-  title?: string
-  description?: string
-  showBackButton?: boolean
-  showHomeButton?: boolean
-  onBack?: () => void
-  onHome?: () => void
-}
+  title?: string;
+  description?: string;
+  showBackButton?: boolean;
+  showHomeButton?: boolean;
+  onBack?: () => void;
+  onHome?: () => void;
+};
 
 export function NotFound({
   title = "404",
@@ -62,18 +66,13 @@ export function NotFound({
           className="flex flex-col gap-3 sm:flex-row sm:justify-center"
         >
           {showBackButton && (
-            <Button
-              variant="primary"
-              className="gap-2"
-            >
+            <Button variant="primary" className="gap-2">
               <CaretLeftIcon className="h-4 w-4" />
               Go Back
             </Button>
           )}
           {showHomeButton && (
-            <Button
-              className="gap-2"
-            >
+            <Button className="gap-2">
               <HouseIcon className="h-4 w-4" />
               Go Home
             </Button>
@@ -81,5 +80,5 @@ export function NotFound({
         </motion.div>
       </motion.div>
     </div>
-  )
+  );
 }

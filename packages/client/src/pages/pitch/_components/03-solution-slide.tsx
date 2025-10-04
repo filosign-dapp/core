@@ -11,17 +11,20 @@ import { useRef } from "react";
 const solutions: { title: string; description: string; icon: Icon }[] = [
   {
     title: "Irrevocable Signatures",
-    description: "Every signature is a permanent transaction on the Filecoin Virtual Machine (FVM).",
+    description:
+      "Every signature is a permanent transaction on the Filecoin Virtual Machine (FVM).",
     icon: SignatureIcon,
   },
   {
     title: "Permanent Anchorage",
-    description: "The document's hash is anchored to the Filecoin network, creating a tamper-proof record.",
+    description:
+      "The document's hash is anchored to the Filecoin network, creating a tamper-proof record.",
     icon: StampIcon,
   },
   {
     title: "Verifiable Audit Trail",
-    description: "A time-stamped and independently verifiable audit trail that exists outside any single entity's control.",
+    description:
+      "A time-stamped and independently verifiable audit trail that exists outside any single entity's control.",
     icon: ClockClockwiseIcon,
   },
 ];
@@ -31,7 +34,10 @@ export function SolutionSlide() {
   const inView = useInView(ref, { once: true, amount: 0.3 });
 
   return (
-    <div ref={ref} className="h-screen w-full snap-center flex flex-col items-center justify-center p-page relative overflow-hidden">
+    <div
+      ref={ref}
+      className="h-screen w-full snap-center flex flex-col items-center justify-center p-page relative overflow-hidden"
+    >
       {/* Background decoration */}
       <motion.div
         className="absolute -bottom-60 -left-60 z-0"
@@ -48,9 +54,13 @@ export function SolutionSlide() {
           animate={inView ? { opacity: 1, x: 0 } : {}}
           transition={{ duration: 0.5, delay: 0.1 }}
         >
-          <h2 className="text-5xl md:text-6xl font-bold">The Solution: Mathematical Proof</h2>
+          <h2 className="text-5xl md:text-6xl font-bold">
+            The Solution: Mathematical Proof
+          </h2>
           <p className="text-lg text-muted-foreground mt-4">
-            We replace fragile platform trust with permanent, verifiable mathematical proof. Your agreements are safe from hacks, policy changes, or provider shutdowns.
+            We replace fragile platform trust with permanent, verifiable
+            mathematical proof. Your agreements are safe from hacks, policy
+            changes, or provider shutdowns.
           </p>
         </motion.div>
 
@@ -64,7 +74,10 @@ export function SolutionSlide() {
               transition={{ duration: 0.4, delay: 0.2 + i * 0.1 }}
             >
               <div className="p-3 bg-primary/10 rounded-full">
-                <solution.icon className="size-8 text-primary" weight="duotone" />
+                <solution.icon
+                  className="size-8 text-primary"
+                  weight="duotone"
+                />
               </div>
               <div>
                 <h3 className="text-2xl font-semibold">{solution.title}</h3>

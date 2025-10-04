@@ -1,4 +1,9 @@
-import { KeyIcon, PlusIcon, ShieldIcon, WalletIcon } from "@phosphor-icons/react";
+import {
+  KeyIcon,
+  PlusIcon,
+  ShieldIcon,
+  WalletIcon,
+} from "@phosphor-icons/react";
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 
@@ -7,7 +12,10 @@ export function SecuritySlide() {
   const inView = useInView(ref, { once: true, amount: 0.3 });
 
   return (
-    <div ref={ref} className="h-screen w-full snap-center flex flex-col items-center justify-center p-page relative overflow-hidden">
+    <div
+      ref={ref}
+      className="h-screen w-full snap-center flex flex-col items-center justify-center p-page relative overflow-hidden"
+    >
       <div className="text-center z-10 mb-16">
         <motion.h2
           className="text-5xl md:text-6xl font-bold"
@@ -23,7 +31,8 @@ export function SecuritySlide() {
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          Our platform is fully non-custodial, based on a two-factor model that you control.
+          Our platform is fully non-custodial, based on a two-factor model that
+          you control.
         </motion.p>
       </div>
 
@@ -36,7 +45,9 @@ export function SecuritySlide() {
         >
           <WalletIcon className="size-24 text-primary" weight="duotone" />
           <h3 className="text-2xl font-semibold">Web3 Wallet</h3>
-          <p className="text-muted-foreground text-center">Something you have.</p>
+          <p className="text-muted-foreground text-center">
+            Something you have.
+          </p>
         </motion.div>
 
         <motion.div
@@ -55,10 +66,12 @@ export function SecuritySlide() {
         >
           <KeyIcon className="size-24 text-primary" weight="duotone" />
           <h3 className="text-2xl font-semibold">Your PIN</h3>
-          <p className="text-muted-foreground text-center">Something you know.</p>
+          <p className="text-muted-foreground text-center">
+            Something you know.
+          </p>
         </motion.div>
       </div>
-      
+
       <motion.div
         className="absolute bottom-10 text-center z-10"
         initial={{ opacity: 0, y: 20 }}
@@ -66,7 +79,8 @@ export function SecuritySlide() {
         transition={{ duration: 0.5, delay: 0.6 }}
       >
         <p className="text-lg text-muted-foreground mt-4 max-w-[90dvw] mx-auto">
-          Client-side encryption ensures that we never have access to your keys or unencrypted documents.
+          Client-side encryption ensures that we never have access to your keys
+          or unencrypted documents.
         </p>
       </motion.div>
 

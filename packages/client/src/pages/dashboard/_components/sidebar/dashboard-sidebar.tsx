@@ -1,41 +1,43 @@
-import * as React from "react"
+import * as React from "react";
 
-import { NavMain } from "@/src/pages/dashboard/_components/sidebar/nav-main"
-import { sidebarData } from "@/src/pages/dashboard/_components/sidebar/mock"
+import { NavMain } from "@/src/pages/dashboard/_components/sidebar/nav-main";
+import { sidebarData } from "@/src/pages/dashboard/_components/sidebar/mock";
 import {
   Sidebar,
   SidebarContent,
   SidebarHeader,
   SidebarRail,
   useSidebar,
-} from "@/src/lib/components/ui/sidebar"
-import Logo from "@/src/lib/components/custom/Logo"
-import { useStorePersist } from "@/src/lib/hooks/use-store"
+} from "@/src/lib/components/ui/sidebar";
+import Logo from "@/src/lib/components/custom/Logo";
+import { useStorePersist } from "@/src/lib/hooks/use-store";
 
-
-export function DashboardSidebar({ className, ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { state, setOpen } = useSidebar()
-  const { sidebar, setSidebar } = useStorePersist()
-  const isCollapsed = state === "collapsed"
-  const isInitialized = React.useRef(false)
+export function DashboardSidebar({
+  className,
+  ...props
+}: React.ComponentProps<typeof Sidebar>) {
+  const { state, setOpen } = useSidebar();
+  const { sidebar, setSidebar } = useStorePersist();
+  const isCollapsed = state === "collapsed";
+  const isInitialized = React.useRef(false);
 
   // Initialize sidebar state from persisted state on mount
   React.useEffect(() => {
     if (!isInitialized.current) {
-      setOpen(sidebar.isOpen)
-      isInitialized.current = true
+      setOpen(sidebar.isOpen);
+      isInitialized.current = true;
     }
-  }, [sidebar.isOpen, setOpen])
+  }, [sidebar.isOpen, setOpen]);
 
   // Update persisted state when UI state changes (only after initialization)
   React.useEffect(() => {
     if (isInitialized.current) {
-      const isOpen = state === "expanded"
+      const isOpen = state === "expanded";
       if (isOpen !== sidebar.isOpen) {
-        setSidebar({ isOpen })
+        setSidebar({ isOpen });
       }
     }
-  }, [state, sidebar.isOpen, setSidebar])
+  }, [state, sidebar.isOpen, setSidebar]);
 
   return (
     <>
@@ -52,5 +54,5 @@ export function DashboardSidebar({ className, ...props }: React.ComponentProps<t
         <SidebarRail />
       </Sidebar>
     </>
-  )
+  );
 }

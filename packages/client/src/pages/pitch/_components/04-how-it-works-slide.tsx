@@ -16,22 +16,26 @@ const components: {
 }[] = [
   {
     title: "Frontend (React)",
-    description: "User-facing interface where all cryptographic operations occur on the client-side.",
+    description:
+      "User-facing interface where all cryptographic operations occur on the client-side.",
     icon: LaptopIcon,
   },
   {
     title: "FiloSign Server",
-    description: "A lightweight service that orchestrates tasks like notifications and transaction preparation.",
+    description:
+      "A lightweight service that orchestrates tasks like notifications and transaction preparation.",
     icon: DatabaseIcon,
   },
   {
     title: "FVM Smart Contracts",
-    description: "The decentralized source of truth for all agreements, managing document state and signatures.",
+    description:
+      "The decentralized source of truth for all agreements, managing document state and signatures.",
     icon: CubeIcon,
   },
   {
     title: "Filecoin Onchain Cloud",
-    description: "Provides permanent, decentralized storage for all encrypted documents.",
+    description:
+      "Provides permanent, decentralized storage for all encrypted documents.",
     icon: CloudIcon,
   },
 ];
@@ -41,7 +45,10 @@ export function HowItWorksSlide() {
   const inView = useInView(ref, { once: true, amount: 0.3 });
 
   return (
-    <div ref={ref} className="h-screen w-full snap-center flex flex-col items-center justify-center p-page relative overflow-hidden">
+    <div
+      ref={ref}
+      className="h-screen w-full snap-center flex flex-col items-center justify-center p-page relative overflow-hidden"
+    >
       <motion.div
         className="text-center z-10 mb-16"
         initial={{ opacity: 0, y: -20 }}
@@ -50,7 +57,8 @@ export function HowItWorksSlide() {
       >
         <h2 className="text-5xl md:text-6xl font-bold">How It Works</h2>
         <p className="text-lg text-muted-foreground mt-4 max-w-[90dvw] mx-auto">
-          A non-custodial platform where users have absolute control, built on a trustless architecture.
+          A non-custodial platform where users have absolute control, built on a
+          trustless architecture.
         </p>
       </motion.div>
 
@@ -70,10 +78,15 @@ export function HowItWorksSlide() {
           >
             <div className="text-right">
               <h3 className="text-2xl font-semibold">{component.title}</h3>
-              <p className="text-muted-foreground max-w-sm">{component.description}</p>
+              <p className="text-muted-foreground max-w-sm">
+                {component.description}
+              </p>
             </div>
             <div className="p-4 bg-primary/10 rounded-full">
-              <component.icon className="size-10 text-primary" weight="duotone" />
+              <component.icon
+                className="size-10 text-primary"
+                weight="duotone"
+              />
             </div>
           </motion.div>
         ))}

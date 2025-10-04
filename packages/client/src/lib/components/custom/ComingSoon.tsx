@@ -1,15 +1,15 @@
-import { Button } from "@/src/lib/components/ui/button"
-import { ClockIcon, BellIcon, CaretLeftIcon } from "@phosphor-icons/react"
-import { motion } from "framer-motion"
+import { Button } from "@/src/lib/components/ui/button";
+import { ClockIcon, BellIcon, CaretLeftIcon } from "@phosphor-icons/react";
+import { motion } from "framer-motion";
 
 type ComingSoonProps = {
-  title?: string
-  description?: string
-  showBackButton?: boolean
-  showNotifyButton?: boolean
-  onBack?: () => void
-  onNotify?: () => void
-}
+  title?: string;
+  description?: string;
+  showBackButton?: boolean;
+  showNotifyButton?: boolean;
+  onBack?: () => void;
+  onNotify?: () => void;
+};
 
 export function ComingSoon({
   title = "Coming Soon",
@@ -46,12 +46,8 @@ export function ComingSoon({
           transition={{ delay: 0.4, duration: 0.5 }}
           className="space-y-3"
         >
-          <h1 className="text-foreground">
-            {title}
-          </h1>
-          <p className="text-muted-foreground">
-            {description}
-          </p>
+          <h1 className="text-foreground">{title}</h1>
+          <p className="text-muted-foreground">{description}</p>
         </motion.div>
 
         {/* Actions */}
@@ -62,21 +58,13 @@ export function ComingSoon({
           className="flex flex-col gap-3 sm:flex-row sm:justify-center"
         >
           {showBackButton && (
-            <Button
-              variant="ghost"
-              onClick={onBack}
-              className="gap-2"
-            >
+            <Button variant="ghost" onClick={onBack} className="gap-2">
               <CaretLeftIcon className="w-4 h-4" weight="bold" />
               Go Back
             </Button>
           )}
           {showNotifyButton && (
-            <Button
-              onClick={onNotify}
-              variant="primary"
-              className="gap-2"
-            >
+            <Button onClick={onNotify} variant="primary" className="gap-2">
               <BellIcon className="w-4 h-4" weight="bold" />
               Notify Me
             </Button>
@@ -84,5 +72,5 @@ export function ComingSoon({
         </motion.div>
       </motion.div>
     </div>
-  )
+  );
 }

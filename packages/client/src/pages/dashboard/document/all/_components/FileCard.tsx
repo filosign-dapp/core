@@ -1,4 +1,4 @@
-import { motion } from "motion/react"
+import { motion } from "motion/react";
 import {
   FileIcon,
   FilePdfIcon,
@@ -6,58 +6,70 @@ import {
   FileTextIcon,
   DotsThreeVertical,
   DotsThreeVerticalIcon,
-} from "@phosphor-icons/react"
-import { cn } from "@/src/lib/utils/utils"
-import type { MockFile } from "../mock"
-import { Image } from "@/src/lib/components/custom/Image"
-import { Button } from "@/src/lib/components/ui/button"
+} from "@phosphor-icons/react";
+import { cn } from "@/src/lib/utils/utils";
+import type { MockFile } from "../mock";
+import { Image } from "@/src/lib/components/custom/Image";
+import { Button } from "@/src/lib/components/ui/button";
 
 interface FileCardProps {
-  file: MockFile
-  onClick?: (file: MockFile) => void
-  variant?: "list" | "grid"
+  file: MockFile;
+  onClick?: (file: MockFile) => void;
+  variant?: "list" | "grid";
 }
 
 const getFileIcon = (fileType: string) => {
-  if (fileType.includes("pdf")) return FilePdfIcon
-  if (fileType.includes("image") || fileType.includes("jpg") || fileType.includes("jpeg") || fileType.includes("png") || fileType.includes("gif")) return FileImageIcon
-  if (fileType.includes("text") || fileType.includes("txt")) return FileTextIcon
-  return FileIcon
-}
+  if (fileType.includes("pdf")) return FilePdfIcon;
+  if (
+    fileType.includes("image") ||
+    fileType.includes("jpg") ||
+    fileType.includes("jpeg") ||
+    fileType.includes("png") ||
+    fileType.includes("gif")
+  )
+    return FileImageIcon;
+  if (fileType.includes("text") || fileType.includes("txt"))
+    return FileTextIcon;
+  return FileIcon;
+};
 
 const getFileTypeColor = (fileType: string) => {
-  if (fileType.includes("pdf")) return "text-red-500"
-  if (fileType.includes("image")) return "text-green-500"
-  if (fileType.includes("text")) return "text-gray-500"
-  return "text-primary"
-}
+  if (fileType.includes("pdf")) return "text-red-500";
+  if (fileType.includes("image")) return "text-green-500";
+  if (fileType.includes("text")) return "text-gray-500";
+  return "text-primary";
+};
 
-export default function FileCard({ file, onClick, variant = "grid" }: FileCardProps) {
-  const FileIconComponent = getFileIcon(file.type)
-  const iconColor = getFileTypeColor(file.type)
+export default function FileCard({
+  file,
+  onClick,
+  variant = "grid",
+}: FileCardProps) {
+  const FileIconComponent = getFileIcon(file.type);
+  const iconColor = getFileTypeColor(file.type);
 
   const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes'
-    const k = 1024
-    const sizes = ['Bytes', 'KB', 'MB', 'GB']
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-  }
+    if (bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  };
 
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    })
-  }
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
 
   const handleClick = () => {
-    onClick?.(file)
-  }
+    onClick?.(file);
+  };
 
-  const isImage = file.type.includes("image")
-  const shouldShowPreview = isImage && file.dataUrl
+  const isImage = file.type.includes("image");
+  const shouldShowPreview = isImage && file.dataUrl;
 
   // Grid variant
   if (variant === "grid") {
@@ -70,7 +82,7 @@ export default function FileCard({ file, onClick, variant = "grid" }: FileCardPr
           type: "spring",
           stiffness: 230,
           damping: 25,
-          duration: 0.3
+          duration: 0.3,
         }}
         onClick={handleClick}
       >
@@ -100,7 +112,7 @@ export default function FileCard({ file, onClick, variant = "grid" }: FileCardPr
           </p>
         </div>
       </motion.div>
-    )
+    );
   }
 
   // List variant
@@ -113,7 +125,7 @@ export default function FileCard({ file, onClick, variant = "grid" }: FileCardPr
         type: "spring",
         stiffness: 230,
         damping: 25,
-        duration: 0.3
+        duration: 0.3,
       }}
       onClick={handleClick}
     >
@@ -140,13 +152,17 @@ export default function FileCard({ file, onClick, variant = "grid" }: FileCardPr
           </div>
         </div>
 
-        <Button variant="ghost" size="icon" onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-        }}>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+        >
           <DotsThreeVerticalIcon className="size-5" />
         </Button>
       </div>
     </motion.div>
-  )
+  );
 }

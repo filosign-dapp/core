@@ -1,17 +1,22 @@
-import { Button } from "@/src/lib/components/ui/button"
-import { HouseIcon, ArrowClockwiseIcon, SmileySadIcon, CaretLeftIcon } from "@phosphor-icons/react"
-import { motion } from "framer-motion"
+import { Button } from "@/src/lib/components/ui/button";
+import {
+  HouseIcon,
+  ArrowClockwiseIcon,
+  SmileySadIcon,
+  CaretLeftIcon,
+} from "@phosphor-icons/react";
+import { motion } from "framer-motion";
 
 type PageCrashedProps = {
-  title?: string
-  description?: string
-  showBackButton?: boolean
-  showHomeButton?: boolean
-  showRetryButton?: boolean
-  onBack?: () => void
-  onHome?: () => void
-  onRetry?: () => void
-}
+  title?: string;
+  description?: string;
+  showBackButton?: boolean;
+  showHomeButton?: boolean;
+  showRetryButton?: boolean;
+  onBack?: () => void;
+  onHome?: () => void;
+  onRetry?: () => void;
+};
 
 export function PageCrashed({
   title = "Oops! Something went wrong",
@@ -39,7 +44,10 @@ export function PageCrashed({
           className="relative"
         >
           <div className="flex justify-center items-center mx-auto w-32 h-32 rounded-full bg-muted/20">
-            <SmileySadIcon weight="regular" className="w-16 h-16 text-muted-foreground" />
+            <SmileySadIcon
+              weight="regular"
+              className="w-16 h-16 text-muted-foreground"
+            />
           </div>
         </motion.div>
 
@@ -50,12 +58,8 @@ export function PageCrashed({
           transition={{ delay: 0.4, duration: 0.5 }}
           className="space-y-3"
         >
-          <h1 className="text-foreground">
-            {title}
-          </h1>
-          <p className="text-muted-foreground">
-            {description}
-          </p>
+          <h1 className="text-foreground">{title}</h1>
+          <p className="text-muted-foreground">{description}</p>
         </motion.div>
 
         {/* Actions */}
@@ -66,31 +70,19 @@ export function PageCrashed({
           className="flex flex-col gap-3 sm:flex-row sm:justify-center"
         >
           {showBackButton && (
-            <Button
-              variant="ghost"
-              onClick={onBack}
-              className="gap-2"
-            >
+            <Button variant="ghost" onClick={onBack} className="gap-2">
               <CaretLeftIcon className="w-4 h-4" />
               Go Back
             </Button>
           )}
           {showHomeButton && (
-            <Button
-              variant="ghost"
-              onClick={onHome}
-              className="gap-2"
-            >
+            <Button variant="ghost" onClick={onHome} className="gap-2">
               <HouseIcon className="w-4 h-4" />
               Go Home
             </Button>
           )}
           {showRetryButton && (
-            <Button
-              variant="primary"
-              onClick={onRetry}
-              className="gap-2"
-            >
+            <Button variant="primary" onClick={onRetry} className="gap-2">
               <ArrowClockwiseIcon className="w-4 h-4" />
               Try Again
             </Button>
@@ -98,5 +90,5 @@ export function PageCrashed({
         </motion.div>
       </motion.div>
     </div>
-  )
+  );
 }

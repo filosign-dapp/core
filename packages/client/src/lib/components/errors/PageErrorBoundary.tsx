@@ -38,11 +38,12 @@ const PageErrorBoundary: React.FC<PageErrorBoundaryProps> = ({ children }) => {
   );
 };
 
-const withPageErrorBoundary = <P extends {}>(Component: React.ComponentType<P>) => (props: P) =>
-(
-  <PageErrorBoundary>
-    <Component {...props} />
-  </PageErrorBoundary>
-);
+const withPageErrorBoundary =
+  <P extends {}>(Component: React.ComponentType<P>) =>
+  (props: P) => (
+    <PageErrorBoundary>
+      <Component {...props} />
+    </PageErrorBoundary>
+  );
 
 export { PageErrorBoundary, withPageErrorBoundary };

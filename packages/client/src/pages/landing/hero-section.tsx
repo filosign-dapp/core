@@ -17,7 +17,7 @@ export default function HeroSection() {
           type: "spring",
           stiffness: 200,
           damping: 25,
-          delay: 0.8
+          delay: 0.8,
         }}
       >
         {/* Announcement Banner */}
@@ -28,12 +28,13 @@ export default function HeroSection() {
             type: "spring",
             stiffness: 200,
             damping: 25,
-            delay: 1.3
+            delay: 1.3,
           }}
           className="self-start group"
         >
           <Badge>
-            <CircleIcon className="size-4 animate-pulse" weight="fill" /> Waitlist is live
+            <CircleIcon className="size-4 animate-pulse" weight="fill" />{" "}
+            Waitlist is live
           </Badge>
         </motion.div>
 
@@ -45,7 +46,7 @@ export default function HeroSection() {
             type: "spring",
             stiffness: 200,
             damping: 25,
-            delay: 1.4
+            delay: 1.4,
           }}
           className="text-3xl sm:text-4xl md:text-5xl xl:text-7xl leading-tight"
         >
@@ -60,7 +61,7 @@ export default function HeroSection() {
             type: "spring",
             stiffness: 200,
             damping: 25,
-            delay: 1.5
+            delay: 1.5,
           }}
           className="text-base sm:text-lg md:text-xl text-muted-foreground leading-relaxed -mt-2"
         >
@@ -75,19 +76,35 @@ export default function HeroSection() {
             type: "spring",
             stiffness: 200,
             damping: 25,
-            delay: 1.6
+            delay: 1.6,
           }}
           className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4"
         >
-          <Button variant="primary" size="lg" asChild className="w-full sm:w-auto">
-            <Link to="/dashboard" className="flex items-center justify-center gap-2 group">
+          <Button
+            variant="primary"
+            size="lg"
+            asChild
+            className="w-full sm:w-auto"
+          >
+            <Link
+              to="/dashboard"
+              className="flex items-center justify-center gap-2 group"
+            >
               Get started
               <CaretRightIcon className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" />
             </Link>
           </Button>
 
-          <Button variant="secondary" size="lg" asChild className="w-full sm:w-auto">
-            <Link to="/dashboard" className="flex items-center justify-center gap-2 text-foreground group">
+          <Button
+            variant="secondary"
+            size="lg"
+            asChild
+            className="w-full sm:w-auto"
+          >
+            <Link
+              to="/dashboard"
+              className="flex items-center justify-center gap-2 text-foreground group"
+            >
               <PlayIcon className="w-4 h-4 transition-transform duration-200 group-hover:rotate-120" />
               See it in action
             </Link>
@@ -103,11 +120,17 @@ export default function HeroSection() {
           type: "spring",
           stiffness: 200,
           damping: 50,
-          delay: 1.5
+          delay: 1.5,
         }}
         className="flex items-center justify-center bg-secondary p-4 md:p-6 rounded-3xl mt-4"
       >
-        <Image src="/static/hero_2.png" alt="Filosign" width={500} height={500} className="size-full rounded-large" />
+        <Image
+          src="/static/hero_2.png"
+          alt="Filosign"
+          width={500}
+          height={500}
+          className="size-full rounded-large"
+        />
       </motion.div>
     </section>
   );

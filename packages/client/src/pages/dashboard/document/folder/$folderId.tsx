@@ -1,6 +1,12 @@
-import { Input } from "@/src/lib/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/lib/components/ui/select"
-import { Button } from "@/src/lib/components/ui/button"
+import { Input } from "@/src/lib/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/src/lib/components/ui/select";
+import { Button } from "@/src/lib/components/ui/button";
 import {
   FileTextIcon,
   MagnifyingGlassIcon,
@@ -9,49 +15,53 @@ import {
   ListIcon,
   ArrowLeftIcon,
   CaretLeftIcon,
-} from "@phosphor-icons/react"
-import { motion } from "motion/react"
-import DashboardLayout from "../../layout"
-import { Link, useParams } from "@tanstack/react-router"
-import { useState } from "react"
-import { getFilesInFolder, getFolderById } from "../all/mock"
-import FileCard from "../all/_components/FileCard"
-import { FileViewer } from "@/src/lib/components/custom/FileViewer"
-import type { MockFile } from "../all/mock"
+} from "@phosphor-icons/react";
+import { motion } from "motion/react";
+import DashboardLayout from "../../layout";
+import { Link, useParams } from "@tanstack/react-router";
+import { useState } from "react";
+import { getFilesInFolder, getFolderById } from "../all/mock";
+import FileCard from "../all/_components/FileCard";
+import { FileViewer } from "@/src/lib/components/custom/FileViewer";
+import type { MockFile } from "../all/mock";
 
 export default function DocumentFolderPage() {
-  const { folderId } = useParams({ from: '/dashboard/document/folder/$folderId' })
-  const [viewMode, setViewMode] = useState<"list" | "grid">("grid")
-  const [isViewSwitching, setIsViewSwitching] = useState(false)
-  const [viewerOpen, setViewerOpen] = useState(false)
-  const [selectedFileId, setSelectedFileId] = useState<string | null>(null)
-  const [isFilterOpen, setIsFilterOpen] = useState(false)
+  const { folderId } = useParams({
+    from: "/dashboard/document/folder/$folderId",
+  });
+  const [viewMode, setViewMode] = useState<"list" | "grid">("grid");
+  const [isViewSwitching, setIsViewSwitching] = useState(false);
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [selectedFileId, setSelectedFileId] = useState<string | null>(null);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  const folder = getFolderById(folderId!)
-  const files = getFilesInFolder(folderId!)
+  const folder = getFolderById(folderId!);
+  const files = getFilesInFolder(folderId!);
 
   const handleViewModeChange = (newViewMode: "list" | "grid") => {
     if (newViewMode !== viewMode) {
-      setIsViewSwitching(true)
-      setViewMode(newViewMode)
+      setIsViewSwitching(true);
+      setViewMode(newViewMode);
       // Reset the switching state after animation completes
       setTimeout(() => {
-        setIsViewSwitching(false)
-      }, 300)
+        setIsViewSwitching(false);
+      }, 300);
     }
-  }
+  };
 
   const handleFileClick = (file: MockFile) => {
-    setSelectedFileId(file.id)
-    setViewerOpen(true)
-  }
+    setSelectedFileId(file.id);
+    setViewerOpen(true);
+  };
 
   if (!folder) {
     return (
       <DashboardLayout>
         <div className="flex flex-col h-full rounded-tl-2xl bg-background @container">
           <div className="flex flex-1 flex-col items-center justify-center">
-            <h2 className="text-lg font-medium text-foreground">Folder not found</h2>
+            <h2 className="text-lg font-medium text-foreground">
+              Folder not found
+            </h2>
             <Link to="/dashboard/document/all">
               <Button variant="outline" className="mt-4">
                 Back to All Documents
@@ -60,7 +70,7 @@ export default function DocumentFolderPage() {
           </div>
         </div>
       </DashboardLayout>
-    )
+    );
   }
 
   return (
@@ -168,24 +178,29 @@ export default function DocumentFolderPage() {
             initial={false}
             animate={{
               height: isFilterOpen ? "auto" : 0,
-              opacity: isFilterOpen ? 1 : 0
+              opacity: isFilterOpen ? 1 : 0,
             }}
             transition={{
               duration: 0.3,
               ease: "easeInOut",
-              opacity: { duration: 0.2 }
+              opacity: { duration: 0.2 },
             }}
           >
             <div className="px-8 py-4 bg-background/50 backdrop-blur-sm">
               <div className="flex flex-col gap-4 @md:flex-row @md:items-center">
                 <div className="flex items-center gap-2">
                   <FunnelIcon className="size-4 text-muted-foreground" />
-                  <span className="text-sm font-medium text-foreground">Filters</span>
+                  <span className="text-sm font-medium text-foreground">
+                    Filters
+                  </span>
                 </div>
 
                 <div className="flex flex-col gap-3 @md:flex-row @md:gap-4 @md:flex-1">
                   <Select>
-                    <SelectTrigger className="w-full @md:w-auto @md:min-w-40" size="sm">
+                    <SelectTrigger
+                      className="w-full @md:w-auto @md:min-w-40"
+                      size="sm"
+                    >
                       <SelectValue placeholder="Type: All" />
                     </SelectTrigger>
                     <SelectContent>
@@ -197,7 +212,10 @@ export default function DocumentFolderPage() {
                   </Select>
 
                   <Select>
-                    <SelectTrigger className="w-full @md:w-auto @md:min-w-40" size="sm">
+                    <SelectTrigger
+                      className="w-full @md:w-auto @md:min-w-40"
+                      size="sm"
+                    >
                       <SelectValue placeholder="All Time" />
                     </SelectTrigger>
                     <SelectContent>
@@ -228,9 +246,14 @@ export default function DocumentFolderPage() {
                   className="space-y-4 text-center"
                 >
                   <div className="size-40 mx-auto mb-6">
-                    <FileTextIcon className="size-full text-muted-foreground/50" weight="light" />
+                    <FileTextIcon
+                      className="size-full text-muted-foreground/50"
+                      weight="light"
+                    />
                   </div>
-                  <h2 className="font-semibold text-foreground">No files in this folder</h2>
+                  <h2 className="font-semibold text-foreground">
+                    No files in this folder
+                  </h2>
                   <p className="max-w-md px-4 text-muted-foreground">
                     This folder is empty. Upload some documents to get started.
                   </p>
@@ -277,8 +300,8 @@ export default function DocumentFolderPage() {
       <FileViewer
         open={viewerOpen}
         onOpenChange={setViewerOpen}
-        fileId={selectedFileId || ''}
+        fileId={selectedFileId || ""}
       />
     </DashboardLayout>
-  )
+  );
 }

@@ -41,16 +41,22 @@ export const useStorePersist = create<StorePersist>()(
         pin: "",
         hasOnboarded: false,
         selectedSignature: undefined,
-        image: "https://cdn.dribbble.com/userupload/32112291/file/original-4d4ef0e9749c47c0e20c93e61583233c.jpg?resize=400x0",
+        image:
+          "https://cdn.dribbble.com/userupload/32112291/file/original-4d4ef0e9749c47c0e20c93e61583233c.jpg?resize=400x0",
       },
-      setOnboardingForm: (form: OnboardingForm) => set({ onboardingForm: form }),
-      clearOnboardingForm: () => set({ onboardingForm: {
-        name: "",
-        pin: "",
-        hasOnboarded: false,
-        selectedSignature: undefined,
-        image: "https://cdn.dribbble.com/userupload/32112291/file/original-4d4ef0e9749c47c0e20c93e61583233c.jpg?resize=400x0",
-      } }),
+      setOnboardingForm: (form: OnboardingForm) =>
+        set({ onboardingForm: form }),
+      clearOnboardingForm: () =>
+        set({
+          onboardingForm: {
+            name: "",
+            pin: "",
+            hasOnboarded: false,
+            selectedSignature: undefined,
+            image:
+              "https://cdn.dribbble.com/userupload/32112291/file/original-4d4ef0e9749c47c0e20c93e61583233c.jpg?resize=400x0",
+          },
+        }),
 
       sidebar: {
         isOpen: true,
@@ -59,9 +65,9 @@ export const useStorePersist = create<StorePersist>()(
       },
       setSidebar: (updates: Partial<SidebarState>) =>
         set((state) => ({
-          sidebar: { ...state.sidebar, ...updates }
+          sidebar: { ...state.sidebar, ...updates },
         })),
     }),
-    { name: "zustand" }
-  )
+    { name: "zustand" },
+  ),
 );

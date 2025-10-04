@@ -1,11 +1,9 @@
-
-
 import {
   FolderIcon,
   ShareIcon,
   DotsThreeIcon,
   TrashIcon,
-} from "@phosphor-icons/react"
+} from "@phosphor-icons/react";
 
 import {
   DropdownMenu,
@@ -13,7 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/src/lib/components/ui/dropdown-menu"
+} from "@/src/lib/components/ui/dropdown-menu";
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -22,24 +20,24 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/src/lib/components/ui/sidebar"
+} from "@/src/lib/components/ui/sidebar";
 
 export function NavProjects({
   projects,
 }: {
   projects: {
-    name: string
-    url: string
-    icon: React.ElementType
-  }[]
+    name: string;
+    url: string;
+    icon: React.ElementType;
+  }[];
 }) {
-  const { isMobile, state, setOpen } = useSidebar()
+  const { isMobile, state, setOpen } = useSidebar();
 
   const handleIconClick = () => {
     if (state === "collapsed") {
-      setOpen(true)
+      setOpen(true);
     }
-  }
+  };
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
@@ -48,11 +46,15 @@ export function NavProjects({
         {projects.map((item) => (
           <SidebarMenuItem key={item.name}>
             <SidebarMenuButton asChild>
-              <a href={item.url} onClick={handleIconClick} className="cursor-pointer">
-                <item.icon 
-                  className="size-6 group-data-[collapsible=icon]:size-9 group-data-[collapsible=offcanvas]:size-7.5" 
-                />
-                <span className="group-data-[collapsible=icon]:hidden">{item.name}</span>
+              <a
+                href={item.url}
+                onClick={handleIconClick}
+                className="cursor-pointer"
+              >
+                <item.icon className="size-6 group-data-[collapsible=icon]:size-9 group-data-[collapsible=offcanvas]:size-7.5" />
+                <span className="group-data-[collapsible=icon]:hidden">
+                  {item.name}
+                </span>
               </a>
             </SidebarMenuButton>
             <DropdownMenu>
@@ -85,14 +87,17 @@ export function NavProjects({
           </SidebarMenuItem>
         ))}
         <SidebarMenuItem>
-          <SidebarMenuButton onClick={handleIconClick} className="cursor-pointer">
-            <DotsThreeIcon 
-              className="size-6 group-data-[collapsible=icon]:size-9 group-data-[collapsible=offcanvas]:size-7.5" 
-            />
-            <span className="group-data-[collapsible=icon]:hidden">View All</span>
+          <SidebarMenuButton
+            onClick={handleIconClick}
+            className="cursor-pointer"
+          >
+            <DotsThreeIcon className="size-6 group-data-[collapsible=icon]:size-9 group-data-[collapsible=offcanvas]:size-7.5" />
+            <span className="group-data-[collapsible=icon]:hidden">
+              View All
+            </span>
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarMenu>
     </SidebarGroup>
-  )
+  );
 }

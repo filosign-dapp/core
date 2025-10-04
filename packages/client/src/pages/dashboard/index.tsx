@@ -1,13 +1,17 @@
-import DashboardLayout from "./layout"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/lib/components/ui/card"
-import { Badge } from "@/src/lib/components/ui/badge"
-import { Button } from "@/src/lib/components/ui/button"
+import DashboardLayout from "./layout";
 import {
-  PlusIcon,
-} from "@phosphor-icons/react"
-import { motion } from "motion/react"
-import { Link } from "@tanstack/react-router"
-import { Image } from "@/src/lib/components/custom/Image"
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/src/lib/components/ui/card";
+import { Badge } from "@/src/lib/components/ui/badge";
+import { Button } from "@/src/lib/components/ui/button";
+import { PlusIcon } from "@phosphor-icons/react";
+import { motion } from "motion/react";
+import { Link } from "@tanstack/react-router";
+import { Image } from "@/src/lib/components/custom/Image";
 
 const statsCards = [
   {
@@ -16,7 +20,7 @@ const statsCards = [
     description: "Total this month",
     color: "text-primary",
     link: "/dashboard/document/all",
-    image: "https://cdn-icons-png.flaticon.com/512/2786/2786356.png"
+    image: "https://cdn-icons-png.flaticon.com/512/2786/2786356.png",
   },
   {
     title: "Your Signatures",
@@ -24,7 +28,7 @@ const statsCards = [
     description: "Awaiting completion",
     color: "text-primary",
     link: "/dashboard",
-    image: "https://cdn-icons-png.flaticon.com/512/10186/10186368.png"
+    image: "https://cdn-icons-png.flaticon.com/512/10186/10186368.png",
   },
   {
     title: "Your Envelopes",
@@ -32,9 +36,9 @@ const statsCards = [
     description: "In progress",
     color: "text-primary",
     link: "/dashboard",
-    image: "https://cdn-icons-png.flaticon.com/512/3814/3814611.png"
-  }
-]
+    image: "https://cdn-icons-png.flaticon.com/512/3814/3814611.png",
+  },
+];
 
 export default function DashboardPage() {
   return (
@@ -49,19 +53,23 @@ export default function DashboardPage() {
         >
           <div>
             <h1 className="text-2xl font-semibold">Dashboard</h1>
-            <p className="text-muted-foreground">Overview of your document signing activity</p>
+            <p className="text-muted-foreground">
+              Overview of your document signing activity
+            </p>
           </div>
         </motion.div>
 
         <div className="p-8 rounded-large mx-8 mt-8 bg-card gap-4 @3xl:gap-8 flex flex-col @3xl:flex-row items-start @3xl:items-center justify-between">
           <div>
-            <h4 className="font-semibold mb-1">Finish setting up your account</h4>
-            <p className="text-muted-foreground">Check out your profile and update your information</p>
+            <h4 className="font-semibold mb-1">
+              Finish setting up your account
+            </h4>
+            <p className="text-muted-foreground">
+              Check out your profile and update your information
+            </p>
           </div>
           <Button variant="primary" asChild className="group">
-            <Link to="/dashboard/settings/profile">
-              Update Profile
-            </Link>
+            <Link to="/dashboard/settings/profile">Update Profile</Link>
           </Button>
         </div>
 
@@ -75,7 +83,10 @@ export default function DashboardPage() {
           >
             {statsCards.map((stat) => (
               <Link to={stat.link} key={stat.title}>
-                <Card key={stat.title} className="hover:bg-muted/40 transition-all">
+                <Card
+                  key={stat.title}
+                  className="hover:bg-muted/40 transition-all"
+                >
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardDescription className="text-sm font-medium flex items-center gap-2">
                       {stat.title}
@@ -88,7 +99,13 @@ export default function DashboardPage() {
                         {stat.description}
                       </p>
                     </div>
-                    <Image src={stat.image} alt={stat.title} className="object-contain p-2" width={100} height={100} />
+                    <Image
+                      src={stat.image}
+                      alt={stat.title}
+                      className="object-contain p-2"
+                      width={100}
+                      height={100}
+                    />
                   </CardContent>
                 </Card>
               </Link>
@@ -105,7 +122,9 @@ export default function DashboardPage() {
               <Card className="h-full">
                 <CardHeader>
                   <CardTitle className="text-lg">Document Status</CardTitle>
-                  <CardDescription>Current signing pipeline overview</CardDescription>
+                  <CardDescription>
+                    Current signing pipeline overview
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
@@ -114,8 +133,12 @@ export default function DashboardPage() {
                       <div className="text-sm">Awaiting Signatures</div>
                     </div>
                     <div className="p-4 bg-muted/20 rounded-lg text-center">
-                      <div className="text-2xl font-bold text-secondary-dark">0</div>
-                      <div className="text-sm text-muted-foreground">Under Review</div>
+                      <div className="text-2xl font-bold text-secondary-dark">
+                        0
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        Under Review
+                      </div>
                     </div>
                   </div>
 
@@ -123,7 +146,9 @@ export default function DashboardPage() {
                     <div className="flex items-center justify-between p-3 bg-muted/20 rounded-lg">
                       <div className="flex items-center gap-3">
                         <div className="size-2 bg-primary rounded-full"></div>
-                        <span className="text-sm font-medium">Completed This Week</span>
+                        <span className="text-sm font-medium">
+                          Completed This Week
+                        </span>
                       </div>
                       <span className="text-sm font-bold">0</span>
                     </div>
@@ -131,7 +156,9 @@ export default function DashboardPage() {
                     <div className="flex items-center justify-between p-3 bg-muted/20 rounded-lg">
                       <div className="flex items-center gap-3">
                         <div className="size-2 bg-secondary-dark rounded-full"></div>
-                        <span className="text-sm font-medium">Average Completion Time</span>
+                        <span className="text-sm font-medium">
+                          Average Completion Time
+                        </span>
                       </div>
                       <span className="text-sm font-bold">0 days</span>
                     </div>
@@ -139,7 +166,9 @@ export default function DashboardPage() {
                     <div className="flex items-center justify-between p-3 bg-muted/20 rounded-lg">
                       <div className="flex items-center gap-3">
                         <div className="size-2 bg-primary-medium rounded-full"></div>
-                        <span className="text-sm font-medium">Success Rate</span>
+                        <span className="text-sm font-medium">
+                          Success Rate
+                        </span>
                       </div>
                       <span className="text-sm font-bold">0%</span>
                     </div>
@@ -162,7 +191,9 @@ export default function DashboardPage() {
                   <div className="p-4 bg-primary text-primary-foreground rounded-lg">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium">Balance</span>
-                      <Badge variant="primary" className="text-xs">Active</Badge>
+                      <Badge variant="primary" className="text-xs">
+                        Active
+                      </Badge>
                     </div>
                     <div className="text-2xl font-bold">0 USDFC</div>
                   </div>
@@ -170,10 +201,14 @@ export default function DashboardPage() {
                   <div className="p-4 bg-muted/20 rounded-lg">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium">Gas Reserve</span>
-                      <Badge variant="outline" className="text-xs">Reserve</Badge>
+                      <Badge variant="outline" className="text-xs">
+                        Reserve
+                      </Badge>
                     </div>
                     <div className="text-lg font-semibold">0 FIL</div>
-                    <div className="text-xs text-muted-foreground">For transaction fees</div>
+                    <div className="text-xs text-muted-foreground">
+                      For transaction fees
+                    </div>
                   </div>
 
                   <div className="space-y-2 pt-2">
@@ -182,7 +217,9 @@ export default function DashboardPage() {
                       <span className="font-medium">0 signatures</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Avg. Cost/Signature</span>
+                      <span className="text-muted-foreground">
+                        Avg. Cost/Signature
+                      </span>
                       <span className="font-medium">0 FIL</span>
                     </div>
                   </div>
@@ -193,5 +230,5 @@ export default function DashboardPage() {
         </div>
       </div>
     </DashboardLayout>
-  )
+  );
 }

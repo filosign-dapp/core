@@ -1,98 +1,109 @@
-import { useRef } from 'react'
-import { Tldraw, Editor } from 'tldraw'
-import 'tldraw/tldraw.css'
-import { Button } from "@/src/lib/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/src/lib/components/ui/dialog"
-import { XIcon } from "@phosphor-icons/react"
+import { useRef } from "react";
+import { Tldraw, Editor } from "tldraw";
+import "tldraw/tldraw.css";
+import { Button } from "@/src/lib/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/src/lib/components/ui/dialog";
+import { XIcon } from "@phosphor-icons/react";
 
 interface SignatureDialogProps {
-    isOpen: boolean
-    onClose: () => void
-    onSave: (signatureData: string) => void
-    title: string
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (signatureData: string) => void;
+  title: string;
 }
 
-export default function SignatureDialog({ isOpen, onClose, onSave, title }: SignatureDialogProps) {
-    const editorRef = useRef<Editor | null>(null)
+export default function SignatureDialog({
+  isOpen,
+  onClose,
+  onSave,
+  title,
+}: SignatureDialogProps) {
+  const editorRef = useRef<Editor | null>(null);
 
-    const handleSave = async () => {
-        if (!editorRef.current) {
-            console.error('Editor not found')
-            return
-        }
-
-        try {
-            // Get all shapes on the current page using the proper API
-            const shapes = editorRef.current.getCurrentPageShapes()
-            if (shapes.length === 0) {
-                alert('Please draw something before saving.')
-                return
-            }
-
-            // Get shape IDs for export
-            const shapeIds = shapes.map(shape => shape.id)
-
-            // Export as image using the proper method
-            const { blob } = await editorRef.current.toImage(shapeIds, { 
-                format: 'svg',
-                scale: 2 // Higher resolution for crisp signatures
-            })
-            
-            // Convert blob to data URL
-            const reader = new FileReader()
-            reader.onload = () => {
-                onSave(reader.result as string)
-            }
-            reader.readAsDataURL(blob)
-            
-            onClose()
-        } catch (error) {
-            console.error('Error saving signature:', error)
-            alert('Error saving signature. Please try again.')
-        }
+  const handleSave = async () => {
+    if (!editorRef.current) {
+      console.error("Editor not found");
+      return;
     }
 
-    const handleClear = () => {
-        if (editorRef.current) {
-            const shapes = editorRef.current.getCurrentPageShapes()
-            if (shapes.length > 0) {
-                const shapeIds = shapes.map(shape => shape.id)
-                editorRef.current.deleteShapes(shapeIds)
-            }
-        }
-    }
+    try {
+      // Get all shapes on the current page using the proper API
+      const shapes = editorRef.current.getCurrentPageShapes();
+      if (shapes.length === 0) {
+        alert("Please draw something before saving.");
+        return;
+      }
 
-    return (
-        <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-7xl h-[50vh] flex flex-col">
-                <DialogHeader>
-                    <DialogTitle className="flex items-center justify-between">
-                        {title}
-                        <Button variant="ghost" size="icon" onClick={onClose}>
-                            <XIcon className="w-4 h-4" />
-                        </Button>
-                    </DialogTitle>
-                </DialogHeader>
-                
-                <div className="flex-1 border rounded-lg overflow-hidden w-full h-full">
-                    <Tldraw 
-                        onMount={(editor) => {
-                            editorRef.current = editor
-                            editor.setCurrentTool('draw')
-                        }}
-                        hideUi={true}
-                    />
-                </div>
-                
-                <DialogFooter className="gap-2">
-                    <Button variant="outline" onClick={handleClear}>
-                        Clear
-                    </Button>
-                    <Button variant="primary" onClick={handleSave}>
-                        Save
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
-    )
+      // Get shape IDs for export
+      const shapeIds = shapes.map((shape) => shape.id);
+
+      // Export as image using the proper method
+      const { blob } = await editorRef.current.toImage(shapeIds, {
+        format: "svg",
+        scale: 2, // Higher resolution for crisp signatures
+      });
+
+      // Convert blob to data URL
+      const reader = new FileReader();
+      reader.onload = () => {
+        onSave(reader.result as string);
+      };
+      reader.readAsDataURL(blob);
+
+      onClose();
+    } catch (error) {
+      console.error("Error saving signature:", error);
+      alert("Error saving signature. Please try again.");
+    }
+  };
+
+  const handleClear = () => {
+    if (editorRef.current) {
+      const shapes = editorRef.current.getCurrentPageShapes();
+      if (shapes.length > 0) {
+        const shapeIds = shapes.map((shape) => shape.id);
+        editorRef.current.deleteShapes(shapeIds);
+      }
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-7xl h-[50vh] flex flex-col">
+        <DialogHeader>
+          <DialogTitle className="flex items-center justify-between">
+            {title}
+            <Button variant="ghost" size="icon" onClick={onClose}>
+              <XIcon className="w-4 h-4" />
+            </Button>
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="flex-1 border rounded-lg overflow-hidden w-full h-full">
+          <Tldraw
+            onMount={(editor) => {
+              editorRef.current = editor;
+              editor.setCurrentTool("draw");
+            }}
+            hideUi={true}
+          />
+        </div>
+
+        <DialogFooter className="gap-2">
+          <Button variant="outline" onClick={handleClear}>
+            Clear
+          </Button>
+          <Button variant="primary" onClick={handleSave}>
+            Save
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
 }

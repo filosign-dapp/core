@@ -10,17 +10,20 @@ import { useRef } from "react";
 const phases: { title: string; description: string; icon: Icon }[] = [
   {
     title: "Phase 1: Validation",
-    description: "Targeted customer discovery interviews with CTOs and compliance officers to validate the MVP.",
+    description:
+      "Targeted customer discovery interviews with CTOs and compliance officers to validate the MVP.",
     icon: ChatsIcon,
   },
   {
     title: "Phase 2: Product-Led Growth",
-    description: "A tiered subscription model to drive bottom-up adoption and gather user feedback.",
+    description:
+      "A tiered subscription model to drive bottom-up adoption and gather user feedback.",
     icon: RocketIcon,
   },
   {
     title: "Phase 3: Enterprise Sales",
-    description: "Building direct sales channels to target startups and enterprise clients with high-value needs.",
+    description:
+      "Building direct sales channels to target startups and enterprise clients with high-value needs.",
     icon: StorefrontIcon,
   },
 ];
@@ -30,7 +33,10 @@ export function GoToMarketSlide() {
   const inView = useInView(ref, { once: true, amount: 0.3 });
 
   return (
-    <div ref={ref} className="h-screen w-full snap-center flex flex-col items-center justify-center p-page relative overflow-hidden">
+    <div
+      ref={ref}
+      className="h-screen w-full snap-center flex flex-col items-center justify-center p-page relative overflow-hidden"
+    >
       <div className="text-center z-10 mb-24">
         <motion.h2
           className="text-5xl md:text-6xl font-bold"
@@ -53,14 +59,14 @@ export function GoToMarketSlide() {
       <div className="relative w-full max-w-[90dvw] z-10">
         {/* Timeline */}
         <div className="absolute top-12 left-0 w-full h-1 bg-border -translate-y-1/2">
-            <motion.div 
-                className="h-full bg-primary"
-                initial={{ width: 0 }}
-                animate={inView ? { width: "100%" } : {}}
-                transition={{ duration: 1, delay: 0.3, ease: "easeInOut" }}
-            />
+          <motion.div
+            className="h-full bg-primary"
+            initial={{ width: 0 }}
+            animate={inView ? { width: "100%" } : {}}
+            transition={{ duration: 1, delay: 0.3, ease: "easeInOut" }}
+          />
         </div>
-        
+
         <div className="flex justify-between">
           {phases.map((phase, i) => (
             <motion.div
@@ -75,7 +81,9 @@ export function GoToMarketSlide() {
               </div>
               <div className="w-60 mt-4">
                 <h3 className="text-xl font-semibold">{phase.title}</h3>
-                <p className="text-muted-foreground text-sm">{phase.description}</p>
+                <p className="text-muted-foreground text-sm">
+                  {phase.description}
+                </p>
               </div>
             </motion.div>
           ))}

@@ -6,14 +6,15 @@ import {
   ChartBarIcon,
   GearIcon,
   ShieldCheckIcon,
-} from "@phosphor-icons/react"
+} from "@phosphor-icons/react";
 
 // This is sample data.
 export const userData = {
   name: "Styles",
   email: "styles@filosign.com",
-  avatar: "https://cdn.dribbble.com/userupload/32112291/file/original-4d4ef0e9749c47c0e20c93e61583233c.jpg?resize=400x0",
-}
+  avatar:
+    "https://cdn.dribbble.com/userupload/32112291/file/original-4d4ef0e9749c47c0e20c93e61583233c.jpg?resize=400x0",
+};
 
 export const sidebarData = {
   user: userData,
@@ -44,7 +45,7 @@ export const sidebarData = {
         {
           title: "All Documents",
           url: "/dashboard/document/all",
-        }
+        },
       ],
     },
     {
@@ -66,7 +67,7 @@ export const sidebarData = {
         {
           title: "Dashboard",
           url: "/dashboard",
-        }
+        },
       ],
     },
     {
@@ -103,4 +104,4 @@ export const sidebarData = {
       icon: ChartBarIcon,
     },
   ],
-}
+};

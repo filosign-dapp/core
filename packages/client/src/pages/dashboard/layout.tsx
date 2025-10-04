@@ -1,11 +1,12 @@
-import { DashboardSidebar } from "@/src/pages/dashboard/_components/sidebar/dashboard-sidebar"
-import {
-  SidebarInset,
-  SidebarProvider,
-} from "@/src/lib/components/ui/sidebar"
-import DashboardNav from "./_components/dashboard-nav"
+import { DashboardSidebar } from "@/src/pages/dashboard/_components/sidebar/dashboard-sidebar";
+import { SidebarInset, SidebarProvider } from "@/src/lib/components/ui/sidebar";
+import DashboardNav from "./_components/dashboard-nav";
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <SidebarProvider>
       <DashboardSidebar className="bg-card/80" />
@@ -16,5 +17,5 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </section>
       </SidebarInset>
     </SidebarProvider>
-  )
+  );
 }

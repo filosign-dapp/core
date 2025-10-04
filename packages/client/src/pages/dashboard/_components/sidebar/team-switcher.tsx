@@ -1,8 +1,6 @@
-
-
-import * as React from "react"
-import { CaretDownIcon, PlusIcon } from "@phosphor-icons/react"
-import { motion } from "framer-motion"
+import * as React from "react";
+import { CaretDownIcon, PlusIcon } from "@phosphor-icons/react";
+import { motion } from "framer-motion";
 
 import {
   DropdownMenu,
@@ -11,35 +9,35 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/src/lib/components/ui/dropdown-menu"
+} from "@/src/lib/components/ui/dropdown-menu";
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/src/lib/components/ui/sidebar"
+} from "@/src/lib/components/ui/sidebar";
 
 export function TeamSwitcher({
   orgs,
 }: {
   orgs: {
-    name: string
-    logo: React.ElementType
-    plan: string
-  }[]
+    name: string;
+    logo: React.ElementType;
+    plan: string;
+  }[];
 }) {
-  const { state, setOpen } = useSidebar()
-  const [activeOrganization, setActiveOrganization] = React.useState(orgs[0])
-  const [isDropdownOpen, setIsDropdownOpen] = React.useState(false)
+  const { state, setOpen } = useSidebar();
+  const [activeOrganization, setActiveOrganization] = React.useState(orgs[0]);
+  const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
 
   const handleIconClick = () => {
     if (state === "collapsed") {
-      setOpen(true)
+      setOpen(true);
     }
-  }
+  };
 
   if (!activeOrganization) {
-    return null
+    return null;
   }
 
   return (
@@ -55,10 +53,12 @@ export function TeamSwitcher({
               <div className=" text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center bg-muted/10 p-1 rounded-full">
                 <activeOrganization.logo className="size-6" />
               </div>
-              <div className="grid flex-1 text-left leading-tight group-data-[collapsible=icon]:hidden"> 
+              <div className="grid flex-1 text-left leading-tight group-data-[collapsible=icon]:hidden">
                 <p className="truncate">{activeOrganization.name}</p>
               </div>
-              <CaretDownIcon className={`ml-auto size-6 group-data-[collapsible=icon]:hidden transition-transform duration-150 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+              <CaretDownIcon
+                className={`ml-auto size-6 group-data-[collapsible=icon]:hidden transition-transform duration-150 ${isDropdownOpen ? "rotate-180" : ""}`}
+              />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -78,7 +78,7 @@ export function TeamSwitcher({
                   type: "spring",
                   stiffness: 300,
                   damping: 20,
-                  delay: index * 0.03
+                  delay: index * 0.03,
                 }}
               >
                 <DropdownMenuItem
@@ -100,7 +100,7 @@ export function TeamSwitcher({
                 type: "spring",
                 stiffness: 300,
                 damping: 20,
-                delay: orgs.length * 0.03 + 0.05
+                delay: orgs.length * 0.03 + 0.05,
               }}
             >
               <DropdownMenuItem className="gap-2 p-2">
@@ -114,5 +114,5 @@ export function TeamSwitcher({
         </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>
-  )
+  );
 }

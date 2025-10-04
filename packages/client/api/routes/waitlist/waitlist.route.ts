@@ -8,19 +8,23 @@ const waitlist = new Hono()
   // Get all emails in waitlist
   .get("/", async (ctx) => {
     try {
-      const emails = db.query("SELECT id, email, created_at FROM waitlist ORDER BY created_at DESC").all();
+      const emails = db
+        .query(
+          "SELECT id, email, created_at FROM waitlist ORDER BY created_at DESC",
+        )
+        .all();
 
       // Convert BigInt id to number for JSON serialization
       const serializedEmails = emails.map((email: any) => ({
         ...email,
-        id: Number(email.id)
+        id: Number(email.id),
       }));
 
       return respond.ok(
         ctx,
         { emails: serializedEmails, count: serializedEmails.length },
         "Successfully fetched waitlist emails",
-        200
+        200,
       );
     } catch (error) {
       console.error("Database error:", error);
@@ -37,17 +41,19 @@ const waitlist = new Hono()
         return respond.err(ctx, "Invalid email format", 400);
       }
 
-      const existing = db.query("SELECT id FROM waitlist WHERE email = $email").get({ $email: email }) as { id: number } | undefined;
+      const existing = db
+        .query("SELECT id FROM waitlist WHERE email = $email")
+        .get({ $email: email }) as { id: number } | undefined;
 
       return respond.ok(
         ctx,
         {
           exists: !!existing,
           email,
-          id: existing ? Number(existing.id) : null
+          id: existing ? Number(existing.id) : null,
         },
         "Email check completed",
-        200
+        200,
       );
     } catch (error) {
       console.error("Database error:", error);
@@ -62,23 +68,29 @@ const waitlist = new Hono()
       "json",
       z.object({
         email: z.string().email("Invalid email format"),
-      })
+      }),
     ),
     async (ctx) => {
       const { email } = ctx.req.valid("json");
 
       try {
         const addToWaitlist = db.transaction((email: string) => {
-          const existing = db.query("SELECT id FROM waitlist WHERE email = $email").get({ $email: email }) as { id: number } | undefined;
+          const existing = db
+            .query("SELECT id FROM waitlist WHERE email = $email")
+            .get({ $email: email }) as { id: number } | undefined;
 
           if (existing) {
             throw new Error("Email already registered");
           }
 
-          const result = db.query(`
+          const result = db
+            .query(
+              `
             INSERT INTO waitlist (email, created_at, updated_at)
             VALUES ($email, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-          `).run({ $email: email });
+          `,
+            )
+            .run({ $email: email });
 
           return result;
         });
@@ -92,29 +104,35 @@ const waitlist = new Hono()
             email,
           },
           "Successfully added to waitlist",
-          201
+          201,
         );
       } catch (error) {
         console.error("Database error:", error);
 
-        if (error instanceof Error && error.message === "Email already registered") {
+        if (
+          error instanceof Error &&
+          error.message === "Email already registered"
+        ) {
           return respond.err(ctx, "Email already registered", 409);
         }
 
         // Handle SQLite-specific errors
-        if (error && typeof error === 'object' && 'code' in error) {
+        if (error && typeof error === "object" && "code" in error) {
           const sqliteError = error as { code: number; message: string };
-          console.error(`SQLite error ${sqliteError.code}: ${sqliteError.message}`);
+          console.error(
+            `SQLite error ${sqliteError.code}: ${sqliteError.message}`,
+          );
 
           // Handle constraint violations (e.g., unique constraint on email)
-          if (sqliteError.code === 19) { // SQLITE_CONSTRAINT
+          if (sqliteError.code === 19) {
+            // SQLITE_CONSTRAINT
             return respond.err(ctx, "Email already registered", 409);
           }
         }
 
         return respond.err(ctx, "Failed to add to waitlist", 500);
       }
-    }
+    },
   )
 
   // Remove email from waitlist
@@ -126,7 +144,9 @@ const waitlist = new Hono()
         return respond.err(ctx, "Invalid email format", 400);
       }
 
-      const result = db.query("DELETE FROM waitlist WHERE email = $email").run({ $email: email });
+      const result = db
+        .query("DELETE FROM waitlist WHERE email = $email")
+        .run({ $email: email });
 
       if (result.changes === 0) {
         return respond.err(ctx, "Email not found in waitlist", 404);
@@ -136,7 +156,7 @@ const waitlist = new Hono()
         ctx,
         { email, deleted: true },
         "Successfully removed from waitlist",
-        200
+        200,
       );
     } catch (error) {
       console.error("Database error:", error);

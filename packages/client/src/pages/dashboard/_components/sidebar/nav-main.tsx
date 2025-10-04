@@ -1,6 +1,6 @@
-import * as React from "react"
-import { CaretRightIcon } from "@phosphor-icons/react"
-import { motion, AnimatePresence } from "framer-motion"
+import * as React from "react";
+import { CaretRightIcon } from "@phosphor-icons/react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   SidebarGroup,
   SidebarMenu,
@@ -10,77 +10,79 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
   useSidebar,
-} from "@/src/lib/components/ui/sidebar"
-import { Link } from "@tanstack/react-router"
-import { useStorePersist } from "@/src/lib/hooks/use-store"
+} from "@/src/lib/components/ui/sidebar";
+import { Link } from "@tanstack/react-router";
+import { useStorePersist } from "@/src/lib/hooks/use-store";
 
 export function NavMain({
   items,
 }: {
   items: {
-    title: string
-    url: string
-    icon?: React.ElementType
-    isActive?: boolean
+    title: string;
+    url: string;
+    icon?: React.ElementType;
+    isActive?: boolean;
     items?: {
-      title: string
-      url: string
-    }[]
-  }[]
+      title: string;
+      url: string;
+    }[];
+  }[];
 }) {
-  const { state, setOpen } = useSidebar()
-  const { sidebar, setSidebar } = useStorePersist()
-  const isCollapsed = state === "collapsed"
-  const openItems = new Set(sidebar.expandedItems)
+  const { state, setOpen } = useSidebar();
+  const { sidebar, setSidebar } = useStorePersist();
+  const isCollapsed = state === "collapsed";
+  const openItems = new Set(sidebar.expandedItems);
 
   React.useEffect(() => {
     if (state === "collapsed") {
-      setSidebar({ expandedItems: [] })
+      setSidebar({ expandedItems: [] });
     }
-  }, [state, setSidebar])
+  }, [state, setSidebar]);
 
   const handleIconClick = () => {
     if (state === "collapsed") {
-      setOpen(true)
+      setOpen(true);
     }
-  }
+  };
 
   const toggleItem = (title: string) => {
     const expandedItems = sidebar.expandedItems.includes(title)
       ? [] // If clicking on expanded item, collapse it (clear all)
       : [title]; // If clicking on collapsed item, expand only this one
-    setSidebar({ expandedItems, lastClickedMenu: title })
-  }
+    setSidebar({ expandedItems, lastClickedMenu: title });
+  };
 
   return (
     <SidebarGroup>
       <SidebarMenu>
         {items.map((item) => {
-          const isOpen = openItems.has(item.title)
-          
+          const isOpen = openItems.has(item.title);
+
           return (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton
                 tooltip={item.title}
                 size="lg"
                 onClick={() => {
-                  handleIconClick()
-                  setSidebar({ lastClickedMenu: item.title })
+                  handleIconClick();
+                  setSidebar({ lastClickedMenu: item.title });
                   // Only toggle submenu if sidebar is not collapsed
-                  if (item.items && item.items.length > 0 && state !== "collapsed") {
-                    toggleItem(item.title)
+                  if (
+                    item.items &&
+                    item.items.length > 0 &&
+                    state !== "collapsed"
+                  ) {
+                    toggleItem(item.title);
                   }
                 }}
                 className="cursor-pointer text-sm font-semibold transition-all duration-200 hover:bg-accent/50 data-[active=true]:bg-accent data-[active=true]:text-accent-foreground data-[active=true]:shadow-sm"
                 isActive={item.isActive}
               >
                 {item.icon && (
-                  <item.icon 
-                    className="!size-6 group-data-[collapsible=icon]:!size-6" 
-                  />
+                  <item.icon className="!size-6 group-data-[collapsible=icon]:!size-6" />
                 )}
                 {!isCollapsed && (
-                  <motion.span 
+                  <motion.span
                     className="group-data-[collapsible=icon]:hidden"
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -88,21 +90,21 @@ export function NavMain({
                       type: "spring",
                       stiffness: 230,
                       damping: 25,
-                      delay: 0.1
+                      delay: 0.1,
                     }}
                   >
                     {item.title}
                   </motion.span>
                 )}
                 {item.items && item.items.length > 0 && (
-                  <CaretRightIcon 
+                  <CaretRightIcon
                     className={`ml-auto transition-transform duration-200 group-data-[collapsible=icon]:hidden ${
-                      isOpen ? 'rotate-90' : ''
-                    }`} 
+                      isOpen ? "rotate-90" : ""
+                    }`}
                   />
                 )}
               </SidebarMenuButton>
-              
+
               {item.items && item.items.length > 0 && (
                 <AnimatePresence>
                   {isOpen && (
@@ -120,7 +122,12 @@ export function NavMain({
                               asChild
                               className="text-sm font-medium transition-all duration-100 hover:bg-accent/50 hover:text-accent-foreground data-[active=true]:bg-accent/50 data-[active=true]:text-accent-foreground data-[active=true]:font-semibold px-5 py-2"
                             >
-                              <Link to={subItem.url} onClick={() => setSidebar({ lastClickedMenu: subItem.title })}>
+                              <Link
+                                to={subItem.url}
+                                onClick={() =>
+                                  setSidebar({ lastClickedMenu: subItem.title })
+                                }
+                              >
                                 <span>{subItem.title}</span>
                               </Link>
                             </SidebarMenuSubButton>
@@ -132,9 +139,9 @@ export function NavMain({
                 </AnimatePresence>
               )}
             </SidebarMenuItem>
-          )
+          );
         })}
       </SidebarMenu>
     </SidebarGroup>
-  )
+  );
 }

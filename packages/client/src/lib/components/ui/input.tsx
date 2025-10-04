@@ -1,8 +1,15 @@
-import * as React from "react"
+import * as React from "react";
 
-import { cn } from "../../utils"
+import { cn } from "../../utils";
 
-function Input({ className, type, size = "md", ...props }: Omit<React.ComponentProps<"input">, "size"> & { size?: "sm" | "md" | "lg" }) {
+function Input({
+  className,
+  type,
+  size = "md",
+  ...props
+}: Omit<React.ComponentProps<"input">, "size"> & {
+  size?: "sm" | "md" | "lg";
+}) {
   const heightClass = size === "sm" ? "h-9" : size === "lg" ? "h-14" : "h-12";
   return (
     <input
@@ -12,11 +19,11 @@ function Input({ className, type, size = "md", ...props }: Omit<React.ComponentP
         `file:text-foreground placeholder:text-muted-foreground text-sm selection:bg-primary selection:text-primary-foreground flex ${heightClass} w-full min-w-0 rounded-md border bg-input px-3 py-1 transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 text-sm`,
         "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
         "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
-        className
+        className,
       )}
       {...props}
     />
-  )
+  );
 }
 
-export { Input }
+export { Input };

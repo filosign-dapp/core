@@ -17,7 +17,7 @@ export default function LandingPage() {
 
       {/* Waitlist Section */}
       <WaitlistSection />
-      
+
       <div className="h-[var(--section-gap)]" />
 
       {/* <PricingSection /> */}
