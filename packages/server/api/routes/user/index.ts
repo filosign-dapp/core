@@ -34,7 +34,7 @@ export default new Hono()
 
     return respond.ok(
       ctx,
-      { encryptionPublicKey: user.encryptionPublicKey },
+      { publicKey: user.encryptionPublicKey },
       "Encryption public key retrieved successfully",
       200,
     );
