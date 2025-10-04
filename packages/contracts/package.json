@@ -1,0 +1,57 @@
+{
+  "name": "@filosign/contracts",
+  "version": "1.0.0",
+  "main": "./dist/exports.js",
+  "types": "./dist/exports.d.ts",
+  "files": [
+    "dist/**/*",
+    "artifacts/**/*"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/exports.d.ts",
+      "require": "./dist/exports.js",
+      "import": "./dist/exports.js"
+    }
+  },
+  "scripts": {
+    "localnode": "hardhat node",
+    "compile": "bun gen:interfaces; bun --bun hardhat compile",
+    "build": "tsc -p tsconfig.build.json",
+    "pretest": "bun compile",
+    "tests": "bun compile; bunx --bun hardhat test",
+    "gen:interfaces": "bun run scripts/generateInterfaces.ts",
+    "migrate": "bun compile; bunx --bun hardhat run scripts/deploy.ts --network filecoinCalibration; bun run build"
+  },
+  "devDependencies": {
+    "@filoz/synapse-sdk": "^0.25.1",
+    "@nomicfoundation/hardhat-ignition": "^0.15.13",
+    "@nomicfoundation/hardhat-ignition-viem": "^0.15.13",
+    "@nomicfoundation/hardhat-network-helpers": "^1.1.0",
+    "@nomicfoundation/hardhat-toolbox-viem": "^4.1.0",
+    "@nomicfoundation/hardhat-verify": "^2.1.1",
+    "@nomicfoundation/hardhat-viem": "^2.1.1",
+    "@openzeppelin/contracts": "^5.4.0",
+    "@types/bun": "^1.2.21",
+    "@types/chai": "^4.3.20",
+    "@types/chai-as-promised": "^7.1.8",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^24.5.2",
+    "chai": "^4.5.0",
+    "ethers": "^6.15.0",
+    "filosign-crypto-utils": "^0.2.15",
+    "glob": "^11.0.3",
+    "hardhat": "^2.26.3",
+    "hardhat-gas-reporter": "^2.3.0",
+    "solidity-coverage": "^0.8.16",
+    "solidity-parser-antlr": "^0.4.11",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "multiformats": "^13.4.1"
+  },
+  "peerDependencies": {
+    "viem": "^2.37.5"
+  }
+}
