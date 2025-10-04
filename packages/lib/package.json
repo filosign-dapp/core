@@ -10,11 +10,7 @@
       "default": "./react/exports.ts"
     }
   },
-  "scripts": {
-    "build": "rm -rf dist; tsc -p tsconfig.build.json",
-    "prepare": "bun run build",
-    "pack": "python3 ./pack.py"
-  },
+  "scripts": {},
   "dependencies": {
     "@filosign/contracts": "workspace:*",
     "@tanstack/react-query": "^5.90.2",
