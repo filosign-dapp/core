@@ -19,6 +19,8 @@ export const files = t.sqliteTable(
       .references(() => users.walletAddress),
 
     metadata: tJsonString(),
+    ownerEncryptedKey: tHex().notNull(),
+    ownerEncryptedKeyIv: tHex().notNull(),
 
     onchainTxHash: tBytes32(),
 
