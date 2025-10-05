@@ -20,14 +20,17 @@ import { Image } from "@/src/lib/components/custom/Image";
 import { userData } from "./sidebar/mock";
 import { usePrivy } from "@privy-io/react-auth";
 import { useNavigate } from "@tanstack/react-router";
+import { useFilosignMutation } from "@filosign/sdk/react";
 
 export function UserDropdown() {
   const [isOpen, setIsOpen] = React.useState(false);
-  const { logout } = usePrivy();
+  const { logout: logoutPrivy } = usePrivy();
+  const logoutFilosign = useFilosignMutation(["logout"]);
   const navigate = useNavigate();
 
   const handleSignOut = () => {
-    logout();
+    logoutFilosign.mutateAsync(undefined);
+    logoutPrivy();
     navigate({ to: "/", replace: true });
   };
 

@@ -1,6 +1,7 @@
 import { useFilosignMutation, useFilosignQuery } from "@filosign/sdk/react";
 import { usePrivy } from "@privy-io/react-auth";
 import { useNavigate } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { toast } from "sonner";
@@ -20,42 +21,30 @@ interface DashboardProtectorProps {
   children: React.ReactNode;
 }
 
-const PIN_AUTH_KEY = "filosign_pin_auth";
-
 export default function DashboardProtector({
   children,
 }: DashboardProtectorProps) {
   const { ready, authenticated } = usePrivy();
   const isRegistered = useFilosignQuery(["isRegistered"], undefined);
+  const isLoggedIn = useFilosignQuery(["isLoggedIn"], undefined);
   const loginMutation = useFilosignMutation(["login"]);
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   const [showPinAuth, setShowPinAuth] = useState(false);
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
 
-  // Check if user has PIN auth for this session
-  const hasPinAuth = () => {
-    return sessionStorage.getItem(PIN_AUTH_KEY) === "true";
-  };
-
-  // Set PIN auth for this session
-  const setPinAuth = () => {
-    sessionStorage.setItem(PIN_AUTH_KEY, "true");
-  };
+  console.log("isLoggedIn", isLoggedIn.data, isLoggedIn.status);
 
   useEffect(() => {
-    // Only show PIN auth if:
-    // 1. Privy is ready
-    // 2. User is authenticated with Privy
-    // 3. User is registered
-    // 4. User hasn't completed PIN auth for this session
     if (
       ready &&
       authenticated &&
       isRegistered.data &&
       !isRegistered.isPending &&
-      !hasPinAuth()
+      !isLoggedIn.data &&
+      !isLoggedIn.isPending
     ) {
       setShowPinAuth(true);
     } else if (
@@ -63,7 +52,6 @@ export default function DashboardProtector({
       (!authenticated || !isRegistered.data) &&
       !isRegistered.isPending
     ) {
-      // If not authenticated or not registered, redirect to landing
       navigate({ to: "/" });
     }
   }, [
@@ -71,6 +59,8 @@ export default function DashboardProtector({
     authenticated,
     isRegistered.data,
     isRegistered.isPending,
+    isLoggedIn.data,
+    isLoggedIn.isPending,
     navigate,
   ]);
 
@@ -80,7 +70,10 @@ export default function DashboardProtector({
     try {
       setError("");
       await loginMutation.mutateAsync({ pin });
-      setPinAuth(); // Mark PIN auth as completed for this session
+      // Invalidate isLoggedIn query to refetch with new JWT
+      await queryClient.invalidateQueries({
+        queryKey: ["filosign", "isLoggedIn"],
+      });
       toast.success("Successfully logged in!");
       setShowPinAuth(false);
       setPin("");
@@ -99,10 +92,11 @@ export default function DashboardProtector({
   };
 
   // Show loading while checking auth status
-  if (!ready || isRegistered.isPending) {
+  if (!ready || isRegistered.isPending || !isLoggedIn.isSuccess) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <SpinnerBallIcon className="animate-spin " />
+      <div className="flex items-center justify-center min-h-screen gap-2">
+        <SpinnerBallIcon className="animate-spin size-8" />
+        <h3 className="">Working on it...</h3>
       </div>
     );
   }

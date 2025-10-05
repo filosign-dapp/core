@@ -1,19 +1,12 @@
 import { Button } from "@/src/lib/components/ui/button";
-import { useFilosignMutation, useFilosignQuery } from "@filosign/sdk/react";
+import { useFilosignQuery } from "@filosign/sdk/react";
 import { usePrivy } from "@privy-io/react-auth";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useState } from "react";
-import PinAuthDialog from "./PinAuthDialog";
-import { toast } from "sonner";
 
 export default function ConnectButton() {
   const { ready, authenticated, login: loginPrivy } = usePrivy();
   const isRegistered = useFilosignQuery(["isRegistered"], undefined);
-  const loginMutation = useFilosignMutation(["login"]);
-  const navigate = useNavigate();
-
-  const [showPinDialog, setShowPinDialog] = useState(false);
 
   // Determine button state for smooth transitions
   const getButtonState = () => {
@@ -21,16 +14,6 @@ export default function ConnectButton() {
     if (!authenticated || isRegistered.isPending) return "signin";
     if (!isRegistered.data) return "get-started";
     return "dashboard";
-  };
-
-  const handlePinSubmit = async (pin: string) => {
-    try {
-      await loginMutation.mutateAsync({ pin });
-      toast.success("Successfully logged in!");
-      navigate({ to: "/dashboard" });
-    } catch (error) {
-      throw error; // Re-throw to let PinAuthDialog handle the error
-    }
   };
 
   return (
@@ -53,7 +36,6 @@ export default function ConnectButton() {
           getButtonState() === "get-started" || getButtonState() === "dashboard"
         }
         className="min-w-28"
-        disabled={showPinDialog}
       >
         {getButtonState() === "get-started" ||
         getButtonState() === "dashboard" ? (
@@ -96,13 +78,6 @@ export default function ConnectButton() {
           </AnimatePresence>
         )}
       </Button>
-
-      <PinAuthDialog
-        open={showPinDialog}
-        onOpenChange={setShowPinDialog}
-        onSubmit={handlePinSubmit}
-        isLoading={loginMutation.isPending}
-      />
     </motion.div>
   );
 }

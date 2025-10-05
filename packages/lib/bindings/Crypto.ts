@@ -8,34 +8,27 @@ export class Crypto {
   private _encryptionPublicKey: Hex | null = null;
 
   set encryptionKey(key: Uint8Array | null) {
+    if (key === null) {
+      this._encryptionKey = null;
+      this._encryptionPublicKey = null;
+      return;
+    }
+
     if (key !== null && (!(key instanceof Uint8Array) || key.length !== 32)) {
       throw new Error("encryptionKey must be Uint8Array(32) or null");
     }
     this._encryptionKey = key;
-  }
 
-  set encryptionPublicKey(publicKey: Hex) {
-    if (!this._encryptionKey) {
-      throw new Error(
-        "encryptionKey is not set first before encryptionPublicKey",
-      );
-    }
-    const publicKeyPoint = p256.getPublicKey(this._encryptionKey, false);
+    const privateKey = base64.decode(this._encryptionKey.toBase64());
+    const publicKeyPoint = p256.getPublicKey(privateKey, false); // uncompressed
     const publicX = publicKeyPoint.slice(1, 33);
-    if (publicX.toHex() !== publicKey.replace("0x", "")) {
-      throw new Error(
-        "encryptionPublicKey does not match the derived public key from encryptionKey",
-      );
-    }
-
-    this._encryptionPublicKey = publicKey;
+    this._encryptionPublicKey = `0x${publicX.toHex()}`;
   }
 
   get encryptionPublicKey() {
     if (!this._encryptionPublicKey) {
-      throw new Error(
-        "encryptionPublicKey is not set but read attempt as wmade",
-      );
+      console.info("encryptionPublicKey is not set but read attempt as wmade");
+      return null;
     }
     return this._encryptionPublicKey;
   }

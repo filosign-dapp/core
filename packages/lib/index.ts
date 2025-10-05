@@ -103,6 +103,19 @@ export class FilosignClient {
     return await this.contracts.FSKeyRegistry.read.isRegistered([this.address]);
   }
 
+  async isLoggedIn() {
+    console.log("hi");
+    console.log(this.apiClient.jwtExists);
+    console.log(this.crypto.encryptionPublicKey);
+    return !!this.crypto.encryptionPublicKey && !!this.apiClient.jwtExists;
+  }
+
+  async logout() {
+    this.crypto.encryptionKey = null;
+    this.apiClient.setJwt(null);
+    console.log("Logged out");
+  }
+
   async register(options: { pin: string }) {
     const { pin } = options;
 
@@ -184,7 +197,6 @@ export class FilosignClient {
     );
 
     this.crypto.encryptionKey = Uint8Array.fromBase64(encryptionKey);
-    this.crypto.encryptionPublicKey = `0x${toHex(publicKey)}`;
 
     await this.requestAndSetJwt();
   }
@@ -266,12 +278,17 @@ export class FilosignClient {
     );
 
     this.crypto.encryptionKey = Uint8Array.fromBase64(encryptionKey);
-    this.crypto.encryptionPublicKey = `0x${toHex(publicKey)}`;
 
     await this.requestAndSetJwt();
   }
 
   async requestAndSetJwt() {
+    if (!this.crypto.encryptionPublicKey) {
+      throw new Error(
+        "Encryption public key is not set which means pvtKey was also not set so cant reqest jwt",
+      );
+    }
+
     const derivedAddress = publicKeyToAddress(this.crypto.encryptionPublicKey);
 
     const nonce = await this.apiClient.rpc.getSafe(

@@ -2,6 +2,7 @@ import Logo from "@/src/lib/components/custom/Logo";
 import ConnectButton from "../../lib/components/custom/ConnectButton";
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
+import { useFilosignQuery } from "@filosign/sdk/react";
 
 interface NavLink {
   label: string;
