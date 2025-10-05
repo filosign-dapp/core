@@ -1,4 +1,4 @@
-import type { Address } from "viem";
+import { encodePacked, keccak256, type Address } from "viem";
 import type { Defaults } from "../types/client";
 import type Logger from "./Logger";
 import z from "zod";
@@ -108,7 +108,7 @@ export default class Files {
     recipientAddresses: Address[];
     metadata?: Record<string, any>;
   }) {
-    const { apiClient, crypto, tx, contracts } = this.defaults;
+    const { apiClient, crypto, tx, contracts, wallet } = this.defaults;
     apiClient.ensureJwt();
 
     const dataEncryptionKey = generatePrivateKey();
@@ -141,6 +141,25 @@ export default class Files {
       throw new Error(`Upload failed: ${uploadResponse.statusText}`);
     }
 
+    const ownerWallet = this.defaults.wallet.account.address;
+    const ownerPubKeyResponse = await apiClient.rpc.getSafe(
+      {
+        publicKey: z.string(),
+      },
+      `/user/publickey?address=${ownerWallet}`,
+    );
+
+    const { encrypted: ownerEncryptedKeyBuffer, iv: ownerKeyIv } =
+      await crypto.encrypt(
+        Uint8Array.fromHex(dataEncryptionKey.replace("0x", "")),
+        ownerPubKeyResponse.data.publicKey,
+      );
+
+    const ownerEncryptedKey = Buffer.from(ownerEncryptedKeyBuffer).toString(
+      "base64",
+    );
+    const ownerKeyIvBase64 = Buffer.from(ownerKeyIv).toString("base64");
+
     const recipients = [];
     for (const recipientAddress of options.recipientAddresses) {
       const recipientPubKeyResponse = await apiClient.rpc.getSafe(
@@ -170,14 +189,18 @@ export default class Files {
         pieceCid: z.string(),
         ownerWallet: z.string(),
         metadata: z.record(z.string(), z.any()).nullable(),
+        ownerEncryptedKey: z.string(),
+        ownerEncryptedKeyIv: z.string(),
         createdAt: z.string(),
         updatedAt: z.string(),
       },
       "/files",
       {
-        pieceCid: pieceCid,
+        pieceCid: pieceCid.toString(),
         recipients,
         metaData: options.metadata || null,
+        ownerEncryptedKey,
+        ownerEncryptedKeyIv: ownerKeyIvBase64,
       },
     );
 
@@ -194,6 +217,125 @@ export default class Files {
     return {
       ...registerResponse,
       onchainTxHash: receipt.transactionHash,
+    };
+  }
+
+  async getFileDetails(options: { pieceCid: string }) {
+    const { apiClient } = this.defaults;
+    apiClient.ensureJwt();
+
+    const response = await apiClient.rpc.getSafe(
+      {
+        pieceCid: z.string(),
+        ownerWallet: z.string(),
+        metadata: z.record(z.string(), z.any()).nullable(),
+        userRole: z.enum(["owner", "recipient"]),
+        userAcknowledged: z.boolean(),
+        userAcknowledgedTxHash: z.string().nullable(),
+        recipients: z.array(
+          z.object({
+            recipientWallet: z.string(),
+            acknowledged: z.boolean(),
+            acknowledgedTxHash: z.string().nullable(),
+            acknowledgedAt: z.string().nullable(),
+            recipientProfile: zFileProfile,
+          }),
+        ),
+        acknowledgmentSummary: z.object({
+          total: z.number(),
+          acknowledged: z.number(),
+          pending: z.number(),
+          allAcknowledged: z.boolean(),
+        }),
+        signatures: z.array(zFileSignature),
+        ownerProfile: zFileProfile,
+        onchainTxHash: z.string().nullable(),
+        createdAt: z.string(),
+        updatedAt: z.string(),
+      },
+      `/files/${options.pieceCid}`,
+    );
+
+    return response.data;
+  }
+
+  async acknowledgeFile(options: { pieceCid: string }) {
+    const { tx, contracts } = this.defaults;
+    const { digestPrefix, digestTail } = parsePieceCid(options.pieceCid);
+
+    const cidIdentifier = keccak256(
+      encodePacked(["bytes32", "uint16"], [digestPrefix, digestTail]),
+    );
+
+    const receipt = await tx(
+      contracts.FSFileRegistry.write.acknowledge([cidIdentifier]),
+    );
+
+    return {
+      transactionHash: receipt.transactionHash,
+      cidIdentifier,
+      acknowledged: true,
+    };
+  }
+
+  async viewFile(options: {
+    pieceCid: string;
+    encryptedFileData: Uint8Array;
+  }): Promise<{
+    data: Uint8Array;
+    metadata?: Record<string, any>;
+  }> {
+    const { apiClient, crypto } = this.defaults;
+    apiClient.ensureJwt();
+
+    const fileInfo = await this.getFileDetails({ pieceCid: options.pieceCid });
+
+    if (fileInfo.userRole === "recipient" && !fileInfo.userAcknowledged) {
+      throw new Error("File must be acknowledged before viewing");
+    }
+
+    const keyResponse = await apiClient.rpc.getSafe(
+      {
+        encryptedKey: z.string(),
+        encryptedKeyIv: z.string(),
+        role: z.enum(["owner", "recipient"]),
+      },
+      `/files/${options.pieceCid}/key`,
+    );
+
+    const ownerPubKeyResponse = await apiClient.rpc.getSafe(
+      {
+        publicKey: z.string(),
+      },
+      `/user/publickey?address=${fileInfo.ownerWallet}`,
+    );
+
+    const encryptedKeyHex = keyResponse.data.encryptedKey;
+    const encryptedKeyIvHex = keyResponse.data.encryptedKeyIv;
+
+    const encryptedKeyBuffer = Buffer.from(
+      encryptedKeyHex.replace("0x", ""),
+      "hex",
+    );
+    const encryptedKeyIvBuffer = Buffer.from(
+      encryptedKeyIvHex.replace("0x", ""),
+      "hex",
+    );
+
+    const decryptedKeyBuffer = await crypto.decrypt(
+      encryptedKeyBuffer,
+      new Uint8Array(encryptedKeyIvBuffer),
+      ownerPubKeyResponse.data.publicKey,
+    );
+
+    const decryptedData = await crypto.decryptWithKey(
+      options.encryptedFileData,
+      `0x${Buffer.from(decryptedKeyBuffer).toString("hex")}`,
+    );
+
+    return {
+      data: decryptedData,
+      metadata: fileInfo.metadata || undefined,
     };
   }
 }
