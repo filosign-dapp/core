@@ -1,7 +1,7 @@
 import { createSharedKey } from "filosign-crypto-utils";
-import { type Hex } from "viem";
-import { privateKeyToAccount, signMessage } from "viem/accounts";
-import { compressPublicKey } from "../utils/crypto";
+import { isHash, type Hash, type Hex } from "viem";
+import { p256 } from "@noble/curves/p256";
+import { base64 } from "@scure/base";
 
 export class Crypto {
   private _encryptionKey: Uint8Array | null = null;
@@ -20,6 +20,14 @@ export class Crypto {
         "encryptionKey is not set first before encryptionPublicKey",
       );
     }
+    const publicKeyPoint = p256.getPublicKey(this._encryptionKey, false);
+    const publicX = publicKeyPoint.slice(1, 33);
+    if (publicX.toHex() !== publicKey.replace("0x", "")) {
+      throw new Error(
+        "encryptionPublicKey does not match the derived public key from encryptionKey",
+      );
+    }
+
     this._encryptionPublicKey = publicKey;
   }
 
@@ -116,12 +124,19 @@ export class Crypto {
     );
   }
 
-  async signMessage(message: string) {
+  async signMessage(message: Hash) {
     if (!this._encryptionKey) {
       throw new Error("Client is not logged in - encryption key is missing");
     }
 
-    const account = privateKeyToAccount(`0x${this._encryptionKey.toHex()}`);
-    return await account.signMessage({ message });
+    if (!isHash(message)) {
+      throw new Error("message must be a valid hash");
+    }
+
+    const signature = p256.sign(
+      message.replace("0x", ""),
+      this._encryptionKey.toHex(),
+    );
+    const signatureB64 = base64.encode(signature.toDERRawBytes());
   }
 }
