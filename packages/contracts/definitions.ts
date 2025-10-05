@@ -1,6 +1,6 @@
 export const definitions = {
   FSManager: {
-    address: "0xf2dca5b9b49e0b776bde018c6fa33c41e34b6c66",
+    address: "0x8280b637737e38abb32c7c9f4f383fe58acdd276",
     abi: [
       {
         inputs: [],
@@ -176,7 +176,7 @@ export const definitions = {
     ],
   },
   FSFileRegistry: {
-    address: "0x0FA9dAf6025917D6F6277e4c3685c54E99EA2a58",
+    address: "0x74E5543aBC8E057B762fd73003aE801a89a7C463",
     abi: [
       {
         inputs: [],
@@ -610,7 +610,7 @@ export const definitions = {
     ],
   },
   FSKeyRegistry: {
-    address: "0x6a32b5E1B2C58126C0A23cdb026384c8C7E5d8f9",
+    address: "0xd1ecD60C924dCB0eAA5B6952Dc86E779E8Ad6889",
     abi: [
       {
         inputs: [],
@@ -829,4 +829,4 @@ export const definitions = {
     ],
   },
 } as const;
-export const contractsDeployedAtBlock = 3077802n;
+export const contractsDeployedAtBlock = 3078020n;
