@@ -7,6 +7,7 @@ import { getContracts } from "@filosign/contracts";
 import { bigIntMax, bigIntMin } from "../utils/math";
 import { type GetLogsReturnType } from "viem";
 import { enqueueJob } from "../jobrunner/scheduler";
+import analytics from "../analytics/logger";
 
 const contracts = getContracts(provider);
 const { indexerCheckpoints, pendingJobs } = db.schema;
@@ -177,7 +178,7 @@ export async function startIndexer(contract: keyof typeof contracts) {
 
       await updateCheckpoint(identifier, to);
     } catch (err) {
-      console.error("Indexer error:", err);
+      analytics.log("Indexer error:", err);
       // backoff if there is error
       await new Promise((r) => setTimeout(r, 5000));
     }

@@ -4,8 +4,6 @@ import { useWalletClient } from "wagmi";
 export function FilosignProvider({ children }: { children: React.ReactNode }) {
   const { data: walletClient } = useWalletClient();
 
-  console.log("walletClient", walletClient);
-
   return (
     <FilosignProviderBase
       config={{

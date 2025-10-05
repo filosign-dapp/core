@@ -1,14 +1,35 @@
 import { createSharedKey } from "filosign-crypto-utils";
 import { type Hex } from "viem";
+import { privateKeyToAccount, signMessage } from "viem/accounts";
+import { compressPublicKey } from "../utils/crypto";
 
 export class Crypto {
   private _encryptionKey: Uint8Array | null = null;
+  private _encryptionPublicKey: Hex | null = null;
 
   set encryptionKey(key: Uint8Array | null) {
     if (key !== null && (!(key instanceof Uint8Array) || key.length !== 32)) {
       throw new Error("encryptionKey must be Uint8Array(32) or null");
     }
     this._encryptionKey = key;
+  }
+
+  set encryptionPublicKey(publicKey: Hex) {
+    if (!this._encryptionKey) {
+      throw new Error(
+        "encryptionKey is not set first before encryptionPublicKey",
+      );
+    }
+    this._encryptionPublicKey = publicKey;
+  }
+
+  get encryptionPublicKey() {
+    if (!this._encryptionPublicKey) {
+      throw new Error(
+        "encryptionPublicKey is not set but read attempt as wmade",
+      );
+    }
+    return this._encryptionPublicKey;
   }
 
   private async deriveRawAesKey(raw: Uint8Array) {
@@ -19,7 +40,7 @@ export class Crypto {
       "raw",
       raw,
       { name: "AES-GCM", length: 256 },
-      false, // non-extractable means cant export raw bytes
+      false,
       ["encrypt", "decrypt"],
     );
   }
@@ -93,5 +114,14 @@ export class Crypto {
       cryptoKey,
       encrypted,
     );
+  }
+
+  async signMessage(message: string) {
+    if (!this._encryptionKey) {
+      throw new Error("Client is not logged in - encryption key is missing");
+    }
+
+    const account = privateKeyToAccount(`0x${this._encryptionKey.toHex()}`);
+    return await account.signMessage({ message });
   }
 }

@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { logger } from "hono/logger";
 import { cors } from "hono/cors";
 import { startIndexer } from "./lib/indexer/engine";
 import { startJobScheduler } from "./lib/jobrunner/scheduler";
@@ -16,6 +17,7 @@ const workerId = `${require("os").hostname()}:${process.pid}`;
 startJobScheduler(workerId);
 
 export const app = new Hono()
+  .use(logger())
   .use(
     cors({
       origin: ["http://localhost:3000"],

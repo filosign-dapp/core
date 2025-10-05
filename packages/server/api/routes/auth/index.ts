@@ -14,7 +14,7 @@ const { users, profiles } = db.schema;
 export default new Hono()
 
   .get("/nonce", async (ctx) => {
-    const wallet = ctx.req.query("wallet_address");
+    const wallet = ctx.req.query("address");
     if (!wallet || !isAddress(wallet)) {
       return respond.err(ctx, "Missing wallet address", 400);
     }
@@ -26,14 +26,17 @@ export default new Hono()
   })
 
   .get("/verify", async (ctx) => {
+    const address = ctx.req.query("address");
     const pubKey = ctx.req.query("pub_key");
     const signature = ctx.req.query("signature");
+
+    if (!address || !isAddress(address)) {
+      return respond.err(ctx, "Missing or invalid address", 400);
+    }
 
     if (!pubKey || !isHex(pubKey)) {
       return respond.err(ctx, "Missing or invalid public key", 400);
     }
-
-    const address = publicKeyToAddress(pubKey);
 
     if (!signature || !isHex(signature)) {
       return respond.err(ctx, "Missing signature", 400);

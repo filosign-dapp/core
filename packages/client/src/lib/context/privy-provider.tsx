@@ -11,7 +11,7 @@ export function PrivyProvider({ children }: { children: React.ReactNode }) {
       config={{
         defaultChain: filecoinCalibration,
         supportedChains: [filecoinCalibration],
-        loginMethods: ["wallet", "google", "twitter", "github"],
+        loginMethods: ["wallet", "google", "twitter", "github", "discord"],
         appearance: {
           theme: "light",
         },
