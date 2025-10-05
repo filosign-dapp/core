@@ -5,7 +5,7 @@ import { authenticated } from "../../middleware/auth";
 import { bucket } from "../../../lib/s3/client";
 import { getOrCreateUserDataset } from "../../../lib/synapse";
 import { and, desc, eq, isNotNull, sql } from "drizzle-orm";
-import { calculate as calculatePieceCid } from "@filoz/synapse-sdk/piece";
+import { isHex } from "viem";
 
 const {
   files,
@@ -39,13 +39,28 @@ export default new Hono()
   })
 
   .post("/", authenticated, async (ctx) => {
-    const { pieceCid, recipients, metaData } = await ctx.req.json();
+    const {
+      pieceCid,
+      recipients,
+      metaData,
+      ownerEncryptedKey,
+      ownerEncryptedKeyIv,
+    } = await ctx.req.json();
     if (!pieceCid || typeof pieceCid !== "string") {
       return respond.err(ctx, "Invalid pieceCid", 400);
     }
-
     if (!Array.isArray(recipients) || recipients.length === 0) {
       return respond.err(ctx, "Recipients must be a non-empty array", 400);
+    }
+
+    if (typeof ownerEncryptedKey !== "string" || !isHex(ownerEncryptedKey)) {
+      return respond.err(ctx, "Invalid ownerEncryptedKey", 400);
+    }
+    if (
+      typeof ownerEncryptedKeyIv !== "string" ||
+      !isHex(ownerEncryptedKeyIv)
+    ) {
+      return respond.err(ctx, "Invalid ownerEncryptedKeyIv", 400);
     }
 
     for (const recipient of recipients) {
@@ -107,6 +122,8 @@ export default new Hono()
         pieceCid: pieceCid,
         ownerWallet: ctx.var.userWallet,
         metadata: metaData,
+        ownerEncryptedKey: ownerEncryptedKey,
+        ownerEncryptedKeyIv: ownerEncryptedKeyIv,
       })
       .returning()
       .get();
@@ -321,6 +338,253 @@ export default new Hono()
         },
       },
       "Received files retrieved successfully",
+      200,
+    );
+  })
+
+  .get("/:pieceCid/key", authenticated, async (ctx) => {
+    const { pieceCid } = ctx.req.param();
+    const userWallet = ctx.var.userWallet;
+
+    const file = db
+      .select()
+      .from(files)
+      .where(eq(files.pieceCid, pieceCid))
+      .get();
+
+    if (!file) {
+      return respond.err(ctx, "File not found", 404);
+    }
+
+    if (file.ownerWallet === userWallet) {
+      return respond.ok(
+        ctx,
+        {
+          encryptedKey: file.ownerEncryptedKey,
+          encryptedKeyIv: file.ownerEncryptedKeyIv,
+          role: "owner",
+        },
+        "Owner key retrieved successfully",
+        200,
+      );
+    }
+
+    const recipient = db
+      .select()
+      .from(fileRecipients)
+      .where(
+        and(
+          eq(fileRecipients.filePieceCid, pieceCid),
+          eq(fileRecipients.recipientWallet, userWallet),
+        ),
+      )
+      .get();
+
+    if (!recipient) {
+      return respond.err(
+        ctx,
+        "Access denied: You are not a recipient of this file",
+        403,
+      );
+    }
+
+    const acknowledgement = db
+      .select()
+      .from(fileAcknowledgements)
+      .where(
+        and(
+          eq(fileAcknowledgements.filePieceCid, pieceCid),
+          eq(fileAcknowledgements.recipientWallet, userWallet),
+        ),
+      )
+      .get();
+
+    if (!acknowledgement) {
+      return respond.err(
+        ctx,
+        "Access denied: File must be acknowledged before viewing",
+        403,
+      );
+    }
+
+    const recipientKey = db
+      .select()
+      .from(fileKeys)
+      .where(
+        and(
+          eq(fileKeys.filePieceCid, pieceCid),
+          eq(fileKeys.recipientWallet, userWallet),
+        ),
+      )
+      .get();
+
+    if (!recipientKey) {
+      return respond.err(ctx, "Decryption key not found", 404);
+    }
+
+    return respond.ok(
+      ctx,
+      {
+        encryptedKey: recipientKey.encryptedKey,
+        encryptedKeyIv: recipientKey.encryptedKeyIv,
+        role: "recipient",
+      },
+      "Recipient key retrieved successfully",
+      200,
+    );
+  })
+
+  .get("/:pieceCid", authenticated, async (ctx) => {
+    const { pieceCid } = ctx.req.param();
+    const userWallet = ctx.var.userWallet;
+
+    const file = db
+      .select({
+        pieceCid: files.pieceCid,
+        ownerWallet: files.ownerWallet,
+        metadata: files.metadata,
+        onchainTxHash: files.onchainTxHash,
+        createdAt: files.createdAt,
+        updatedAt: files.updatedAt,
+        ownerProfile: {
+          username: profiles.username,
+          displayName: profiles.displayName,
+          avatarUrl: profiles.avatarUrl,
+        },
+      })
+      .from(files)
+      .leftJoin(profiles, eq(files.ownerWallet, profiles.walletAddress))
+      .where(eq(files.pieceCid, pieceCid))
+      .get();
+
+    if (!file) {
+      return respond.err(ctx, "File not found", 404);
+    }
+
+    const isOwner = file.ownerWallet === userWallet;
+
+    const recipient = db
+      .select({
+        recipientWallet: fileRecipients.recipientWallet,
+      })
+      .from(fileRecipients)
+      .where(
+        and(
+          eq(fileRecipients.filePieceCid, pieceCid),
+          eq(fileRecipients.recipientWallet, userWallet),
+        ),
+      )
+      .get();
+
+    const isRecipient = !!recipient;
+    if (!isOwner && !isRecipient) {
+      return respond.err(
+        ctx,
+        "Access denied: You are not authorized to view this file",
+        403,
+      );
+    }
+
+    let userAcknowledged = false;
+    let userAcknowledgedTxHash = null;
+
+    if (isRecipient) {
+      const userAcknowledgement = db
+        .select({
+          acknowledgedTxHash: fileAcknowledgements.acknowledgedTxHash,
+          createdAt: fileAcknowledgements.createdAt,
+        })
+        .from(fileAcknowledgements)
+        .where(
+          and(
+            eq(fileAcknowledgements.filePieceCid, pieceCid),
+            eq(fileAcknowledgements.recipientWallet, userWallet),
+          ),
+        )
+        .get();
+
+      userAcknowledged = !!userAcknowledgement;
+      userAcknowledgedTxHash = userAcknowledgement?.acknowledgedTxHash || null;
+    }
+
+    const allRecipients = db
+      .select({
+        recipientWallet: fileRecipients.recipientWallet,
+        acknowledged: sql<boolean>`${fileAcknowledgements.acknowledgedTxHash} IS NOT NULL`,
+        acknowledgedTxHash: fileAcknowledgements.acknowledgedTxHash,
+        acknowledgedAt: fileAcknowledgements.createdAt,
+        recipientProfile: {
+          username: profiles.username,
+          displayName: profiles.displayName,
+          avatarUrl: profiles.avatarUrl,
+        },
+      })
+      .from(fileRecipients)
+      .leftJoin(
+        profiles,
+        eq(fileRecipients.recipientWallet, profiles.walletAddress),
+      )
+      .leftJoin(
+        fileAcknowledgements,
+        and(
+          eq(fileAcknowledgements.filePieceCid, fileRecipients.filePieceCid),
+          eq(
+            fileAcknowledgements.recipientWallet,
+            fileRecipients.recipientWallet,
+          ),
+        ),
+      )
+      .where(eq(fileRecipients.filePieceCid, pieceCid))
+      .orderBy(fileAcknowledgements.createdAt)
+      .all();
+
+    const signatures = db
+      .select({
+        id: fileSignatures.id,
+        signerWallet: fileSignatures.signerWallet,
+        signatureVisualHash: fileSignatures.signatureVisualHash,
+        timestamp: fileSignatures.timestamp,
+        compactSignature: fileSignatures.compactSignature,
+        onchainTxHash: fileSignatures.onchainTxHash,
+        createdAt: fileSignatures.createdAt,
+        signerProfile: {
+          username: profiles.username,
+          displayName: profiles.displayName,
+          avatarUrl: profiles.avatarUrl,
+        },
+      })
+      .from(fileSignatures)
+      .leftJoin(
+        profiles,
+        eq(fileSignatures.signerWallet, profiles.walletAddress),
+      )
+      .where(eq(fileSignatures.filePieceCid, pieceCid))
+      .orderBy(desc(fileSignatures.timestamp))
+      .all();
+
+    const totalRecipients = allRecipients.length;
+    const acknowledgedCount = allRecipients.filter(
+      (r) => r.acknowledged,
+    ).length;
+    const pendingCount = totalRecipients - acknowledgedCount;
+
+    return respond.ok(
+      ctx,
+      {
+        ...file,
+        userRole: isOwner ? "owner" : "recipient",
+        userAcknowledged,
+        userAcknowledgedTxHash,
+        recipients: allRecipients,
+        acknowledgmentSummary: {
+          total: totalRecipients,
+          acknowledged: acknowledgedCount,
+          pending: pendingCount,
+          allAcknowledged: acknowledgedCount === totalRecipients,
+        },
+        signatures,
+      },
+      "File details retrieved successfully",
       200,
     );
   });
