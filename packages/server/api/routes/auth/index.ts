@@ -7,6 +7,7 @@ import db from "../../../lib/db";
 import { eq } from "drizzle-orm";
 import { MINUTE } from "../../../constants";
 import { publicKeyToAddress } from "viem/utils";
+import { p256 } from "@noble/curves/p256";
 
 const nonces: Record<Address, { nonce: string; validTill: number }> = {};
 const { users, profiles } = db.schema;
@@ -51,11 +52,7 @@ export default new Hono()
 
     const { nonce } = msgData;
 
-    const valid = await verifyMessage({
-      message: nonce,
-      signature,
-      address,
-    });
+    const valid = p256.verify(signature, nonce.replace("0x", ""), pubKey);
 
     if (!valid) {
       return respond.err(ctx, "Invalid signature", 400);
