@@ -55,7 +55,7 @@ export default function TestPage() {
 
   async function handleRegisterFilosign() {
     try {
-      await register.mutateAsync({ pin: "222222" });
+      await register.mutateAsync({ pin: "111111" });
       console.log("register", register.isSuccess, register.isError);
       alert("Registered with Filosign");
     } catch (error) {
@@ -65,7 +65,7 @@ export default function TestPage() {
 
   async function handleLoginFilosign() {
     try {
-      await login.mutateAsync({ pin: "222222" });
+      await login.mutateAsync({ pin: "111111" });
       console.log("login", login.isSuccess, login.isError);
       alert("Logged in with Filosign");
     } catch (error) {
@@ -125,7 +125,7 @@ export default function TestPage() {
           <p>User: {user?.wallet?.address}</p>
           {walletClient && <p>Wallet client present</p>}
           {balance && <p>Balance: {formatEther(balance.value)} tFIL</p>}
-          {isRegistered && <p>Registered with Filosign</p>}
+          {isRegistered.data && <p>Registered with Filosign</p>}
 
           <div className="mt-4 space-y-2">
             <div>
@@ -158,7 +158,7 @@ export default function TestPage() {
       <div className="flex gap-2 flex-wrap">
         {!user && <Button onClick={() => loginPrivy()}>Login Privy</Button>}
         {user && <Button onClick={() => logoutPrivy()}>Logout Privy</Button>}
-        {!isRegistered && (
+        {!isRegistered.data && (
           <Button onClick={handleRegisterFilosign}>Register</Button>
         )}
         <Button onClick={handleLoginFilosign}>Login Filosign</Button>
