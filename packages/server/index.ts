@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 import { startIndexer } from "./lib/indexer/engine";
 import { startJobScheduler } from "./lib/jobrunner/scheduler";
 import { apiRouter } from "./api/routes/router";
@@ -14,7 +15,16 @@ startIndexer("FSManager");
 const workerId = `${require("os").hostname()}:${process.pid}`;
 startJobScheduler(workerId);
 
-export const app = new Hono().route("/api", apiRouter);
+export const app = new Hono()
+  .use(
+    cors({
+      origin: ["http://localhost:3000"],
+      allowHeaders: ["Content-Type", "Authorization"],
+      allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+      credentials: true,
+    }),
+  )
+  .route("/api", apiRouter);
 
 export default {
   port: 30011,

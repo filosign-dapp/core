@@ -52,8 +52,13 @@ function SelectContent({
   className,
   children,
   position = "popper",
+  emptyContent,
   ...props
-}: React.ComponentProps<typeof SelectPrimitive.Content>) {
+}: React.ComponentProps<typeof SelectPrimitive.Content> & {
+  emptyContent?: React.ReactNode;
+}) {
+  const hasChildren = React.Children.count(children) > 0;
+
   return (
     <SelectPrimitive.Portal>
       <SelectPrimitive.Content
@@ -75,7 +80,15 @@ function SelectContent({
               "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)] scroll-my-1",
           )}
         >
-          {children}
+          {hasChildren ? (
+            children
+          ) : emptyContent ? (
+            <div className="py-6 text-center">{emptyContent}</div>
+          ) : (
+            <div className="py-6 text-center text-sm text-muted-foreground">
+              Nothing to show...
+            </div>
+          )}
         </SelectPrimitive.Viewport>
         <SelectScrollDownButton />
       </SelectPrimitive.Content>

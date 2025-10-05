@@ -14,9 +14,7 @@ export type UploadedFile = {
 };
 
 export type EnvelopeForm = {
-  isOnlySigner: boolean;
   recipients: Recipient[];
-  emailSubject: string;
   emailMessage: string;
   documents: UploadedFile[];
 };
@@ -51,9 +49,7 @@ export type StoredDocument = {
 
 // Create form
 export type CreateForm = {
-  isOnlySigner: boolean;
   recipients: Recipient[];
-  emailSubject: string;
   emailMessage: string;
   documents: StoredDocument[];
 };

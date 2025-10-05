@@ -29,6 +29,12 @@ export type MethodFromPath<T, P extends readonly any[]> =
     ? (...args: A) => R
     : never;
 
+export type ReturnTypeFromPath<T, P extends readonly any[]> =
+  PathValue<T, P> extends (...args: any[]) => infer R ? Awaited<R> : never;
+
+export type ParamsFromPath<T, P extends readonly any[]> =
+  PathValue<T, P> extends (...args: infer A) => any ? A[0] : never;
+
 export function resolvePath<T, P extends readonly (keyof any)[]>(
   root: T,
   path: readonly [...P],
@@ -49,7 +55,7 @@ export function resolvePath<T, P extends readonly (keyof any)[]>(
 export function useFilosignQuery<
   T extends FilosignClient,
   P extends Path<T> & readonly any[],
->(path: P, options: Parameters<MethodFromPath<T, P>>[0]) {
+>(path: P, options: ParamsFromPath<T, P>) {
   const { client } = useFilosignContext();
 
   const method = useMemo(() => {
@@ -62,13 +68,13 @@ export function useFilosignQuery<
     return undefined;
   }, [client, ...(path as any)]) as MethodFromPath<T, P> | undefined;
 
-  return useQuery({
+  return useQuery<ReturnTypeFromPath<T, P>>({
     queryKey: ["filosign", ...path],
     queryFn: async () => {
       if (!method) {
         throw new Error("Method not found");
       }
-      return method(options);
+      return method(options) as Promise<ReturnTypeFromPath<T, P>>;
     },
     enabled: !!method,
   });
@@ -90,13 +96,13 @@ export function useFilosignMutation<
     return undefined;
   }, [client, ...(path as any)]) as MethodFromPath<T, P> | undefined;
 
-  return useMutation({
+  return useMutation<ReturnTypeFromPath<T, P>, Error, ParamsFromPath<T, P>>({
     mutationKey: ["filosign", ...path],
-    mutationFn: async (options: Parameters<MethodFromPath<T, P>>[0]) => {
+    mutationFn: async (options: ParamsFromPath<T, P>) => {
       if (!method) {
         throw new Error("Method not found");
       }
-      return method(options);
+      return method(options) as Promise<ReturnTypeFromPath<T, P>>;
     },
   });
 }

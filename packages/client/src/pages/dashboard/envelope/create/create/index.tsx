@@ -5,7 +5,6 @@ import { Form } from "@/src/lib/components/ui/form";
 import Logo from "@/src/lib/components/custom/Logo";
 import DocumentsSection from "./_components/DocumentUpload";
 import RecipientsSection from "./_components/RecipientsSection";
-import MessageSection from "./_components/MessageSection";
 import { Link, useNavigate } from "@tanstack/react-router";
 import type { EnvelopeForm } from "../types";
 import { useStorePersist } from "@/src/lib/hooks/use-store";
@@ -16,17 +15,10 @@ export default function CreateEnvelopePage() {
   const { setCreateForm } = useStorePersist();
   const form = useForm<EnvelopeForm>({
     defaultValues: {
-      isOnlySigner: false,
       recipients: [{ name: "", email: "", walletAddress: "", role: "signer" }],
-      emailSubject: "",
       emailMessage: "",
       documents: [],
     },
-  });
-
-  const { fields, append, remove, move } = useFieldArray({
-    control: form.control,
-    name: "recipients",
   });
 
   const {
@@ -37,8 +29,6 @@ export default function CreateEnvelopePage() {
     control: form.control,
     name: "documents",
   });
-
-  const isOnlySigner = form.watch("isOnlySigner");
 
   const onSubmit = async (data: EnvelopeForm) => {
     const toDataUrl = (file: File) =>
@@ -64,14 +54,14 @@ export default function CreateEnvelopePage() {
     );
 
     setCreateForm({
-      isOnlySigner: data.isOnlySigner,
       recipients: data.recipients,
-      emailSubject: data.emailSubject,
       emailMessage: data.emailMessage,
       documents,
     });
 
-    navigate({ to: "/dashboard/envelope/create/add-sign" });
+    // TODO: Implement envelope creation API call here
+    // For now, navigate back to dashboard to bypass signature placement
+    navigate({ to: "/dashboard" });
   };
 
   return (
@@ -98,18 +88,7 @@ export default function CreateEnvelopePage() {
               append={appendDocument}
               remove={removeDocument}
             />
-            <RecipientsSection
-              control={form.control}
-              fields={fields}
-              append={append}
-              remove={remove}
-              move={move}
-              isOnlySigner={isOnlySigner}
-            />
-            <MessageSection
-              control={form.control}
-              isOnlySigner={isOnlySigner}
-            />
+            <RecipientsSection control={form.control} />
           </main>
           <motion.div
             initial={{ opacity: 0, y: 20 }}

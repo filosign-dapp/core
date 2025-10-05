@@ -30,7 +30,8 @@ export default class ShareCapability {
         metadata: options.metadata,
       },
     );
-    return response;
+
+    return response.data;
   }
 
   async getReceivedRequests() {
@@ -59,7 +60,8 @@ export default class ShareCapability {
       },
       "/requests/received",
     );
-    return response;
+
+    return response.data;
   }
 
   async getSentRequests() {
@@ -88,7 +90,7 @@ export default class ShareCapability {
       },
       "/requests/sent",
     );
-    return response;
+    return response.data;
   }
 
   async getPeopleCanSendTo() {
@@ -109,7 +111,7 @@ export default class ShareCapability {
       },
       "/requests/can-send-to",
     );
-    return response;
+    return response.data;
   }
 
   async getPeopleCanReceiveFrom() {
@@ -130,7 +132,7 @@ export default class ShareCapability {
       },
       "/requests/can-receive-from",
     );
-    return response;
+    return response.data;
   }
 
   async cancelShareRequest(options: { requestId: string }) {
@@ -140,7 +142,7 @@ export default class ShareCapability {
       { canceled: z.string() },
       `/requests/${options.requestId}/cancel`,
     );
-    return response;
+    return response.data;
   }
 
   async allowSharing(options: { senderWallet: Address }) {
