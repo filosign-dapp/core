@@ -63,6 +63,7 @@ export class FilosignClient {
 
     this.logger = new Logger("FilosignClient", config.debug);
     this.defaults = {
+      wallet: this.wallet,
       apiClient: this.apiClient,
       contracts: this.contracts,
       publicClient: this.publicClient,
