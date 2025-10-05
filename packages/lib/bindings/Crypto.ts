@@ -71,6 +71,26 @@ export class Crypto {
     return { encrypted, iv };
   }
 
+  async decryptWithKey(encryptedData: Uint8Array, keyBytes32: Hex) {
+    const cryptoKey = await this.deriveRawAesKey(
+      Uint8Array.fromHex(keyBytes32.replace("0x", "")),
+    );
+
+    const iv = new Uint8Array(encryptedData.slice(0, 12));
+    const ciphertext = encryptedData.slice(12);
+
+    const decrypted = await crypto.subtle.decrypt(
+      {
+        name: "AES-GCM",
+        iv,
+      },
+      cryptoKey,
+      ciphertext,
+    );
+
+    return new Uint8Array(decrypted);
+  }
+
   async encrypt(data: Uint8Array, recipientPubKeyB64: string) {
     if (!this._encryptionKey) {
       throw new Error("Client is not logged in - encryption key is missing");
@@ -98,7 +118,7 @@ export class Crypto {
   }
 
   async decrypt(
-    encrypted: ArrayBuffer,
+    encrypted: Uint8Array,
     iv: Uint8Array,
     senderPubKeyB64: string,
   ) {
