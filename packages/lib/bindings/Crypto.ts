@@ -137,6 +137,13 @@ export class Crypto {
       message.replace("0x", ""),
       this._encryptionKey.toHex(),
     );
-    const signatureB64 = base64.encode(signature.toDERRawBytes());
+
+    console.log(
+      signature.addRecoveryBit(0).toCompactHex(),
+      message,
+      this._encryptionPublicKey,
+    );
+
+    return signature.toCompactHex();
   }
 }

@@ -1,16 +1,22 @@
 import { Hono } from "hono";
-import { isAddress, isHex, keccak256, verifyMessage, type Address } from "viem";
+import {
+  Hash,
+  isAddress,
+  isHex,
+  keccak256,
+  verifyMessage,
+  type Address,
+} from "viem";
 import { respond } from "../../../lib/utils/respond";
 import { issueJwtToken } from "../../../lib/utils/jwt";
-import { authenticated } from "../../middleware/auth";
 import db from "../../../lib/db";
 import { eq } from "drizzle-orm";
 import { MINUTE } from "../../../constants";
-import { publicKeyToAddress } from "viem/utils";
 import { p256 } from "@noble/curves/p256";
+import { p256VerifyWithXOnly } from "../../../lib/utils/crypto";
 
-const nonces: Record<Address, { nonce: string; validTill: number }> = {};
-const { users, profiles } = db.schema;
+const nonces: Record<Address, { nonce: Hash; validTill: number }> = {};
+const { users } = db.schema;
 
 export default new Hono()
 
@@ -39,8 +45,14 @@ export default new Hono()
       return respond.err(ctx, "Missing or invalid public key", 400);
     }
 
-    if (!signature || !isHex(signature)) {
+    console.log("signature", signature);
+
+    if (!signature) {
       return respond.err(ctx, "Missing signature", 400);
+    }
+
+    if (!isHex(signature)) {
+      return respond.err(ctx, "Invalid signature format", 400);
     }
 
     const msgData = nonces[address];
@@ -52,11 +64,15 @@ export default new Hono()
 
     const { nonce } = msgData;
 
-    const valid = p256.verify(signature, nonce.replace("0x", ""), pubKey);
+    console.log(signature, nonce, pubKey);
+    const valid = p256VerifyWithXOnly(signature, nonce, pubKey);
+    console.log("valid", valid);
 
     if (!valid) {
       return respond.err(ctx, "Invalid signature", 400);
     }
+
+    console.log("pubKey", pubKey);
 
     const user = db
       .select()

@@ -8,6 +8,7 @@ import {
   type PublicClient,
   http,
   ripemd160,
+  isHash,
 } from "viem";
 import { filecoinCalibration } from "viem/chains";
 import { getContracts } from "@filosign/contracts";
@@ -282,7 +283,13 @@ export class FilosignClient {
       },
     );
 
-    const signature = await this.crypto.signMessage(nonce.data.nonce);
+    const nonceHash = nonce.data.nonce;
+    if (!isHash(nonceHash)) {
+      throw new Error("Invalid nonce");
+    }
+
+    const signature = await this.crypto.signMessage(nonceHash);
+    console.log(signature, nonceHash, this.crypto.encryptionPublicKey);
 
     const publicKey = this.crypto.encryptionPublicKey;
 
@@ -293,7 +300,7 @@ export class FilosignClient {
         params: {
           address: derivedAddress,
           pub_key: publicKey,
-          signature: signature,
+          signature: `0x${signature}`,
         },
       },
     );
