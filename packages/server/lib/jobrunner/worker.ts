@@ -11,7 +11,7 @@ import {
 } from "viem";
 import { and, eq } from "drizzle-orm";
 import analytics from "../analytics/logger";
-import { rebuildPieceCid } from "../utils/multiformats";
+import { rebuildPieceCid } from "@filosign/contracts";
 
 type Job = typeof schema.pendingJobs.$inferSelect;
 type Incoming = Job;
@@ -157,12 +157,9 @@ async function processJob(job: Job, dbC: ReturnType<typeof createDbClient>) {
             }
 
             const cid = rebuildPieceCid({
-              codecNumeric: 85,
-              multihashCode: 4113,
               digestPrefix: fileData.pieceCidPrefix,
+              digestBuffer: fileData.pieceCidBuffer,
               digestTail: fileData.pieceCidTail,
-              pieceCidParity: fileData.pieceCidParity,
-              missingByte: fileData.missingByte,
             }).toString();
 
             analytics.log("file regsrtereded", cid, fileData, log.args);
@@ -194,12 +191,9 @@ async function processJob(job: Job, dbC: ReturnType<typeof createDbClient>) {
             }
 
             const cid = rebuildPieceCid({
-              codecNumeric: 85,
-              multihashCode: 4113,
               digestPrefix: fileData.pieceCidPrefix,
+              digestBuffer: fileData.pieceCidBuffer,
               digestTail: fileData.pieceCidTail,
-              pieceCidParity: fileData.pieceCidParity,
-              missingByte: fileData.missingByte,
             }).toString();
 
             analytics.log("file ack", cid, fileData, log.args);
@@ -223,10 +217,11 @@ async function processJob(job: Job, dbC: ReturnType<typeof createDbClient>) {
               log.args.cidIdentifier,
             ]);
 
-            const cid = concatHex([
-              fileData.pieceCidPrefix,
-              toHex(fileData.pieceCidTail),
-            ]);
+            const cid = rebuildPieceCid({
+              digestPrefix: fileData.pieceCidPrefix,
+              digestBuffer: fileData.pieceCidBuffer,
+              digestTail: fileData.pieceCidTail,
+            }).toString();
 
             const signatureExists = db
               .select()
