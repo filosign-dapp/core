@@ -32,6 +32,7 @@ import ShareCapability from "./bindings/ShareCapability";
 import z from "zod";
 import { privateKeyToAddress, publicKeyToAddress } from "viem/accounts";
 import { FilosignStore } from "./store";
+import Files from "./bindings/Files";
 
 const info = `Replace with relevant shit`; // temporary, todo replace
 const primaryChain = filecoinCalibration;
@@ -97,6 +98,10 @@ export class FilosignClient {
 
   get shareCapability() {
     return new ShareCapability(this.defaults);
+  }
+
+  get files() {
+    return new Files(this.defaults);
   }
 
   async isRegistered() {

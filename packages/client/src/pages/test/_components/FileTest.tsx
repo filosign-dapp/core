@@ -77,8 +77,8 @@ export function FileTest() {
       const result = await getFileDetails.mutateAsync({
         pieceCid: pieceCidToView,
       });
-      setFileDetails(result.data);
-      console.log("File details retrieved", result.data);
+      setFileDetails(result);
+      console.log("File details retrieved", result);
     } catch (error) {
       console.error("Failed to get file details", error);
     }
