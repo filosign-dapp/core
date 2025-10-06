@@ -24,12 +24,26 @@ export function parsePieceCid(pieceCid: string) {
   if (digestLength < 2) throw new Error("digest too short (<2 bytes)");
 
   const prefix = new Uint8Array(32);
+  let digestTail: number;
 
-  prefix.set(rawDigest.subarray(0, Math.min(32, digestLength)));
+  if (digestLength <= 34) {
+    const prefixLength = Math.min(32, digestLength - 2);
+    prefix.set(rawDigest.subarray(0, prefixLength));
 
-  const b1 = rawDigest[digestLength - 2];
-  const b2 = rawDigest[digestLength - 1];
-  const digestTail = (b1 << 8) | b2;
+    const b1 = rawDigest[digestLength - 2];
+    const b2 = rawDigest[digestLength - 1];
+    digestTail = (b1 << 8) | b2;
+  } else {
+    prefix.set(rawDigest.subarray(0, 32));
+
+    const missingByte = rawDigest[32];
+    const lastByte = rawDigest[34]; // this is the cactual last byte
+    digestTail = (missingByte << 8) | lastByte;
+  }
+
+  const pieceCidParity = digestLength > 34;
+
+  const missingByte = digestLength > 34 ? rawDigest[33] : 0;
 
   return {
     multihashCode,
@@ -38,6 +52,8 @@ export function parsePieceCid(pieceCid: string) {
     digestTail,
     digestLength,
     rawDigest,
+    pieceCidParity,
+    missingByte,
   };
 }
 
@@ -64,7 +80,7 @@ export async function signFileSignature(options: {
   const types = {
     Signature: [
       { name: "pieceCidPrefix", type: "bytes32" },
-      { name: "pieceCidTail", type: "uint256" }, // contract casts uint16 -> uint256 for hashing
+      { name: "pieceCidTail", type: "uint256" },
       { name: "signatureVisualHash", type: "bytes32" },
     ],
   };

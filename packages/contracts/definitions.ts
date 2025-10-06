@@ -1,6 +1,6 @@
 export const definitions = {
   FSManager: {
-    address: "0x6c300ab6656b21863f9e2aae8df43c4155b3d4a4",
+    address: "0x0c5d6eac95153636ef3d12f08406bbe4240d59b1",
     abi: [
       {
         inputs: [],
@@ -176,7 +176,7 @@ export const definitions = {
     ],
   },
   FSFileRegistry: {
-    address: "0x95Fa6e920d25cf4860A0ddae9C3BcbC5C936035b",
+    address: "0xb55DF07F4Af95eB1a8518C2C132695D84F5156B3",
     abi: [
       {
         inputs: [],
@@ -420,6 +420,16 @@ export const definitions = {
                 name: "pieceCidTail",
                 type: "uint16",
               },
+              {
+                internalType: "bool",
+                name: "pieceCidParity",
+                type: "bool",
+              },
+              {
+                internalType: "uint8",
+                name: "missingByte",
+                type: "uint8",
+              },
             ],
             internalType: "struct FSFileRegistry.FileDataView",
             name: "",
@@ -564,6 +574,16 @@ export const definitions = {
             type: "uint16",
           },
           {
+            internalType: "bool",
+            name: "pieceCidParity_",
+            type: "bool",
+          },
+          {
+            internalType: "uint8",
+            name: "missingByte_",
+            type: "uint8",
+          },
+          {
             internalType: "address[]",
             name: "recipients_",
             type: "address[]",
@@ -610,7 +630,7 @@ export const definitions = {
     ],
   },
   FSKeyRegistry: {
-    address: "0x3771ed67B8feCA8Da4688D09EE4dABa6E19C48bd",
+    address: "0xb4Ca5624c511F1d78986DEfA1bBf008D8f7898E8",
     abi: [
       {
         inputs: [],
@@ -829,4 +849,4 @@ export const definitions = {
     ],
   },
 } as const;
-export const contractsDeployedAtBlock = 3079495n;
+export const contractsDeployedAtBlock = 3081606n;

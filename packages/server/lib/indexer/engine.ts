@@ -178,7 +178,7 @@ export async function startIndexer(contract: keyof typeof contracts) {
 
       await updateCheckpoint(identifier, to);
     } catch (err) {
-      analytics.log("Indexer error:", err);
+      analytics.log("📇Indexer error:\n", err);
       // backoff if there is error
       await new Promise((r) => setTimeout(r, 5000));
     }

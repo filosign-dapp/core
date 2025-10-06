@@ -46,9 +46,9 @@ async function main() {
 
   console.log("Definitions written to definitions.ts");
 
-  await $`bunx --bun hardhat verify --network filecoinCalibration ${manager.address}`;
-  await $`bunx --bun hardhat verify --network filecoinCalibration ${fileRegistry.address}`;
-  await $`bunx --bun hardhat verify --network filecoinCalibration ${keyRegistry.address}`;
+  await $`bunx --bun hardhat verify --network filecoinCalibration ${manager.address} --force`;
+  await $`bunx --bun hardhat verify --network filecoinCalibration ${fileRegistry.address} --force`;
+  await $`bunx --bun hardhat verify --network filecoinCalibration ${keyRegistry.address} --force`;
 
   console.log("Contracts verified on block explorer");
 }

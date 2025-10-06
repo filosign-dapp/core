@@ -12,7 +12,7 @@ export default new Hono()
   .route("/profile", profile)
   .route("/signatures", signatures)
 
-  .get("/publicKey", async (ctx) => {
+  .get("/public-key", async (ctx) => {
     const walletAddress = ctx.req.query("address");
 
     if (typeof walletAddress !== "string" || !isAddress(walletAddress)) {

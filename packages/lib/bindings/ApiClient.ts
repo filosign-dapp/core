@@ -15,7 +15,7 @@ export default class ApiClient {
   private createClient() {
     const instance = axios.create({
       baseURL: this._baseUrl,
-      timeout: 10_000,
+      timeout: 30_000,
       headers: {
         Authorization: this._authHeader.Authorization,
       },

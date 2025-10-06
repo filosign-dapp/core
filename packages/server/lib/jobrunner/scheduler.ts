@@ -126,7 +126,7 @@ async function handleJobFailure(jobId: string, errMsg: string) {
         .where(eq(pendingJobs.id, job.id))
         .run();
       analytics.log(
-        "Job permanently failed",
+        "⛔Job permanently failed",
         { jobType: job.type, jobId: job.id },
         { error: job.lastError },
       );

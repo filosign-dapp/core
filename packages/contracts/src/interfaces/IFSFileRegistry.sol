@@ -8,6 +8,8 @@ interface IFSFileRegistry {
         bytes32 pieceCidPrefix;
         address sender;
         uint16 pieceCidTail;
+        bool pieceCidParity;
+        uint8 missingByte;
         mapping(address => bool) recipients;
         mapping(address => bool) acked;
     }
@@ -27,6 +29,8 @@ interface IFSFileRegistry {
         bytes32 pieceCidPrefix;
         address sender;
         uint16 pieceCidTail;
+        bool pieceCidParity;
+        uint8 missingByte;
     }
 
     function manager() external view returns (address);
@@ -34,7 +38,7 @@ interface IFSFileRegistry {
     event FileAcknowledged();
     event SignatureSubmitted();
     function acknowledge(bytes32 cidIdentifier_) external;
-    function registerFile(bytes32 pieceCidPrefix_, uint16 pieceCidTail_, address[] calldata recipients_) external;
+    function registerFile(bytes32 pieceCidPrefix_, uint16 pieceCidTail_, bool pieceCidParity_, uint8 missingByte_, address[] calldata recipients_) external;
     function submitSignature(bytes32 cidIdentifier_, bytes32 signatureVisualHash_, uint8 v_, bytes32 r_, bytes32 s_) external;
     function cidIdentifier(bytes32 pieceCidPrefix_, uint16 pieceCidTail_) external pure returns (bytes32);
     function getFileData(bytes32 cidIdentifier_) external view returns (FileDataView memory);

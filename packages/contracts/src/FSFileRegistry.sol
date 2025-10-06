@@ -10,6 +10,8 @@ contract FSFileRegistry is EIP712 {
         bytes32 pieceCidPrefix;
         address sender;
         uint16 pieceCidTail;
+        bool pieceCidParity;
+        uint8 missingByte; // For 35-byte digests, stores the byte at position 33
         mapping(address => bool) recipients;
         mapping(address => bool) acked;
     }
@@ -29,6 +31,8 @@ contract FSFileRegistry is EIP712 {
         bytes32 pieceCidPrefix;
         address sender;
         uint16 pieceCidTail;
+        bool pieceCidParity;
+        uint8 missingByte;
     }
 
     mapping(bytes32 => FileData) private _files;
@@ -82,6 +86,8 @@ contract FSFileRegistry is EIP712 {
     function registerFile(
         bytes32 pieceCidPrefix_,
         uint16 pieceCidTail_,
+        bool pieceCidParity_,
+        uint8 missingByte_,
         address[] calldata recipients_
     ) external {
         FileData storage file = _files[
@@ -92,6 +98,8 @@ contract FSFileRegistry is EIP712 {
 
         file.pieceCidPrefix = pieceCidPrefix_;
         file.pieceCidTail = pieceCidTail_;
+        file.pieceCidParity = pieceCidParity_;
+        file.missingByte = missingByte_;
         file.sender = msg.sender;
 
         bytes32 cid = cidIdentifier(pieceCidPrefix_, pieceCidTail_);
@@ -166,7 +174,7 @@ contract FSFileRegistry is EIP712 {
     ) external view returns (FileDataView memory) {
         FileData storage file = _files[cidIdentifier_];
         return
-            FileDataView(file.pieceCidPrefix, file.sender, file.pieceCidTail);
+            FileDataView(file.pieceCidPrefix, file.sender, file.pieceCidTail, file.pieceCidParity, file.missingByte);
     }
 
     function isRecipient(

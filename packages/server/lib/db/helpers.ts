@@ -67,7 +67,10 @@ export const tBytes32 = customType<{
     return value;
   },
   fromDriver(value) {
-    return toHex(value);
+    if (!isHex(value)) {
+      throw new Error(`Invalid hex: ${value}`);
+    }
+    return value;
   },
 });
 
@@ -85,7 +88,10 @@ export const tHex = customType<{
     return value;
   },
   fromDriver(value) {
-    return toHex(value);
+    if (!isHex(value)) {
+      throw new Error(`Invalid hex: ${value}`);
+    }
+    return value;
   },
 });
 

@@ -19,6 +19,7 @@ export function PrivyProvider({ children }: { children: React.ReactNode }) {
           ethereum: {
             createOnLogin: "users-without-wallets",
           },
+          showWalletUIs: false,
         },
       }}
     >

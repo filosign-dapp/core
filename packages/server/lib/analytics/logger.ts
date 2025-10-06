@@ -7,12 +7,12 @@ const GROUP_ID = env.TG_ANALYTICS_BOT_GROUP_ID;
 function log(message?: any, ...optionalParams: any[]) {
   const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
 
-  const text = `${require("os").hostname()}:${process.pid}\n${[
+  const text = `${require("os").hostname()}:${process.pid}@${Date.now()}\n${[
     message,
     ...optionalParams,
   ]
     .map((j) => jsonStringify(j))
-    .join(" ")}
+    .join("\n")}
     `;
 
   const body = {

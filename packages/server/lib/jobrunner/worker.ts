@@ -11,6 +11,7 @@ import {
 } from "viem";
 import { and, eq } from "drizzle-orm";
 import analytics from "../analytics/logger";
+import { rebuildPieceCid } from "../utils/multiformats";
 
 type Job = typeof schema.pendingJobs.$inferSelect;
 type Incoming = Job;
@@ -155,10 +156,16 @@ async function processJob(job: Job, dbC: ReturnType<typeof createDbClient>) {
               );
             }
 
-            const cid = concatHex([
-              fileData.pieceCidPrefix,
-              toHex(fileData.pieceCidTail),
-            ]);
+            const cid = rebuildPieceCid({
+              codecNumeric: 85,
+              multihashCode: 4113,
+              digestPrefix: fileData.pieceCidPrefix,
+              digestTail: fileData.pieceCidTail,
+              pieceCidParity: fileData.pieceCidParity,
+              missingByte: fileData.missingByte,
+            }).toString();
+
+            analytics.log("file regsrtereded", cid, fileData, log.args);
 
             db.update(schema.files)
               .set({
@@ -186,10 +193,16 @@ async function processJob(job: Job, dbC: ReturnType<typeof createDbClient>) {
               );
             }
 
-            const cid = concatHex([
-              fileData.pieceCidPrefix,
-              toHex(fileData.pieceCidTail),
-            ]);
+            const cid = rebuildPieceCid({
+              codecNumeric: 85,
+              multihashCode: 4113,
+              digestPrefix: fileData.pieceCidPrefix,
+              digestTail: fileData.pieceCidTail,
+              pieceCidParity: fileData.pieceCidParity,
+              missingByte: fileData.missingByte,
+            }).toString();
+
+            analytics.log("file ack", cid, fileData, log.args);
 
             db.insert(schema.fileAcknowledgements)
               .values({
@@ -255,10 +268,6 @@ async function processJob(job: Job, dbC: ReturnType<typeof createDbClient>) {
               log.args.user,
             ]);
 
-            analytics.log("Register new user", {
-              wallet: log.args.user,
-            });
-
             db.insert(schema.users)
               .values({
                 walletAddress: log.args.user,
@@ -282,6 +291,8 @@ async function processJob(job: Job, dbC: ReturnType<typeof createDbClient>) {
       }
     });
     return true;
+  } catch (e) {
+    analytics.log("Error in job processing", job.id, job.type, e);
   } finally {
     dbC.$client.close();
   }

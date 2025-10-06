@@ -19,6 +19,7 @@ export const files = t.sqliteTable(
       .references(() => users.walletAddress),
 
     metadata: tJsonString(),
+    status: t.text({ enum: ["s3", "foc", "unpaid_for", "invalid"] }).notNull(),
     ownerEncryptedKey: tHex().notNull(),
     ownerEncryptedKeyIv: tHex().notNull(),
 
