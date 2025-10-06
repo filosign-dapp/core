@@ -8,10 +8,9 @@ import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 contract FSFileRegistry is EIP712 {
     struct FileData {
         bytes32 pieceCidPrefix;
+        bytes16 pieceCidBuffer;
+        bytes32 pieceCidTail;
         address sender;
-        uint16 pieceCidTail;
-        bool pieceCidParity;
-        uint8 missingByte; // For 35-byte digests, stores the byte at position 33
         mapping(address => bool) recipients;
         mapping(address => bool) acked;
     }
@@ -29,10 +28,9 @@ contract FSFileRegistry is EIP712 {
 
     struct FileDataView {
         bytes32 pieceCidPrefix;
+        bytes16 pieceCidBuffer;
+        bytes32 pieceCidTail;
         address sender;
-        uint16 pieceCidTail;
-        bool pieceCidParity;
-        uint8 missingByte;
     }
 
     mapping(bytes32 => FileData) private _files;
@@ -42,7 +40,7 @@ contract FSFileRegistry is EIP712 {
 
     bytes32 private constant SIGNATURE_TYPEHASH =
         keccak256(
-            "Signature(bytes32 pieceCidPrefix,uint256 pieceCidTail,bytes32 signatureVisualHash)"
+            "Signature(bytes32 pieceCidPrefix,bytes16 pieceCidBuffer,bytes32 pieceCidTail,bytes32 signatureVisualHash)"
         );
 
     event FileRegistered(
@@ -85,24 +83,26 @@ contract FSFileRegistry is EIP712 {
 
     function registerFile(
         bytes32 pieceCidPrefix_,
-        uint16 pieceCidTail_,
-        bool pieceCidParity_,
-        uint8 missingByte_,
+        bytes16 pieceCidBuffer_,
+        bytes32 pieceCidTail_,
         address[] calldata recipients_
     ) external {
         FileData storage file = _files[
-            cidIdentifier(pieceCidPrefix_, pieceCidTail_)
+            cidIdentifier(pieceCidPrefix_, pieceCidBuffer_, pieceCidTail_)
         ];
 
         require(file.sender == address(0), "File already registered");
 
         file.pieceCidPrefix = pieceCidPrefix_;
+        file.pieceCidBuffer = pieceCidBuffer_;
         file.pieceCidTail = pieceCidTail_;
-        file.pieceCidParity = pieceCidParity_;
-        file.missingByte = missingByte_;
         file.sender = msg.sender;
 
-        bytes32 cid = cidIdentifier(pieceCidPrefix_, pieceCidTail_);
+        bytes32 cid = cidIdentifier(
+            pieceCidPrefix_,
+            pieceCidBuffer_,
+            pieceCidTail_
+        );
         uint48 timestamp = uint48(block.timestamp);
         for (uint i = 0; i < recipients_.length; i++) {
             require(
@@ -138,7 +138,8 @@ contract FSFileRegistry is EIP712 {
             abi.encode(
                 SIGNATURE_TYPEHASH,
                 file.pieceCidPrefix,
-                uint256(file.pieceCidTail),
+                file.pieceCidBuffer,
+                file.pieceCidTail,
                 signatureVisualHash_
             )
         );
@@ -164,9 +165,17 @@ contract FSFileRegistry is EIP712 {
 
     function cidIdentifier(
         bytes32 pieceCidPrefix_,
-        uint16 pieceCidTail_
+        bytes16 pieceCidBuffer_,
+        bytes32 pieceCidTail_
     ) public pure returns (bytes32) {
-        return keccak256(abi.encodePacked(pieceCidPrefix_, pieceCidTail_));
+        return
+            keccak256(
+                abi.encodePacked(
+                    pieceCidPrefix_,
+                    pieceCidBuffer_,
+                    pieceCidTail_
+                )
+            );
     }
 
     function getFileData(
@@ -174,7 +183,12 @@ contract FSFileRegistry is EIP712 {
     ) external view returns (FileDataView memory) {
         FileData storage file = _files[cidIdentifier_];
         return
-            FileDataView(file.pieceCidPrefix, file.sender, file.pieceCidTail, file.pieceCidParity, file.missingByte);
+            FileDataView(
+                file.pieceCidPrefix,
+                file.pieceCidBuffer,
+                file.pieceCidTail,
+                file.sender
+            );
     }
 
     function isRecipient(
