@@ -387,7 +387,7 @@ export default class Files {
             recipientWallet: z.string(),
             acknowledged: z.boolean(),
             acknowledgedTxHash: z.string().nullable(),
-            acknowledgedAt: z.string().nullable(),
+            acknowledgedAt: z.number().nullable(),
             recipientProfile: zFileProfile,
           }),
         ),
