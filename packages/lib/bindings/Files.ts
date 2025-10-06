@@ -4,7 +4,7 @@ import type Logger from "./Logger";
 import z from "zod";
 import { calculate as calculatePieceCid } from "@filoz/synapse-sdk/piece";
 import { generatePrivateKey } from "viem/accounts";
-import { parsePieceCid } from "@filosign/contracts";
+import { parsePieceCid, computeCidIdentifier } from "@filosign/contracts";
 import { toB64 } from "filosign-crypto-utils";
 
 const zFileProfile = z
@@ -322,20 +322,20 @@ export default class Files {
 
       // Register on blockchain
       console.log("⛓️ Registering file on blockchain...");
-      const { digestPrefix, digestTail, digestLength, missingByte } =
-        parsePieceCid(pieceCid.toString());
+      const { digestPrefix, digestBuffer, digestTail } = parsePieceCid(
+        pieceCid.toString(),
+      );
       console.log("📝 Parsed piece CID for contract:", {
         digestPrefix: digestPrefix.substring(0, 20) + "...",
-        digestTail,
-        recipientCount: options.recipientAddresses.length,
+        digestBuffer: digestBuffer.substring(0, 20) + "...",
+        digestTail: digestTail.substring(0, 20) + "...",
       });
 
       const receipt = await tx(
         contracts.FSFileRegistry.write.registerFile([
           digestPrefix,
+          digestBuffer,
           digestTail,
-          digestLength - 34 === 0 ? false : true,
-          missingByte,
           options.recipientAddresses,
         ]),
       );
@@ -411,11 +411,8 @@ export default class Files {
 
   async acknowledgeFile(options: { pieceCid: string }) {
     const { tx, contracts } = this.defaults;
-    const { digestPrefix, digestTail } = parsePieceCid(options.pieceCid);
 
-    const cidIdentifier = keccak256(
-      encodePacked(["bytes32", "uint16"], [digestPrefix, digestTail]),
-    );
+    const cidIdentifier = computeCidIdentifier(options.pieceCid);
 
     const receipt = await tx(
       contracts.FSFileRegistry.write.acknowledge([cidIdentifier]),
