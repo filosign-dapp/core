@@ -19,7 +19,7 @@ const zFileSignature = z.object({
   timestamp: z.number(),
   compactSignature: z.string(),
   onchainTxHash: z.string().nullable(),
-  createdAt: z.string(),
+  createdAt: z.number(),
   signerProfile: zFileProfile,
 });
 
@@ -31,8 +31,8 @@ const zFile = z.object({
   acknowledged: z.boolean(),
   onchainTxHash: z.string().nullable(),
   acknowledgedTxHash: z.string().nullable(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
+  createdAt: z.number(),
+  updatedAt: z.number(),
   signatures: z.array(zFileSignature),
 });
 
@@ -191,8 +191,8 @@ export default class Files {
         metadata: z.record(z.string(), z.any()).nullable(),
         ownerEncryptedKey: z.string(),
         ownerEncryptedKeyIv: z.string(),
-        createdAt: z.string(),
-        updatedAt: z.string(),
+        createdAt: z.number(),
+        updatedAt: z.number(),
       },
       "/files",
       {
@@ -250,8 +250,8 @@ export default class Files {
         signatures: z.array(zFileSignature),
         ownerProfile: zFileProfile,
         onchainTxHash: z.string().nullable(),
-        createdAt: z.string(),
-        updatedAt: z.string(),
+        createdAt: z.number(),
+        updatedAt: z.number(),
       },
       `/files/${options.pieceCid}`,
     );

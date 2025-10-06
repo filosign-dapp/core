@@ -8,8 +8,8 @@ const zUserSignature = z.object({
   storageBucketPath: z.string(),
   visualHash: z.string(),
   name: z.string(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
+  createdAt: z.number(),
+  updatedAt: z.number(),
 });
 
 export default class Signatures {

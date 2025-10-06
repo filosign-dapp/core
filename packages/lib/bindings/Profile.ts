@@ -6,8 +6,8 @@ const zUserProfile = z.object({
   walletAddress: z.string(),
   email: z.string().nullable(),
   lastActiveAt: z.number(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
+  createdAt: z.number(),
+  updatedAt: z.number(),
   username: z.string().nullable(),
   displayName: z.string().nullable(),
   avatarUrl: z.string().nullable(),
@@ -22,8 +22,8 @@ const zProfile = z.object({
   avatarUrl: z.string().nullable(),
   bio: z.string().nullable(),
   metadataJson: z.record(z.string(), z.any()).nullable(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
+  createdAt: z.number(),
+  updatedAt: z.number(),
 });
 
 const zProfileExists = z.object({
