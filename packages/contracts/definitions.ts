@@ -1,6 +1,6 @@
 export const definitions = {
   FSManager: {
-    address: "0x0c5d6eac95153636ef3d12f08406bbe4240d59b1",
+    address: "0x61399e56027b81f1fb6eaaa983e4b839fb875035",
     abi: [
       {
         inputs: [],
@@ -176,7 +176,7 @@ export const definitions = {
     ],
   },
   FSFileRegistry: {
-    address: "0xb55DF07F4Af95eB1a8518C2C132695D84F5156B3",
+    address: "0x91Ab87C1c2b75F2685a159Bd5ca5a4A61ef610C0",
     abi: [
       {
         inputs: [],
@@ -334,9 +334,14 @@ export const definitions = {
             type: "bytes32",
           },
           {
-            internalType: "uint16",
+            internalType: "bytes16",
+            name: "pieceCidBuffer_",
+            type: "bytes16",
+          },
+          {
+            internalType: "bytes32",
             name: "pieceCidTail_",
-            type: "uint16",
+            type: "bytes32",
           },
         ],
         name: "cidIdentifier",
@@ -411,24 +416,19 @@ export const definitions = {
                 type: "bytes32",
               },
               {
+                internalType: "bytes16",
+                name: "pieceCidBuffer",
+                type: "bytes16",
+              },
+              {
+                internalType: "bytes32",
+                name: "pieceCidTail",
+                type: "bytes32",
+              },
+              {
                 internalType: "address",
                 name: "sender",
                 type: "address",
-              },
-              {
-                internalType: "uint16",
-                name: "pieceCidTail",
-                type: "uint16",
-              },
-              {
-                internalType: "bool",
-                name: "pieceCidParity",
-                type: "bool",
-              },
-              {
-                internalType: "uint8",
-                name: "missingByte",
-                type: "uint8",
               },
             ],
             internalType: "struct FSFileRegistry.FileDataView",
@@ -569,19 +569,14 @@ export const definitions = {
             type: "bytes32",
           },
           {
-            internalType: "uint16",
+            internalType: "bytes16",
+            name: "pieceCidBuffer_",
+            type: "bytes16",
+          },
+          {
+            internalType: "bytes32",
             name: "pieceCidTail_",
-            type: "uint16",
-          },
-          {
-            internalType: "bool",
-            name: "pieceCidParity_",
-            type: "bool",
-          },
-          {
-            internalType: "uint8",
-            name: "missingByte_",
-            type: "uint8",
+            type: "bytes32",
           },
           {
             internalType: "address[]",
@@ -630,7 +625,7 @@ export const definitions = {
     ],
   },
   FSKeyRegistry: {
-    address: "0xb4Ca5624c511F1d78986DEfA1bBf008D8f7898E8",
+    address: "0x772953b525efffd27D5d848fFAe4D5f123bFE96d",
     abi: [
       {
         inputs: [],
@@ -849,4 +844,4 @@ export const definitions = {
     ],
   },
 } as const;
-export const contractsDeployedAtBlock = 3081606n;
+export const contractsDeployedAtBlock = 3081863n;
