@@ -58,8 +58,6 @@ export default new Hono()
     // if status is not PENDING, remove from rows
     const filteredRows = rows.filter((row) => row.status === "PENDING");
 
-    console.log("received requests", filteredRows);
-
     return respond.ok(
       ctx,
       { requests: filteredRows },
