@@ -1,4 +1,3 @@
-import { CID } from "multiformats/cid";
 import {
   Account,
   Address,
@@ -6,6 +5,7 @@ import {
   encodePacked,
   Hex,
   keccak256,
+  pad,
   parseSignature,
   toHex,
   Transport,
@@ -13,54 +13,47 @@ import {
 } from "viem";
 
 export function parsePieceCid(pieceCid: string) {
-  const cid = CID.parse(pieceCid);
+  const bytes = new TextEncoder().encode(pieceCid);
+  const hex = `0x${bytes.toHex()}` as const;
 
-  const codecNumeric = cid.code;
-  const mh = cid.multihash;
-  const multihashCode = mh.code;
-  const rawDigest = mh.digest;
-  const digestLength = rawDigest.length;
+  const p1_bytes32 = `0x${hex.slice(2, 2 + 32 * 2)}` as const;
 
-  if (digestLength < 2) throw new Error("digest too short (<2 bytes)");
+  const p2_bytes16 = `0x${hex.slice(2 + 32 * 2, 2 + 32 * 2 + 16 * 2)}` as const;
 
-  const prefix = new Uint8Array(32);
-  let digestTail: number;
-
-  if (digestLength <= 34) {
-    const prefixLength = Math.min(32, digestLength - 2);
-    prefix.set(rawDigest.subarray(0, prefixLength));
-
-    const b1 = rawDigest[digestLength - 2];
-    const b2 = rawDigest[digestLength - 1];
-    digestTail = (b1 << 8) | b2;
-  } else {
-    prefix.set(rawDigest.subarray(0, 32));
-
-    const missingByte = rawDigest[32];
-    const lastByte = rawDigest[34]; // this is the cactual last byte
-    digestTail = (missingByte << 8) | lastByte;
-  }
-
-  const pieceCidParity = digestLength > 34;
-
-  const missingByte = digestLength > 34 ? rawDigest[33] : 0;
+  const remainingHex = hex.slice(2 + 32 * 2 + 16 * 2);
+  const p3_bytes32 = pad(`0x${remainingHex}`, {
+    size: 32,
+  });
 
   return {
-    multihashCode,
-    codecNumeric,
-    digestPrefix: toHex(prefix),
-    digestTail,
-    digestLength,
-    rawDigest,
-    pieceCidParity,
-    missingByte,
+    digestPrefix: p1_bytes32,
+    digestBuffer: p2_bytes16,
+    digestTail: p3_bytes32,
+    length: bytes.length,
   };
 }
 
+export function rebuildPieceCid(options: {
+  digestPrefix: Hex;
+  digestBuffer: Hex;
+  digestTail: Hex;
+}) {
+  const tailHex = options.digestTail.slice(2).replace(/^0+/, "");
+  const reconstructedHex = `0x${options.digestPrefix.slice(2)}${options.digestBuffer.slice(2)}${tailHex}`;
+
+  const reconstruct = Uint8Array.fromHex(reconstructedHex.slice(2));
+  const reconstructedString = new TextDecoder().decode(reconstruct);
+
+  return reconstructedString;
+}
+
 export function computeCidIdentifier(pieceCid: string) {
-  const { digestPrefix, digestTail } = parsePieceCid(pieceCid);
+  const { digestPrefix, digestBuffer, digestTail } = parsePieceCid(pieceCid);
   return keccak256(
-    encodePacked(["bytes32", "uint16"], [digestPrefix, digestTail]),
+    encodePacked(
+      ["bytes32", "bytes16", "bytes32"],
+      [digestPrefix, digestBuffer, digestTail],
+    ),
   );
 }
 
@@ -80,16 +73,21 @@ export async function signFileSignature(options: {
   const types = {
     Signature: [
       { name: "pieceCidPrefix", type: "bytes32" },
-      { name: "pieceCidTail", type: "uint256" },
+      { name: "pieceCidBuffer", type: "bytes16" },
+      { name: "pieceCidTail", type: "bytes32" },
       { name: "signatureVisualHash", type: "bytes32" },
     ],
   };
 
-  const { digestPrefix: pieceCidPrefix, digestTail: pieceCidTail } =
-    parsePieceCid(options.pieceCid);
+  const {
+    digestPrefix: pieceCidPrefix,
+    digestBuffer: pieceCidBuffer,
+    digestTail: pieceCidTail,
+  } = parsePieceCid(options.pieceCid);
 
   const value = {
     pieceCidPrefix: pieceCidPrefix,
+    pieceCidBuffer: pieceCidBuffer,
     pieceCidTail: pieceCidTail,
     signatureVisualHash: options.signatureVisualHash,
   };
