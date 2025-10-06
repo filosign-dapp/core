@@ -51,9 +51,18 @@ export default new Hono()
       .orderBy(shareRequests.createdAt)
       .all();
 
+    if (rows.length === 0) {
+      return respond.ok(ctx, { requests: [] }, "No received requests", 200);
+    }
+
+    // if status is not PENDING, remove from rows
+    const filteredRows = rows.filter((row) => row.status === "PENDING");
+
+    console.log("received requests", filteredRows);
+
     return respond.ok(
       ctx,
-      { requests: rows },
+      { requests: filteredRows },
       "Received requests fetched",
       200,
     );
