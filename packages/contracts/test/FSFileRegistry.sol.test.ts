@@ -63,17 +63,15 @@ describe("FSFileRegistry", () => {
 
     const {
       digestPrefix: pieceCidPrefix,
+      digestBuffer: pieceCidBuffer,
       digestTail: pieceCidTail,
-      pieceCidParity,
-      missingByte,
     } = parsePieceCid(samplePieceCid);
 
     const txHash = await fileRegistry.write.registerFile(
       [
         pieceCidPrefix,
+        pieceCidBuffer,
         pieceCidTail,
-        pieceCidParity,
-        missingByte,
         [recipient.account.address],
       ],
       { account: sender.account },
@@ -85,8 +83,8 @@ describe("FSFileRegistry", () => {
     const fileData = await fileRegistry.read.getFileData([cidIdentifier]);
 
     expect(fileData.pieceCidPrefix).to.equal(pieceCidPrefix);
+    expect(fileData.pieceCidBuffer).to.equal(pieceCidBuffer);
     expect(fileData.pieceCidTail).to.equal(pieceCidTail);
-    expect(fileData.pieceCidParity).to.equal(pieceCidParity);
     expect(fileData.sender.toLowerCase()).to.equal(
       sender.account.address.toLowerCase(),
     );
@@ -107,18 +105,16 @@ describe("FSFileRegistry", () => {
 
     const {
       digestPrefix: pieceCidPrefix,
+      digestBuffer: pieceCidBuffer,
       digestTail: pieceCidTail,
-      pieceCidParity,
-      missingByte,
     } = parsePieceCid(samplePieceCid);
 
     await expect(
       fileRegistry.write.registerFile(
         [
           pieceCidPrefix,
+          pieceCidBuffer,
           pieceCidTail,
-          pieceCidParity,
-          missingByte,
           [recipient.account.address],
         ],
         { account: other.account },
@@ -136,17 +132,15 @@ describe("FSFileRegistry", () => {
 
     const {
       digestPrefix: pieceCidPrefix,
+      digestBuffer: pieceCidBuffer,
       digestTail: pieceCidTail,
-      pieceCidParity,
-      missingByte,
     } = parsePieceCid(samplePieceCid);
 
     const txHash = await fileRegistry.write.registerFile(
       [
         pieceCidPrefix,
+        pieceCidBuffer,
         pieceCidTail,
-        pieceCidParity,
-        missingByte,
         [recipient.account.address],
       ],
       { account: sender.account },
@@ -157,9 +151,8 @@ describe("FSFileRegistry", () => {
       fileRegistry.write.registerFile(
         [
           pieceCidPrefix,
+          pieceCidBuffer,
           pieceCidTail,
-          pieceCidParity,
-          missingByte,
           [recipient.account.address],
         ],
         { account: sender.account },
@@ -177,17 +170,15 @@ describe("FSFileRegistry", () => {
 
     const {
       digestPrefix: pieceCidPrefix,
+      digestBuffer: pieceCidBuffer,
       digestTail: pieceCidTail,
-      pieceCidParity,
-      missingByte,
     } = parsePieceCid(samplePieceCid);
 
     const registerTxHash = await fileRegistry.write.registerFile(
       [
         pieceCidPrefix,
+        pieceCidBuffer,
         pieceCidTail,
-        pieceCidParity,
-        missingByte,
         [recipient.account.address],
       ],
       { account: sender.account },
@@ -220,17 +211,15 @@ describe("FSFileRegistry", () => {
 
     const {
       digestPrefix: pieceCidPrefix,
+      digestBuffer: pieceCidBuffer,
       digestTail: pieceCidTail,
-      pieceCidParity,
-      missingByte,
     } = parsePieceCid(samplePieceCid);
 
     const registerTxHash = await fileRegistry.write.registerFile(
       [
         pieceCidPrefix,
+        pieceCidBuffer,
         pieceCidTail,
-        pieceCidParity,
-        missingByte,
         [recipient.account.address],
       ],
       { account: sender.account },
@@ -269,17 +258,15 @@ describe("FSFileRegistry", () => {
 
     const {
       digestPrefix: pieceCidPrefix,
+      digestBuffer: pieceCidBuffer,
       digestTail: pieceCidTail,
-      pieceCidParity,
-      missingByte,
     } = parsePieceCid(samplePieceCid);
 
     const registerTxHash = await fileRegistry.write.registerFile(
       [
         pieceCidPrefix,
+        pieceCidBuffer,
         pieceCidTail,
-        pieceCidParity,
-        missingByte,
         [recipient.account.address],
       ],
       { account: sender.account },
@@ -310,18 +297,16 @@ describe("FSFileRegistry", () => {
 
     const {
       digestPrefix: pieceCidPrefix,
+      digestBuffer: pieceCidBuffer,
       digestTail: pieceCidTail,
-      pieceCidParity,
-      missingByte,
     } = parsePieceCid(samplePieceCid);
     const signatureVisualHash = keccak256(toBytes("signature-visual-data"));
 
     const registerTxHash = await fileRegistry.write.registerFile(
       [
         pieceCidPrefix,
+        pieceCidBuffer,
         pieceCidTail,
-        pieceCidParity,
-        missingByte,
         [recipient.account.address],
       ],
       { account: sender.account },
@@ -367,18 +352,16 @@ describe("FSFileRegistry", () => {
 
     const {
       digestPrefix: pieceCidPrefix,
+      digestBuffer: pieceCidBuffer,
       digestTail: pieceCidTail,
-      pieceCidParity,
-      missingByte,
     } = parsePieceCid(samplePieceCid);
     const signatureVisualHash = keccak256(toBytes("signature-visual-data"));
 
     const registerTxHash = await fileRegistry.write.registerFile(
       [
         pieceCidPrefix,
+        pieceCidBuffer,
         pieceCidTail,
-        pieceCidParity,
-        missingByte,
         [recipient.account.address],
       ],
       { account: sender.account },
@@ -387,18 +370,12 @@ describe("FSFileRegistry", () => {
 
     const cidIdentifier = computeCidIdentifier(samplePieceCid);
 
-    const messageHash = keccak256(
-      encodePacked(
-        ["bytes32", "uint16", "bytes32"],
-        [pieceCidPrefix, pieceCidTail, signatureVisualHash],
-      ),
-    );
-
-    const signature = await recipient.signMessage({
-      message: { raw: messageHash },
+    const { r, s, v } = await signFileSignature({
+      walletClient: recipient,
+      contractAddress: fileRegistry.address,
+      pieceCid: samplePieceCid,
+      signatureVisualHash,
     });
-
-    const { r, s, v } = parseSignature(signature);
 
     await expect(
       fileRegistry.write.submitSignature(
@@ -421,46 +398,35 @@ describe("FSFileRegistry", () => {
 
     const {
       digestPrefix: pieceCidPrefix,
+      digestBuffer: pieceCidBuffer,
       digestTail: pieceCidTail,
-      pieceCidParity,
-      missingByte,
     } = parsePieceCid(samplePieceCid);
     const signatureVisualHash = keccak256(toBytes("signature-visual-data"));
 
     const registerTxHash = await fileRegistry.write.registerFile(
       [
         pieceCidPrefix,
+        pieceCidBuffer,
         pieceCidTail,
-        pieceCidParity,
-        missingByte,
         [recipient.account.address],
       ],
       { account: sender.account },
     );
     await admin.waitForTransactionReceipt({ hash: registerTxHash });
 
-    const cidIdentifier = await fileRegistry.read.cidIdentifier([
-      pieceCidPrefix,
-      pieceCidTail,
-    ]);
+    const cidIdentifier = computeCidIdentifier(samplePieceCid);
 
     const ackTxHash = await fileRegistry.write.acknowledge([cidIdentifier], {
       account: recipient.account,
     });
     await admin.waitForTransactionReceipt({ hash: ackTxHash });
 
-    const messageHash = keccak256(
-      encodePacked(
-        ["bytes32", "uint16", "bytes32"],
-        [pieceCidPrefix, pieceCidTail, signatureVisualHash],
-      ),
-    );
-
-    const signature = await other.signMessage({
-      message: { raw: messageHash },
+    const { r, s, v } = await signFileSignature({
+      walletClient: other,
+      contractAddress: fileRegistry.address,
+      pieceCid: samplePieceCid,
+      signatureVisualHash,
     });
-
-    const { r, s, v } = parseSignature(signature);
 
     await expect(
       fileRegistry.write.submitSignature(
@@ -480,18 +446,16 @@ describe("FSFileRegistry", () => {
 
     const {
       digestPrefix: pieceCidPrefix,
+      digestBuffer: pieceCidBuffer,
       digestTail: pieceCidTail,
-      pieceCidParity,
-      missingByte,
     } = parsePieceCid(samplePieceCid);
     const signatureVisualHash = keccak256(toBytes("signature-visual-data"));
 
     const registerTxHash = await fileRegistry.write.registerFile(
       [
         pieceCidPrefix,
+        pieceCidBuffer,
         pieceCidTail,
-        pieceCidParity,
-        missingByte,
         [recipient.account.address],
       ],
       { account: sender.account },
@@ -536,18 +500,16 @@ describe("FSFileRegistry", () => {
 
     const {
       digestPrefix: pieceCidPrefix,
+      digestBuffer: pieceCidBuffer,
       digestTail: pieceCidTail,
-      pieceCidParity,
-      missingByte,
     } = parsePieceCid(samplePieceCid);
     const signatureVisualHash = keccak256(toBytes("signature-visual-data"));
 
     const registerTxHash = await fileRegistry.write.registerFile(
       [
         pieceCidPrefix,
+        pieceCidBuffer,
         pieceCidTail,
-        pieceCidParity,
-        missingByte,
         [recipient.account.address],
       ],
       { account: sender.account },
@@ -581,12 +543,13 @@ describe("FSFileRegistry", () => {
 
     const {
       digestPrefix: pieceCidPrefix,
+      digestBuffer: pieceCidBuffer,
       digestTail: pieceCidTail,
-      pieceCidParity,
     } = parsePieceCid(samplePieceCid);
 
     const calculatedIdentifier = await fileRegistry.read.cidIdentifier([
       pieceCidPrefix,
+      pieceCidBuffer,
       pieceCidTail,
     ]);
     const expectedIdentifier = computeCidIdentifier(samplePieceCid);
@@ -604,17 +567,15 @@ describe("FSFileRegistry", () => {
 
     const {
       digestPrefix: pieceCidPrefix,
+      digestBuffer: pieceCidBuffer,
       digestTail: pieceCidTail,
-      pieceCidParity,
-      missingByte,
     } = parsePieceCid(samplePieceCid);
 
     const registerTxHash = await fileRegistry.write.registerFile(
       [
         pieceCidPrefix,
+        pieceCidBuffer,
         pieceCidTail,
-        pieceCidParity,
-        missingByte,
         [recipient.account.address],
       ],
       { account: sender.account },
@@ -647,17 +608,15 @@ describe("FSFileRegistry", () => {
 
     const {
       digestPrefix: pieceCidPrefix,
+      digestBuffer: pieceCidBuffer,
       digestTail: pieceCidTail,
-      pieceCidParity,
-      missingByte,
     } = parsePieceCid(samplePieceCid);
 
     const registerTxHash = await fileRegistry.write.registerFile(
       [
         pieceCidPrefix,
+        pieceCidBuffer,
         pieceCidTail,
-        pieceCidParity,
-        missingByte,
         [recipient1.account.address, recipient2.account.address],
       ],
       { account: sender.account },
@@ -751,8 +710,12 @@ describe("FSFileRegistry", () => {
     expect(fileData.pieceCidPrefix).to.equal(
       "0x0000000000000000000000000000000000000000000000000000000000000000",
     );
-    expect(fileData.pieceCidTail).to.equal(0);
-    expect(fileData.pieceCidParity).to.equal(false);
+    expect(fileData.pieceCidBuffer).to.equal(
+      "0x00000000000000000000000000000000",
+    );
+    expect(fileData.pieceCidTail).to.equal(
+      "0x0000000000000000000000000000000000000000000000000000000000000000",
+    );
     expect(fileData.sender).to.equal(
       "0x0000000000000000000000000000000000000000",
     );
