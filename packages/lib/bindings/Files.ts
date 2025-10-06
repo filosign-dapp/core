@@ -141,7 +141,7 @@ export default class Files {
       throw new Error(`Upload failed: ${uploadResponse.statusText}`);
     }
 
-    const ownerWallet = this.defaults.wallet.account.address;
+    const ownerWallet = wallet.account.address;
     const ownerPubKeyResponse = await apiClient.rpc.getSafe(
       {
         publicKey: z.string(),
