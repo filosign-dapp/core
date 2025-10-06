@@ -109,9 +109,6 @@ export class FilosignClient {
   }
 
   async isLoggedIn() {
-    console.log("hi");
-    console.log(this.apiClient.jwtExists);
-    console.log(this.crypto.encryptionPublicKey);
     return !!this.crypto.encryptionPublicKey && !!this.apiClient.jwtExists;
   }
 
