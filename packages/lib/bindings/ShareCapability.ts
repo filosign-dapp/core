@@ -66,7 +66,9 @@ export default class ShareCapability {
 
   async getSentRequests() {
     const { apiClient } = this.defaults;
+    console.log("getSentRequests called");
     apiClient.ensureJwt();
+    console.log("getSentRequests ensured jwt");
     const response = await apiClient.rpc.getSafe(
       {
         requests: z.array(
@@ -83,13 +85,14 @@ export default class ShareCapability {
               "CANCELLED",
               "EXPIRED",
             ]),
-            createdAt: z.string(),
-            updatedAt: z.string(),
+            createdAt: z.number(),
+            updatedAt: z.number(),
           }),
         ),
       },
       "/requests/sent",
     );
+    console.log("getSentRequests response", response.data);
     return response.data;
   }
 

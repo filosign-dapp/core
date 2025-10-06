@@ -74,9 +74,15 @@ class ExtendedAxios {
     ...args: Parameters<AxiosInstance["get"]>
   ) {
     const resp = await this.axios.get(...args);
+    console.log(
+      "getSafe response",
+      resp.data,
+      this.getApiResponseZodType(z.object(zResponseShape)),
+    );
     const parsed = this.getApiResponseZodType(z.object(zResponseShape)).parse(
       resp.data,
     );
+    console.log("getSafe parsed", parsed);
     if (!parsed.success) {
       throw new Error(parsed.error || "API returned an error");
     }
