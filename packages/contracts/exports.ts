@@ -1,3 +1,8 @@
-export { computeCidIdentifier, parsePieceCid } from "./services/utils";
+export {
+  computeCidIdentifier,
+  parsePieceCid,
+  rebuildPieceCid,
+  signFileSignature,
+} from "./services/utils";
 export { getContracts } from "./services/contracts";
 export { contractsDeployedAtBlock } from "./definitions";
