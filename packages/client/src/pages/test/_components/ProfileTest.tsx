@@ -15,8 +15,8 @@ import {
   UserIcon,
   CheckCircleIcon,
   PlusIcon,
-  EditIcon,
-  SearchIcon,
+  PencilIcon as EditIcon,
+  FileSearchIcon as SearchIcon,
   SpinnerIcon,
   EyeIcon,
 } from "@phosphor-icons/react";
@@ -54,8 +54,8 @@ export function ProfileTest() {
     try {
       const result =
         await checkUsernameAvailability.mutateAsync(usernameToCheck);
-      setUsernameCheckResult(result.data);
-      console.log("Username check result", result.data);
+      setUsernameCheckResult(result);
+      console.log("Username check result", result);
     } catch (error) {
       console.error("Failed to check username", error);
     }

@@ -30,7 +30,7 @@ import ApiClient from "./bindings/ApiClient";
 import { Crypto } from "./bindings/Crypto";
 import ShareCapability from "./bindings/ShareCapability";
 import z from "zod";
-import { privateKeyToAddress, publicKeyToAddress } from "viem/accounts";
+import { publicKeyToAddress } from "viem/accounts";
 import { FilosignStore } from "./store";
 import Files from "./bindings/Files";
 
@@ -102,6 +102,10 @@ export class FilosignClient {
 
   get files() {
     return new Files(this.defaults);
+  }
+
+  get profile() {
+    return this.store.profile;
   }
 
   async isRegistered() {
