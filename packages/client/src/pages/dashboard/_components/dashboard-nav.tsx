@@ -1,5 +1,6 @@
 import { SidebarTrigger } from "@/src/lib/components/ui/sidebar";
 import { UserDropdown } from "./user-dropdown";
+import { NotificationsPopover } from "./notifications-popover";
 import Logo from "@/src/lib/components/custom/Logo";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/src/lib/components/ui/button";
@@ -28,6 +29,7 @@ export default function DashboardNav() {
             <p className="hidden sm:inline">New Envelope</p>
           </Button>
         </Link>
+        <NotificationsPopover />
         <UserDropdown />
         <SidebarTrigger className="-ml-1 md:hidden" />
       </div>

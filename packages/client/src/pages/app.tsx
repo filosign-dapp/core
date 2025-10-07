@@ -16,6 +16,7 @@ import PitchPage from "./pitch";
 import FilesPage from "./dashboard/files";
 import DashboardPage from "./dashboard";
 import ProfilePage from "./dashboard/profile";
+import PermissionsPage from "./dashboard/permissions";
 import OnboardingWelcomePage from "./onboarding";
 import OnboardingSetPinPage from "./onboarding/set-pin";
 import OnboardingCreateSignaturePage from "./onboarding/create-signature";
@@ -71,6 +72,18 @@ const profileRoute = createRoute({
     return (
       <DashboardProtector>
         {withPageErrorBoundary(ProfilePage)({})}
+      </DashboardProtector>
+    );
+  },
+});
+
+const permissionsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/dashboard/settings/permissions",
+  component: function Permissions() {
+    return (
+      <DashboardProtector>
+        {withPageErrorBoundary(PermissionsPage)({})}
       </DashboardProtector>
     );
   },
@@ -202,6 +215,7 @@ const routeTree = rootRoute.addChildren([
   pitchRoute,
   dashboardRoute,
   profileRoute,
+  permissionsRoute,
   dashboardDocumentAllRoute,
   dashboardDocumentFolderRoute,
   createEnvelopeRoute,

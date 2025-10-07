@@ -41,6 +41,7 @@ export const ACCEPTED_FILE_EXTENSIONS = Array.from(
 // Uploaded file type
 export type StoredDocument = {
   id: string;
+  pieceCid?: string; // SDK piece CID for the uploaded file
   name: string;
   size: number;
   type: string;

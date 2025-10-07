@@ -1,0 +1,76 @@
+import { ReactNode } from "react";
+import { Button } from "@/src/lib/components/ui/button";
+import { Badge } from "@/src/lib/components/ui/badge";
+
+interface NotificationItemCardProps {
+  icon: ReactNode;
+  title: string;
+  subtitle?: string;
+  badge?: string;
+  actionButton?: {
+    label: string;
+    onClick: () => void;
+    loading?: boolean;
+    variant?: "default" | "outline" | "destructive";
+  };
+  variant?: "default" | "warning" | "info";
+  className?: string;
+}
+
+export function NotificationItemCard({
+  icon,
+  title,
+  subtitle,
+  badge,
+  actionButton,
+  variant = "default",
+  className = "",
+}: NotificationItemCardProps) {
+  const variantStyles = {
+    default:
+      "bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800",
+    warning:
+      "bg-orange-50 dark:bg-orange-950/20 border-orange-200 dark:border-orange-800",
+    info: "bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800",
+  };
+
+  return (
+    <div
+      className={`p-4 rounded-lg border ${variantStyles[variant]} ${className}`}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-start gap-3 flex-1 min-w-0">
+          <div className="flex-shrink-0 mt-0.5">{icon}</div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <h4 className="text-sm font-medium text-foreground truncate">
+                {title}
+              </h4>
+              {badge && (
+                <Badge variant="outline" className="text-xs px-1.5 py-0.5">
+                  {badge}
+                </Badge>
+              )}
+            </div>
+            {subtitle && (
+              <p className="text-xs text-muted-foreground line-clamp-2">
+                {subtitle}
+              </p>
+            )}
+          </div>
+        </div>
+        {actionButton && (
+          <Button
+            size="sm"
+            variant={actionButton.variant || "default"}
+            onClick={actionButton.onClick}
+            disabled={actionButton.loading}
+            className="flex-shrink-0 text-xs px-3 py-1 h-7"
+          >
+            {actionButton.loading ? "..." : actionButton.label}
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}

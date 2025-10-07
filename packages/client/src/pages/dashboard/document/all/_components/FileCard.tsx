@@ -8,13 +8,26 @@ import {
   DotsThreeVerticalIcon,
 } from "@phosphor-icons/react";
 import { cn } from "@/src/lib/utils/utils";
-import type { MockFile } from "../mock";
 import { Image } from "@/src/lib/components/custom/Image";
 import { Button } from "@/src/lib/components/ui/button";
 
+interface RealFile {
+  pieceCid: string;
+  metadata?: {
+    fileName?: string;
+    fileSize?: number;
+    fileType?: string;
+    message?: string;
+    originalId?: string;
+  };
+  type?: "sent" | "received";
+  createdAt?: Date;
+  [key: string]: any;
+}
+
 interface FileCardProps {
-  file: MockFile;
-  onClick?: (file: MockFile) => void;
+  file: RealFile;
+  onClick?: (file: RealFile) => void;
   variant?: "list" | "grid";
 }
 
@@ -45,8 +58,12 @@ export default function FileCard({
   onClick,
   variant = "grid",
 }: FileCardProps) {
-  const FileIconComponent = getFileIcon(file.type);
-  const iconColor = getFileTypeColor(file.type);
+  const fileName = file.metadata?.fileName || "Unknown File";
+  const fileSize = file.metadata?.fileSize || 0;
+  const fileType = file.metadata?.fileType || "application/octet-stream";
+
+  const FileIconComponent = getFileIcon(fileType);
+  const iconColor = getFileTypeColor(fileType);
 
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return "0 Bytes";
@@ -68,8 +85,8 @@ export default function FileCard({
     onClick?.(file);
   };
 
-  const isImage = file.type.includes("image");
-  const shouldShowPreview = isImage && file.dataUrl;
+  const isImage = fileType.includes("image");
+  const shouldShowPreview = isImage && file.metadata?.dataUrl;
 
   // Grid variant
   if (variant === "grid") {
@@ -90,8 +107,8 @@ export default function FileCard({
         <div className="aspect-square mb-3 bg-card rounded-lg flex items-center justify-center">
           {shouldShowPreview ? (
             <Image
-              src={file.dataUrl}
-              alt={file.name}
+              src={file.metadata?.dataUrl}
+              alt={fileName}
               className="w-full h-full object-cover object-top rounded-lg"
             />
           ) : (
@@ -101,14 +118,14 @@ export default function FileCard({
 
         {/* File info */}
         <div className="space-y-1">
-          <p className="text-sm font-medium truncate" title={file.name}>
-            {file.name}
+          <p className="text-sm font-medium truncate" title={fileName}>
+            {fileName}
           </p>
           <p className="text-xs text-muted-foreground">
-            {formatFileSize(file.size)}
+            {formatFileSize(fileSize)}
           </p>
           <p className="text-xs text-muted-foreground">
-            {formatDate(file.createdAt)}
+            {file.createdAt ? formatDate(file.createdAt) : "Unknown date"}
           </p>
         </div>
       </motion.div>
@@ -133,8 +150,8 @@ export default function FileCard({
         <div className="flex items-center gap-3">
           {shouldShowPreview ? (
             <Image
-              src={file.dataUrl}
-              alt={file.name}
+              src={file.metadata?.dataUrl}
+              alt={fileName}
               className="size-10 object-cover object-top rounded-lg"
               width={200}
               height={200}
@@ -145,9 +162,10 @@ export default function FileCard({
             </div>
           )}
           <div>
-            <p className="text-sm font-medium">{file.name}</p>
+            <p className="text-sm font-medium">{fileName}</p>
             <p className="text-xs text-muted-foreground">
-              {formatFileSize(file.size)} • {formatDate(file.createdAt)}
+              {formatFileSize(fileSize)} •{" "}
+              {file.createdAt ? formatDate(file.createdAt) : "Unknown date"}
             </p>
           </div>
         </div>

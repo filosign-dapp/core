@@ -26,6 +26,7 @@ import {
   UserCheckIcon,
   FileIcon,
   SignatureIcon,
+  ClockIcon,
 } from "@phosphor-icons/react";
 import { StatusBadge } from "./_components/StatusBadge";
 import { AuthenticationTest } from "./_components/AuthenticationTest";
@@ -88,17 +89,31 @@ export default function TestPage() {
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Filosign Registered</span>
-                <StatusBadge
-                  status={isRegistered.data}
-                  label={isRegistered.data ? "Yes" : "No"}
-                />
+                {isRegistered.data === undefined ? (
+                  <Badge variant="outline">
+                    <ClockIcon className="w-3 h-3 mr-1" />
+                    Loading
+                  </Badge>
+                ) : (
+                  <StatusBadge
+                    status={isRegistered.data as boolean}
+                    label={isRegistered.data ? "Yes" : "No"}
+                  />
+                )}
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Filosign Logged In</span>
-                <StatusBadge
-                  status={isLoggedIn.data}
-                  label={isLoggedIn.data ? "Yes" : "No"}
-                />
+                {isLoggedIn.data === undefined ? (
+                  <Badge variant="outline">
+                    <ClockIcon className="w-3 h-3 mr-1" />
+                    Loading
+                  </Badge>
+                ) : (
+                  <StatusBadge
+                    status={isLoggedIn.data as boolean}
+                    label={isLoggedIn.data ? "Yes" : "No"}
+                  />
+                )}
               </div>
             </div>
 

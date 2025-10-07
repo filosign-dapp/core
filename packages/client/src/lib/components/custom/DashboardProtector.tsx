@@ -13,8 +13,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/src/lib/components/ui/card";
+import { Loader } from "@/src/lib/components/ui/loader";
 import OtpInput from "@/src/pages/onboarding/_components/OtpInput";
-import { CaretRightIcon, SpinnerBallIcon } from "@phosphor-icons/react";
+import { CaretRightIcon } from "@phosphor-icons/react";
 import Logo from "./Logo";
 
 interface DashboardProtectorProps {
@@ -93,12 +94,7 @@ export default function DashboardProtector({
 
   // Show loading while checking auth status
   if (!ready || isRegistered.isPending || !isLoggedIn.isSuccess) {
-    return (
-      <div className="flex items-center justify-center min-h-screen gap-2">
-        <SpinnerBallIcon className="animate-spin size-8" />
-        <h3 className="">Working on it...</h3>
-      </div>
-    );
+    return <Loader />;
   }
 
   // If PIN auth is required and not completed, show inline form

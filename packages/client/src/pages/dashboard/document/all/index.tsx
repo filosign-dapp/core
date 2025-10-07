@@ -19,11 +19,10 @@ import { motion } from "motion/react";
 import DashboardLayout from "../../layout";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { getRootItems } from "./mock";
-import FolderCard from "./_components/FolderCard";
 import FileCard from "./_components/FileCard";
 import { FileViewer } from "@/src/lib/components/custom/FileViewer";
-import type { MockFolder, MockFile } from "./mock";
+import { Loader } from "@/src/lib/components/ui/loader";
+import { useFilosignQuery } from "@filosign/sdk/react";
 
 export default function DocumentAllPage() {
   const navigate = useNavigate();
@@ -32,7 +31,22 @@ export default function DocumentAllPage() {
   const [viewerOpen, setViewerOpen] = useState(false);
   const [selectedFileId, setSelectedFileId] = useState<string | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const items = getRootItems();
+
+  // File queries
+  const sentFiles = useFilosignQuery(["files", "getSentFiles"], undefined);
+  const receivedFiles = useFilosignQuery(
+    ["files", "getReceivedFiles"],
+    undefined,
+  );
+
+  const allFiles = [
+    ...(Array.isArray(sentFiles.data)
+      ? sentFiles.data.map((file) => ({ ...file, type: "sent" }))
+      : []),
+    ...(Array.isArray(receivedFiles.data)
+      ? receivedFiles.data.map((file) => ({ ...file, type: "received" }))
+      : []),
+  ];
 
   const handleViewModeChange = (newViewMode: "list" | "grid") => {
     if (newViewMode !== viewMode) {
@@ -45,18 +59,10 @@ export default function DocumentAllPage() {
     }
   };
 
-  const handleItemClick = (item: MockFolder | MockFile) => {
-    if ("documentCount" in item) {
-      // It's a folder, navigate to folder page
-      navigate({
-        to: "/dashboard/document/folder/$folderId",
-        params: { folderId: item.id },
-      });
-    } else {
-      // It's a file, open file viewer
-      setSelectedFileId(item.id);
-      setViewerOpen(true);
-    }
+  const handleItemClick = (file: any) => {
+    // Open file viewer with piece CID
+    setSelectedFileId(file.pieceCid);
+    setViewerOpen(true);
   };
 
   return (
@@ -73,7 +79,7 @@ export default function DocumentAllPage() {
           >
             <div className="flex items-center gap-4">
               <h2 className="text-lg font-medium text-foreground">
-                All Documents ({items.length})
+                All Documents ({allFiles.length})
               </h2>
             </div>
 
@@ -215,7 +221,9 @@ export default function DocumentAllPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.2, delay: 0.3 }}
           >
-            {items.length === 0 ? (
+            {sentFiles.isLoading || receivedFiles.isLoading ? (
+              <Loader text="Loading documents..." />
+            ) : allFiles.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -246,80 +254,80 @@ export default function DocumentAllPage() {
               </div>
             ) : (
               <>
-                {/* Folders Section */}
-                {(() => {
-                  const folders = items.filter(
-                    (item) => "documentCount" in item,
-                  ) as MockFolder[];
-                  const files = items.filter(
-                    (item) => !("documentCount" in item),
-                  ) as MockFile[];
+                {/* Sent Files Section */}
+                {Array.isArray(sentFiles.data) && sentFiles.data.length > 0 && (
+                  <motion.div
+                    className="space-y-4"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.2, delay: 0.4 }}
+                  >
+                    <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+                      Sent Files ({sentFiles.data.length})
+                    </h3>
+                    {viewMode === "list" ? (
+                      <div className="space-y-2">
+                        {sentFiles.data.map((file) => (
+                          <FileCard
+                            key={`sent-${file.pieceCid}`}
+                            file={{ ...file, type: "sent" }}
+                            onClick={handleItemClick}
+                            variant="list"
+                          />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-2 @xl:grid-cols-3 @2xl:grid-cols-4 @3xl:grid-cols-5 @5xl:grid-cols-5 gap-4">
+                        {sentFiles.data.map((file) => (
+                          <FileCard
+                            key={`sent-${file.pieceCid}`}
+                            file={{ ...file, type: "sent" }}
+                            onClick={handleItemClick}
+                            variant="grid"
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </motion.div>
+                )}
 
-                  return (
-                    <>
-                      {/* Folders */}
-                      {folders.length > 0 && (
-                        <motion.div
-                          className="space-y-4"
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.2, delay: 0.4 }}
-                        >
-                          <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-                            Folders ({folders.length})
-                          </h3>
-                          <div className="grid grid-cols-1 @xl:grid-cols-2 @2xl:grid-cols-3 @3xl:grid-cols-4 @5xl:grid-cols-5 gap-3">
-                            {folders.map((folder) => (
-                              <FolderCard
-                                key={`folder-${folder.id}`}
-                                folder={folder}
-                                onClick={handleItemClick}
-                                variant="grid"
-                              />
-                            ))}
-                          </div>
-                        </motion.div>
+                {/* Received Files Section */}
+                {Array.isArray(receivedFiles.data) &&
+                  receivedFiles.data.length > 0 && (
+                    <motion.div
+                      className="space-y-4"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.2, delay: 0.5 }}
+                    >
+                      <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+                        Received Files ({receivedFiles.data.length})
+                      </h3>
+                      {viewMode === "list" ? (
+                        <div className="space-y-2">
+                          {receivedFiles.data.map((file) => (
+                            <FileCard
+                              key={`received-${file.pieceCid}`}
+                              file={{ ...file, type: "received" }}
+                              onClick={handleItemClick}
+                              variant="list"
+                            />
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-2 @xl:grid-cols-3 @2xl:grid-cols-4 @3xl:grid-cols-5 @5xl:grid-cols-5 gap-4">
+                          {receivedFiles.data.map((file) => (
+                            <FileCard
+                              key={`received-${file.pieceCid}`}
+                              file={{ ...file, type: "received" }}
+                              onClick={handleItemClick}
+                              variant="grid"
+                            />
+                          ))}
+                        </div>
                       )}
-
-                      {/* Files Section */}
-                      {files.length > 0 && (
-                        <motion.div
-                          className="space-y-4"
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.2, delay: 0.5 }}
-                        >
-                          <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-                            Files ({files.length})
-                          </h3>
-                          {viewMode === "list" ? (
-                            <div className="space-y-2">
-                              {files.map((file) => (
-                                <FileCard
-                                  key={`file-${file.id}`}
-                                  file={file}
-                                  onClick={handleItemClick}
-                                  variant="list"
-                                />
-                              ))}
-                            </div>
-                          ) : (
-                            <div className="grid grid-cols-2 @xl:grid-cols-3 @2xl:grid-cols-4 @3xl:grid-cols-5 @5xl:grid-cols-5 gap-4">
-                              {files.map((file) => (
-                                <FileCard
-                                  key={`file-${file.id}`}
-                                  file={file}
-                                  onClick={handleItemClick}
-                                  variant="grid"
-                                />
-                              ))}
-                            </div>
-                          )}
-                        </motion.div>
-                      )}
-                    </>
-                  );
-                })()}
+                    </motion.div>
+                  )}
               </>
             )}
           </motion.div>

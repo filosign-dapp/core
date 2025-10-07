@@ -17,14 +17,13 @@ import {
 } from "@/src/lib/components/ui/dropdown-menu";
 import { Button } from "@/src/lib/components/ui/button";
 import { Image } from "@/src/lib/components/custom/Image";
-import { userData } from "./sidebar/mock";
 import { usePrivy } from "@privy-io/react-auth";
 import { useNavigate } from "@tanstack/react-router";
 import { useFilosignMutation } from "@filosign/sdk/react";
 
 export function UserDropdown() {
   const [isOpen, setIsOpen] = React.useState(false);
-  const { logout: logoutPrivy } = usePrivy();
+  const { user, logout: logoutPrivy } = usePrivy();
   const logoutFilosign = useFilosignMutation(["logout"]);
   const navigate = useNavigate();
 
@@ -34,6 +33,13 @@ export function UserDropdown() {
     navigate({ to: "/", replace: true });
   };
 
+  const formatAddress = (address: string) => {
+    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  };
+
+  const displayName = user?.google?.name || user?.email?.address || "User";
+  const walletAddress = user?.wallet?.address;
+
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
@@ -42,16 +48,7 @@ export function UserDropdown() {
           className="relative h-10 w-10 rounded-full transition-all duration-150 hover:bg-accent/50"
         >
           <div className="flex aspect-square size-8 items-center justify-center bg-muted/10 rounded-full">
-            <Image
-              src={userData.avatar}
-              alt={userData.name}
-              className="size-8 rounded-full object-cover"
-            >
-              <UserIcon
-                className="size-5 text-muted-foreground"
-                weight="bold"
-              />
-            </Image>
+            <UserIcon className="size-5 text-muted-foreground" weight="bold" />
           </div>
         </Button>
       </DropdownMenuTrigger>
@@ -76,17 +73,13 @@ export function UserDropdown() {
         >
           <DropdownMenuItem className="gap-3 p-3 cursor-default">
             <div className="flex aspect-square size-10 items-center justify-center bg-muted/10 rounded-full">
-              <Image
-                src={userData.avatar}
-                alt={userData.name}
-                className="size-10 rounded-full object-cover"
-              >
-                <UserIcon className="size-6 text-muted-foreground" />
-              </Image>
+              <UserIcon className="size-6 text-muted-foreground" />
             </div>
             <div className="flex flex-col">
-              <p className="font-medium text-sm">{userData.name}</p>
-              <p className="text-xs text-muted-foreground">{userData.email}</p>
+              <p className="font-medium text-sm">{displayName}</p>
+              <p className="text-xs text-muted-foreground">
+                {walletAddress ? formatAddress(walletAddress) : "No wallet"}
+              </p>
             </div>
           </DropdownMenuItem>
         </motion.div>

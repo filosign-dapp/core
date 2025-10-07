@@ -6,6 +6,7 @@ import {
   ChartBarIcon,
   GearIcon,
   ShieldCheckIcon,
+  ShieldIcon,
 } from "@phosphor-icons/react";
 
 // This is sample data.
@@ -78,6 +79,10 @@ export const sidebarData = {
         {
           title: "Profile",
           url: "/dashboard/settings/profile",
+        },
+        {
+          title: "Permissions",
+          url: "/dashboard/settings/permissions",
         },
       ],
     },

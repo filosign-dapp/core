@@ -8,27 +8,20 @@ import {
   CardTitle,
 } from "../../../lib/components/ui/card";
 import { usePrivy } from "@privy-io/react-auth";
-import { useBalance, useWalletClient } from "wagmi";
+import { useWalletClient } from "wagmi";
 import { formatEther } from "viem";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   UserIcon,
-  WalletIcon,
   KeyIcon,
   CheckCircleIcon,
   XIcon,
   SpinnerIcon,
 } from "@phosphor-icons/react";
-import { StatusBadge } from "./StatusBadge";
 
 export function AuthenticationTest() {
   const { user, login: loginPrivy, logout: logoutPrivy } = usePrivy();
-  const { data: walletClient } = useWalletClient();
   const queryClient = useQueryClient();
-
-  const { data: balance } = useBalance({
-    address: walletClient?.account.address,
-  });
 
   const login = useFilosignMutation(["login"]);
   const register = useFilosignMutation(["register"]);
@@ -39,6 +32,9 @@ export function AuthenticationTest() {
   async function handleRegisterFilosign() {
     try {
       await register.mutateAsync({ pin: "111111" });
+      await queryClient.invalidateQueries({
+        queryKey: ["filosign", "isRegistered"],
+      });
       console.log("register", register.isSuccess, register.isError);
     } catch (error) {
       console.error("Failed to register", error);

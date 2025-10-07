@@ -9,10 +9,18 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import type { EnvelopeForm } from "../types";
 import { useStorePersist } from "@/src/lib/hooks/use-store";
 import { motion } from "motion/react";
+import { useFilosignMutation } from "@filosign/sdk/react";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function CreateEnvelopePage() {
   const navigate = useNavigate();
   const { setCreateForm } = useStorePersist();
+  const queryClient = useQueryClient();
+
+  // SDK mutations for file uploads
+  const uploadFile = useFilosignMutation(["files", "uploadFile"]);
+
   const form = useForm<EnvelopeForm>({
     defaultValues: {
       recipients: [{ name: "", email: "", walletAddress: "", role: "signer" }],
@@ -31,37 +39,77 @@ export default function CreateEnvelopePage() {
   });
 
   const onSubmit = async (data: EnvelopeForm) => {
-    const toDataUrl = (file: File) =>
-      new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
+    if (!data.documents || data.documents.length === 0) {
+      toast.error("Please upload at least one document");
+      return;
+    }
+
+    if (
+      !data.recipients ||
+      data.recipients.length === 0 ||
+      !data.recipients[0].walletAddress
+    ) {
+      toast.error("Please select at least one recipient");
+      return;
+    }
+
+    try {
+      toast.loading("Uploading documents...", { id: "upload-progress" });
+
+      // Upload each file to the SDK
+      const uploadPromises = data.documents.map(async (doc) => {
+        const fileData = new Uint8Array(await doc.file.arrayBuffer());
+        const recipientAddresses = data.recipients
+          .filter((r) => r.walletAddress)
+          .map((r) => r.walletAddress as `0x${string}`);
+
+        const result = await uploadFile.mutateAsync({
+          data: fileData,
+          recipientAddresses,
+          metadata: {
+            fileName: doc.name,
+            fileSize: doc.size,
+            fileType: doc.type,
+            message: data.emailMessage,
+            originalId: doc.id,
+          },
+        });
+
+        return {
+          id: doc.id,
+          pieceCid: result.pieceCid,
+          name: doc.name,
+          type: doc.type,
+          size: doc.size,
+          // Keep data URL for preview if needed
+          dataUrl:
+            doc.type.includes("image") || doc.type.includes("pdf")
+              ? await new Promise<string>((resolve, reject) => {
+                  const reader = new FileReader();
+                  reader.onload = () => resolve(reader.result as string);
+                  reader.onerror = reject;
+                  reader.readAsDataURL(doc.file);
+                })
+              : undefined,
+        };
       });
 
-    const documents = await Promise.all(
-      (data.documents || []).map(async (d) => ({
-        id: d.id,
-        name: d.name,
-        type: d.type,
-        size: d.size,
-        // Store data URLs for images and PDFs to enable preview in step 2
-        dataUrl:
-          d.type.includes("image") || d.type.includes("pdf")
-            ? await toDataUrl(d.file)
-            : undefined,
-      })),
-    );
+      const uploadedDocuments = await Promise.all(uploadPromises);
 
-    setCreateForm({
-      recipients: data.recipients,
-      emailMessage: data.emailMessage,
-      documents,
-    });
+      toast.success("Documents uploaded successfully!", {
+        id: "upload-progress",
+      });
 
-    // TODO: Implement envelope creation API call here
-    // For now, navigate back to dashboard to bypass signature placement
-    navigate({ to: "/dashboard" });
+      // Wait for 1 second then navigate back to dashboard
+      setTimeout(() => {
+        navigate({ to: "/dashboard" });
+      }, 1000);
+    } catch (error) {
+      console.error("Failed to upload documents:", error);
+      toast.error("Failed to upload documents. Please try again.", {
+        id: "upload-progress",
+      });
+    }
   };
 
   return (
@@ -115,9 +163,9 @@ export default function CreateEnvelopePage() {
               variant="primary"
               size="lg"
               className="gap-2 group transition-all duration-200"
+              disabled={uploadFile.isPending}
             >
-              Next Step
-              <CaretLeftIcon className="w-4 h-4 rotate-180 group-hover:translate-x-1 transition-transform duration-200" />
+              {uploadFile.isPending ? "Uploading..." : "Send Envelope"}
             </Button>
           </motion.div>
         </form>
