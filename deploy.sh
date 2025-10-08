@@ -14,9 +14,10 @@ echo "📦 Installing dependencies..."
 bun install
 
 echo "⚙️ Starting Bun server..."
-pm2 restart bun-server || pm2 start --name bun-server -- bun run server:start
+pm2 restart filosign-server || pm2 start bun --name filosign-server -- run server:start
 
 echo "🖼️ Starting Bun client in development mode..."
-pm2 restart bun-client || pm2 start --name bun-client -- bun run client:dev
+bun run client:build
+pm2 restart filosign-client || pm2 start bun --name filosign-client -- run client:start
 
 echo "✅ Deploy complete!"

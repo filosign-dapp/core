@@ -6,6 +6,7 @@ const envKeys = [
   "S3_BUCKET",
   "S3_ENDPOINT",
   "EVM_PRIVATE_KEY_SYNAPSE",
+  "FRONTEND_URL",
 ] as const;
 
 type ENV = Record<(typeof envKeys)[number], string>;
