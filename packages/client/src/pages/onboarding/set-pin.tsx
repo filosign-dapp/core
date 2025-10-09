@@ -1,156 +1,156 @@
+import { useFilosignMutation, useFilosignQuery } from "@filosign/sdk/react";
+import { CaretRightIcon } from "@phosphor-icons/react";
+import { useNavigate } from "@tanstack/react-router";
+import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { toast } from "sonner";
+import Logo from "@/src/lib/components/custom/Logo";
 import { Button } from "@/src/lib/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
 } from "@/src/lib/components/ui/card";
-import OtpInput from "./_components/OtpInput";
-import { useNavigate } from "@tanstack/react-router";
-import { CaretRightIcon } from "@phosphor-icons/react";
-import Logo from "@/src/lib/components/custom/Logo";
 import { useStorePersist } from "@/src/lib/hooks/use-store";
-import { useFilosignMutation, useFilosignQuery } from "@filosign/sdk/react";
-import { toast } from "sonner";
+import OtpInput from "./_components/OtpInput";
 
 export default function OnboardingSetPinPage() {
-  const [pin, setPin] = useState("");
-  const [confirmPin, setConfirmPin] = useState("");
-  const [step, setStep] = useState<"enter" | "confirm">("enter");
-  const navigate = useNavigate();
-  const { onboardingForm, setOnboardingForm } = useStorePersist();
-  const register = useFilosignMutation(["register"]);
-  const isRegistered = useFilosignQuery(["isRegistered"], undefined);
+	const [pin, setPin] = useState("");
+	const [confirmPin, setConfirmPin] = useState("");
+	const [step, setStep] = useState<"enter" | "confirm">("enter");
+	const navigate = useNavigate();
+	const { onboardingForm, setOnboardingForm } = useStorePersist();
+	const register = useFilosignMutation(["register"]);
+	const isRegistered = useFilosignQuery(["isRegistered"], undefined);
 
-  const handleRegistration = async () => {
-    if (!onboardingForm) return;
+	const handleRegistration = async () => {
+		if (!onboardingForm) return;
 
-    try {
-      if (isRegistered.data) {
-        toast.warning("You are already registered!");
+		try {
+			if (isRegistered.data) {
+				toast.warning("You are already registered!");
 
-        // setTimeout to navigate to dashboard
-        setTimeout(() => {
-          navigate({ to: "/dashboard" });
-        }, 1000);
-        return;
-      }
+				// setTimeout to navigate to dashboard
+				setTimeout(() => {
+					navigate({ to: "/dashboard" });
+				}, 1000);
+				return;
+			}
 
-      await register.mutateAsync({
-        pin: pin,
-      });
+			await register.mutateAsync({
+				pin: pin,
+			});
 
-      // Navigate to next step
-      navigate({ to: "/onboarding/welcome" });
-    } catch (error) {
-      console.error("Registration failed:", error);
-      // Show user-friendly error message
-      toast.error("Registration failed. Please try again.");
-    }
-  };
+			// Navigate to next step
+			navigate({ to: "/onboarding/welcome" });
+		} catch (error) {
+			console.error("Registration failed:", error);
+			// Show user-friendly error message
+			toast.error("Registration failed. Please try again.");
+		}
+	};
 
-  const handlePinSubmit = () => {
-    if (pin.length === 6) {
-      if (step === "enter") {
-        setStep("confirm");
-        setConfirmPin("");
-      } else if (step === "confirm") {
-        if (pin === confirmPin) {
-          handleRegistration();
-        } else {
-          setConfirmPin("");
-        }
-      }
-    }
-  };
+	const handlePinSubmit = () => {
+		if (pin.length === 6) {
+			if (step === "enter") {
+				setStep("confirm");
+				setConfirmPin("");
+			} else if (step === "confirm") {
+				if (pin === confirmPin) {
+					handleRegistration();
+				} else {
+					setConfirmPin("");
+				}
+			}
+		}
+	};
 
-  const handleBack = () => {
-    if (step === "confirm") {
-      setStep("enter");
-      setConfirmPin("");
-    } else {
-      navigate({ to: "/onboarding" });
-    }
-  };
+	const handleBack = () => {
+		if (step === "confirm") {
+			setStep("enter");
+			setConfirmPin("");
+		} else {
+			navigate({ to: "/onboarding" });
+		}
+	};
 
-  const currentPin = step === "enter" ? pin : confirmPin;
-  const isComplete = currentPin.length === 6;
-  const isPinMismatch =
-    step === "confirm" && confirmPin.length === 6 && pin !== confirmPin;
+	const currentPin = step === "enter" ? pin : confirmPin;
+	const isComplete = currentPin.length === 6;
+	const isPinMismatch =
+		step === "confirm" && confirmPin.length === 6 && pin !== confirmPin;
 
-  return (
-    <div className="flex justify-center items-center min-h-screen">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: 0.2 }}
-        className="flex flex-col justify-center items-center px-8 mx-auto w-full max-w-lg"
-      >
-        <Logo className="mb-4" textClassName="text-foreground font-semibold" />
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.2 }}
-          className="flex flex-col justify-center items-center px-8 mx-auto w-full max-w-lg"
-        >
-          <Card className="w-full">
-            <CardHeader>
-              <CardTitle>
-                {step === "enter" ? "Setup your PIN" : "Confirm PIN"}
-              </CardTitle>
-              <CardDescription>
-                {step === "enter"
-                  ? "Choose a 6-digit PIN for your account"
-                  : "Re-enter your PIN to confirm"}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex flex-col gap-2">
-                <OtpInput
-                  value={currentPin}
-                  onChange={step === "enter" ? setPin : setConfirmPin}
-                  length={6}
-                  autoFocus={true}
-                  onSubmit={handlePinSubmit}
-                />
-              </div>
+	return (
+		<div className="flex justify-center items-center min-h-screen">
+			<motion.div
+				initial={{ opacity: 0, y: 20 }}
+				animate={{ opacity: 1, y: 0 }}
+				transition={{ duration: 0.3, delay: 0.2 }}
+				className="flex flex-col justify-center items-center px-8 mx-auto w-full max-w-lg"
+			>
+				<Logo className="mb-4" textClassName="text-foreground font-semibold" />
+				<motion.div
+					initial={{ opacity: 0, y: 20 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ duration: 0.3, delay: 0.2 }}
+					className="flex flex-col justify-center items-center px-8 mx-auto w-full max-w-lg"
+				>
+					<Card className="w-full">
+						<CardHeader>
+							<CardTitle>
+								{step === "enter" ? "Setup your PIN" : "Confirm PIN"}
+							</CardTitle>
+							<CardDescription>
+								{step === "enter"
+									? "Choose a 6-digit PIN for your account"
+									: "Re-enter your PIN to confirm"}
+							</CardDescription>
+						</CardHeader>
+						<CardContent className="space-y-4">
+							<div className="flex flex-col gap-2">
+								<OtpInput
+									value={currentPin}
+									onChange={step === "enter" ? setPin : setConfirmPin}
+									length={6}
+									autoFocus={true}
+									onSubmit={handlePinSubmit}
+								/>
+							</div>
 
-              {isPinMismatch && (
-                <p className="text-destructive text-sm">
-                  PINs don't match. Please try again.
-                </p>
-              )}
+							{isPinMismatch && (
+								<p className="text-destructive text-sm">
+									PINs don't match. Please try again.
+								</p>
+							)}
 
-              <div className="flex gap-3">
-                <Button variant="ghost" onClick={handleBack} className="flex-1">
-                  Back
-                </Button>
+							<div className="flex gap-3">
+								<Button variant="ghost" onClick={handleBack} className="flex-1">
+									Back
+								</Button>
 
-                <Button
-                  onClick={handlePinSubmit}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && isComplete) {
-                      handlePinSubmit();
-                    }
-                  }}
-                  disabled={!isComplete}
-                  className="flex-1 group"
-                  variant="primary"
-                >
-                  {step === "enter" ? "Continue" : "Confirm"}
-                  <CaretRightIcon
-                    className="transition-transform duration-200 size-4 group-hover:translate-x-1"
-                    weight="bold"
-                  />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      </motion.div>
-    </div>
-  );
+								<Button
+									onClick={handlePinSubmit}
+									onKeyDown={(e) => {
+										if (e.key === "Enter" && isComplete) {
+											handlePinSubmit();
+										}
+									}}
+									disabled={!isComplete}
+									className="flex-1 group"
+									variant="primary"
+								>
+									{step === "enter" ? "Continue" : "Confirm"}
+									<CaretRightIcon
+										className="transition-transform duration-200 size-4 group-hover:translate-x-1"
+										weight="bold"
+									/>
+								</Button>
+							</div>
+						</CardContent>
+					</Card>
+				</motion.div>
+			</motion.div>
+		</div>
+	);
 }

@@ -1,21 +1,21 @@
-import { drizzle } from "drizzle-orm/bun-sqlite";
 import { Database } from "bun:sqlite";
-import schema from "./schema";
 import { SQL } from "bun";
+import { drizzle } from "drizzle-orm/bun-sqlite";
 import { sqliteFile } from "../../drizzle.config";
+import schema from "./schema";
 
 function getSqliteClient() {
-  const sqlite = new Database(sqliteFile);
-  sqlite.run("PRAGMA foreign_keys = ON");
-  return sqlite;
+	const sqlite = new Database(sqliteFile);
+	sqlite.run("PRAGMA foreign_keys = ON");
+	return sqlite;
 }
 
 export const createDbClient = () =>
-  drizzle({
-    client: getSqliteClient(),
-    schema: schema,
-    casing: "snake_case",
-  });
+	drizzle({
+		client: getSqliteClient(),
+		schema: schema,
+		casing: "snake_case",
+	});
 
 const dbClient = createDbClient();
 

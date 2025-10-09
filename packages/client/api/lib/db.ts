@@ -3,7 +3,7 @@ import { existsSync, mkdirSync } from "fs";
 
 // Create data directory if it doesn't exist
 if (!existsSync("db")) {
-  mkdirSync("db", { recursive: true });
+	mkdirSync("db", { recursive: true });
 }
 
 const db = new Database("db/filosign.db", { safeIntegers: true });
@@ -22,13 +22,13 @@ db.run("PRAGMA journal_mode = WAL");
 db.run("CREATE INDEX IF NOT EXISTS idx_waitlist_email ON waitlist(email)");
 
 export function closeDatabase() {
-  try {
-    db.close(false);
-  } catch (error) {
-    try {
-      db.close(true);
-    } catch {}
-  }
+	try {
+		db.close(false);
+	} catch (error) {
+		try {
+			db.close(true);
+		} catch {}
+	}
 }
 
 export { db };
