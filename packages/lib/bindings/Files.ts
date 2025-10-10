@@ -1,7 +1,7 @@
 import { computeCidIdentifier, parsePieceCid } from "@filosign/contracts";
 import { calculate as calculatePieceCid } from "@filoz/synapse-sdk/piece";
 import { toB64 } from "filosign-crypto-utils";
-import { type Address, encodePacked, keccak256 } from "viem";
+import type { Address } from "viem";
 import { generatePrivateKey } from "viem/accounts";
 import z from "zod";
 import type { Defaults } from "../types/client";
@@ -26,19 +26,19 @@ const zFileSignature = z.object({
 	signerProfile: zFileProfile,
 });
 
-const zFile = z.object({
-	pieceCid: z.string(),
-	ownerWallet: z.string(),
-	status: z.enum(["s3", "foc", "unpaid_for", "invalid"]),
-	recipientWallet: z.string().nullable(),
-	metadata: z.record(z.string(), z.any()).nullable(),
-	acknowledged: z.boolean(),
-	onchainTxHash: z.string().nullable(),
-	acknowledgedTxHash: z.string().nullable(),
-	createdAt: z.number(),
-	updatedAt: z.number(),
-	signatures: z.array(zFileSignature),
-});
+// const zFile = z.object({
+// 	pieceCid: z.string(),
+// 	ownerWallet: z.string(),
+// 	status: z.enum(["s3", "foc", "unpaid_for", "invalid"]),
+// 	recipientWallet: z.string().nullable(),
+// 	metadata: z.record(z.string(), z.any()).nullable(),
+// 	acknowledged: z.boolean(),
+// 	onchainTxHash: z.string().nullable(),
+// 	acknowledgedTxHash: z.string().nullable(),
+// 	createdAt: z.number(),
+// 	updatedAt: z.number(),
+// 	signatures: z.array(zFileSignature),
+// });
 
 const zSentFile = z.object({
 	pieceCid: z.string(),
@@ -136,45 +136,19 @@ export default class Files {
 	async uploadFile(options: {
 		data: Uint8Array;
 		recipientAddresses: Address[];
-		metadata?: Record<string, any>;
+		metadata?: Record<string, unknown>;
 	}) {
 		const { apiClient, crypto, tx, contracts, wallet } = this.defaults;
-		console.log("🚀 Starting file upload process", {
-			dataSize: options.data.length,
-			recipientCount: options.recipientAddresses.length,
-			recipients: options.recipientAddresses,
-			metadata: options.metadata,
-		});
 
 		try {
 			apiClient.ensureJwt();
-			console.log("✅ JWT verified");
-
-			// Generate encryption key
-			console.log("🔑 Generating data encryption key...");
 			const dataEncryptionKey = generatePrivateKey();
-			console.log(
-				"✅ Data encryption key generated:",
-				dataEncryptionKey.substring(0, 10) + "...",
-			);
 
-			// Encrypt data
-			console.log("🔒 Encrypting file data...");
 			const { encrypted: encryptedData, iv: dataIv } =
 				await crypto.encryptWithKey(options.data, dataEncryptionKey);
-			console.log("✅ File data encrypted", {
-				originalSize: options.data.length,
-				encryptedSize: encryptedData.byteLength,
-				iv: Buffer.from(dataIv).toString("hex").substring(0, 20) + "...",
-			});
 
-			// Calculate piece CID
-			console.log("📊 Calculating piece CID...");
 			const pieceCid = calculatePieceCid(new Uint8Array(encryptedData));
-			console.log("✅ Piece CID calculated:", pieceCid);
 
-			// Get upload URL
-			console.log("🌐 Requesting upload URL...");
 			const uploadStartResponse = await apiClient.rpc.postSafe(
 				{
 					uploadUrl: z.string(),
@@ -185,13 +159,7 @@ export default class Files {
 					pieceCid: pieceCid.toString(),
 				},
 			);
-			console.log("✅ Upload URL received:", {
-				url: uploadStartResponse.data.uploadUrl.substring(0, 50) + "...",
-				key: uploadStartResponse.data.key,
-			});
 
-			// Upload to S3
-			console.log("☁️ Uploading encrypted data to S3...");
 			const uploadResponse = await fetch(uploadStartResponse.data.uploadUrl, {
 				method: "PUT",
 				headers: {
@@ -207,27 +175,18 @@ export default class Files {
 				});
 				throw new Error(`Upload failed: ${uploadResponse.statusText}`);
 			}
-			console.log("✅ File uploaded to S3 successfully");
 
-			// Get owner's public key
 			const ownerWallet = wallet.account.address;
-			console.log("👤 Getting owner public key for wallet:", ownerWallet);
+
 			const ownerPubKeyResponse = await apiClient.rpc.getSafe(
 				{
 					publicKey: z.string(),
 				},
 				`/user/public-key?address=${ownerWallet}`,
 			);
-			console.log(
-				"✅ Owner public key retrieved:",
-				ownerPubKeyResponse.data.publicKey,
-			);
 
-			// Encrypt key for owner
-			console.log("🔐 Encrypting data key for owner...");
 			const ownerPubKeyHex = ownerPubKeyResponse.data.publicKey;
 			const ownerPubKeyB64 = toB64(ownerPubKeyHex);
-			console.log("Final base64 public key:", ownerPubKeyB64);
 
 			const { encrypted: ownerEncryptedKeyBuffer, iv: ownerKeyIv } =
 				await crypto.encrypt(
@@ -237,20 +196,10 @@ export default class Files {
 
 			const ownerEncryptedKey = `0x${Buffer.from(ownerEncryptedKeyBuffer).toString("hex")}`;
 			const ownerKeyIvBase64 = `0x${Buffer.from(ownerKeyIv).toString("hex")}`;
-			console.log("✅ Owner key encrypted", {
-				encryptedKeyLength: ownerEncryptedKey.length,
-				ivLength: ownerKeyIvBase64.length,
-			});
 
-			// Process recipients
-			console.log("👥 Processing recipients...");
 			const recipients = [];
 			for (let i = 0; i < options.recipientAddresses.length; i++) {
 				const recipientAddress = options.recipientAddresses[i];
-				console.log(
-					`🔄 Processing recipient ${i + 1}/${options.recipientAddresses.length}:`,
-					recipientAddress,
-				);
 
 				try {
 					const recipientPubKeyResponse = await apiClient.rpc.getSafe(
@@ -259,7 +208,6 @@ export default class Files {
 						},
 						`/user/public-key?address=${recipientAddress}`,
 					);
-					console.log(`✅ Recipient ${recipientAddress} public key retrieved`);
 
 					const recipientPubKeyHex = recipientPubKeyResponse.data.publicKey;
 					const recipientPubKeyB64 = toB64(recipientPubKeyHex);
@@ -278,9 +226,6 @@ export default class Files {
 						encryptedKey,
 						iv: keyIvBase64,
 					});
-					console.log(
-						`✅ Recipient ${recipientAddress} key encrypted successfully`,
-					);
 				} catch (error) {
 					console.error(
 						`❌ Failed to process recipient ${recipientAddress}:`,
@@ -291,10 +236,6 @@ export default class Files {
 					);
 				}
 			}
-			console.log("✅ All recipients processed successfully");
-
-			// Register file in database
-			console.log("💾 Registering file in database...");
 			const registerResponse = await apiClient.rpc.postSafe(
 				{
 					pieceCid: z.string(),
@@ -314,22 +255,10 @@ export default class Files {
 					ownerEncryptedKeyIv: ownerKeyIvBase64,
 				},
 			);
-			console.log("✅ File registered in database:", {
-				pieceCid: registerResponse.data.pieceCid,
-				ownerWallet: registerResponse.data.ownerWallet,
-				createdAt: registerResponse.data.createdAt,
-			});
 
-			// Register on blockchain
-			console.log("⛓️ Registering file on blockchain...");
 			const { digestPrefix, digestBuffer, digestTail } = parsePieceCid(
 				pieceCid.toString(),
 			);
-			console.log("📝 Parsed piece CID for contract:", {
-				digestPrefix: digestPrefix.substring(0, 20) + "...",
-				digestBuffer: digestBuffer.substring(0, 20) + "...",
-				digestTail: digestTail.substring(0, 20) + "...",
-			});
 
 			const receipt = await tx(
 				contracts.FSFileRegistry.write.registerFile([
@@ -339,30 +268,17 @@ export default class Files {
 					options.recipientAddresses,
 				]),
 			);
-			console.log("✅ File registered on blockchain:", {
-				transactionHash: receipt.transactionHash,
-				blockNumber: receipt.blockNumber,
-				gasUsed: receipt.gasUsed,
-			});
 
 			const finalResult = {
 				...registerResponse,
 				onchainTxHash: receipt.transactionHash,
 			};
 
-			console.log("🎉 File upload completed successfully!", {
-				pieceCid: finalResult.data.pieceCid,
-				onchainTxHash: finalResult.onchainTxHash,
-				totalRecipients: options.recipientAddresses.length,
-			});
-
 			return finalResult;
 		} catch (error) {
 			console.error("💥 File upload failed:", {
 				error: error instanceof Error ? error.message : error,
 				stack: error instanceof Error ? error.stack : undefined,
-				step: "Unknown", // You could track which step failed
-				pieceCid: "Not calculated yet",
 				recipients: options.recipientAddresses,
 			});
 			throw error;
@@ -430,7 +346,7 @@ export default class Files {
 		encryptedFileData: Uint8Array;
 	}): Promise<{
 		data: Uint8Array;
-		metadata?: Record<string, any>;
+		metadata?: Record<string, unknown>;
 	}> {
 		const { apiClient, crypto } = this.defaults;
 		apiClient.ensureJwt();
