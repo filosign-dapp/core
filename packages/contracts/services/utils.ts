@@ -8,7 +8,6 @@ import {
 	pad,
 	parseSignature,
 	type Transport,
-	toHex,
 	type WalletClient,
 } from "viem";
 

@@ -1,17 +1,8 @@
-import {
-	loadFixture,
-	time,
-} from "@nomicfoundation/hardhat-toolbox-viem/network-helpers";
+import { loadFixture } from "@nomicfoundation/hardhat-toolbox-viem/network-helpers";
 import { expect } from "chai";
 import hre from "hardhat";
 import { describe, it } from "mocha";
-import {
-	encodePacked,
-	keccak256,
-	parseSignature,
-	publicActions,
-	toBytes,
-} from "viem";
+import { keccak256, parseSignature, publicActions, toBytes } from "viem";
 import {
 	computeCidIdentifier,
 	parsePieceCid,
@@ -191,7 +182,7 @@ describe("FSFileRegistry", () => {
 		});
 		await admin.waitForTransactionReceipt({ hash: ackTxHash });
 
-		const fileData = await fileRegistry.read.getFileData([cidIdentifier]);
+		// const fileData = await fileRegistry.read.getFileData([cidIdentifier]);
 
 		const isAcked = await fileRegistry.read.isAcknowledged([
 			cidIdentifier,

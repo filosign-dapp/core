@@ -1,12 +1,96 @@
-/* biome-ignore-all */
-/* @ts-nocheck */
-import fs from "fs";
+import fs from "node:fs";
+import path from "node:path";
 import { glob } from "glob";
-import path from "path";
-import parser, {
-	type ContractDefinition,
-	type PragmaDirective,
-} from "solidity-parser-antlr";
+import type { ASTNode } from "solidity-parser-antlr";
+import parser from "solidity-parser-antlr";
+
+interface PragmaDirective {
+	type: string;
+	name: string;
+	value: string;
+}
+
+interface TypeName {
+	type: string;
+	name?: string;
+	namePath?: string | { name: string } | string[];
+	baseTypeName?: TypeName;
+	length?: string;
+	keyType?: TypeName;
+	valueType?: TypeName;
+}
+
+interface Parameter {
+	type: string;
+	typeName: TypeName;
+	name?: string;
+	storageLocation?: string;
+	indexed?: boolean;
+}
+
+interface ParameterList {
+	type: string;
+	parameters?: Parameter[];
+}
+
+interface FunctionDefinition {
+	type: string;
+	name?: string;
+	parameters?: Parameter[];
+	returnParameters?: Parameter[];
+	stateMutability?: string;
+	visibility?: string;
+}
+
+interface EventDefinition {
+	type: string;
+	name: string;
+	parameters?: ParameterList;
+}
+
+interface StructMember {
+	type: string;
+	typeName: TypeName;
+	name: string;
+}
+
+interface StructDefinition {
+	type: string;
+	name: string;
+	members?: StructMember[];
+}
+
+interface ErrorDefinition {
+	type: string;
+	name: string;
+	parameters?: Parameter[];
+}
+
+interface VariableDeclaration {
+	type: string;
+	visibility?: string;
+	typeName: TypeName;
+	name: string;
+}
+
+interface StateVariableDeclaration {
+	type: string;
+	variables?: VariableDeclaration[];
+}
+
+interface ContractDefinition {
+	type: string;
+	name: string;
+	kind: string;
+	subNodes?: (
+		| StructDefinition
+		| FunctionDefinition
+		| EventDefinition
+		| ErrorDefinition
+		| VariableDeclaration
+		| StateVariableDeclaration
+	)[];
+}
 
 const SRC_DIR = path.resolve(process.cwd(), "./src");
 const OUT_DIR = path.join(SRC_DIR, "interfaces");
@@ -38,37 +122,41 @@ function extractPragmaAndVersion(fileText: string) {
 			},
 		});
 		return pragma;
-	} catch {
+	} catch (_) {
 		return "";
 	}
 }
 
-function typeNameToString(node: any): string {
+function typeNameToString(node: TypeName): string {
 	if (!node) return "";
 	switch (node.type) {
 		case "ElementaryTypeName":
-			return node.name;
+			return node.name ?? "UnknownType";
 		case "UserDefinedTypeName":
 			if (typeof node.namePath === "string") {
 				return node.namePath;
-			} else if (node.namePath?.name) {
-				return node.namePath.name;
+			} else if (node.namePath && (node.namePath as { name: string }).name) {
+				return (node.namePath as { name: string }).name;
 			} else if (Array.isArray(node.namePath)) {
-				return node.namePath.map((p: any) => p.name || p).join(".");
+				return node.namePath
+					.map((p: string | { name?: string }) =>
+						typeof p === "string" ? p : (p.name ?? p),
+					)
+					.join(".");
 			}
-			return node.name || "UnknownType";
+			return node.name ?? "UnknownType";
 		case "ArrayTypeName":
-			return `${typeNameToString(node.baseTypeName)}${
+			return `${node.baseTypeName ? typeNameToString(node.baseTypeName) : "UnknownType"}${
 				node.length ? `[${node.length}]` : "[]"
 			}`;
 		case "Mapping":
-			return `mapping(${typeNameToString(node.keyType)} => ${typeNameToString(
-				node.valueType,
-			)})`;
+			return `mapping(${node.keyType ? typeNameToString(node.keyType) : "UnknownType"} => ${
+				node.valueType ? typeNameToString(node.valueType) : "UnknownType"
+			})`;
 		case "FunctionTypeName":
 			return "function";
 		default:
-			return node.name || "UnknownType";
+			return node.name ?? "UnknownType";
 	}
 }
 
@@ -90,11 +178,13 @@ function needsDataLocation(typeName: string): boolean {
 }
 
 function extractMappingParams(
-	typeName: any,
+	typeName: TypeName,
 	paramNames: string[] = [],
 ): { params: string[]; returnType: string } {
 	if (typeName.type === "Mapping") {
-		const keyType = typeNameToString(typeName.keyType);
+		const keyType = typeName.keyType
+			? typeNameToString(typeName.keyType)
+			: "UnknownType";
 		const paramName = paramNames.length > 0 ? paramNames[0] : "key";
 		const keyParam = needsDataLocation(keyType)
 			? `${keyType} calldata ${paramName}`
@@ -104,7 +194,9 @@ function extractMappingParams(
 			paramNames.length > 1
 				? paramNames.slice(1)
 				: [`key${paramNames.length + 1}`];
-		const nested = extractMappingParams(typeName.valueType, nextParamNames);
+		const nested = typeName.valueType
+			? extractMappingParams(typeName.valueType, nextParamNames)
+			: { params: [], returnType: "UnknownType" };
 
 		return {
 			params: [keyParam, ...nested.params],
@@ -118,10 +210,10 @@ function extractMappingParams(
 	}
 }
 
-function paramListToString(paramList: any): string {
+function paramListToString(paramList: Parameter[] | undefined): string {
 	if (!paramList || !Array.isArray(paramList)) return "";
 	return paramList
-		.map((p: any) => {
+		.map((p: Parameter) => {
 			const t = typeNameToString(p.typeName);
 
 			const name = p.name || "";
@@ -136,11 +228,11 @@ function paramListToString(paramList: any): string {
 		.join(", ");
 }
 
-function returnsToString(paramList: any): string {
+function returnsToString(paramList: Parameter[] | undefined): string {
 	if (!paramList || !Array.isArray(paramList) || paramList.length === 0)
 		return "";
 	const s = paramList
-		.map((p: any) => {
+		.map((p: Parameter) => {
 			const t = typeNameToString(p.typeName);
 			const name = p.name || "";
 
@@ -155,7 +247,7 @@ function returnsToString(paramList: any): string {
 	return s.includes(",") ? `(${s})` : s;
 }
 
-function functionToSignature(node: any): string {
+function functionToSignature(node: FunctionDefinition): string {
 	const name = node.name || "";
 
 	if (
@@ -184,30 +276,29 @@ function functionToSignature(node: any): string {
 	if (stateMut) parts.push(stateMut);
 	if (returns) parts.push(`returns (${returns})`);
 
-	return parts.join(" ") + ";";
+	return `${parts.join(" ")};`;
 }
 
-function eventToSignature(node: any): string {
+function eventToSignature(node: EventDefinition): string {
 	const name = node.name;
-	const params =
-		node.parameters?.parameters
-			? node.parameters.parameters
-					.map((p: any) => {
-						const type = typeNameToString(p.typeName);
-						const indexed = p.indexed ? " indexed" : "";
-						const pname = p.name ? ` ${p.name}` : "";
-						return `${type}${indexed}${pname}`;
-					})
-					.join(", ")
-			: "";
+	const params = node.parameters?.parameters
+		? node.parameters.parameters
+				.map((p: Parameter) => {
+					const type = typeNameToString(p.typeName);
+					const indexed = p.indexed ? " indexed" : "";
+					const pname = p.name ? ` ${p.name}` : "";
+					return `${type}${indexed}${pname}`;
+				})
+				.join(", ")
+		: "";
 	return `event ${name}(${params});`;
 }
 
-function structToDefinition(node: any): string {
+function structToDefinition(node: StructDefinition): string {
 	const name = node.name;
 	const members = node.members
 		? node.members
-				.map((member: any) => {
+				.map((member: StructMember) => {
 					const type = typeNameToString(member.typeName);
 					const memberName = member.name;
 					return `        ${type} ${memberName};`;
@@ -218,7 +309,7 @@ function structToDefinition(node: any): string {
 	return `    struct ${name} {\n${members}\n    }`;
 }
 
-function errorToSignature(node: any): string {
+function errorToSignature(node: ErrorDefinition): string {
 	const name = node.name;
 	const params = node.parameters ? paramListToString(node.parameters) : "";
 	return `error ${name}(${params});`;
@@ -245,7 +336,7 @@ function extractImmutableVariables(
 }
 
 function generateInterfaceForContract(
-	contractNode: any,
+	contractNode: ContractDefinition,
 	pragma: string | null,
 	srcFilePath: string,
 	sourceText: string,
@@ -270,107 +361,96 @@ function generateInterfaceForContract(
 
 	if (contractNode.subNodes && Array.isArray(contractNode.subNodes)) {
 		for (const sub of contractNode.subNodes) {
-			switch (sub.type) {
-				case "StructDefinition": {
-					const structDef = structToDefinition(sub);
-					lines.push(structDef);
-					lines.push("");
-					break;
-				}
-				case "FunctionDefinition": {
-					const sig = functionToSignature(sub);
-					if (sig) lines.push(`    ${sig}`);
-					break;
-				}
-				case "EventDefinition": {
-					const sig = eventToSignature(sub);
-					lines.push(`    ${sig}`);
-					break;
-				}
-				case "ErrorDefinition": {
-					const sig = errorToSignature(sub);
-					lines.push(`    ${sig}`);
-					break;
-				}
-				case "VariableDeclaration": {
-					if (sub.visibility === "public") {
-						const varType = typeNameToString(sub.typeName);
-						const varName = sub.name;
+			if (sub.type === "StructDefinition") {
+				const structDef = structToDefinition(sub as StructDefinition);
+				lines.push(structDef);
+				lines.push("");
+			} else if (sub.type === "FunctionDefinition") {
+				const sig = functionToSignature(sub as FunctionDefinition);
+				if (sig) lines.push(`    ${sig}`);
+			} else if (sub.type === "EventDefinition") {
+				const sig = eventToSignature(sub as EventDefinition);
+				lines.push(`    ${sig}`);
+			} else if (sub.type === "ErrorDefinition") {
+				const sig = errorToSignature(sub as ErrorDefinition);
+				lines.push(`    ${sig}`);
+			} else if (sub.type === "VariableDeclaration") {
+				const varDecl = sub as VariableDeclaration;
+				if (varDecl.visibility === "public") {
+					const varType = typeNameToString(varDecl.typeName);
+					const varName = varDecl.name;
 
-						let params = "";
-						let returnType = varType;
+					let params = "";
+					let returnType = varType;
 
-						if (sub.typeName.type === "ArrayTypeName") {
-							params = `uint256 index`;
-							returnType = typeNameToString(sub.typeName.baseTypeName);
-						} else if (sub.typeName.type === "Mapping") {
-							const mappingInfo = extractMappingParams(sub.typeName);
-							params = mappingInfo.params.join(", ");
-							returnType = mappingInfo.returnType;
-						}
-
-						if (
-							returnType.startsWith("I") &&
-							returnType !== "int" &&
-							returnType !== "int256"
-						) {
-							returnType = "address";
-						}
-
-						const returnLocation = needsDataLocation(returnType)
-							? ` memory`
-							: "";
-						const getterSig = `function ${varName}(${params}) external view returns (${returnType}${returnLocation});`;
-						lines.push(`    ${getterSig}`);
+					if (varDecl.typeName.type === "ArrayTypeName") {
+						params = `uint256 index`;
+						returnType = varDecl.typeName.baseTypeName
+							? typeNameToString(varDecl.typeName.baseTypeName)
+							: "UnknownType";
+					} else if (varDecl.typeName.type === "Mapping") {
+						const mappingInfo = extractMappingParams(varDecl.typeName);
+						params = mappingInfo.params.join(", ");
+						returnType = mappingInfo.returnType;
 					}
-					break;
+
+					if (
+						returnType.startsWith("I") &&
+						returnType !== "int" &&
+						returnType !== "int256"
+					) {
+						returnType = "address";
+					}
+
+					const returnLocation = needsDataLocation(returnType) ? ` memory` : "";
+					const getterSig = `function ${varName}(${params}) external view returns (${returnType}${returnLocation});`;
+					lines.push(`    ${getterSig}`);
 				}
-				case "StateVariableDeclaration": {
-					if (sub.variables && Array.isArray(sub.variables)) {
-						for (const variable of sub.variables) {
-							if (variable.visibility === "public") {
-								const varType = typeNameToString(variable.typeName);
-								let varName = variable.name;
+			} else if (sub.type === "StateVariableDeclaration") {
+				const stateVarDecl = sub as StateVariableDeclaration;
+				if (stateVarDecl.variables && Array.isArray(stateVarDecl.variables)) {
+					for (const variable of stateVarDecl.variables) {
+						if (variable.visibility === "public") {
+							const varType = typeNameToString(variable.typeName);
+							let varName = variable.name;
 
-								if (varName === "immutable") {
-									const immutableInfo = immutableVars.get(varType);
-									if (immutableInfo) {
-										varName = immutableInfo.varName;
-									}
+							if (varName === "immutable") {
+								const immutableInfo = immutableVars.get(varType);
+								if (immutableInfo) {
+									varName = immutableInfo.varName;
 								}
-
-								let params = "";
-								let returnType = varType;
-
-								if (variable.typeName.type === "ArrayTypeName") {
-									params = `uint256 index`;
-									returnType = typeNameToString(variable.typeName.baseTypeName);
-								} else if (variable.typeName.type === "Mapping") {
-									const mappingInfo = extractMappingParams(variable.typeName);
-									params = mappingInfo.params.join(", ");
-									returnType = mappingInfo.returnType;
-								}
-
-								if (
-									returnType.startsWith("I") &&
-									returnType !== "int" &&
-									returnType !== "int256"
-								) {
-									returnType = "address";
-								}
-
-								const returnLocation = needsDataLocation(returnType)
-									? ` memory`
-									: "";
-								const getterSig = `function ${varName}(${params}) external view returns (${returnType}${returnLocation});`;
-								lines.push(`    ${getterSig}`);
 							}
+
+							let params = "";
+							let returnType = varType;
+
+							if (variable.typeName.type === "ArrayTypeName") {
+								params = `uint256 index`;
+								returnType = variable.typeName.baseTypeName
+									? typeNameToString(variable.typeName.baseTypeName)
+									: "UnknownType";
+							} else if (variable.typeName.type === "Mapping") {
+								const mappingInfo = extractMappingParams(variable.typeName);
+								params = mappingInfo.params.join(", ");
+								returnType = mappingInfo.returnType;
+							}
+
+							if (
+								returnType.startsWith("I") &&
+								returnType !== "int" &&
+								returnType !== "int256"
+							) {
+								returnType = "address";
+							}
+
+							const returnLocation = needsDataLocation(returnType)
+								? ` memory`
+								: "";
+							const getterSig = `function ${varName}(${params}) external view returns (${returnType}${returnLocation});`;
+							lines.push(`    ${getterSig}`);
 						}
 					}
-					break;
 				}
-				default:
-					break;
 			}
 		}
 	}
@@ -385,7 +465,7 @@ function generateInterfaceForContract(
 function processFile(filePath: string) {
 	const text = fs.readFileSync(filePath, "utf8");
 	const pragma = extractPragmaAndVersion(text);
-	let ast: any;
+	let ast: ASTNode;
 	try {
 		ast = parser.parse(text, { tolerant: true });
 	} catch (err) {
@@ -394,7 +474,7 @@ function processFile(filePath: string) {
 	}
 
 	parser.visit(ast, {
-		ContractDefinition(node: any) {
+		ContractDefinition(node: ContractDefinition) {
 			if (node.kind === "contract") {
 				generateInterfaceForContract(node, pragma, filePath, text);
 			}
