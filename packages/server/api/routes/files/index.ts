@@ -50,6 +50,7 @@ export default new Hono()
 			metaData,
 			ownerEncryptedKey,
 			ownerEncryptedKeyIv,
+			encryptedDataIv,
 		} = await ctx.req.json();
 		if (!pieceCid || typeof pieceCid !== "string") {
 			return respond.err(ctx, "Invalid pieceCid", 400);
@@ -57,7 +58,6 @@ export default new Hono()
 		if (!Array.isArray(recipients) || recipients.length === 0) {
 			return respond.err(ctx, "Recipients must be a non-empty array", 400);
 		}
-
 		if (typeof ownerEncryptedKey !== "string" || !isHex(ownerEncryptedKey)) {
 			return respond.err(ctx, "Invalid ownerEncryptedKey", 400);
 		}
@@ -66,6 +66,9 @@ export default new Hono()
 			!isHex(ownerEncryptedKeyIv)
 		) {
 			return respond.err(ctx, "Invalid ownerEncryptedKeyIv", 400);
+		}
+		if (typeof encryptedDataIv !== "string" || !isHex(encryptedDataIv)) {
+			return respond.err(ctx, "Invalid encryptedDataIv", 400);
 		}
 
 		for (const recipient of recipients) {
@@ -109,6 +112,7 @@ export default new Hono()
 					ownerWallet: ctx.var.userWallet,
 					metadata: metaData,
 					status: "s3",
+					encryptedDataIv: encryptedDataIv,
 					ownerEncryptedKey: ownerEncryptedKey,
 					ownerEncryptedKeyIv: ownerEncryptedKeyIv,
 				})

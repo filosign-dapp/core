@@ -20,6 +20,7 @@ export const files = t.sqliteTable(
 		status: t.text({ enum: ["s3", "foc", "unpaid_for", "invalid"] }).notNull(),
 		ownerEncryptedKey: tHex().notNull(),
 		ownerEncryptedKeyIv: tHex().notNull(),
+		encryptedDataIv: tHex().notNull(),
 
 		onchainTxHash: tBytes32(),
 

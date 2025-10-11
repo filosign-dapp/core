@@ -146,6 +146,7 @@ export default class Files {
 
 			const { encrypted: encryptedData, iv: dataIv } =
 				await crypto.encryptWithKey(options.data, dataEncryptionKey);
+			const encryptedDataIvHex = `0x${(dataIv).toHex()}`;
 
 			const pieceCid = calculatePieceCid(new Uint8Array(encryptedData));
 
@@ -253,6 +254,7 @@ export default class Files {
 					metaData: options.metadata || null,
 					ownerEncryptedKey,
 					ownerEncryptedKeyIv: ownerKeyIvBase64,
+					encryptedDataIv: encryptedDataIvHex,
 				},
 			);
 
