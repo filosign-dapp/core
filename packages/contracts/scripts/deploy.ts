@@ -1,11 +1,20 @@
 import { $ } from "bun";
 import hre from "hardhat";
+import { toHex } from "viem";
+
+const DEFINITIONS_FILE_PREFIX = "export const definitions = ";
+const DEFINITIONS_FILE_SUFFIX = " as const;";
 
 async function main() {
-	const [deployer] = await hre.viem.getWalletClients();
-	const publicClient = await hre.viem.getPublicClient();
+	const chainId = hre.network.config.chainId;
+	if (!chainId) {
+		console.error(
+			"No chainId found in network config, how will we deploy to this network?",
+		);
+		process.exit(1);
+	}
 
-	const blockHeight = await publicClient.getBlockNumber();
+	const [deployer] = await hre.viem.getWalletClients();
 
 	console.log("Deploying contracts as ", deployer.account.address);
 
@@ -36,21 +45,37 @@ async function main() {
 		},
 	} as const;
 
-	Bun.file("definitions.ts").write(
-		`export const definitions = ${JSON.stringify(
-			definitions,
-			null,
-			2,
-		)} as const;\nexport const contractsDeployedAtBlock = ${blockHeight.toString()}n;`,
+	const definitionsFile = Bun.file("definitions.ts");
+	const existingContent = await definitionsFile.text();
+
+	const definitionsJson = existingContent.slice(
+		DEFINITIONS_FILE_PREFIX.length,
+		existingContent.length - DEFINITIONS_FILE_SUFFIX.length,
+	);
+	const existingDefinitions = JSON.parse(definitionsJson);
+	existingDefinitions[toHex(chainId)] = definitions;
+
+	await definitionsFile.write(
+		DEFINITIONS_FILE_PREFIX +
+			JSON.stringify(existingDefinitions, null, 2) +
+			DEFINITIONS_FILE_SUFFIX,
 	);
 
 	console.log("Definitions written to definitions.ts");
+	if (chainId === 314159) {
+		try {
+			await $`bunx --bun hardhat verify --network filecoinCalibration ${manager.address} --force`;
+			await sleep(1000);
+			await $`bunx --bun hardhat verify --network filecoinCalibration ${fileRegistry.address} --force`;
+			await sleep(1500);
+			await $`bunx --bun hardhat verify --network filecoinCalibration ${keyRegistry.address} --force`;
+		} catch (_) {}
+		console.log("Contracts verified on filecoin calibration block explorer");
+	}
+}
 
-	await $`bunx --bun hardhat verify --network filecoinCalibration ${manager.address} --force`;
-	await $`bunx --bun hardhat verify --network filecoinCalibration ${fileRegistry.address} --force`;
-	await $`bunx --bun hardhat verify --network filecoinCalibration ${keyRegistry.address} --force`;
-
-	console.log("Contracts verified on block explorer");
+async function sleep(ms: number) {
+	return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 main()
