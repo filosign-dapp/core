@@ -4,7 +4,11 @@
 	"description": "Filosign monorepo",
 	"private": true,
 	"workspaces": [
-		"packages/*"
+		"packages/client",
+		"packages/server",
+		"packages/contracts",
+		"packages/lib/sdk",
+		"packages/lib/crypto-utils"
 	],
 	"scripts": {
 		"client:dev": "bun run --cwd packages/client dev",
