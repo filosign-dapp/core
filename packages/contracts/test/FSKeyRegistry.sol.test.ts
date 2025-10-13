@@ -1,16 +1,10 @@
-import { loadFixture } from "@nomicfoundation/hardhat-toolbox-viem/network-helpers";
-import { expect } from "chai";
 import {
 	deriveEncryptionMaterial,
-	ensureWasmInitialized,
-	generateNonce,
-	generateRegisterChallenge,
-	generateSalts,
-	getPublicKeyFromRegenerated,
+	generateRandomHex,
 	regenerateEncryptionKey,
-	toB64,
-	toHex,
-} from "filosign-crypto-utils";
+} from "@filosign/crypto-utils";
+import { loadFixture } from "@nomicfoundation/hardhat-toolbox-viem/network-helpers";
+import { expect } from "chai";
 import hre from "hardhat";
 import { describe, it } from "mocha";
 import {
@@ -22,8 +16,9 @@ import {
 	sliceHex,
 } from "viem";
 
+const register_challenge = "0xblhblah:filosign:yayy";
+
 async function setupFixture() {
-	await ensureWasmInitialized();
 	const [deployer, user] = await hre.viem.getWalletClients();
 	const admin = (await hre.viem.getTestClient()).extend(publicActions);
 
@@ -44,25 +39,21 @@ describe("FSKeyRegistry", () => {
 		const pin = "1234";
 		const info = "Spandan";
 
-		const base_material = generateSalts();
-		const nonce = generateNonce();
-
-		const register_challenge = generateRegisterChallenge(
-			user.account.address,
-			version.toString(),
-			nonce,
-		);
+		const pinSalt = await generateRandomHex();
+		const authSalt = await generateRandomHex();
+		const wrapperSalt = await generateRandomHex();
+		const nonce = await generateRandomHex();
 
 		const signature = await user.signMessage({
-			message: register_challenge.challenge,
+			message: register_challenge,
 		});
 
 		const enc_material = deriveEncryptionMaterial(
 			signature,
 			pin,
-			base_material.pinSalt,
-			base_material.authSalt,
-			base_material.wrapperSalt,
+			pinSalt,
+			authSalt,
+			wrapperSalt,
 			info,
 		);
 
