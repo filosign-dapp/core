@@ -25,11 +25,11 @@ import {
 import { publicKeyToAddress } from "viem/accounts";
 import { filecoinCalibration } from "viem/chains";
 import z from "zod";
-import ApiClient from "./bindings/ApiClient";
-import { Crypto } from "./bindings/Crypto";
-import Files from "./bindings/Files";
-import Logger from "./bindings/Logger";
-import ShareCapability from "./bindings/ShareCapability";
+import ApiClient from "./sdk/bindings/ApiClient";
+import { Crypto } from "./sdk/bindings/Crypto";
+import Files from "./sdk/bindings/Files";
+import Logger from "./sdk/bindings/Logger";
+import ShareCapability from "./sdk/bindings/ShareCapability";
 import { FilosignStore } from "./store";
 import type { Defaults, FilosignClientConfig, Wallet } from "./types/client";
 import { signRegisterChallenge } from "./utils/signature";

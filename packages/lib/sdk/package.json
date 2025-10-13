@@ -13,9 +13,9 @@
 	"scripts": {},
 	"dependencies": {
 		"@filosign/contracts": "workspace:*",
+		"@filosign/crypto-utils": "workspace:*",
 		"@tanstack/react-query": "^5.90.2",
 		"axios": "^1.12.2",
-		"filosign-crypto-utils": "0.2.21",
 		"hono": "^4.9.8",
 		"idb": "8.0.3",
 		"zod": "^4.1.11"

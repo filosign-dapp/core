@@ -4,7 +4,7 @@ import { toB64 } from "filosign-crypto-utils";
 import type { Address } from "viem";
 import { generatePrivateKey } from "viem/accounts";
 import z from "zod";
-import type { Defaults } from "../types/client";
+import type { Defaults } from "../../types/client";
 import type Logger from "./Logger";
 
 const zFileProfile = z

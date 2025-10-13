@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
-import type { FilosignClient } from "..";
+import type { FilosignClient } from "../..";
 import { useFilosignContext } from "./FilosignProvider";
 
 export type Path<T> = T extends object

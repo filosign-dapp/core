@@ -1,5 +1,5 @@
 import z from "zod";
-import type { Defaults } from "../types/client";
+import type { Defaults } from "../../types/client";
 import type Logger from "./Logger";
 
 const zUserProfile = z.object({

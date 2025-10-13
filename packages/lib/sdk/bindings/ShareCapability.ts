@@ -1,6 +1,6 @@
 import type { Address } from "viem";
 import z from "zod";
-import type { Defaults } from "../types/client";
+import type { Defaults } from "../../types/client";
 import type Logger from "./Logger";
 
 export default class ShareCapability {
