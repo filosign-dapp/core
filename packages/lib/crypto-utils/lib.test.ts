@@ -6,7 +6,6 @@ const {
 	regenerateEncryptionKey,
 	generateKeyPair,
 	createSharedKey,
-	getPublicKeyFromRegenerated,
 } = cryptoUtils;
 
 import { describe, expect, it } from "bun:test";

@@ -14,30 +14,30 @@ export default class Logger {
 	private logMessage(
 		method: "log" | "error" | "warn" | "info" | "debug",
 		message: string,
-		...args: any[]
+		...args: unknown[]
 	): void {
 		if (this.isLoggingEnabled) {
 			console[method](this.formatMessage(message), ...args);
 		}
 	}
 
-	log(message: string, ...args: any[]): void {
+	log(message: string, ...args: unknown[]): void {
 		this.logMessage("log", message, ...args);
 	}
 
-	debug(message: string, ...args: any[]): void {
+	debug(message: string, ...args: unknown[]): void {
 		this.logMessage("debug", message, ...args);
 	}
 
-	error(message: string, ...args: any[]): void {
+	error(message: string, ...args: unknown[]): void {
 		this.logMessage("error", message, ...args);
 	}
 
-	warn(message: string, ...args: any[]): void {
+	warn(message: string, ...args: unknown[]): void {
 		this.logMessage("warn", message, ...args);
 	}
 
-	info(message: string, ...args: any[]): void {
+	info(message: string, ...args: unknown[]): void {
 		this.logMessage("info", message, ...args);
 	}
 }

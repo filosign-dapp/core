@@ -98,7 +98,7 @@ export default class Profile {
 		displayName?: string;
 		avatarUrl?: string;
 		bio?: string;
-		metadataJson?: Record<string, any>;
+		metadataJson?: Record<string, unknown>;
 	}) {
 		const { apiClient } = this.defaults;
 		apiClient.ensureJwt();

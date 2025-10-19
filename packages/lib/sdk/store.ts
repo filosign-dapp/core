@@ -51,5 +51,5 @@ export class FilosignStore {
 		this._cache = v;
 	}
 
-	constructor(options: {}) {}
+	// constructor(options: {}) {}
 }
