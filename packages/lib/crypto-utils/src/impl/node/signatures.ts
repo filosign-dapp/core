@@ -1,6 +1,7 @@
 import Dilithium from "dilithium-crystals-js";
+import { DILITHIUM_KIND } from "../../constants";
 
-const dilithiumKind = 3;
+const dilithiumKind = DILITHIUM_KIND;
 
 export async function keyGen(args: { seed: Uint8Array }) {
 	const { seed } = args;
@@ -42,7 +43,7 @@ export async function verify(args: {
 	const { message, signature, publicKey } = args;
 	const dl = await Dilithium;
 
-	const { result } = dl.verify(message, signature, publicKey, dilithiumKind);
+	const { result } = dl.verify(signature, message, publicKey, dilithiumKind);
 
 	return result !== 0;
 }
