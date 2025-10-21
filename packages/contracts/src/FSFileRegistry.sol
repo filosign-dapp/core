@@ -21,8 +21,6 @@ contract FSFileRegistry is EIP712 {
         bytes32 s;
         address signer;
         uint48 timestamp;
-        uint8 signatureVisualPositionTop;
-        uint8 signatureVisualPositionLeft;
         uint8 v;
     }
 
