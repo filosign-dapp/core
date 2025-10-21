@@ -45,5 +45,5 @@ export async function verify(args: {
 
 	const { result } = dl.verify(signature, message, publicKey, dilithiumKind);
 
-	return result !== 0;
+	return result === 0;
 }
