@@ -5,47 +5,50 @@ import "./interfaces/IFSManager.sol";
 
 contract FSKeyRegistry {
     struct KeygenData {
-        bytes32 salt_auth;
-        bytes32 salt_wrap;
-        bytes32 salt_pin;
-        bytes32 nonce;
-        bytes20 seed_head;
-        bytes32 seed_word;
-        bytes20 seed_tail;
-        bytes20 commitment_pin;
+        bytes16 salt_pin;
+        bytes16 salt_seed;
+        bytes20 commitment_kyber_pk;
+        bytes20 commitment_dilithium_pk;
     }
 
     mapping(address => KeygenData) public keygenData;
-    mapping(address => uint8) public keygenDataVersion;
     mapping(address => bytes32) public publicKeys;
 
-    IFSManager public immutable manager;
+    event KeygenDataRegistered(address indexed user);
 
-    event KeygenDataRegistered(
-        address indexed user,
-        bytes32 publicKey,
-        uint8 version
-    );
-
-    constructor() {
-        manager = IFSManager(msg.sender);
-    }
+    constructor() {}
 
     function isRegistered(address user_) public view returns (bool) {
-        return keygenData[user_].nonce != bytes32(0);
+        return
+            keygenData[user_].commitment_kyber_pk != bytes20(0) ||
+            keygenData[user_].commitment_dilithium_pk != bytes20(0);
     }
 
     function registerKeygenData(
-        KeygenData memory data_,
-        bytes32 publicKey_
+        bytes16 salt_pin,
+        bytes16 salt_seed,
+        bytes20 commitment_kyber_pk,
+        bytes20 commitment_dilithium_pk
     ) external {
-        require(data_.nonce != bytes32(0), "Invalid nonce");
+        require(salt_pin != bytes16(0), "Invalid salt_pin");
+        require(salt_seed != bytes16(0), "Invalid salt_seed");
+        require(
+            commitment_kyber_pk != bytes20(0),
+            "Invalid commitment_kyber_pk"
+        );
+        require(
+            commitment_dilithium_pk != bytes20(0),
+            "Invalid commitment_dilithium_pk"
+        );
         require(isRegistered(msg.sender) == false, "Data already registered");
 
-        keygenDataVersion[msg.sender] = manager.version();
-        keygenData[msg.sender] = data_;
-        publicKeys[msg.sender] = publicKey_;
+        keygenData[msg.sender] = KeygenData({
+            salt_pin: salt_pin,
+            salt_seed: salt_seed,
+            commitment_kyber_pk: commitment_kyber_pk,
+            commitment_dilithium_pk: commitment_dilithium_pk
+        });
 
-        emit KeygenDataRegistered(msg.sender, publicKey_, manager.version());
+        emit KeygenDataRegistered(msg.sender);
     }
 }
