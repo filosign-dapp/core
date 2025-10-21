@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 
 import "./interfaces/IFSManager.sol";
 
-contract FSKeyRegistry is EIP712 {
+contract FSKeyRegistry {
     struct KeygenData {
         bytes16 salt_pin;
         bytes16 salt_seed;
@@ -18,12 +18,7 @@ contract FSKeyRegistry is EIP712 {
 
     event KeygenDataRegistered(address indexed user);
 
-    constructor() EIP712("Filosign File Registry", "1") {}
-
-    bytes32 private constant REGISTERKEYGENDATA_TYPEHASH =
-        keccak256(
-            "Signature(bytes16 salt_pin,bytes16 salt_seed,bytes20 commitment_kyber_pk,bytes20 commitment_dilithium_pk)"
-        );
+    constructor() {}
 
     function isRegistered(address user_) public view returns (bool) {
         return
@@ -35,8 +30,7 @@ contract FSKeyRegistry is EIP712 {
         bytes16 salt_pin_,
         bytes16 salt_seed_,
         bytes20 commitment_kyber_pk_,
-        bytes20 commitment_dilithium_pk_,
-        bytes32 signature_
+        bytes20 commitment_dilithium_pk_
     ) external {
         require(salt_pin_ != bytes16(0), "Invalid salt_pin");
         require(salt_seed_ != bytes16(0), "Invalid salt_seed");
@@ -51,10 +45,10 @@ contract FSKeyRegistry is EIP712 {
         require(isRegistered(msg.sender) == false, "Data already registered");
 
         keygenData[msg.sender] = KeygenData({
-            salt_pin: salt_pin,
-            salt_seed: salt_seed,
-            commitment_kyber_pk: commitment_kyber_pk,
-            commitment_dilithium_pk: commitment_dilithium_pk
+            salt_pin: salt_pin_,
+            salt_seed: salt_seed_,
+            commitment_kyber_pk: commitment_kyber_pk_,
+            commitment_dilithium_pk: commitment_dilithium_pk_
         });
 
         emit KeygenDataRegistered(msg.sender);
