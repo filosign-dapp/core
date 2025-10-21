@@ -1,274 +1,94 @@
-import cryptoUtils from "./src/impl/node";
-
-const {
-	generateRandomHex,
-	deriveEncryptionMaterial,
-	regenerateEncryptionKey,
-	generateKeyPair,
-	createSharedKey,
-} = cryptoUtils;
-
 import { describe, expect, it } from "bun:test";
+import cryptoUtils from "./src/lib-node";
 
-describe("FiloSign Crypto Utils", () => {
-	describe("Basic Functionality", () => {
-		it("should generate random hex", async () => {
-			const res1 = await generateRandomHex();
-			const res2 = await generateRandomHex();
+const { KEM, encryption, hash, signatures, utils } = cryptoUtils;
 
-			expect(res1).toBeDefined();
-			expect(res2).toBeDefined();
-			expect(res1).not.toBe(res2);
-			if (res1.ok && res2.ok) {
-				expect(res1.value.startsWith("0x")).toBe(true);
-				expect(res1.value.length).toBe(66); // 0x + 64 hex chars
-				expect(res2.value.startsWith("0x")).toBe(true);
-				expect(res2.value.length).toBe(66);
-			}
+describe("KEM (Kyber1024)", async () => {
+	it("should generate keypair determistically by input seed", async () => {
+		const seed = utils.randomBytes(64);
+		const { privateKey: pvt1, publicKey: pub1 } = await KEM.keyGen({ seed });
+		const { privateKey: pvt2, publicKey: pub2 } = await KEM.keyGen({ seed });
+		expect(pvt1).toEqual(pvt2);
+		expect(pub1).toEqual(pub2);
+
+		const seed2 = utils.randomBytes(64);
+		const { privateKey: pvt3, publicKey: pub3 } = await KEM.keyGen({
+			seed: seed2,
 		});
-
-		it("should derive encryption material with randomization", async () => {
-			const signatureHex = "74657374207369676e61747572652064617461";
-			const pin = "1234";
-			const pinSaltHex = "70696e5f73616c745f6578616d706c65";
-			const authSaltHex = "617574685f73616c745f6578616d706c65";
-			const wrapperSaltHex = "777261707065725f73616c745f6578616d706c65";
-			const infoHex = "746573745f636964";
-
-			const res1 = await deriveEncryptionMaterial(
-				signatureHex,
-				pin,
-				pinSaltHex,
-				authSaltHex,
-				wrapperSaltHex,
-				infoHex,
-			);
-
-			const res2 = await deriveEncryptionMaterial(
-				signatureHex,
-				pin,
-				pinSaltHex,
-				authSaltHex,
-				wrapperSaltHex,
-				infoHex,
-			);
-
-			expect(res1.ok).toBe(true);
-			expect(res2.ok).toBe(true);
-			if (res1.ok && res2.ok) {
-				expect(res1.value.commitment).toBeDefined();
-				expect(res2.value.commitment).toBeDefined();
-				expect(res1.value.commitment).not.toBe(res2.value.commitment);
-			}
-		});
-
-		it("should regenerate encryption key consistently", async () => {
-			const signatureHex = "74657374207369676e61747572652064617461";
-			const pin = "1234";
-			const pinSaltHex = "70696e5f73616c745f6578616d706c65";
-			const authSaltHex = "617574685f73616c745f6578616d706c65";
-			const wrapperSaltHex = "777261707065725f73616c745f6578616d706c65";
-			const infoHex = "746573745f636964";
-
-			const derivationRes = await deriveEncryptionMaterial(
-				signatureHex,
-				pin,
-				pinSaltHex,
-				authSaltHex,
-				wrapperSaltHex,
-				infoHex,
-			);
-
-			expect(derivationRes.ok).toBe(true);
-			if (!derivationRes.ok) return;
-
-			const regeneratedResult1 = await regenerateEncryptionKey(
-				signatureHex,
-				pin,
-				pinSaltHex,
-				authSaltHex,
-				wrapperSaltHex,
-				derivationRes.value.enc_seed,
-				infoHex,
-			);
-
-			const regeneratedResult2 = await regenerateEncryptionKey(
-				signatureHex,
-				pin,
-				pinSaltHex,
-				authSaltHex,
-				wrapperSaltHex,
-				derivationRes.value.enc_seed,
-				infoHex,
-			);
-
-			expect(regeneratedResult1.ok).toBe(true);
-			expect(regeneratedResult2.ok).toBe(true);
-			if (regeneratedResult1.ok && regeneratedResult2.ok) {
-				expect(derivationRes.value.encryption_key).toBe(
-					regeneratedResult1.value.encryption_key,
-				);
-				expect(regeneratedResult1.value.encryption_key).toBe(
-					regeneratedResult2.value.encryption_key,
-				);
-			}
-		});
-
-		it("should fail with wrong PIN", async () => {
-			const signatureHex = "74657374207369676e61747572652064617461";
-			const pin = "1234";
-			const wrongPin = "5678";
-			const pinSaltHex = "70696e5f73616c745f6578616d706c65";
-			const authSaltHex = "617574685f73616c745f6578616d706c65";
-			const wrapperSaltHex = "777261707065725f73616c745f6578616d706c65";
-			const infoHex = "746573745f636964";
-
-			const derivationRes = await deriveEncryptionMaterial(
-				signatureHex,
-				pin,
-				pinSaltHex,
-				authSaltHex,
-				wrapperSaltHex,
-				infoHex,
-			);
-
-			expect(derivationRes.ok).toBe(true);
-			if (!derivationRes.ok) return;
-
-			const result = await regenerateEncryptionKey(
-				signatureHex,
-				wrongPin,
-				pinSaltHex,
-				authSaltHex,
-				wrapperSaltHex,
-				derivationRes.value.enc_seed,
-				infoHex,
-			);
-
-			expect(result.ok).toBe(false);
-		});
-
-		it("should produce different keys with different info", async () => {
-			const signatureHex = "74657374207369676e61747572652064617461";
-			const pin = "1234";
-			const pinSaltHex = "70696e5f73616c745f6578616d706c65";
-			const authSaltHex = "617574685f73616c745f6578616d706c65";
-			const wrapperSaltHex = "777261707065725f73616c745f6578616d706c65";
-			const infoHex = "746573745f636964";
-			const differentInfoHex = "646966666572656e745f636964";
-
-			const derivationRes = await deriveEncryptionMaterial(
-				signatureHex,
-				pin,
-				pinSaltHex,
-				authSaltHex,
-				wrapperSaltHex,
-				infoHex,
-			);
-
-			expect(derivationRes.ok).toBe(true);
-			if (!derivationRes.ok) return;
-
-			const differentInfoResult = await regenerateEncryptionKey(
-				signatureHex,
-				pin,
-				pinSaltHex,
-				authSaltHex,
-				wrapperSaltHex,
-				derivationRes.value.enc_seed,
-				differentInfoHex,
-			);
-
-			expect(differentInfoResult.ok).toBe(true);
-			if (differentInfoResult.ok) {
-				expect(differentInfoResult.value.encryption_key).not.toBe(
-					derivationRes.value.encryption_key,
-				);
-			}
-		});
+		expect(pvt1).not.toEqual(pvt3);
+		expect(pub1).not.toEqual(pub3);
 	});
 
-	describe("Key Exchange", () => {
-		it("should perform successful key exchange between two parties", async () => {
-			const aliceKeyPairRes = await generateKeyPair();
-			const bobKeyPairRes = await generateKeyPair();
+	it("should be able to genarate, encapsulate and decapsulate shared secret among two parteis", async () => {
+		const receiver = await KEM.keyGen({ seed: utils.randomBytes(64) });
 
-			expect(aliceKeyPairRes.ok).toBe(true);
-			expect(bobKeyPairRes.ok).toBe(true);
-			if (!aliceKeyPairRes.ok || !bobKeyPairRes.ok) return;
-
-			// Alice computes shared key using her private and Bob's public
-			const aliceSharedKey = await createSharedKey(
-				aliceKeyPairRes.value.private_key,
-				bobKeyPairRes.value.public_key,
-			);
-
-			// Bob computes shared key using his private and Alice's public
-			const bobSharedKey = await createSharedKey(
-				bobKeyPairRes.value.private_key,
-				aliceKeyPairRes.value.public_key,
-			);
-
-			expect(aliceSharedKey.ok).toBe(true);
-			expect(bobSharedKey.ok).toBe(true);
-			if (aliceSharedKey.ok && bobSharedKey.ok) {
-				expect(aliceSharedKey.value.shared_key).toBe(
-					bobSharedKey.value.shared_key,
-				);
-			}
+		const { ciphertext, sharedSecret: ssA } = await KEM.encapsulate({
+			publicKeyOther: receiver.publicKey,
+		});
+		const { sharedSecret: ssE } = await KEM.decapsulate({
+			ciphertext,
+			privateKeySelf: receiver.privateKey,
 		});
 
-		it("should produce consistent shared keys", async () => {
-			const aliceKeyPairResult = await generateKeyPair();
-			const bobKeyPairResult = await generateKeyPair();
-
-			expect(aliceKeyPairResult.ok).toBe(true);
-			expect(bobKeyPairResult.ok).toBe(true);
-
-			if (aliceKeyPairResult.ok && bobKeyPairResult.ok) {
-				// Test that the same inputs always produce the same shared key
-				const aliceSharedKey1 = await createSharedKey(
-					aliceKeyPairResult.value.private_key,
-					bobKeyPairResult.value.public_key,
-				);
-
-				const aliceSharedKey2 = await createSharedKey(
-					aliceKeyPairResult.value.private_key,
-					bobKeyPairResult.value.public_key,
-				);
-
-				expect(aliceSharedKey1.ok).toBe(true);
-				expect(aliceSharedKey2.ok).toBe(true);
-				if (aliceSharedKey1.ok && aliceSharedKey2.ok) {
-					expect(aliceSharedKey1.value.shared_key).toBe(
-						aliceSharedKey2.value.shared_key,
-					);
-				}
-			}
-		});
+		expect(ssA).toEqual(ssE);
 	});
 
-	describe("Key Pair Generation", () => {
-		it("should generate unique key pairs", async () => {
-			const keyPair1Result = await generateKeyPair();
-			const keyPair2Result = await generateKeyPair();
+	const keypair = await KEM.keyGen({ seed: utils.randomBytes(64) });
+	console.log("KEM public key size: ", keypair.publicKey.length);
+});
 
-			expect(keyPair1Result.ok).toBe(true);
-			expect(keyPair2Result.ok).toBe(true);
-
-			if (keyPair1Result.ok && keyPair2Result.ok) {
-				expect(keyPair1Result.value.private_key).toBeDefined();
-				expect(keyPair1Result.value.public_key).toBeDefined();
-				expect(keyPair2Result.value.private_key).toBeDefined();
-				expect(keyPair2Result.value.public_key).toBeDefined();
-
-				expect(keyPair1Result.value.private_key).not.toBe(
-					keyPair2Result.value.private_key,
-				);
-				expect(keyPair1Result.value.public_key).not.toBe(
-					keyPair2Result.value.public_key,
-				);
-			}
+describe("Signatures (Dilithium)", async () => {
+	it("should geenerate keypair determistically by input seed", async () => {
+		const seed = utils.randomBytes(64);
+		const { privateKey: pvt1, publicKey: pub1 } = await signatures.keyGen({
+			seed,
 		});
+		const { privateKey: pvt2, publicKey: pub2 } = await signatures.keyGen({
+			seed,
+		});
+		expect(pvt1).toEqual(pvt2);
+		expect(pub1).toEqual(pub2);
+
+		const seed2 = utils.randomBytes(64);
+		const { privateKey: pvt3, publicKey: pub3 } = await signatures.keyGen({
+			seed: seed2,
+		});
+		expect(pvt1).not.toEqual(pvt3);
+		expect(pub1).not.toEqual(pub3);
 	});
+
+	it("should be able to sign and verify message", async () => {
+		const signer = await signatures.keyGen({
+			seed: utils.randomBytes(64),
+		});
+		const message = utils.randomBytes(2056);
+
+		const signature = await signatures.sign({
+			message,
+			privateKey: signer.privateKey,
+		});
+		console.log("Signature size: ", signature.length);
+		const isValid = await signatures.verify({
+			message,
+			signature,
+			publicKey: signer.publicKey,
+		});
+		expect(isValid).toBe(true);
+
+		message.fill(0xff, 0, 10); // tamper the message
+		const isValidFake = await signatures.verify({
+			message,
+			signature,
+			publicKey: signer.publicKey,
+		});
+		expect(isValidFake).toBe(false);
+	});
+
+	const keypair = await signatures.keyGen({ seed: utils.randomBytes(64) });
+	const signature = await signatures.sign({
+		message: utils.randomBytes(128),
+		privateKey: keypair.privateKey,
+	});
+	console.log("DL3 Public key size: ", keypair.publicKey.length);
+	console.log("Signature size: ", signature.length);
 });
