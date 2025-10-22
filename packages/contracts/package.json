@@ -40,6 +40,7 @@
 		"glob": "^11.0.3",
 		"hardhat": "^2.26.3",
 		"hardhat-gas-reporter": "^2.3.0",
+		"mocha": "11.7.4",
 		"solidity-coverage": "^0.8.16",
 		"solidity-parser-antlr": "^0.4.11",
 		"ts-node": "^10.9.2",

@@ -12,7 +12,7 @@ export function hash(value: Hex | ByteArray | string) {
 	return keccak256(value);
 }
 
-export const argon = (...args: Parameters<typeof keccak256>) => {
+export function argon(...args: Parameters<typeof keccak256>) {
 	const [value, ...rest] = args;
 	return keccak256(
 		encodePacked(
@@ -26,4 +26,4 @@ export const argon = (...args: Parameters<typeof keccak256>) => {
 		),
 		...rest,
 	);
-};
+}
