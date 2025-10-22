@@ -1,8 +1,10 @@
 import {
-	deriveEncryptionMaterial,
-	generateRandomHex,
-	regenerateEncryptionKey,
-} from "@filosign/crypto-utils";
+	computeCommitment,
+	hash as fsHash,
+	generateRegisterChallenge,
+	KEM,
+	randomBytes,
+} from "@filosign/crypto-utils/node";
 import { loadFixture } from "@nomicfoundation/hardhat-toolbox-viem/network-helpers";
 import { expect } from "chai";
 import hre from "hardhat";
@@ -16,8 +18,6 @@ import {
 	sliceHex,
 } from "viem";
 
-const register_challenge = "0xblhblah:filosign:yayy";
-
 async function setupFixture() {
 	const [deployer, user] = await hre.viem.getWalletClients();
 	const admin = (await hre.viem.getTestClient()).extend(publicActions);
@@ -27,60 +27,24 @@ async function setupFixture() {
 		"FSKeyRegistry",
 		await manager.read.keyRegistry(),
 	);
-	const version = 1; //await keyRegistry.read.version();
 
-	return { deployer, user, keyRegistry, version, admin };
+	return { deployer, user, keyRegistry, admin };
 }
 
 describe("FSKeyRegistry", () => {
 	it("stores relevant information for the user to be able to regenerate encryption keys", async () => {
-		const { keyRegistry, user, version, admin } =
-			await loadFixture(setupFixture);
+		const { keyRegistry, user, admin } = await loadFixture(setupFixture);
 		const pin = "1234";
-		const info = "Spandan";
+		const pinArgoned = fsHash.argon(fsHash.hash(pin));
+		const pinSalt = randomBytes(16);
 
-		const pinSalt = await generateRandomHex();
-		const authSalt = await generateRandomHex();
-		const wrapperSalt = await generateRandomHex();
-		const nonce = await generateRandomHex();
+		const commitment_pin = computeCommitment([pin, pinSalt.toString()]);
 
-		const signature = await user.signMessage({
-			message: register_challenge,
-		});
-
-		const enc_material = deriveEncryptionMaterial(
-			signature,
-			pin,
-			pinSalt,
-			authSalt,
-			wrapperSalt,
-			info,
-		);
-
-		const generated = regenerateEncryptionKey(
-			signature,
-			pin,
-			base_material.pinSalt,
-			base_material.authSalt,
-			base_material.wrapperSalt,
-			enc_material.encSeed,
-			"test",
-		);
-
-		const commitment_pin = ripemd160(
-			keccak256(
-				encodePacked(["string", "string"], [base_material.pinSalt, pin]),
-			),
-		);
-
-		const { publicKey } = getPublicKeyFromRegenerated(
-			signature,
-			pin,
-			base_material.pinSalt,
-			base_material.authSalt,
-			base_material.wrapperSalt,
-			enc_material.encSeed,
-			"test",
+		const challengeSalt = randomBytes(16);
+		const registerChallenge = generateRegisterChallenge(
+			user.account.address,
+			toHex(challengeSalt),
+			pinArgoned,
 		);
 
 		const encSeedHex = `0x${toHex(enc_material.encSeed)}` as const;
