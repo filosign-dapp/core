@@ -36,11 +36,6 @@ contract FSFileRegistry is EIP712 {
 
     IFSManager public immutable manager;
 
-    bytes32 private constant SIGNATURE_TYPEHASH =
-        keccak256(
-            "Signature(bytes32 pieceCidPrefix,bytes16 pieceCidBuffer,bytes32 pieceCidTail,bytes32 signatureVisualHash)"
-        );
-
     event FileRegistered(
         bytes32 indexed cidIdentifier,
         address indexed sender,
