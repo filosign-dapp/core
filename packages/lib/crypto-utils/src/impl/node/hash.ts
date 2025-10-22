@@ -1,11 +1,16 @@
-import { encodePacked, keccak256 } from "viem";
+import { type ByteArray, encodePacked, type Hex, isHex, keccak256 } from "viem";
 import {
 	ARGON_MEMORY_COST_KIB,
 	ARGON_PARALLELISM_DEGREE,
 	ARGON_TIMES_COST,
 } from "../../constants";
 
-export const hash = keccak256;
+export function hash(value: Hex | ByteArray | string) {
+	if (typeof value === "string" && !isHex(value)) {
+		return keccak256(encodePacked(["string"], [value]));
+	}
+	return keccak256(value);
+}
 
 export const argon = (...args: Parameters<typeof keccak256>) => {
 	const [value, ...rest] = args;
