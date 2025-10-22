@@ -7,7 +7,7 @@
 			"default": "./src/impl/web.ts"
 		},
 		"./node": {
-			"default": "./src/impl/node.ts"
+			"default": "./src/lib-node.ts"
 		}
 	},
 	"scripts": {

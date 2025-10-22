@@ -4,6 +4,10 @@ import * as KEM from "./impl/node/KEM";
 import * as signatures from "./impl/node/signatures";
 import * as utils from "./impl/node/utils";
 
-const node = { encryption, hash, KEM, signatures, utils };
+export * from "./impl/node/utils";
+
+const node = { encryption, hash, KEM, signatures, ...utils };
 
 export default node;
+
+export { encryption, hash, KEM, signatures };
