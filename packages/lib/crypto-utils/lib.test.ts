@@ -31,10 +31,9 @@ describe("KEM (Kyber1024)", async () => {
 		});
 
 		expect(ssA).toEqual(ssE);
-	});
 
-	const keypair = await KEM.keyGen({ seed: utils.randomBytes(64) });
-	console.log("KEM public key size: ", keypair.publicKey.length);
+		console.log("KEM public key size: ", receiver.publicKey.length);
+	});
 });
 
 describe("Signatures (Dilithium)", async () => {
@@ -67,7 +66,6 @@ describe("Signatures (Dilithium)", async () => {
 			message,
 			privateKey: signer.privateKey,
 		});
-		console.log("Signature size: ", signature.length);
 		const isValid = await signatures.verify({
 			message,
 			signature,
@@ -82,13 +80,42 @@ describe("Signatures (Dilithium)", async () => {
 			publicKey: signer.publicKey,
 		});
 		expect(isValidFake).toBe(false);
-	});
 
-	const keypair = await signatures.keyGen({ seed: utils.randomBytes(64) });
-	const signature = await signatures.sign({
-		message: utils.randomBytes(128),
-		privateKey: keypair.privateKey,
+		console.log("DL3 Public key size: ", signer.publicKey.length);
+		console.log("Signature size: ", signature.length);
 	});
-	console.log("DL3 Public key size: ", keypair.publicKey.length);
-	console.log("Signature size: ", signature.length);
+});
+
+describe("Encryption (AES-GCM)", async () => {
+	it("entire encryption workflow with KEM is tested and it works", async () => {
+		const receiver = await KEM.keyGen({ seed: utils.randomBytes(64) });
+
+		//sender
+		const { ciphertext: kemCiphertext, sharedSecret: ssA } =
+			await KEM.encapsulate({
+				publicKeyOther: receiver.publicKey,
+			});
+
+		const message = utils.randomBytes(16_777_216);
+
+		const encryptedMessage = await encryption.encrypt({
+			message,
+			sharedSecret: ssA,
+			info: "encryption info",
+		});
+
+		//receiver
+		const { sharedSecret: ssE } = await KEM.decapsulate({
+			ciphertext: kemCiphertext,
+			privateKeySelf: receiver.privateKey,
+		});
+
+		const decryptedMessage = await encryption.decrypt({
+			ciphertext: encryptedMessage,
+			sharedSecret: ssE,
+			info: "encryption info",
+		});
+
+		expect(decryptedMessage).toEqual(message);
+	});
 });
