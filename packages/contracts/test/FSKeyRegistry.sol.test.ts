@@ -1,27 +1,8 @@
-import {
-	computeCommitment,
-	hash as fsHash,
-	generateRegisterChallenge,
-	hkdfExtractExpand,
-	KEM,
-	randomBytes,
-	signatures,
-	toBytes,
-	toHex,
-	walletKeyGen,
-} from "@filosign/crypto-utils/node";
+import { walletKeyGen } from "@filosign/crypto-utils/node";
 import { loadFixture } from "@nomicfoundation/hardhat-toolbox-viem/network-helpers";
-import { expect, use } from "chai";
+import { expect } from "chai";
 import hre from "hardhat";
-import {
-	concatBytes,
-	concatHex,
-	encodePacked,
-	keccak256,
-	publicActions,
-	ripemd160,
-	sliceHex,
-} from "viem";
+import { publicActions } from "viem";
 
 async function setupFixture() {
 	const [deployer, user] = await hre.viem.getWalletClients();
@@ -38,7 +19,7 @@ async function setupFixture() {
 
 describe("FSKeyRegistry", () => {
 	it("stores relevant information for the user to be able to regenerate encryption keys", async () => {
-		const { keyRegistry, user, admin } = await loadFixture(setupFixture);
+		const { keyRegistry, user } = await loadFixture(setupFixture);
 		const pin = "1234";
 		const { saltPin, saltSeed, saltChallenge, commitmentKem, commitmentSig } =
 			await walletKeyGen(user, { pin });
