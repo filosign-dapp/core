@@ -24,10 +24,18 @@ describe("FSKeyRegistry", () => {
 		const { saltPin, saltSeed, saltChallenge, commitmentKem, commitmentSig } =
 			await walletKeyGen(user, { pin });
 
+		expect(
+			await keyRegistry.read.isRegistered([user.account.address]),
+		).to.equal(false);
+
 		await keyRegistry.write.registerKeygenData(
 			[saltPin, saltSeed, saltChallenge, commitmentKem, commitmentSig],
 			{ account: user.account },
 		);
+
+		expect(
+			await keyRegistry.read.isRegistered([user.account.address]),
+		).to.equal(true);
 
 		const storedData = await keyRegistry.read.keygenData([
 			user.account.address,
