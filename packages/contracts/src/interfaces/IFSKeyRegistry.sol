@@ -5,21 +5,16 @@ pragma solidity ^0.8.26;
 
 interface IFSKeyRegistry {
     struct KeygenData {
-        bytes32 salt_auth;
-        bytes32 salt_wrap;
-        bytes32 salt_pin;
-        bytes32 nonce;
-        bytes20 seed_head;
-        bytes32 seed_word;
-        bytes20 seed_tail;
-        bytes20 commitment_pin;
+        bytes16 salt_pin;
+        bytes16 salt_seed;
+        bytes16 salt_challenge;
+        bytes20 commitment_kyber_pk;
+        bytes20 commitment_dilithium_pk;
     }
 
     function keygenData(address key) external view returns (KeygenData memory);
-    function keygenDataVersion(address key) external view returns (uint8);
     function publicKeys(address key) external view returns (bytes32);
-    function manager() external view returns (address);
     event KeygenDataRegistered();
     function isRegistered(address user_) external view returns (bool);
-    function registerKeygenData(KeygenData memory data_, bytes32 publicKey_) external;
+    function registerKeygenData(bytes16 salt_pin_, bytes16 salt_seed_, bytes16 salt_challenge_, bytes20 commitment_kyber_pk_, bytes20 commitment_dilithium_pk_) external;
 }
