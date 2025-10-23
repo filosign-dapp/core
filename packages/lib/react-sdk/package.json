@@ -1,5 +1,5 @@
 {
-	"name": "@filosign/sdk",
+	"name": "@filosign/react",
 	"version": "0.1.0",
 	"main": "dist/exports.js",
 	"exports": {
