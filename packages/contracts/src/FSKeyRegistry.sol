@@ -9,6 +9,7 @@ contract FSKeyRegistry {
     struct KeygenData {
         bytes16 salt_pin;
         bytes16 salt_seed;
+        bytes16 salt_challenge;
         bytes20 commitment_kyber_pk;
         bytes20 commitment_dilithium_pk;
     }
@@ -29,6 +30,7 @@ contract FSKeyRegistry {
     function registerKeygenData(
         bytes16 salt_pin_,
         bytes16 salt_seed_,
+        bytes16 salt_challenge_,
         bytes20 commitment_kyber_pk_,
         bytes20 commitment_dilithium_pk_
     ) external {
@@ -47,6 +49,7 @@ contract FSKeyRegistry {
         keygenData[msg.sender] = KeygenData({
             salt_pin: salt_pin_,
             salt_seed: salt_seed_,
+            salt_challenge: salt_challenge_,
             commitment_kyber_pk: commitment_kyber_pk_,
             commitment_dilithium_pk: commitment_dilithium_pk_
         });
