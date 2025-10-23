@@ -83,17 +83,25 @@ export async function walletKeyGen(
 	wallet: Wallet,
 	args: {
 		pin: string;
+		salts?: {
+			challenge: Hex;
+			seed: Hex;
+			pin: Hex;
+		};
 	},
 ) {
-	const { pin } = args;
+	const { pin, salts } = args;
+	const saltPin = salts?.pin ? toBytes(salts.pin) : randomBytes(16);
+	const saltSeed = salts?.seed ? toBytes(salts.seed) : randomBytes(16);
+	const saltChallenge = salts?.challenge
+		? toBytes(salts.challenge)
+		: randomBytes(16);
 
 	const pinArgoned = argon(hash(pin));
-	const saltPin = randomBytes(16);
 
-	const challengeSalt = randomBytes(16);
 	const registerChallenge = generateRegisterChallenge(
 		wallet.account.address,
-		toHex(challengeSalt),
+		toHex(saltChallenge),
 		pinArgoned.toString(),
 	);
 
@@ -101,9 +109,8 @@ export async function walletKeyGen(
 		message: registerChallenge,
 	});
 
-	const saltSeed = randomBytes(16);
 	const seed = await hkdfExtractExpand(
-		seedSalt,
+		saltSeed,
 		toBytes(signature),
 		toBytes(pinArgoned.toString()),
 		64,
@@ -117,8 +124,9 @@ export async function walletKeyGen(
 
 	return {
 		seed,
-		saltPin,
-		saltSeed,
+		saltPin: toHex(saltPin),
+		saltSeed: toHex(saltSeed),
+		saltChallenge: toHex(saltChallenge),
 		kemKeypair,
 		sigKeypair,
 		commitmentKem,
