@@ -45,15 +45,21 @@ async function main() {
 		},
 	} as const;
 
-	const definitionsFile = Bun.file("definitions.ts");
-	const existingContent = await definitionsFile.text();
+	let existingDefinitions: Record<string, typeof definitions> = {};
 
-	const definitionsJson = existingContent.slice(
-		DEFINITIONS_FILE_PREFIX.length,
-		existingContent.length - DEFINITIONS_FILE_SUFFIX.length,
-	);
-	const existingDefinitions = JSON.parse(definitionsJson);
-	existingDefinitions[toHex(chainId)] = definitions;
+	const definitionsFile = Bun.file("definitions.ts");
+	try {
+		const existingContent = await definitionsFile.text();
+
+		const definitionsJson = existingContent.slice(
+			DEFINITIONS_FILE_PREFIX.length,
+			existingContent.length - DEFINITIONS_FILE_SUFFIX.length,
+		);
+		existingDefinitions = JSON.parse(definitionsJson);
+		existingDefinitions[toHex(chainId)] = definitions;
+	} catch (error) {
+		console.error("Error reading definitions.ts:", error);
+	}
 
 	await definitionsFile.write(
 		DEFINITIONS_FILE_PREFIX +
