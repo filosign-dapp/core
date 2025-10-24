@@ -16,6 +16,10 @@ const config: HardhatUserConfig = {
 			chainId: 314159,
 			url: "https://api.calibration.node.glif.io/rpc/v1",
 		},
+		localhost: {
+			url: "http://127.0.0.1:8545",
+			chainId: 31337,
+		},
 	},
 	etherscan: {
 		apiKey: {

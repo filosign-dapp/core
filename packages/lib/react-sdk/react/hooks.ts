@@ -4,7 +4,7 @@ import type { FilosignClient } from "../..";
 
 p;
 
-import { useFilosignContext } from "./FilosignProvider";
+import { useFilosignContext } from "../src/context/FilosignProvider";
 
 export type Path<T> = T extends object
 	? {
