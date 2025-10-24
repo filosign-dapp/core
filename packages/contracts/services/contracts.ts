@@ -23,27 +23,36 @@ function getKeyedClient<T extends Client | WalletClient>(client: T) {
 	};
 }
 
-export function getContracts<T extends Wallet>(client: T) {
+export function getContracts<T extends Wallet>(options: {
+	client: T;
+	chainId: keyof typeof definitions;
+}) {
+	const { client, chainId } = options;
+
 	if (!client.transport || !client.chain || !client.account) {
 		console.log(
 			"Ensure client is properly initialized with transport, chain and account",
 		);
 	}
 
+	const contractDefinitions = definitions[chainId];
+
 	return {
 		FSManager: getContract({
 			client: getKeyedClient(client),
-			...definitions.FSManager,
+			...contractDefinitions.FSManager,
 		}),
 		FSFileRegistry: getContract({
 			client: getKeyedClient(client),
-			...definitions.FSFileRegistry,
+			...contractDefinitions.FSFileRegistry,
 		}),
 		FSKeyRegistry: getContract({
 			client: getKeyedClient(client),
-			...definitions.FSKeyRegistry,
+			...contractDefinitions.FSKeyRegistry,
 		}),
 	};
 }
+
+export type FilosignContracts = ReturnType<typeof getContracts>;
 
 type Wallet = WalletClient<Transport, Chain, Account>;
