@@ -19,5 +19,13 @@
 		"hono": "^4.9.8",
 		"idb": "8.0.3",
 		"zod": "^4.1.11"
+	},
+	"peerDependencies": {
+		"viem": "^2.38.5",
+		"wagmi": "2.19.1",
+		"react": "19.2.0"
+	},
+	"devDependencies": {
+		"@types/react": "19.2.2"
 	}
 }

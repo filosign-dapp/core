@@ -27,6 +27,6 @@
 		"dilithium-crystals-js": "1.1.3"
 	},
 	"peerDependencies": {
-		"viem": "2.38.0"
+		"viem": "^2.38.5"
 	}
 }
