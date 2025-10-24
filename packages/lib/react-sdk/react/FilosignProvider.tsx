@@ -9,7 +9,7 @@ import {
 	useState,
 } from "react";
 import { FilosignClient } from "../..";
-import type { FilosignClientConfig } from "../../types/client";
+import type { FilosignClientConfig } from "../types/client";
 
 type FilosignContext = {
 	client: FilosignClient;

@@ -15,3 +15,5 @@ export function useContracts() {
 		return getContracts(client);
 	}, [client]);
 }
+
+export function useServerInfo() {}

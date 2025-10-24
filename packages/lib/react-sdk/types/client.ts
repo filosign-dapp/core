@@ -7,9 +7,6 @@ import type {
 	Transport,
 	WalletClient,
 } from "viem";
-import type ApiClient from "../sdk/bindings/ApiClient";
-import type { Crypto } from "../sdk/bindings/Crypto";
-import type Logger from "../sdk/bindings/Logger";
 import type { FilosignStore } from "../store";
 
 export type FilosignClientConfig = {
