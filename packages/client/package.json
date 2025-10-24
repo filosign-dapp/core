@@ -12,7 +12,7 @@
 		"sdk:update:force": "rm -rf node_modules/@filosign/sdk; rm -rf ../../node_modules/@filosign/sdk; bun install"
 	},
 	"dependencies": {
-		"@filosign/sdk": "workspace:*",
+		"@filosign/react": "workspace:*",
 		"@hono/zod-validator": "^0.7.0",
 		"@hookform/resolvers": "5.2.1",
 		"@phosphor-icons/react": "2.1.10",

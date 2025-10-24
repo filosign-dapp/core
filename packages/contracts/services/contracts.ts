@@ -23,7 +23,7 @@ function getKeyedClient<T extends Client | WalletClient>(client: T) {
 	};
 }
 
-export function getContracts<T extends Client | WalletClient>(client: T) {
+export function getContracts<T extends Wallet>(client: T) {
 	if (!client.transport || !client.chain || !client.account) {
 		console.log(
 			"Ensure client is properly initialized with transport, chain and account",
@@ -45,3 +45,5 @@ export function getContracts<T extends Client | WalletClient>(client: T) {
 		}),
 	};
 }
+
+type Wallet = WalletClient<Transport, Chain, Account>;
