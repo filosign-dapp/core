@@ -1,18 +1,17 @@
 import { defineConfig } from "drizzle-kit";
+import env from "./env";
 
 //@ts-expect-error
 BigInt.prototype.toJSON = function () {
 	return this.toString();
 };
 
-export const sqliteFile = "./filosign.db";
-
 export default defineConfig({
 	out: "./drizzle",
 	schema: "./lib/db/schema",
-	dialect: "sqlite",
+	dialect: "postgresql",
 	dbCredentials: {
-		url: sqliteFile,
+		url: env.PG_URI,
 	},
 	casing: "snake_case",
 });

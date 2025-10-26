@@ -6,6 +6,8 @@ const envKeys = [
 	"S3_BUCKET",
 	"S3_ENDPOINT",
 	"EVM_PRIVATE_KEY_SYNAPSE",
+	"EVM_PRIVATE_KEY_SERVER",
+	"PG_URI",
 	"FRONTEND_URL",
 	"RUNTIME_CHAIN_ID",
 ] as const;
