@@ -5,10 +5,10 @@ import * as user from "./user";
 
 // Combine all schema parts
 const schema = {
-	...sys,
-	...shareCapability,
+	// ...sys,
+	// ...shareCapability,
 	...user,
-	...file,
+	// ...file,
 };
 
 export default schema;

@@ -1,4 +1,4 @@
-import { customType, integer } from "drizzle-orm/sqlite-core";
+import { customType, integer } from "drizzle-orm/pg-core";
 import {
 	type Address,
 	checksumAddress,
