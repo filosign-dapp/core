@@ -7,6 +7,7 @@ import {
 	http,
 	type PublicClient,
 	type Transport,
+	toHex,
 	type WalletClient,
 } from "viem";
 import { definitions } from "../definitions";
@@ -25,7 +26,7 @@ function getKeyedClient<T extends Client | WalletClient>(client: T) {
 
 export function getContracts<T extends Wallet>(options: {
 	client: T;
-	chainId: keyof typeof definitions;
+	chainId: number;
 }) {
 	const { client, chainId } = options;
 
@@ -35,7 +36,13 @@ export function getContracts<T extends Wallet>(options: {
 		);
 	}
 
-	const contractDefinitions = definitions[chainId];
+	const key = toHex(chainId);
+	if (!Object.keys(definitions).includes(key)) {
+		console.error(`No contract definitions found for chainId ${chainId}`);
+		return null;
+	}
+
+	const contractDefinitions = definitions[key as keyof typeof definitions];
 
 	return {
 		FSManager: getContract({

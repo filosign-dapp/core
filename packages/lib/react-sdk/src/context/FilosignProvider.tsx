@@ -1,4 +1,4 @@
-import type { FilosignContracts, getContracts } from "@filosign/contracts";
+import { type FilosignContracts, getContracts } from "@filosign/contracts";
 import { useQuery } from "@tanstack/react-query";
 import {
 	createContext,
@@ -10,18 +10,20 @@ import {
 	useState,
 } from "react";
 import type { Chain } from "viem";
-import type ApiClient from "../ApiClient";
+import { useWalletClient } from "wagmi";
+import ApiClient from "../ApiClient";
+import { DAY } from "../constants";
 
 type FilosignContext = {
 	ready: boolean;
 	api: ApiClient;
-	contracts: FilosignContracts;
+	contracts: FilosignContracts | null;
 };
 
 const FilosignContext = createContext<FilosignContext>({
 	ready: false,
 	api: {} as ApiClient,
-	contracts: {} as FilosignContracts,
+	contracts: null,
 });
 
 type FilosignConfig = {
@@ -31,12 +33,22 @@ type FilosignConfig = {
 
 export function FilosignProvider(props: FilosignConfig) {
 	const { children, apiBaseUrl } = props;
-	const [ready, setReady] = useState<boolean>(false);
-	const [api, setApi] = useState<ApiClient>({} as ApiClient);
-	const [contracts, setContracts] = useState<FilosignContracts>(
-		{} as FilosignContracts,
-	);
 
+	const [contracts, setContracts] = useState<FilosignContracts | null>(null);
+
+	const { data: wallet } = useWalletClient();
+
+	const { data: api } = useQuery({
+		queryKey: [
+			"api-client",
+			apiBaseUrl,
+			apiBaseUrl.includes("localhost") ? Date.now() : null,
+		],
+		queryFn: async () => {
+			return new ApiClient(apiBaseUrl);
+		},
+		staleTime: 1 * DAY,
+	});
 	const runtime = useQuery({
 		queryKey: [
 			"runtime",
@@ -49,23 +61,28 @@ export function FilosignProvider(props: FilosignConfig) {
 			);
 			return runtime as { uptime: number; chain: Chain };
 		},
+		staleTime: 1 * DAY,
+
+		enabled: !!api,
 	});
 
 	const flag = useRef(false);
 
 	useEffect(() => {
-		if (runtime.data && !flag.current) {
-			const { uptime, chain } = runtime.data;
-
-			const fsContracts = getContracts({ client: api, chainId: chain.id });
+		if (!flag.current && wallet && runtime.data) {
+			const fsContracts = getContracts({
+				client: wallet,
+				chainId: runtime.data.chain.id,
+			});
+			setContracts(fsContracts);
 		}
-	}, [runtime.data]);
+	}, [runtime.data, wallet]);
 
 	const value: FilosignContext = {
-		ready,
+		ready: !!api,
+		api: api as ApiClient,
+		contracts,
 	};
-
-	useEffect(() => {}, []);
 
 	return createElement(FilosignContext.Provider, { value }, children);
 }
