@@ -1,4 +1,6 @@
-import { filecoinCalibration } from "viem/chains";
+import type { Chain } from "viem";
+import * as chains from "viem/chains";
+import env from "./env";
 
 const INDEXER = {
 	CONFIRMATIONS: 0n,
@@ -11,10 +13,17 @@ const INDEXER = {
 	MAX_NODE_LOOKBACK_PERIOD_MS: 16 * 60 * 60 * 1000,
 };
 
+const runtimeChain = Object.values(chains).find(
+	(chain) => chain.id === Number(env.RUNTIME_CHAIN_ID),
+);
+
+if (!runtimeChain) {
+	throw new Error(`Chain with id ${env.RUNTIME_CHAIN_ID} not found`);
+}
+
 const config = {
+	runtimeChain,
 	INDEXER,
 };
-
-export const primaryChain = filecoinCalibration;
 
 export default config;
