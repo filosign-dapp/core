@@ -71,6 +71,9 @@ class ExtendedAxios {
 
 	async tx(txHash: string, data: Record<string, unknown>) {
 		const res = await this.axios.post(`/tx/${txHash}`, data);
+		if (!res.data.success) {
+			console.error("Transaction API error:", res.data);
+		}
 		return res.status === 201;
 	}
 

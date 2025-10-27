@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useWalletClient } from "wagmi";
-import { walletKeyGen } from "../../../crypto-utils/src/lib-node";
+import { encryption, walletKeyGen } from "../../../crypto-utils/src/lib-node";
 import { MINUTE } from "../constants";
 import { useFilosignContext } from "../context/FilosignProvider";
 
@@ -25,7 +25,7 @@ export function useIsRegistered() {
 }
 
 export function useLogin() {
-	const { contracts, wallet } = useFilosignContext();
+	const { api, contracts, wallet } = useFilosignContext();
 
 	const { data: isRegistered } = useIsRegistered();
 
@@ -50,14 +50,37 @@ export function useLogin() {
 					keygenData.commitmentKem,
 					keygenData.commitmentSig,
 				]);
-			} else {
-			}
 
-			const tx = await contracts.FSKeyRegistry.write.login([
-				params.address,
-				params.signature,
-			]);
-			return tx;
+				const success = await api.rpc.tx(tx, {
+					encryptionPublicKey: keygenData.kemKeypair.publicKey,
+					signaturePublicKey: keygenData.sigKeypair.publicKey,
+				});
+
+				if (!success) {
+					throw new Error("Failed to register keygen data");
+				}
+			} else {
+				const [saltPin, saltSeed, saltChallenge, commitmentKem, commitmentSig] =
+					await contracts.FSKeyRegistry.read.keygenData([
+						wallet.account.address,
+					]);
+
+				const keygenData = await walletKeyGen(wallet, {
+					pin,
+					salts: {
+						challenge: saltChallenge,
+						seed: saltSeed,
+						pin: saltPin,
+					},
+				});
+
+				if (
+					commitmentKem !== keygenData.commitmentKem ||
+					commitmentSig !== keygenData.commitmentSig
+				) {
+					throw new Error("Invalid PIN");
+				}
+			}
 		},
 	});
 }
