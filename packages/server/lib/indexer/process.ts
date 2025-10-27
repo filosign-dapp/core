@@ -1,14 +1,16 @@
 import { getContracts } from "@filosign/contracts";
 import { eq } from "drizzle-orm";
 import { decodeEventLog, type Hash, isHex } from "viem";
-import { z } from "zod";
 import db from "../db";
 import { evmClient } from "../evm";
 
 //@ts-expect-error
-const { FSManager, FSFileRegistry, FSKeyRegistry } = getContracts(evmClient);
+const { FSKeyRegistry } = getContracts(evmClient);
 
-async function processTransaction(txHash: Hash, data: Record<string, unknown>) {
+export async function processTransaction(
+	txHash: Hash,
+	data: Record<string, unknown>,
+) {
 	const receipt = await evmClient.waitForTransactionReceipt({ hash: txHash });
 
 	if (!receipt) {

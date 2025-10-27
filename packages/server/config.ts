@@ -1,4 +1,3 @@
-import type { Chain } from "viem";
 import * as chains from "viem/chains";
 import env from "./env";
 

@@ -1,5 +1,4 @@
 import "dotenv/config";
-import os from "node:os";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
@@ -7,19 +6,11 @@ import type { Chain } from "viem";
 import { apiRouter } from "./api/routes/router";
 import config from "./config";
 import env from "./env";
-import { startIndexer } from "./lib/indexer/engine";
-import { startJobScheduler } from "./lib/jobrunner/scheduler";
 
 //@ts-expect-error
 BigInt.prototype.toJSON = function () {
 	return this.toString();
 };
-
-startIndexer("FSFileRegistry");
-startIndexer("FSKeyRegistry");
-startIndexer("FSManager");
-const workerId = `${os.hostname()}:${process.pid}`;
-startJobScheduler(workerId);
 
 export const app = new Hono()
 	.use(logger())
