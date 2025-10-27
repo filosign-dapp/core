@@ -39,7 +39,7 @@ export function getContracts<T extends Wallet>(options: {
 	const key = toHex(chainId);
 	if (!Object.keys(definitions).includes(key)) {
 		console.error(`No contract definitions found for chainId ${chainId}`);
-		return null;
+		throw new Error(`Unsupported chainId: ${chainId}`);
 	}
 
 	const contractDefinitions = definitions[key as keyof typeof definitions];
