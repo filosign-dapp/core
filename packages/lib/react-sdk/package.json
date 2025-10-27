@@ -4,10 +4,10 @@
 	"main": "dist/exports.js",
 	"exports": {
 		".": {
-			"default": "./exports.ts"
+			"default": "./index.ts"
 		},
-		"./react": {
-			"default": "./react/exports.ts"
+		"./hooks": {
+			"default": "./hooks.ts"
 		}
 	},
 	"scripts": {},
