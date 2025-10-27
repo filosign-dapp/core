@@ -10,19 +10,21 @@ import {
 	useState,
 } from "react";
 import type { Chain } from "viem";
-import { useWalletClient } from "wagmi";
+import { type UseWalletClientReturnType, useWalletClient } from "wagmi";
 import ApiClient from "../ApiClient";
 import { DAY } from "../constants";
 
 type FilosignContext = {
 	ready: boolean;
 	api: ApiClient;
+	wallet: UseWalletClientReturnType["data"];
 	contracts: FilosignContracts | null;
 };
 
 const FilosignContext = createContext<FilosignContext>({
 	ready: false,
 	api: {} as ApiClient,
+	wallet: undefined,
 	contracts: null,
 });
 
@@ -80,6 +82,7 @@ export function FilosignProvider(props: FilosignConfig) {
 
 	const value: FilosignContext = {
 		ready: !!api,
+		wallet: wallet,
 		api: api as ApiClient,
 		contracts,
 	};
