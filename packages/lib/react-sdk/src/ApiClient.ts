@@ -69,6 +69,11 @@ class ExtendedAxios {
 			);
 	}
 
+	async tx(txHash: string, data: Record<string, unknown>) {
+		const res = await this.axios.post(`/tx/${txHash}`, data);
+		return res.status === 201;
+	}
+
 	async getSafe<T extends ZodRawShape>(
 		zResponseShape: T,
 		...args: Parameters<AxiosInstance["get"]>

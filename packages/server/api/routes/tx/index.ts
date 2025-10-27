@@ -1,13 +1,11 @@
-import { eq } from "drizzle-orm";
 import { Hono } from "hono";
-import { isAddress, isHash } from "viem";
-import db from "../../../lib/db";
+import { isHash } from "viem";
+import { processTransaction } from "../../../lib/indexer/process";
 import { respond } from "../../../lib/utils/respond";
-
-const { users } = db.schema;
 
 export default new Hono().post("/:hash", async (ctx) => {
 	const txHash = ctx.req.param("hash");
+	const data = await ctx.req.json();
 
 	if (typeof txHash !== "string" || !isHash(txHash)) {
 		return respond.err(
@@ -16,20 +14,11 @@ export default new Hono().post("/:hash", async (ctx) => {
 			400,
 		);
 	}
-
-	const user = db
-		.select()
-		.from(users)
-		.where(eq(users.walletAddress, walletAddress))
-		.get();
-	if (!user) {
-		return respond.err(ctx, "User not found", 404);
-	}
-
-	return respond.ok(
-		ctx,
-		{ publicKey: user.encryptionPublicKey },
-		"Encryption public key retrieved successfully",
-		200,
-	);
+	processTransaction(txHash, data)
+		.then(async () => {
+			return respond.ok(ctx, {}, "Transaction processed successfully", 201);
+		})
+		.catch((err) => {
+			return respond.err(ctx, `Error processing transaction: ${err}`, 500);
+		});
 });
