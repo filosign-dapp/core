@@ -134,4 +134,19 @@ export async function walletKeyGen(
 	};
 }
 
+export async function seedKeyGen(seed: Uint8Array<ArrayBuffer>) {
+	const kemKeypair = await KEM.keyGen({ seed });
+	const sigKeypair = await signatures.keyGen({ seed });
+
+	const commitmentKem = computeCommitment([kemKeypair.publicKey.toString()]);
+	const commitmentSig = computeCommitment([sigKeypair.publicKey.toString()]);
+
+	return {
+		kemKeypair,
+		sigKeypair,
+		commitmentKem,
+		commitmentSig,
+	};
+}
+
 export type Wallet = WalletClient<Transport, Chain, Account>;
