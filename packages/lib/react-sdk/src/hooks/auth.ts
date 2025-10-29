@@ -1,7 +1,11 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { useWalletClient } from "wagmi";
-import { encryption, walletKeyGen } from "../../../crypto-utils/src/lib-node";
-import { MINUTE } from "../constants";
+import {
+	computeCommitment,
+	seedKeyGen,
+	walletKeyGen,
+} from "@filosign/crypto-utils";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { idb } from "../../utils/idb";
+import { DAY, MINUTE } from "../constants";
 import { useFilosignContext } from "../context/FilosignProvider";
 
 export function useIsRegistered() {
@@ -24,14 +28,87 @@ export function useIsRegistered() {
 	});
 }
 
+export function useStoredKeygenData() {
+	const { wallet, contracts } = useFilosignContext();
+
+	return useQuery({
+		queryKey: ["fsQ-stored-keygen-data", wallet?.account.address],
+		queryFn: async () => {
+			if (!wallet || !contracts) {
+				throw new Error("unreachable");
+			}
+
+			const [saltPin, saltSeed, saltChallenge, commitmentKem, commitmentSig] =
+				await contracts.FSKeyRegistry.read.keygenData([wallet.account.address]);
+
+			if (
+				!saltPin ||
+				!saltSeed ||
+				!saltChallenge ||
+				!commitmentKem ||
+				!commitmentSig
+			)
+				return undefined;
+
+			return {
+				saltPin,
+				saltSeed,
+				saltChallenge,
+				commitmentKem,
+				commitmentSig,
+			};
+		},
+		staleTime: 1 * DAY,
+		enabled: !!wallet && !!contracts,
+	});
+}
+
+export function useIsLoggedIn() {
+	const { wallet, contracts } = useFilosignContext();
+	const { data: isRegistered } = useIsRegistered();
+	const { data: storedKeygenData } = useStoredKeygenData();
+
+	return useQuery({
+		queryKey: ["fsQ-is-logged-in", wallet?.account.address],
+		queryFn: async () => {
+			if (!wallet || !contracts) return false;
+			if (!isRegistered || !storedKeygenData) return false;
+
+			const keyStore = idb({
+				db: wallet.account.address,
+				store: "fs-keystore",
+			});
+
+			const keySeed = await keyStore.secret.get("key-seed");
+			if (!keySeed) return false;
+
+			const keygenData = await seedKeyGen(keySeed);
+
+			const { commitmentKem, commitmentSig } = storedKeygenData;
+
+			if (
+				commitmentKem !== keygenData.commitmentKem ||
+				commitmentSig !== keygenData.commitmentSig
+			) {
+				keyStore.del("key-seed");
+				return false;
+			}
+		},
+	});
+}
+
 export function useLogin() {
 	const { api, contracts, wallet } = useFilosignContext();
+	const queryClient = useQueryClient();
 
 	const { data: isRegistered } = useIsRegistered();
+	const { data: isLoggedIn } = useIsLoggedIn();
 
 	return useMutation({
 		mutationKey: ["fsM-login"],
 		mutationFn: async (params: { pin: string }) => {
+			if (isLoggedIn) return;
+
 			const { pin } = params;
 
 			if (!contracts || !wallet) {
@@ -81,6 +158,10 @@ export function useLogin() {
 					throw new Error("Invalid PIN");
 				}
 			}
+
+			queryClient.refetchQueries({
+				queryKey: ["fsQ-is-logged-in", wallet?.account.address],
+			});
 		},
 	});
 }

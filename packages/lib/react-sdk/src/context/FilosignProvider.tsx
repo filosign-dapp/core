@@ -6,13 +6,14 @@ import {
 	type ReactNode,
 	useContext,
 	useEffect,
+	useMemo,
 	useRef,
 	useState,
 } from "react";
 import type { Chain } from "viem";
 import { type UseWalletClientReturnType, useWalletClient } from "wagmi";
 import ApiClient from "../ApiClient";
-import { DAY } from "../constants";
+import { DAY, MINUTE } from "../constants";
 
 type FilosignContext = {
 	ready: boolean;
@@ -39,23 +40,13 @@ export function FilosignProvider(props: FilosignConfig) {
 	const [contracts, setContracts] = useState<FilosignContracts | null>(null);
 
 	const { data: wallet } = useWalletClient();
+	const api = useMemo(() => new ApiClient(apiBaseUrl), [apiBaseUrl]);
 
-	const { data: api } = useQuery({
-		queryKey: [
-			"api-client",
-			apiBaseUrl,
-			apiBaseUrl.includes("localhost") ? Date.now() : null,
-		],
-		queryFn: async () => {
-			return new ApiClient(apiBaseUrl);
-		},
-		staleTime: 1 * DAY,
-	});
 	const runtime = useQuery({
 		queryKey: [
 			"runtime",
 			apiBaseUrl,
-			apiBaseUrl.includes("localhost") ? Date.now() : null,
+			// apiBaseUrl.includes("localhost") ? Date.now() : null,
 		],
 		queryFn: async () => {
 			const runtime = await fetch(`${apiBaseUrl}/runtime`).then((res) =>
@@ -63,7 +54,7 @@ export function FilosignProvider(props: FilosignConfig) {
 			);
 			return runtime as { uptime: number; chain: Chain };
 		},
-		staleTime: 1 * DAY,
+		staleTime: 5 * MINUTE,
 
 		enabled: !!api,
 	});
@@ -80,12 +71,17 @@ export function FilosignProvider(props: FilosignConfig) {
 		}
 	}, [runtime.data, wallet]);
 
-	const value: FilosignContext = {
-		ready: !!api,
-		wallet: wallet,
-		api: api as ApiClient,
-		contracts,
-	};
+	console.log(api, wallet);
+
+	const value: FilosignContext = useMemo(
+		() => ({
+			ready: !!api,
+			wallet: wallet,
+			api: api as ApiClient,
+			contracts,
+		}),
+		[api, wallet, contracts],
+	);
 
 	return createElement(FilosignContext.Provider, { value }, children);
 }
