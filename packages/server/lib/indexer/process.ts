@@ -4,8 +4,11 @@ import { decodeEventLog, type Hash, isHex } from "viem";
 import db from "../db";
 import { evmClient } from "../evm";
 
-//@ts-expect-error
-const { FSKeyRegistry } = getContracts(evmClient);
+const { FSKeyRegistry } = getContracts({
+	//@ts-expect-error
+	client: evmClient,
+	chainId: evmClient.chain.id,
+});
 
 export async function processTransaction(
 	txHash: Hash,
