@@ -22,22 +22,9 @@ export const app = new Hono()
 			credentials: true,
 		}),
 	)
-	.get("/runtime", (ctx) => {
-		const runtime: Runtime = {
-			uptime: process.uptime(),
-			chain: config.runtimeChain,
-		};
-
-		return ctx.json(runtime);
-	})
 	.route("/v1", apiRouter);
 
 export default {
 	port: 30011,
 	fetch: app.fetch,
-};
-
-type Runtime = {
-	uptime: number;
-	chain: Chain;
 };
