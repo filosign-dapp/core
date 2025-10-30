@@ -1,3 +1,5 @@
+rm bun.lock
+rm bun.lockb
 rm -rf node_modules
 rm -rf packages/client/node_modules
 rm -rf packages/server/node_modules
