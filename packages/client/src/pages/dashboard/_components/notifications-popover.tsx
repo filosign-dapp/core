@@ -38,11 +38,6 @@ export function NotificationsPopover() {
 		null,
 	);
 	const queryClient = useQueryClient();
-	const { user } = usePrivy();
-
-	// Authentication checks
-	const isRegistered = useFilosignQuery(["isRegistered"], undefined);
-	const isLoggedIn = useFilosignQuery(["isLoggedIn"], undefined);
 
 	// Only get the actionable data - pending requests and unacknowledged files
 	const receivedRequests = useFilosignQuery(
@@ -134,8 +129,8 @@ export function NotificationsPopover() {
 			(receivedRequests.data as any)?.requests || receivedRequests.data;
 		return requestsData && Array.isArray(requestsData)
 			? requestsData.filter(
-					(req: any) => req.status === "PENDING" || req.status === "pending",
-				)
+				(req: any) => req.status === "PENDING" || req.status === "pending",
+			)
 			: [];
 	})();
 

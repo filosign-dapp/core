@@ -164,7 +164,8 @@ export function useLogin() {
 
 export function useLogout() {
 	const { wallet } = useFilosignContext();
-
+	const queryClient = useQueryClient();
+	
 	if (!wallet) throw new Error("unreachable");
 
 	const keyStore = idb({
@@ -172,4 +173,13 @@ export function useLogout() {
 		store: "fs-keystore",
 	});
 	keyStore.del("key-seed");
+	return useMutation({
+		mutationKey: ["fsM-logout"],
+		mutationFn: async () => {
+			keyStore.del("key-seed");
+			queryClient.invalidateQueries({
+				queryKey: ["fsQ-is-logged-in", wallet?.account.address],
+			});
+		},
+	});
 }

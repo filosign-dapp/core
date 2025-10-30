@@ -1,4 +1,4 @@
-import { useFilosignMutation } from "@filosign/react";
+import { useLogout } from "@filosign/react/hooks";
 import {
 	BellIcon,
 	GearIcon,
@@ -23,11 +23,11 @@ import {
 export function UserDropdown() {
 	const [isOpen, setIsOpen] = React.useState(false);
 	const { user, logout: logoutPrivy } = usePrivy();
-	const logoutFilosign = useFilosignMutation(["logout"]);
+	const logoutFilosign = useLogout();
 	const navigate = useNavigate();
 
 	const handleSignOut = () => {
-		logoutFilosign.mutateAsync(undefined);
+		logoutFilosign.mutateAsync();
 		logoutPrivy();
 		navigate({ to: "/", replace: true });
 	};

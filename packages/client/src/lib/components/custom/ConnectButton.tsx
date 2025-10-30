@@ -1,4 +1,4 @@
-import { useFilosignQuery } from "@filosign/react";
+import { useIsRegistered } from "@filosign/react/hooks";
 import { usePrivy } from "@privy-io/react-auth";
 import { Link } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
@@ -6,7 +6,7 @@ import { Button } from "@/src/lib/components/ui/button";
 
 export default function ConnectButton() {
 	const { ready, authenticated, login: loginPrivy } = usePrivy();
-	const isRegistered = useFilosignQuery(["isRegistered"], undefined);
+	const isRegistered = useIsRegistered();
 
 	// Determine button state for smooth transitions
 	const getButtonState = () => {
@@ -38,7 +38,7 @@ export default function ConnectButton() {
 				className="min-w-28"
 			>
 				{getButtonState() === "get-started" ||
-				getButtonState() === "dashboard" ? (
+					getButtonState() === "dashboard" ? (
 					<Link
 						to={getButtonState() === "dashboard" ? "/dashboard" : "/onboarding"}
 					>

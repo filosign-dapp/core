@@ -1,4 +1,4 @@
-import { useFilosignMutation, useFilosignQuery } from "@filosign/react";
+import { useLogin, useIsRegistered, useIsLoggedIn } from "@filosign/react/hooks";
 import { CaretRightIcon } from "@phosphor-icons/react";
 import { usePrivy } from "@privy-io/react-auth";
 import { useQueryClient } from "@tanstack/react-query";
@@ -26,9 +26,9 @@ export default function DashboardProtector({
 	children,
 }: DashboardProtectorProps) {
 	const { ready, authenticated } = usePrivy();
-	const isRegistered = useFilosignQuery(["isRegistered"], undefined);
-	const isLoggedIn = useFilosignQuery(["isLoggedIn"], undefined);
-	const loginMutation = useFilosignMutation(["login"]);
+	const isRegistered = useIsRegistered();
+	const isLoggedIn = useIsLoggedIn();
+	const login = useLogin();
 	const queryClient = useQueryClient();
 	const navigate = useNavigate();
 
@@ -70,7 +70,7 @@ export default function DashboardProtector({
 
 		try {
 			setError("");
-			await loginMutation.mutateAsync({ pin });
+			await login.mutateAsync({ pin });
 			// Invalidate isLoggedIn query to refetch with new JWT
 			await queryClient.invalidateQueries({
 				queryKey: ["filosign", "isLoggedIn"],
@@ -132,7 +132,7 @@ export default function DashboardProtector({
 										length={6}
 										autoFocus={true}
 										onSubmit={handlePinSubmit}
-										disabled={loginMutation.isPending}
+										disabled={login.isPending}
 									/>
 								</div>
 
@@ -143,7 +143,7 @@ export default function DashboardProtector({
 										variant="ghost"
 										onClick={handleCancel}
 										className="flex-1"
-										disabled={loginMutation.isPending}
+										disabled={login.isPending}
 									>
 										Cancel
 									</Button>
@@ -155,12 +155,12 @@ export default function DashboardProtector({
 												handlePinSubmit();
 											}
 										}}
-										disabled={pin.length !== 6 || loginMutation.isPending}
+										disabled={pin.length !== 6 || login.isPending}
 										className="flex-1 group"
 										variant="default"
 									>
-										{loginMutation.isPending ? "Authenticating..." : "Continue"}
-										{!loginMutation.isPending && (
+										{login.isPending ? "Authenticating..." : "Continue"}
+										{!login.isPending && (
 											<CaretRightIcon
 												className="transition-transform duration-200 size-4 group-hover:translate-x-1"
 												weight="bold"
