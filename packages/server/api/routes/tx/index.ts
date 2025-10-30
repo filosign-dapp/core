@@ -14,11 +14,11 @@ export default new Hono().post("/:hash", async (ctx) => {
 			400,
 		);
 	}
-	processTransaction(txHash, data)
-		.then(async () => {
-			return respond.ok(ctx, {}, "Transaction processed successfully", 201);
-		})
-		.catch((err) => {
-			return respond.err(ctx, `Error processing transaction: ${err}`, 500);
-		});
+
+	try {
+		await processTransaction(txHash, data);
+		return respond.ok(ctx, {}, "Transaction processed successfully", 201);
+	} catch (err) {
+		return respond.err(ctx, `Error processing transaction: ${err}`, 500);
+	}
 });
