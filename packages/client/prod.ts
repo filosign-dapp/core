@@ -22,6 +22,22 @@ const server = serve({
 			return hono.fetch(req);
 		},
 
+		"/dilithium.wasm": () => {
+			const filePath = path.join(
+				import.meta.dir,
+				"dist",
+				"static",
+				"dilithium.wasm",
+			);
+			const file = Bun.file(filePath);
+			return new Response(file, {
+				headers: {
+					"Content-Type": "application/wasm",
+					"Cache-Control": "public, max-age=31536000",
+				},
+			});
+		},
+
 		"/*": (req) => {
 			const url = new URL(req.url);
 			const pathname = url.pathname;

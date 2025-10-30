@@ -31,6 +31,11 @@ const server = serve({
 		},
 
 		"/*": html,
+
+		"/dilithium.wasm": () => {
+			const file = Bun.file(`public/dilithium.wasm`);
+			return new Response(file);
+		},
 	},
 
 	fetch(req) {

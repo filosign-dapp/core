@@ -27,6 +27,7 @@ export const getMimeType = (filePath: string): string => {
 		".mp3": "audio/mpeg",
 		".wav": "audio/wav",
 		".ogg": "audio/ogg",
+		".wasm": "application/wasm",
 	};
 	return mimeTypes[ext] || "application/octet-stream";
 };
