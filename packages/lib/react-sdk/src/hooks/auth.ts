@@ -4,10 +4,11 @@ import { idb } from "../../utils/idb";
 import { DAY, MINUTE } from "../constants";
 import { useFilosignContext } from "../context/FilosignProvider";
 
-export function useIsRegistered() {
-	const { contracts, wallet } = useFilosignContext();
+export function useHook() {
+	const { contracts, wallet, api } = useFilosignContext();
+	const queryClient = useQueryClient();
 
-	return useQuery({
+	const isRegistered = useQuery({
 		queryKey: ["fsQ-is-registered", wallet?.account.address],
 		queryFn: async () => {
 			if (!contracts || !wallet) {
@@ -22,15 +23,12 @@ export function useIsRegistered() {
 		staleTime: 5 * MINUTE,
 		enabled: !!contracts,
 	});
-}
+	const isRegisteredValue = isRegistered.data;
 
-export function useStoredKeygenData() {
-	const { wallet, contracts } = useFilosignContext();
-
-	return useQuery({
+	const storedKeygenData = useQuery({
 		queryKey: ["fsQ-stored-keygen-data", wallet?.account.address],
 		queryFn: async () => {
-			if (!wallet || !contracts) {
+			if (!wallet || !contracts || !isRegisteredValue) {
 				throw new Error("unreachable");
 			}
 
@@ -57,18 +55,13 @@ export function useStoredKeygenData() {
 		staleTime: 1 * DAY,
 		enabled: !!wallet && !!contracts,
 	});
-}
+	const storedKeygenDataValue = storedKeygenData.data;
 
-export function useIsLoggedIn() {
-	const { wallet, contracts } = useFilosignContext();
-	const { data: isRegistered } = useIsRegistered();
-	const { data: storedKeygenData } = useStoredKeygenData();
-
-	return useQuery({
+	const isLoggedIn = useQuery({
 		queryKey: ["fsQ-is-logged-in", wallet?.account.address],
 		queryFn: async () => {
 			if (!wallet || !contracts) return false;
-			if (!isRegistered || !storedKeygenData) return false;
+			if (!isRegisteredValue || !storedKeygenDataValue) return false;
 
 			const keyStore = idb({
 				db: wallet.account.address,
@@ -80,7 +73,7 @@ export function useIsLoggedIn() {
 
 			const keygenData = await seedKeyGen(keySeed);
 
-			const { commitmentKem, commitmentSig } = storedKeygenData;
+			const { commitmentKem, commitmentSig } = storedKeygenDataValue;
 
 			if (
 				commitmentKem !== keygenData.commitmentKem ||
@@ -91,19 +84,12 @@ export function useIsLoggedIn() {
 			}
 		},
 	});
-}
+	const isLoggedInValue = isLoggedIn.data;
 
-export function useLogin() {
-	const { api, contracts, wallet } = useFilosignContext();
-	const queryClient = useQueryClient();
-
-	const { data: isRegistered } = useIsRegistered();
-	const { data: isLoggedIn } = useIsLoggedIn();
-
-	return useMutation({
+	const login = useMutation({
 		mutationKey: ["fsM-login"],
 		mutationFn: async (params: { pin: string }) => {
-			if (isLoggedIn) return;
+			if (isLoggedInValue) return;
 
 			const { pin } = params;
 
@@ -111,7 +97,7 @@ export function useLogin() {
 				throw new Error("unreachable");
 			}
 
-			if (!isRegistered) {
+			if (!isRegisteredValue) {
 				const keygenData = await walletKeyGen(wallet, {
 					pin,
 				});
@@ -160,26 +146,24 @@ export function useLogin() {
 			});
 		},
 	});
-}
 
-export function useLogout() {
-	const { wallet } = useFilosignContext();
-	const queryClient = useQueryClient();
-	
-	if (!wallet) throw new Error("unreachable");
+	const logout = () => {
+		if (!wallet) throw new Error("unreachable");
 
-	const keyStore = idb({
-		db: wallet.account.address,
-		store: "fs-keystore",
-	});
-	keyStore.del("key-seed");
-	return useMutation({
-		mutationKey: ["fsM-logout"],
-		mutationFn: async () => {
-			keyStore.del("key-seed");
-			queryClient.invalidateQueries({
-				queryKey: ["fsQ-is-logged-in", wallet?.account.address],
-			});
-		},
-	});
+		const keyStore = idb({
+			db: wallet.account.address,
+			store: "fs-keystore",
+		});
+		keyStore.del("key-seed");
+
+		window.location.reload();
+	};
+
+	return {
+		isRegistered,
+		storedKeygenData,
+		isLoggedIn,
+		login,
+		logout,
+	};
 }
