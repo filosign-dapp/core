@@ -1,4 +1,4 @@
-import { seedKeyGen, walletKeyGen } from "@filosign/crypto-utils";
+import { seedKeyGen, toHex, walletKeyGen } from "@filosign/crypto-utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { idb } from "../../utils/idb";
 import { DAY, MINUTE } from "../constants";
@@ -65,14 +65,14 @@ export function useStoredKeygenData() {
 }
 
 export function useIsLoggedIn() {
-	const { wallet, contracts } = useFilosignContext();
+	const { wallet, contracts, wasm } = useFilosignContext();
 	const { data: isRegistered } = useIsRegistered();
 	const { data: storedKeygenData } = useStoredKeygenData();
 
 	return useQuery({
 		queryKey: ["fsQ-is-logged-in", wallet?.account.address],
 		queryFn: async () => {
-			if (!wallet || !contracts) return false;
+			if (!wallet || !contracts || !wasm.dilithium) return false;
 			if (!isRegistered || !storedKeygenData) return false;
 
 			const keyStore = idb({
@@ -83,7 +83,7 @@ export function useIsLoggedIn() {
 			const keySeed = await keyStore.secret.get("key-seed");
 			if (!keySeed) return false;
 
-			const keygenData = await seedKeyGen(keySeed);
+			const keygenData = await seedKeyGen(keySeed, { dl: wasm.dilithium });
 
 			const { commitmentKem, commitmentSig } = storedKeygenData;
 
@@ -95,11 +95,12 @@ export function useIsLoggedIn() {
 				return false;
 			}
 		},
+		enabled: !!wallet && !!contracts && !!wasm.dilithium,
 	});
 }
 
 export function useLogin() {
-	const { api, contracts, wallet } = useFilosignContext();
+	const { api, contracts, wallet, wasm } = useFilosignContext();
 	const queryClient = useQueryClient();
 
 	const { data: isRegistered } = useIsRegistered();
@@ -112,13 +113,14 @@ export function useLogin() {
 
 			const { pin } = params;
 
-			if (!contracts || !wallet) {
+			if (!contracts || !wallet || !wasm.dilithium) {
 				throw new Error("unreachable");
 			}
 
 			if (!isRegistered) {
 				const keygenData = await walletKeyGen(wallet, {
 					pin,
+					dl: wasm.dilithium,
 				});
 
 				const tx = await contracts.FSKeyRegistry.write.registerKeygenData([
@@ -130,8 +132,8 @@ export function useLogin() {
 				]);
 
 				const success = await api.rpc.tx(tx, {
-					encryptionPublicKey: keygenData.kemKeypair.publicKey,
-					signaturePublicKey: keygenData.sigKeypair.publicKey,
+					encryptionPublicKey: toHex(keygenData.kemKeypair.publicKey),
+					signaturePublicKey: toHex(keygenData.sigKeypair.publicKey),
 				});
 
 				if (!success) {
@@ -150,6 +152,7 @@ export function useLogin() {
 						seed: saltSeed,
 						pin: saltPin,
 					},
+					dl: wasm.dilithium,
 				});
 
 				if (
