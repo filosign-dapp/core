@@ -162,4 +162,14 @@ export function useLogin() {
 	});
 }
 
-export function useLogout() {}
+export function useLogout() {
+	const { wallet } = useFilosignContext();
+
+	if (!wallet) throw new Error("unreachable");
+
+	const keyStore = idb({
+		db: wallet.account.address,
+		store: "fs-keystore",
+	});
+	keyStore.del("key-seed");
+}
