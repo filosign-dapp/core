@@ -1,13 +1,13 @@
 import { SignOutIcon } from "@phosphor-icons/react";
 import { usePrivy } from "@privy-io/react-auth";
+import { formatEther } from "viem";
+import { useBalance } from "wagmi";
 import { Button } from "@/src/lib/components/ui/button";
 import { Separator } from "@/src/lib/components/ui/separator";
 import FooterSection from "./footer-section";
 import HeroSection from "./hero-section";
 import LandingNavbar from "./landing-nav";
 import WaitlistSection from "./waitlist-section";
-import { useBalance } from "wagmi";
-import { formatEther } from "viem";
 
 export default function LandingPage() {
 	const { user, login, logout } = usePrivy();

@@ -10,9 +10,7 @@ export function FilosignProvider({ children }: { children: React.ReactNode }) {
 	}
 
 	return (
-		<FilosignProviderBase
-			apiBaseUrl={process.env.BUN_PUBLIC_PLATFORM_URL!}
-		>
+		<FilosignProviderBase apiBaseUrl={process.env.BUN_PUBLIC_PLATFORM_URL!}>
 			{children}
 		</FilosignProviderBase>
 	);

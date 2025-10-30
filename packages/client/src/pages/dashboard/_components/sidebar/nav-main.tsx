@@ -98,8 +98,9 @@ export function NavMain({
 								)}
 								{item.items && item.items.length > 0 && (
 									<CaretRightIcon
-										className={`ml-auto transition-transform duration-200 group-data-[collapsible=icon]:hidden ${isOpen ? "rotate-90" : ""
-											}`}
+										className={`ml-auto transition-transform duration-200 group-data-[collapsible=icon]:hidden ${
+											isOpen ? "rotate-90" : ""
+										}`}
 									/>
 								)}
 							</SidebarMenuButton>

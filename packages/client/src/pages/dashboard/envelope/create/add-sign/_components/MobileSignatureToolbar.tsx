@@ -91,8 +91,8 @@ export default function MobileSignatureToolbar({
 										"w-full aspect-square p-2 transition-all duration-200 active:scale-95 active:bg-secondary/50 rounded-main touch-manipulation",
 										"hover:scale-105 hover:bg-secondary/30 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2",
 										isPlacingField &&
-										pendingFieldType === field.type &&
-										"bg-secondary border border-primary/20 scale-105",
+											pendingFieldType === field.type &&
+											"bg-secondary border border-primary/20 scale-105",
 									)}
 									onClick={() => onAddField(field.type)}
 									aria-label={`Add ${field.type} field`}

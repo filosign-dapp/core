@@ -14,31 +14,31 @@ const components: {
 	description: string;
 	icon: Icon;
 }[] = [
-		{
-			title: "Frontend (React)",
-			description:
-				"User-facing interface where all cryptographic operations occur on the client-side.",
-			icon: LaptopIcon,
-		},
-		{
-			title: "FiloSign Server",
-			description:
-				"A lightweight service that orchestrates tasks like notifications and transaction preparation.",
-			icon: DatabaseIcon,
-		},
-		{
-			title: "FVM Smart Contracts",
-			description:
-				"The decentralized source of truth for all agreements, managing document state and signatures.",
-			icon: CubeIcon,
-		},
-		{
-			title: "Filecoin Onchain Cloud",
-			description:
-				"Provides permanent, decentralized storage for all encrypted documents.",
-			icon: CloudIcon,
-		},
-	];
+	{
+		title: "Frontend (React)",
+		description:
+			"User-facing interface where all cryptographic operations occur on the client-side.",
+		icon: LaptopIcon,
+	},
+	{
+		title: "FiloSign Server",
+		description:
+			"A lightweight service that orchestrates tasks like notifications and transaction preparation.",
+		icon: DatabaseIcon,
+	},
+	{
+		title: "FVM Smart Contracts",
+		description:
+			"The decentralized source of truth for all agreements, managing document state and signatures.",
+		icon: CubeIcon,
+	},
+	{
+		title: "Filecoin Onchain Cloud",
+		description:
+			"Provides permanent, decentralized storage for all encrypted documents.",
+		icon: CloudIcon,
+	},
+];
 
 export function HowItWorksSlide() {
 	const ref = useRef(null);
