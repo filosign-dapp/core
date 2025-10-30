@@ -1,10 +1,7 @@
 import * as t from "drizzle-orm/pg-core";
 import {
-	tBoolean,
 	tBytes32,
 	tEvmAddress,
-	timestamps,
-	tJsonString,
 } from "../helpers";
 import { users } from "./user";
 
@@ -20,7 +17,7 @@ export const shareApprovals = t.pgTable(
 			.notNull()
 			.references(() => users.walletAddress),
 
-		active: tBoolean().notNull().default(false),
+		active: t.boolean().notNull().default(false),
 		txHash: tBytes32().unique().notNull(),
 
 		createdAt: t

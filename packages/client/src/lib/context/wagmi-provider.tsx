@@ -2,7 +2,7 @@ import {
 	createConfig,
 	WagmiProvider as WagmiProviderBase,
 } from "@privy-io/wagmi";
-import { filecoinCalibration } from "viem/chains";
+import { hardhat } from "viem/chains";
 import { http } from "wagmi";
 
 declare module "wagmi" {
@@ -12,9 +12,9 @@ declare module "wagmi" {
 }
 
 export const config = createConfig({
-	chains: [filecoinCalibration],
+	chains: [hardhat],
 	transports: {
-		[filecoinCalibration.id]: http(),
+		[hardhat.id]: http(),
 	},
 });
 

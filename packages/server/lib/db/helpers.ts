@@ -37,6 +37,7 @@ export const tEvmAddress = customType<{
 	},
 });
 
+// TODO please remove
 export const tJsonString = customType<{
 	data: Record<string, unknown>;
 	driverData: string;
@@ -92,22 +93,10 @@ export const tHex = customType<{
 		}
 		return value;
 	},
+
 });
 
-export const tBoolean = customType<{
-	data: boolean;
-	driverData: number;
-}>({
-	dataType() {
-		return "integer";
-	},
-	toDriver(value) {
-		return value ? 1 : 0;
-	},
-	fromDriver(value) {
-		return value === 1;
-	},
-});
+// TODO please reconsider
 
 export const tBigInt = customType<{
 	data: bigint;
