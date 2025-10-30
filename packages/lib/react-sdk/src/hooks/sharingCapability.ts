@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Address } from "viem";
-import { idb } from "../../utils/idb";
-import { DAY, MINUTE } from "../constants";
+import { MINUTE } from "../constants";
 import { useFilosignContext } from "../context/FilosignProvider";
 
 export function useApproveSender() {
