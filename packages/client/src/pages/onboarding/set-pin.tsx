@@ -1,7 +1,7 @@
-import { useFilosignMutation, useFilosignQuery } from "@filosign/react";
+import { useLogin, useIsRegistered } from "@filosign/react/hooks";
 import { CaretRightIcon } from "@phosphor-icons/react";
 import { useNavigate } from "@tanstack/react-router";
-import { AnimatePresence, motion } from "motion/react";
+import { motion } from "motion/react";
 import { useState } from "react";
 import { toast } from "sonner";
 import Logo from "@/src/lib/components/custom/Logo";
@@ -22,8 +22,9 @@ export default function OnboardingSetPinPage() {
 	const [step, setStep] = useState<"enter" | "confirm">("enter");
 	const navigate = useNavigate();
 	const { onboardingForm, setOnboardingForm } = useStorePersist();
-	const register = useFilosignMutation(["register"]);
-	const isRegistered = useFilosignQuery(["isRegistered"], undefined);
+
+	const login = useLogin();
+	const isRegistered = useIsRegistered();
 
 	const handleRegistration = async () => {
 		if (!onboardingForm) return;
@@ -39,7 +40,7 @@ export default function OnboardingSetPinPage() {
 				return;
 			}
 
-			await register.mutateAsync({
+			await login.mutateAsync({
 				pin: pin,
 			});
 
