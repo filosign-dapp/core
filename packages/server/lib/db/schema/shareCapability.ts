@@ -1,8 +1,5 @@
 import * as t from "drizzle-orm/pg-core";
-import {
-	tBytes32,
-	tEvmAddress,
-} from "../helpers";
+import { tBytes32, tEvmAddress } from "../helpers";
 import { users } from "./user";
 
 export const shareApprovals = t.pgTable(
@@ -35,10 +32,7 @@ export const shareApprovals = t.pgTable(
 );
 
 export const shareRequests = t.pgTable("share_requests", {
-	id: t
-		.text()
-		.primaryKey()
-		.$default(() => Bun.randomUUIDv7()),
+	id: t.uuid().primaryKey().defaultRandom(),
 	senderWallet: tEvmAddress()
 		.notNull()
 		.references(() => users.walletAddress),
@@ -48,6 +42,5 @@ export const shareRequests = t.pgTable("share_requests", {
 		.notNull()
 		.default("PENDING"),
 	message: t.text(),
-	metadata: tJsonString(),
 	...timestamps,
 });
