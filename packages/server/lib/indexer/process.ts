@@ -76,41 +76,20 @@ export async function processTransaction(
 				data: encodedLog.data,
 			});
 			if (log.eventName === "SenderApproved") {
-				const { encryptionPublicKey, signaturePublicKey } = data;
-
-				if (
-					typeof encryptionPublicKey !== "string" ||
-					!isHex(encryptionPublicKey)
-				) {
-					throw new Error("Invalid encryption public key");
-				}
-				if (
-					typeof signaturePublicKey !== "string" ||
-					!isHex(signaturePublicKey)
-				) {
-					throw new Error("Invalid signature public key");
-				}
-
-				const keygenData = await FSKeyRegistry.read.keygenData([log.args.user]);
-
-				const [exists] = await db
-					.select()
-					.from(db.schema.users)
-					.where(eq(db.schema.users.walletAddress, log.args.user));
-				if (exists) continue;
-
-				await db.insert(db.schema.users).values({
-					walletAddress: log.args.user,
-					encryptionPublicKey: encryptionPublicKey,
-					signaturePublicKey: signaturePublicKey,
-					lastActiveAt: Date.now(),
-					keygenDataJson: {
-						saltPin: keygenData[0],
-						saltSeed: keygenData[1],
-						saltChallenge: keygenData[2],
-						commitmentKem: keygenData[3],
-						commitmentSig: keygenData[4],
-					},
+				if (!encodedLog.transactionHash) continue;
+				await db.insert(db.schema.shareApprovals).values({
+					recipientWallet: log.args.recipient,
+					senderWallet: log.args.sender,
+					txHash: encodedLog.transactionHash,
+					active: true,
+				});
+			}
+			if (log.eventName === "SenderRevoked") {
+				await db.insert(db.schema.shareApprovals).values({
+					recipientWallet: log.args.recipient,
+					senderWallet: log.args.sender,
+					active: false,
+					txHash: txHash,
 				});
 			}
 		}
