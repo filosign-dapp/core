@@ -11,7 +11,7 @@ export default defineConfig({
 	schema: "./lib/db/schema",
 	dialect: "postgresql",
 	dbCredentials: {
-		url: env.PG_URI,
+		url: env.PG_URI.replace(":dbname", env.DB_NAME),
 	},
 	casing: "snake_case",
 });

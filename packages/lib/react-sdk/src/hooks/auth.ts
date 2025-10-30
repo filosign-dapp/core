@@ -1,8 +1,4 @@
-import {
-	computeCommitment,
-	seedKeyGen,
-	walletKeyGen,
-} from "@filosign/crypto-utils";
+import { seedKeyGen, walletKeyGen } from "@filosign/crypto-utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { idb } from "../../utils/idb";
 import { DAY, MINUTE } from "../constants";
