@@ -1,21 +1,11 @@
-import * as t from "drizzle-orm/sqlite-core";
-import {
-	tBigInt,
-	tBoolean,
-	tBytes32,
-	tEvmAddress,
-	timestamps,
-	tJsonString,
-} from "../helpers";
+import * as t from "drizzle-orm/pg-core";
+import { tBoolean, tEvmAddress, timestamps, tJsonString } from "../helpers";
 import { users } from "./user";
 
-export const shareApprovals = t.sqliteTable(
+export const shareApprovals = t.pgTable(
 	"share_approvals",
 	{
-		id: t
-			.text()
-			.primaryKey()
-			.$default(() => Bun.randomUUIDv7()),
+		id: t.uuid().primaryKey().defaultRandom(),
 		recipientWallet: tEvmAddress()
 			.notNull()
 			.references(() => users.walletAddress),
@@ -36,31 +26,31 @@ export const shareApprovals = t.sqliteTable(
 	],
 );
 
-export const shareApprovalHistory = t.sqliteTable(
-	"share_approval_history",
-	{
-		id: t
-			.text()
-			.primaryKey()
-			.$default(() => Bun.randomUUIDv7()),
+// export const shareApprovalHistory = t.sqliteTable(
+// 	"share_approval_history",
+// 	{
+// 		id: t
+// 			.text()
+// 			.primaryKey()
+// 			.$default(() => Bun.randomUUIDv7()),
 
-		approvalId: t.text().notNull(), // references shareApprovals.id but we used string to avoid FK complexty
-		action: t.text({ enum: ["ENABLED", "REVOKED"] }).notNull(),
-		txHash: tBytes32().notNull(),
-		blockNumber: tBigInt().notNull(),
+// 		approvalId: t.text().notNull(), // references shareApprovals.id but we used string to avoid FK complexty
+// 		action: t.text({ enum: ["ENABLED", "REVOKED"] }).notNull(),
+// 		txHash: tBytes32().notNull(),
+// 		blockNumber: tBigInt().notNull(),
 
-		createdAt: t
-			.integer()
-			.notNull()
-			.$default(() => Date.now()),
-	},
-	(table) => [
-		t
-			.uniqueIndex("ux_share_approval_history_tx")
-			.on(table.txHash, table.blockNumber),
-		t.index("idx_share_approval_history_approval").on(table.approvalId),
-	],
-);
+// 		createdAt: t
+// 			.integer()
+// 			.notNull()
+// 			.$default(() => Date.now()),
+// 	},
+// 	(table) => [
+// 		t
+// 			.uniqueIndex("ux_share_approval_history_tx")
+// 			.on(table.txHash, table.blockNumber),
+// 		t.index("idx_share_approval_history_approval").on(table.approvalId),
+// 	],
+// );
 
 export const shareRequests = t.sqliteTable("share_requests", {
 	id: t
