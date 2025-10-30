@@ -22,7 +22,7 @@ export const app = new Hono()
 			credentials: true,
 		}),
 	)
-	.route("/v1", apiRouter);
+	.route("/api", apiRouter);
 
 export default {
 	port: 30011,

@@ -5,8 +5,10 @@ import { AnimatePresence, motion } from "motion/react";
 import { Button } from "@/src/lib/components/ui/button";
 
 export default function ConnectButton() {
-	const { ready, authenticated, login: loginPrivy } = usePrivy();
+	const { ready, authenticated, login: loginPrivy, user } = usePrivy();
 	const isRegistered = useIsRegistered();
+
+	console.log("isRegistered", isRegistered.data);
 
 	// Determine button state for smooth transitions
 	const getButtonState = () => {
