@@ -7,7 +7,6 @@
 		"packages/client",
 		"packages/server",
 		"packages/contracts",
-		"packages/lib/example",
 		"packages/lib/react-sdk",
 		"packages/lib/crypto-utils"
 	],
