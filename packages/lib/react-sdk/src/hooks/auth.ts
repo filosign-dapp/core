@@ -14,17 +14,13 @@ export function useIsRegistered() {
 				throw new Error("unreachable");
 			}
 
-			console.log("meow", "before");
-
 			try {
 				const isRegistered = await contracts.FSKeyRegistry.read.isRegistered([
 					wallet.account.address,
 				]);
-
-				console.log("meow", "after", isRegistered);
 				return isRegistered;
 			} catch (error) {
-				console.error("meow", "error", error);
+				console.error("Failed to check if user is registered", error);
 				throw error;
 			}
 		},
