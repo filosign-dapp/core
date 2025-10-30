@@ -1,6 +1,6 @@
 import { CaretRightIcon } from "@phosphor-icons/react";
 import { Link } from "@tanstack/react-router";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 import * as React from "react";
 import {
 	SidebarGroup,
@@ -98,9 +98,8 @@ export function NavMain({
 								)}
 								{item.items && item.items.length > 0 && (
 									<CaretRightIcon
-										className={`ml-auto transition-transform duration-200 group-data-[collapsible=icon]:hidden ${
-											isOpen ? "rotate-90" : ""
-										}`}
+										className={`ml-auto transition-transform duration-200 group-data-[collapsible=icon]:hidden ${isOpen ? "rotate-90" : ""
+											}`}
 									/>
 								)}
 							</SidebarMenuButton>

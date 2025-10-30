@@ -7,7 +7,7 @@ import {
 	TextBIcon,
 	UserIcon,
 } from "@phosphor-icons/react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { Button } from "@/src/lib/components/ui/button";
 import { cn } from "@/src/lib/utils/utils";
 import { fieldTypeConfigs, type SignatureField } from "../mock";
@@ -100,8 +100,8 @@ export default function SignatureFieldsSidebar({
 								className={cn(
 									"w-full justify-start h-auto p-3 hover:bg-muted/50 transition-colors duration-100",
 									isPlacingField &&
-										pendingFieldType === field.type &&
-										"bg-accent border",
+									pendingFieldType === field.type &&
+									"bg-accent border",
 								)}
 								onClick={() => onAddField(field.type)}
 							>

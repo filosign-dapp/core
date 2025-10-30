@@ -5,7 +5,7 @@ import {
 	PaperPlaneTiltIcon,
 	UploadIcon,
 } from "@phosphor-icons/react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { useCallback, useRef, useState } from "react";
 import type {
 	Control,

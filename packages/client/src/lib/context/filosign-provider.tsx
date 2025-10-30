@@ -1,15 +1,17 @@
-import { FilosignProvider as FilosignProviderBase } from "@filosign/sdk/react";
+import { FilosignProvider as FilosignProviderBase } from "@filosign/react";
+import { usePrivy } from "@privy-io/react-auth";
 import { useWalletClient } from "wagmi";
 
 export function FilosignProvider({ children }: { children: React.ReactNode }) {
-	const { data: walletClient } = useWalletClient();
+	const { ready } = usePrivy();
+
+	if (!ready) {
+		return <>{children}</>;
+	}
 
 	return (
 		<FilosignProviderBase
-			config={{
-				apiBaseUrl: process.env.BUN_PUBLIC_PLATFORM_URL!,
-				wallet: walletClient,
-			}}
+			apiBaseUrl={process.env.BUN_PUBLIC_PLATFORM_URL!}
 		>
 			{children}
 		</FilosignProviderBase>

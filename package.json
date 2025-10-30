@@ -34,6 +34,7 @@
 		"typescript": "5.9.3"
 	},
 	"dependencies": {
+		"@privy-io/wagmi": "2.0.2",
 		"dotenv": "17.2.3",
 		"viem": "2.38.5"
 	}

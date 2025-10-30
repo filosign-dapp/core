@@ -1,10 +1,10 @@
-import { useFilosignQuery } from "@filosign/sdk/react";
+import { useFilosignQuery } from "@filosign/react";
 import {
 	CaretDownIcon,
 	MagnifyingGlassIcon,
 	PlusIcon,
 } from "@phosphor-icons/react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { useState } from "react";
 import type { Control } from "react-hook-form";
 import { useWatch } from "react-hook-form";

@@ -1,4 +1,4 @@
-import { useFilosignQuery } from "@filosign/sdk/react";
+import { useFilosignQuery } from "@filosign/react";
 import {
 	FileTextIcon,
 	FunnelIcon,

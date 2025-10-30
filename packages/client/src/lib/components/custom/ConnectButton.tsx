@@ -1,4 +1,4 @@
-import { useFilosignQuery } from "@filosign/sdk/react";
+import { useFilosignQuery } from "@filosign/react";
 import { usePrivy } from "@privy-io/react-auth";
 import { Link } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";

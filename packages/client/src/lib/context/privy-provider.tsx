@@ -1,10 +1,7 @@
 import { PrivyProvider as PrivyProviderBase } from "@privy-io/react-auth";
 import { filecoinCalibration } from "viem/chains";
-import { useTheme } from "./theme-provider";
 
 export function PrivyProvider({ children }: { children: React.ReactNode }) {
-	const { theme } = useTheme();
-
 	return (
 		<PrivyProviderBase
 			appId={process.env.BUN_PUBLIC_PRIVY_APP_ID!}

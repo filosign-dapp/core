@@ -1,5 +1,5 @@
 import { BellIcon, CaretLeftIcon, ClockIcon } from "@phosphor-icons/react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { Button } from "@/src/lib/components/ui/button";
 
 type ComingSoonProps = {

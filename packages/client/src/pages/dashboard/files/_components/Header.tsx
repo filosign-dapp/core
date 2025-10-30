@@ -5,7 +5,7 @@ import {
 	SquaresFourIcon,
 } from "@phosphor-icons/react";
 import { CaretDown } from "@phosphor-icons/react/dist/ssr";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { Button } from "@/src/lib/components/ui/button";
 import {
 	DropdownMenu,

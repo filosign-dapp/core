@@ -1,4 +1,4 @@
-import { useFilosignMutation } from "@filosign/sdk/react";
+import { useFilosignMutation } from "@filosign/react";
 import {
 	BellIcon,
 	GearIcon,
@@ -7,7 +7,7 @@ import {
 } from "@phosphor-icons/react";
 import { usePrivy } from "@privy-io/react-auth";
 import { useNavigate } from "@tanstack/react-router";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import * as React from "react";
 import { Image } from "@/src/lib/components/custom/Image";
 import { Button } from "@/src/lib/components/ui/button";

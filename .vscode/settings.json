@@ -10,5 +10,8 @@
 	},
 	"[solidity]": {
 		"editor.defaultFormatter": "JuanBlanco.solidity"
+	},
+	"[typescriptreact]": {
+		"editor.defaultFormatter": "vscode.typescript-language-features"
 	}
 }

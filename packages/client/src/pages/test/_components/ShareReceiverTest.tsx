@@ -1,4 +1,4 @@
-import { useFilosignMutation, useFilosignQuery } from "@filosign/sdk/react";
+import { useFilosignMutation, useFilosignQuery } from "@filosign/react";
 import { EyeIcon, SpinnerIcon, UserCheckIcon } from "@phosphor-icons/react";
 import { useState } from "react";
 import { Button } from "../../../lib/components/ui/button";

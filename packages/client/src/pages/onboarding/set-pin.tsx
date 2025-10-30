@@ -1,4 +1,4 @@
-import { useFilosignMutation, useFilosignQuery } from "@filosign/sdk/react";
+import { useFilosignMutation, useFilosignQuery } from "@filosign/react";
 import { CaretRightIcon } from "@phosphor-icons/react";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";

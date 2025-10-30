@@ -4,7 +4,7 @@ import {
 	ShieldWarningIcon,
 	XCircleIcon,
 } from "@phosphor-icons/react";
-import { motion, useInView } from "framer-motion";
+import { motion, useInView } from "motion/react";
 import { useRef } from "react";
 
 const problems: { title: string; description: string; icon: Icon }[] = [

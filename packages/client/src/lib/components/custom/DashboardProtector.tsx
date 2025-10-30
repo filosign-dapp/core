@@ -1,4 +1,4 @@
-import { useFilosignMutation, useFilosignQuery } from "@filosign/sdk/react";
+import { useFilosignMutation, useFilosignQuery } from "@filosign/react";
 import { CaretRightIcon } from "@phosphor-icons/react";
 import { usePrivy } from "@privy-io/react-auth";
 import { useQueryClient } from "@tanstack/react-query";

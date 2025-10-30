@@ -1,4 +1,4 @@
-import { useFilosignMutation, useFilosignQuery } from "@filosign/sdk/react";
+import { useFilosignMutation, useFilosignQuery } from "@filosign/react";
 import {
 	EyeIcon,
 	PaperPlaneIcon,

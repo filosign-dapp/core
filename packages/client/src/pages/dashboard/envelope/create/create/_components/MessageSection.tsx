@@ -1,5 +1,5 @@
 import { CaretDownIcon, EnvelopeIcon } from "@phosphor-icons/react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { useState } from "react";
 import type { Control } from "react-hook-form";
 import {

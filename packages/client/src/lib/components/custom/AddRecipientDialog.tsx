@@ -1,4 +1,4 @@
-import { useFilosignMutation } from "@filosign/sdk/react";
+import { useFilosignMutation } from "@filosign/react";
 import {
 	EnvelopeIcon,
 	PlusIcon,

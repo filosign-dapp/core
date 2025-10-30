@@ -1,4 +1,4 @@
-import { useFilosignMutation } from "@filosign/sdk/react";
+import { useFilosignMutation } from "@filosign/react";
 import { CaretLeftIcon } from "@phosphor-icons/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
