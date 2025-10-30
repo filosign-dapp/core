@@ -1,4 +1,3 @@
-import { seedKeyGen, walletKeyGen } from "@filosign/crypto-utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Address } from "viem";
 import { idb } from "../../utils/idb";
@@ -7,6 +6,7 @@ import { useFilosignContext } from "../context/FilosignProvider";
 
 export function useApproveSender() {
 	const { contracts, wallet, api } = useFilosignContext();
+	const queryClient = useQueryClient();
 
 	return useMutation({
 		mutationFn: async (sender: Address) => {
@@ -20,12 +20,17 @@ export function useApproveSender() {
 			if (!success) {
 				throw new Error("Failed sverer to know you approve sender");
 			}
+
+			queryClient.refetchQueries({
+				queryKey: ["fsQ-is-approved", wallet?.account.address, sender],
+			});
 		},
 	});
 }
 
 export function useRevokeSender() {
 	const { contracts, wallet, api } = useFilosignContext();
+	const queryClient = useQueryClient();
 
 	return useMutation({
 		mutationFn: async (sender: Address) => {
@@ -39,6 +44,10 @@ export function useRevokeSender() {
 			if (!success) {
 				throw new Error("Failed sverer to know you revoke sender");
 			}
+
+			queryClient.refetchQueries({
+				queryKey: ["fsQ-is-approved", wallet?.account.address, sender],
+			});
 		},
 	});
 }
