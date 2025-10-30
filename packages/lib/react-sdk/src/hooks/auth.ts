@@ -94,8 +94,11 @@ export function useIsLoggedIn() {
 				keyStore.del("key-seed");
 				return false;
 			}
+
+			return true;
 		},
-		enabled: !!wallet && !!contracts && !!wasm.dilithium,
+		staleTime: 1 * DAY,
+		enabled: !!wallet && !!contracts && !!wasm.dilithium && !!isRegistered && !!storedKeygenData,
 	});
 }
 
@@ -103,19 +106,25 @@ export function useLogin() {
 	const { api, contracts, wallet, wasm } = useFilosignContext();
 	const queryClient = useQueryClient();
 
+	
 	const { data: isRegistered } = useIsRegistered();
 	const { data: isLoggedIn } = useIsLoggedIn();
-
+	
 	return useMutation({
 		mutationKey: ["fsM-login"],
 		mutationFn: async (params: { pin: string }) => {
 			if (isLoggedIn) return;
-
+			
 			const { pin } = params;
-
+			
 			if (!contracts || !wallet || !wasm.dilithium) {
 				throw new Error("unreachable");
 			}
+
+			const keyStore = idb({
+				db: wallet.account.address,
+				store: "fs-keystore",
+			});
 
 			if (!isRegistered) {
 				const keygenData = await walletKeyGen(wallet, {
@@ -139,6 +148,8 @@ export function useLogin() {
 				if (!success) {
 					throw new Error("Failed to register keygen data");
 				}
+
+				await keyStore.secret.put("key-seed", new Uint8Array(keygenData.seed));
 			} else {
 				const [saltPin, saltSeed, saltChallenge, commitmentKem, commitmentSig] =
 					await contracts.FSKeyRegistry.read.keygenData([
@@ -161,6 +172,8 @@ export function useLogin() {
 				) {
 					throw new Error("Invalid PIN");
 				}
+
+				await keyStore.secret.put("key-seed", new Uint8Array(keygenData.seed));
 			}
 
 			queryClient.refetchQueries({
