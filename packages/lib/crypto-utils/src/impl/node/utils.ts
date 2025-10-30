@@ -2,7 +2,6 @@ import {
 	type Account,
 	type Address,
 	type Chain,
-	type Client,
 	encodePacked,
 	type Hex,
 	keccak256,
@@ -82,6 +81,7 @@ export function computeCommitment(args: (string | number)[]) {
 export async function walletKeyGen(
 	wallet: Wallet,
 	args: {
+		dl: signatures.DL;
 		pin: string;
 		salts?: {
 			challenge: Hex;
@@ -90,7 +90,7 @@ export async function walletKeyGen(
 		};
 	},
 ) {
-	const { pin, salts } = args;
+	const { pin, salts, dl } = args;
 	const saltPin = salts?.pin ? toBytes(salts.pin) : randomBytes(16);
 	const saltSeed = salts?.seed ? toBytes(salts.seed) : randomBytes(16);
 	const saltChallenge = salts?.challenge
@@ -117,7 +117,7 @@ export async function walletKeyGen(
 	);
 
 	const kemKeypair = await KEM.keyGen({ seed });
-	const sigKeypair = await signatures.keyGen({ seed });
+	const sigKeypair = await signatures.keyGen({ seed, dl });
 
 	const commitmentKem = computeCommitment([kemKeypair.publicKey.toString()]);
 	const commitmentSig = computeCommitment([sigKeypair.publicKey.toString()]);
@@ -134,9 +134,12 @@ export async function walletKeyGen(
 	};
 }
 
-export async function seedKeyGen(seed: Uint8Array<ArrayBuffer>) {
+export async function seedKeyGen(
+	seed: Uint8Array<ArrayBuffer>,
+	args: { dl: signatures.DL },
+) {
 	const kemKeypair = await KEM.keyGen({ seed });
-	const sigKeypair = await signatures.keyGen({ seed });
+	const sigKeypair = await signatures.keyGen({ seed, dl: args.dl });
 
 	const commitmentKem = computeCommitment([kemKeypair.publicKey.toString()]);
 	const commitmentSig = computeCommitment([sigKeypair.publicKey.toString()]);

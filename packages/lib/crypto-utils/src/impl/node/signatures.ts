@@ -1,12 +1,11 @@
-import Dilithium from "dilithium-crystals-js";
+import type Dilithium from "dilithium-crystals-js";
 import { DILITHIUM_KIND } from "../../constants";
 
 const dilithiumKind = DILITHIUM_KIND;
+export type DL = Awaited<typeof Dilithium>;
 
-export async function keyGen(args: { seed: Uint8Array }) {
-	const { seed } = args;
-
-	const dl = await Dilithium;
+export async function keyGen(args: { dl: DL; seed: Uint8Array }) {
+	const { seed, dl } = args;
 
 	const pair = dl.generateKeys(dilithiumKind, seed);
 
@@ -21,12 +20,11 @@ export async function keyGen(args: { seed: Uint8Array }) {
 }
 
 export async function sign(args: {
+	dl: DL;
 	message: Uint8Array;
 	privateKey: Uint8Array;
 }) {
-	const { message, privateKey } = args;
-
-	const dl = await Dilithium;
+	const { message, privateKey, dl } = args;
 
 	const { signature } = dl.sign(message, privateKey, dilithiumKind);
 	if (!signature) {
@@ -36,12 +34,12 @@ export async function sign(args: {
 }
 
 export async function verify(args: {
+	dl: DL;
 	message: Uint8Array;
 	signature: Uint8Array;
 	publicKey: Uint8Array;
 }) {
-	const { message, signature, publicKey } = args;
-	const dl = await Dilithium;
+	const { message, signature, publicKey, dl } = args;
 
 	const { result } = dl.verify(signature, message, publicKey, dilithiumKind);
 
