@@ -6,7 +6,7 @@ import * as user from "./user";
 // Combine all schema parts
 const schema = {
 	// ...sys,
-	// ...shareCapability,
+	...shareCapability,
 	...user,
 	// ...file,
 };

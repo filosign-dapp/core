@@ -1,11 +1,18 @@
 import * as t from "drizzle-orm/pg-core";
-import { tBoolean, tEvmAddress, timestamps, tJsonString } from "../helpers";
+import {
+	tBoolean,
+	tBytes32,
+	tEvmAddress,
+	timestamps,
+	tJsonString,
+} from "../helpers";
 import { users } from "./user";
 
 export const shareApprovals = t.pgTable(
 	"share_approvals",
 	{
 		id: t.uuid().primaryKey().defaultRandom(),
+
 		recipientWallet: tEvmAddress()
 			.notNull()
 			.references(() => users.walletAddress),
@@ -14,8 +21,12 @@ export const shareApprovals = t.pgTable(
 			.references(() => users.walletAddress),
 
 		active: tBoolean().notNull().default(false),
+		txHash: tBytes32().unique().notNull(),
 
-		...timestamps,
+		createdAt: t
+			.integer()
+			.notNull()
+			.$default(() => Date.now()),
 	},
 	(table) => [
 		t
@@ -36,7 +47,6 @@ export const shareApprovals = t.pgTable(
 
 // 		approvalId: t.text().notNull(), // references shareApprovals.id but we used string to avoid FK complexty
 // 		action: t.text({ enum: ["ENABLED", "REVOKED"] }).notNull(),
-// 		txHash: tBytes32().notNull(),
 // 		blockNumber: tBigInt().notNull(),
 
 // 		createdAt: t
@@ -52,20 +62,20 @@ export const shareApprovals = t.pgTable(
 // 	],
 // );
 
-export const shareRequests = t.sqliteTable("share_requests", {
-	id: t
-		.text()
-		.primaryKey()
-		.$default(() => Bun.randomUUIDv7()),
-	senderWallet: tEvmAddress()
-		.notNull()
-		.references(() => users.walletAddress),
-	recipientWallet: tEvmAddress().notNull(),
-	status: t
-		.text({ enum: ["PENDING", "ACCEPTED", "REJECTED", "CANCELLED", "EXPIRED"] })
-		.notNull()
-		.default("PENDING"),
-	message: t.text(),
-	metadata: tJsonString(),
-	...timestamps,
-});
+// export const shareRequests = t.sqliteTable("share_requests", {
+// 	id: t
+// 		.text()
+// 		.primaryKey()
+// 		.$default(() => Bun.randomUUIDv7()),
+// 	senderWallet: tEvmAddress()
+// 		.notNull()
+// 		.references(() => users.walletAddress),
+// 	recipientWallet: tEvmAddress().notNull(),
+// 	status: t
+// 		.text({ enum: ["PENDING", "ACCEPTED", "REJECTED", "CANCELLED", "EXPIRED"] })
+// 		.notNull()
+// 		.default("PENDING"),
+// 	message: t.text(),
+// 	metadata: tJsonString(),
+// 	...timestamps,
+// });
