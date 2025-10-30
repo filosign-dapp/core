@@ -37,45 +37,20 @@ export const shareApprovals = t.pgTable(
 	],
 );
 
-// export const shareApprovalHistory = t.sqliteTable(
-// 	"share_approval_history",
-// 	{
-// 		id: t
-// 			.text()
-// 			.primaryKey()
-// 			.$default(() => Bun.randomUUIDv7()),
-
-// 		approvalId: t.text().notNull(), // references shareApprovals.id but we used string to avoid FK complexty
-// 		action: t.text({ enum: ["ENABLED", "REVOKED"] }).notNull(),
-// 		blockNumber: tBigInt().notNull(),
-
-// 		createdAt: t
-// 			.integer()
-// 			.notNull()
-// 			.$default(() => Date.now()),
-// 	},
-// 	(table) => [
-// 		t
-// 			.uniqueIndex("ux_share_approval_history_tx")
-// 			.on(table.txHash, table.blockNumber),
-// 		t.index("idx_share_approval_history_approval").on(table.approvalId),
-// 	],
-// );
-
-// export const shareRequests = t.sqliteTable("share_requests", {
-// 	id: t
-// 		.text()
-// 		.primaryKey()
-// 		.$default(() => Bun.randomUUIDv7()),
-// 	senderWallet: tEvmAddress()
-// 		.notNull()
-// 		.references(() => users.walletAddress),
-// 	recipientWallet: tEvmAddress().notNull(),
-// 	status: t
-// 		.text({ enum: ["PENDING", "ACCEPTED", "REJECTED", "CANCELLED", "EXPIRED"] })
-// 		.notNull()
-// 		.default("PENDING"),
-// 	message: t.text(),
-// 	metadata: tJsonString(),
-// 	...timestamps,
-// });
+export const shareRequests = t.pgTable("share_requests", {
+	id: t
+		.text()
+		.primaryKey()
+		.$default(() => Bun.randomUUIDv7()),
+	senderWallet: tEvmAddress()
+		.notNull()
+		.references(() => users.walletAddress),
+	recipientWallet: tEvmAddress().notNull(),
+	status: t
+		.text({ enum: ["PENDING", "ACCEPTED", "REJECTED", "CANCELLED", "EXPIRED"] })
+		.notNull()
+		.default("PENDING"),
+	message: t.text(),
+	metadata: tJsonString(),
+	...timestamps,
+});
