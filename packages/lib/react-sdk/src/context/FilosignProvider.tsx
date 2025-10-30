@@ -11,14 +11,16 @@ import {
 	useState,
 } from "react";
 import type { Chain } from "viem";
-import { type UseWalletClientReturnType, useWalletClient } from "wagmi";
+import type { UseWalletClientReturnType } from "wagmi";
 import ApiClient from "../ApiClient";
 import { DAY, MINUTE } from "../constants";
+
+type Wallet = UseWalletClientReturnType["data"];
 
 type FilosignContext = {
 	ready: boolean;
 	api: ApiClient;
-	wallet: UseWalletClientReturnType["data"];
+	wallet: Wallet;
 	contracts: FilosignContracts | null;
 };
 
@@ -32,14 +34,14 @@ const FilosignContext = createContext<FilosignContext>({
 type FilosignConfig = {
 	children: ReactNode;
 	apiBaseUrl: string;
+	wallet: Wallet | undefined;
 };
 
 export function FilosignProvider(props: FilosignConfig) {
-	const { children, apiBaseUrl } = props;
+	const { children, apiBaseUrl, wallet } = props;
 
 	const [contracts, setContracts] = useState<FilosignContracts | null>(null);
 
-	const { data: wallet } = useWalletClient();
 	const api = useMemo(() => new ApiClient(apiBaseUrl), [apiBaseUrl]);
 
 	const runtime = useQuery({
@@ -70,8 +72,6 @@ export function FilosignProvider(props: FilosignConfig) {
 			setContracts(fsContracts);
 		}
 	}, [runtime.data, wallet]);
-
-	console.log(api, wallet);
 
 	const value: FilosignContext = useMemo(
 		() => ({
