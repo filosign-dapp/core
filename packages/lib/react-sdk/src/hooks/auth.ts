@@ -79,7 +79,6 @@ export function useIsLoggedIn() {
 				db: wallet.account.address,
 				store: "fs-keystore",
 			});
-
 			const keySeed = await keyStore.secret.get("key-seed");
 			if (!keySeed) return false;
 
@@ -98,7 +97,12 @@ export function useIsLoggedIn() {
 			return true;
 		},
 		staleTime: 1 * DAY,
-		enabled: !!wallet && !!contracts && !!wasm.dilithium && !!isRegistered && !!storedKeygenData,
+		enabled:
+			!!wallet &&
+			!!contracts &&
+			!!wasm.dilithium &&
+			!!isRegistered &&
+			!!storedKeygenData,
 	});
 }
 
@@ -106,17 +110,16 @@ export function useLogin() {
 	const { api, contracts, wallet, wasm } = useFilosignContext();
 	const queryClient = useQueryClient();
 
-	
 	const { data: isRegistered } = useIsRegistered();
 	const { data: isLoggedIn } = useIsLoggedIn();
-	
+
 	return useMutation({
 		mutationKey: ["fsM-login"],
 		mutationFn: async (params: { pin: string }) => {
 			if (isLoggedIn) return;
-			
+
 			const { pin } = params;
-			
+
 			if (!contracts || !wallet || !wasm.dilithium) {
 				throw new Error("unreachable");
 			}

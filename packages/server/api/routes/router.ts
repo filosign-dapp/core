@@ -1,8 +1,11 @@
 import { Hono } from "hono";
 import type { Chain } from "viem";
 import config from "../../config";
+import files from "./files";
 // import sharing from "./sharing";
 import tx from "./tx";
+// import auth from "./auth";
+import users from "./users";
 
 export const apiRouter = new Hono()
 	.get("/runtime", (ctx) => {
@@ -15,7 +18,7 @@ export const apiRouter = new Hono()
 	// .route("/auth", auth)
 	.route("/files", files)
 	// .route("/sharing", sharing)
-	// .route("/user", user);
+	.route("/users", users)
 	.route("/tx", tx);
 
 type Runtime = {
