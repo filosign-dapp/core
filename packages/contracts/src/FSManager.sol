@@ -33,7 +33,12 @@ contract FSManager {
         version = version_;
     }
 
+    function isRegistered(address account_) public view returns (bool) {
+        return FSKeyRegistry(keyRegistry).isRegistered(account_);
+    }
+
     function approveSender(address sender_) external {
+        require(isRegistered(sender_), "Sender not registered");
         approvedSenders[msg.sender][sender_] = true;
         emit SenderApproved(msg.sender, sender_);
     }
