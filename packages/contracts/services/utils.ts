@@ -58,23 +58,28 @@ export function computeCidIdentifier(pieceCid: string) {
 	);
 }
 
-export function eip712signature(
+export async function eip712signature(
 	contracts: FilosignContracts,
-	contractName: keyof Pick<
-		FilosignContracts,
-		"FSManager" | "FSFileRegistry" | "FSKeyRegistry"
-	>,
-	args: Omit<SignTypedDataParameters, "domain">,
+	contractName: keyof Pick<FilosignContracts, "FSFileRegistry">,
+	args: Omit<SignTypedDataParameters, "domain" | "privateKey">,
 ) {
-	const domain = {
-		name: contractName,
-		version: "1",
-		chainId: contracts.$client.chain.id,
-		verifyingContract: contracts[contractName].address,
-	};
+	// const domain = {
+	// 	name: contractName,
+	// 	version: "1",
+	// 	chainId: contracts.$client.chain.id,
+	// 	verifyingContract: contracts[contractName].address,
+	// };
+
+	const domain = await contracts[contractName].read.eip712Domain();
 
 	return contracts.$client.signTypedData({
-		domain,
+		domain: {
+			name: domain[1],
+			version: domain[2],
+			chainId: domain[3],
+			verifyingContract: domain[4],
+			salt: domain[5],
+		},
 		...args,
 	});
 }
