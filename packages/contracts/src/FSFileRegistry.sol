@@ -10,9 +10,17 @@ contract FSFileRegistry is EIP712 {
 
     uint256 constant SIGNATURE_VALIDITY_PERIOD = 5 minutes;
 
-    mapping(bytes32 => bytes) private _pieceCids;
-    mapping(bytes32 => address[]) private _recipients;
-    mapping(bytes32 => mapping(address => bool)) private _acknowledgements;
+    struct FileRegistration {
+        bytes32 cidIdentifier;
+        address sender;
+        address receipient;
+        uint256 timestamp;
+        uint256 nonce;
+    }
+
+    mapping(bytes32 => string) private _pieceCids;
+
+    mapping(address => uint256) public nonce;
 
     IFSManager public immutable manager;
 
@@ -23,6 +31,7 @@ contract FSFileRegistry is EIP712 {
 
     event FileRegistered(
         bytes32 indexed cidIdentifier,
+        address indexed sender,
         address indexed recipient,
         uint48 timestamp
     );
@@ -33,59 +42,68 @@ contract FSFileRegistry is EIP712 {
 
     bytes32 private constant REGISTER_FILE_TYPEHASH =
         keccak256(
-            "RegisterFile(bytes32 cidIdentifier,address sender,bytes32 receipientsHash,uint256 timestamp,uint256 nonce)"
+            "RegisterFile(bytes32 cidIdentifier,address sender,address receipient,uint256 timestamp,uint256 nonce)"
         );
 
     function registerFile(
         address sender_,
-        bytes calldata pieceCid_,
-        address[] calldata recipients_,
+        string calldata pieceCid_,
+        address recipient,
         uint256 timestamp_,
         uint256 nonce_,
         bytes calldata signature_
     ) external onlyServer {
-        bytes32 cidId = keccak256(pieceCid_);
-        _pieceCids[cidId] = pieceCid_;
+        require(nonce_ == nonce[sender_]++, "Invalid nonce");
+        require(
+            block.timestamp <= timestamp_ + SIGNATURE_VALIDITY_PERIOD,
+            "Signature expired"
+        );
 
-        bytes32 receipientsHash = keccak256(abi.encodePacked(recipients_));
+        address recovered = validateFileRegistrationSignature(
+            sender_,
+            pieceCid_,
+            recipient,
+            timestamp_,
+            nonce_,
+            signature_
+        );
+        require(recovered == msg.sender, "Invalid signature");
+
+        nonce[sender_]++;
+    }
+
+    function validateFileRegistrationSignature(
+        address sender_,
+        string calldata pieceCid_,
+        address recipient_,
+        uint256 timestamp_,
+        uint256 nonce_,
+        bytes calldata signature_
+    ) public view returns (address) {
+        require(manager.isRegistered(sender_), "Sender not registered");
+        require(
+            manager.approvedSenders(recipient_, msg.sender),
+            "Sender not approved by recipient"
+        );
+
+        bytes32 cidId = cidIdentifier(pieceCid_);
         bytes32 structHash = keccak256(
             abi.encode(
                 REGISTER_FILE_TYPEHASH,
                 cidId,
                 sender_,
-                receipientsHash,
+                recipient_,
                 timestamp_,
                 nonce_
             )
         );
         bytes32 digest = _hashTypedDataV4(structHash);
-        address recovered = ECDSA.recover(digest, signature_);
-        require(recovered == msg.sender, "Invalid signature");
-
-        for (uint i = 0; i < recipients_.length; i++) {
-            require(
-                manager.approvedSenders(recipients_[i], msg.sender),
-                "Sender not approved by recipient"
-            );
-            require(
-                block.timestamp <= timestamp_ + SIGNATURE_VALIDITY_PERIOD,
-                "Signature expired"
-            );
-        }
+        return ECDSA.recover(digest, signature_);
     }
 
     function cidIdentifier(
-        bytes32 pieceCidPrefix_,
-        bytes16 pieceCidBuffer_,
-        bytes32 pieceCidTail_
+        string calldata pieceCid_
     ) public pure returns (bytes32) {
-        return
-            keccak256(
-                abi.encodePacked(
-                    pieceCidPrefix_,
-                    pieceCidBuffer_,
-                    pieceCidTail_
-                )
-            );
+        return keccak256(abi.encodePacked(pieceCid_));
     }
 }
