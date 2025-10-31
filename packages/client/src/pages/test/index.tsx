@@ -34,7 +34,7 @@ import { ShareReceiverTest } from "./_components/ShareReceiverTest";
 import { ShareSenderTest } from "./_components/ShareSenderTest";
 import { SignatureTest } from "./_components/SignatureTest";
 import { StatusBadge } from "./_components/StatusBadge";
-import { useIsLoggedIn, useIsRegistered } from "@filosign/react/hooks";
+import { useIsLoggedIn, useIsRegistered, useUserProfileByAddress } from "@filosign/react/hooks";
 
 export default function TestPage() {
 	const { user } = usePrivy();
@@ -46,6 +46,9 @@ export default function TestPage() {
 
 	const isRegistered = useIsRegistered();
 	const isLoggedIn = useIsLoggedIn();
+	const userProfile = useUserProfileByAddress(walletClient?.account.address as `0x${string}`);
+
+	console.log(userProfile.data);
 
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-background to-muted/20 p-6">
@@ -137,6 +140,15 @@ export default function TestPage() {
 											</Badge>
 										</div>
 									)}
+									{userProfile.data && (
+										<div className="flex items-center gap-2">
+											<UserIcon className="w-4 h-4 text-muted-foreground" />
+											<span className="text-sm font-medium">Profile:</span>
+											<Badge variant="outline">
+												Active since {new Date(userProfile.data.createdAt).toLocaleDateString()}
+											</Badge>
+										</div>
+									)}
 								</div>
 							</>
 						)}
@@ -195,7 +207,7 @@ export default function TestPage() {
 
 					{/* Files Tab */}
 					<TabsContent value="files" className="space-y-6">
-						{/* <FileTest /> */}
+						<FileTest />
 					</TabsContent>
 
 					{/* Profile Tab */}

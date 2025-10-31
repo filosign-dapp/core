@@ -15,7 +15,7 @@ export async function processTransaction(
 		throw new Error(`Transaction receipt not found for hash: ${txHash}`);
 	}
 
-	if ([receipt.contractAddress, receipt.to].includes(FSKeyRegistry.address)) {
+	if ([receipt.contractAddress?.toLowerCase(), receipt.to?.toLowerCase()].includes(FSKeyRegistry.address.toLowerCase())) {
 		for (const encodedLog of receipt.logs) {
 			const log = decodeEventLog({
 				abi: FSKeyRegistry.abi,
@@ -46,24 +46,29 @@ export async function processTransaction(
 					.where(eq(db.schema.users.walletAddress, log.args.user));
 				if (exists) continue;
 
-				await db.insert(db.schema.users).values({
-					walletAddress: log.args.user,
-					encryptionPublicKey: encryptionPublicKey,
-					signaturePublicKey: signaturePublicKey,
-					lastActiveAt: Date.now(),
-					keygenDataJson: {
-						saltPin: keygenData[0],
-						saltSeed: keygenData[1],
-						saltChallenge: keygenData[2],
-						commitmentKem: keygenData[3],
-						commitmentSig: keygenData[4],
-					},
-				});
+				try {
+					await db.insert(db.schema.users).values({
+						walletAddress: log.args.user,
+						encryptionPublicKey,
+						signaturePublicKey,
+						lastActiveAt: Math.floor(Date.now() / 1000),
+						keygenDataJson: JSON.stringify({
+							saltPin: keygenData[0],
+							saltSeed: keygenData[1],
+							saltChallenge: keygenData[2],
+							commitmentKem: keygenData[3],
+							commitmentSig: keygenData[4],
+						}),
+					}).execute();
+				} catch (error) {
+					console.error(`Error inserting user: ${error}`);
+					throw error;
+				}
 			}
 		}
 	}
 
-	if ([receipt.contractAddress, receipt.to].includes(FSManager.address)) {
+	if ([receipt.contractAddress?.toLowerCase(), receipt.to?.toLowerCase()].includes(FSManager.address.toLowerCase())) {
 		for (const encodedLog of receipt.logs) {
 			try {
 				const log = decodeEventLog({
@@ -94,16 +99,12 @@ export async function processTransaction(
 						continue;
 					}
 
-					try {
-						await db.insert(db.schema.shareApprovals).values({
-							recipientWallet: log.args.recipient,
-							senderWallet: log.args.sender,
-							txHash: encodedLog.transactionHash,
-							active: true,
-						});
-					} catch (dbError) {
-						throw dbError;
-					}
+					await db.insert(db.schema.shareApprovals).values({
+						recipientWallet: log.args.recipient,
+						senderWallet: log.args.sender,
+						txHash: encodedLog.transactionHash,
+						active: true,
+					});
 				}
 
 				if (log.eventName === "SenderRevoked") {
@@ -124,16 +125,12 @@ export async function processTransaction(
 						continue;
 					}
 
-					try {
-						await db.insert(db.schema.shareApprovals).values({
-							recipientWallet: log.args.recipient,
-							senderWallet: log.args.sender,
-							active: false,
-							txHash: txHash,
-						});
-					} catch (dbError) {
-						throw dbError;
-					}
+					await db.insert(db.schema.shareApprovals).values({
+						recipientWallet: log.args.recipient,
+						senderWallet: log.args.sender,
+						active: false,
+						txHash: txHash,
+					});
 				}
 			} catch (error) {
 				// Silently ignore decode errors
