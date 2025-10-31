@@ -5,8 +5,7 @@ import { users } from "./user";
 export const files = t.pgTable(
 	"files",
 	{
-		id: t.uuid().primaryKey().defaultRandom(),
-		pieceCid: t.text().notNull().unique(),
+		pieceCid: t.text().notNull().primaryKey(),
 		sender: tEvmAddress()
 			.notNull()
 			.references(() => users.walletAddress),
