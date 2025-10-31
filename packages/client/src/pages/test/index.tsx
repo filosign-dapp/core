@@ -185,12 +185,12 @@ export default function TestPage() {
 
 					{/* Share Sender Tab */}
 					<TabsContent value="share-sender" className="space-y-6">
-						{/* <ShareSenderTest /> */}
+						<ShareSenderTest />
 					</TabsContent>
 
 					{/* Share Receiver Tab */}
 					<TabsContent value="share-receiver" className="space-y-6">
-						{/* <ShareReceiverTest /> */}
+						<ShareReceiverTest />
 					</TabsContent>
 
 					{/* Files Tab */}

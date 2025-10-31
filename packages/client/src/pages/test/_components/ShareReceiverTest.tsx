@@ -1,5 +1,5 @@
-import { useFilosignMutation, useFilosignQuery } from "@filosign/react";
-import { EyeIcon, SpinnerIcon, UserCheckIcon } from "@phosphor-icons/react";
+import { useCanReceiveFrom, useRevokeSender } from "@filosign/react/hooks";
+import { EyeIcon, SpinnerIcon, XIcon } from "@phosphor-icons/react";
 import { useState } from "react";
 import { Button } from "../../../lib/components/ui/button";
 import {
@@ -13,144 +13,120 @@ import { Input } from "../../../lib/components/ui/input";
 import { Label } from "../../../lib/components/ui/label";
 
 export function ShareReceiverTest() {
-	// Receiver's side
-	const allowSharing = useFilosignMutation(["shareCapability", "allowSharing"]);
-	const allowedList = useFilosignQuery(
-		["shareCapability", "getPeopleCanReceiveFrom"],
-		undefined,
-	);
-	const receivedShareRequests = useFilosignQuery(
-		["shareCapability", "getReceivedRequests"],
-		undefined,
-	);
+	// Receiver's side - check who can send to you and revoke senders
+	const [checkSenderAddress, setCheckSenderAddress] = useState("");
+	const [revokeSenderAddress, setRevokeSenderAddress] = useState("");
 
-	// Input states for shareCapability testing
-	const [senderWalletToAllow, setSenderWalletToAllow] = useState("");
+	const canReceiveFrom = useCanReceiveFrom(checkSenderAddress as `0x${string}`);
+	const revokeSender = useRevokeSender();
 
-	async function handleAllowSharing() {
-		if (!senderWalletToAllow.trim()) return;
+	async function handleRevokeSender() {
+		if (!revokeSenderAddress.trim()) return;
 		try {
-			await allowSharing.mutateAsync({
-				senderWallet: senderWalletToAllow as `0x${string}`,
-			});
-			console.log("Allowed sharing");
-			setSenderWalletToAllow("");
+			await revokeSender.mutateAsync(revokeSenderAddress as `0x${string}`);
+			console.log("Revoked sender");
+			setRevokeSenderAddress("");
 		} catch (error) {
-			console.error("Failed to allow sharing", error);
+			console.error("Failed to revoke sender", error);
 		}
+	}
+
+	async function handleCheckCanReceive() {
+		if (!checkSenderAddress.trim()) return;
+		canReceiveFrom.refetch();
 	}
 
 	return (
 		<div className="space-y-6">
-			{/* Allow Sharing */}
-			<Card>
-				<CardHeader>
-					<CardTitle className="flex items-center gap-2">
-						<UserCheckIcon className="w-5 h-5" />
-						Allow Sharing
-					</CardTitle>
-					<CardDescription>
-						Allow a sender to share documents with you
-					</CardDescription>
-				</CardHeader>
-				<CardContent className="space-y-4">
-					<div>
-						<Label htmlFor="allow-sender-address">Sender Wallet Address</Label>
-						<Input
-							id="allow-sender-address"
-							placeholder="0x..."
-							value={senderWalletToAllow}
-							onChange={(e) => setSenderWalletToAllow(e.target.value)}
-						/>
-					</div>
-					<Button
-						onClick={handleAllowSharing}
-						disabled={!senderWalletToAllow.trim() || allowSharing.isPending}
-						className="w-full"
-						size="lg"
-					>
-						{allowSharing.isPending ? (
-							<SpinnerIcon className="w-4 h-4 mr-2 animate-spin" />
-						) : (
-							<UserCheckIcon className="w-4 h-4 mr-2" />
-						)}
-						Allow Sharing
-					</Button>
-				</CardContent>
-			</Card>
-
-			{/* Receiver Data Display */}
-			<div className="grid gap-6 md:grid-cols-2">
+			<div className="grid gap-6 lg:grid-cols-2">
+				{/* Check Can Receive From */}
 				<Card>
 					<CardHeader>
-						<div className="flex items-center justify-between">
-							<CardTitle className="text-lg">Received Requests</CardTitle>
-							<Button
-								onClick={() => receivedShareRequests.refetch()}
-								disabled={receivedShareRequests.isFetching}
-								variant="outline"
-								size="sm"
-							>
-								{receivedShareRequests.isFetching ? (
-									<SpinnerIcon className="w-3 h-3 animate-spin mr-1" />
-								) : (
-									<EyeIcon className="w-3 h-3 mr-1" />
-								)}
-								Refetch
-							</Button>
-						</div>
+						<CardTitle className="flex items-center gap-2">
+							<EyeIcon className="w-5 h-5" />
+							Check Can Receive From
+						</CardTitle>
+						<CardDescription>
+							Check if a wallet can send documents to you
+						</CardDescription>
 					</CardHeader>
-					<CardContent>
-						<div className="bg-muted/50 p-4 rounded-lg min-h-[100px]">
-							{receivedShareRequests.isLoading ? (
-								<div className="flex items-center gap-2 text-muted-foreground">
-									<SpinnerIcon className="w-4 h-4 animate-spin" />
-									Loading...
+					<CardContent className="space-y-4">
+						<div className="space-y-3">
+							<div>
+								<Label htmlFor="check-sender-address">Sender Wallet Address</Label>
+								<Input
+									id="check-sender-address"
+									placeholder="0x..."
+									value={checkSenderAddress}
+									onChange={(e) => setCheckSenderAddress(e.target.value)}
+								/>
+							</div>
+							<Button
+								onClick={handleCheckCanReceive}
+								disabled={!checkSenderAddress.trim() || canReceiveFrom.isFetching}
+								className="w-full"
+								size="lg"
+							>
+								{canReceiveFrom.isFetching ? (
+									<SpinnerIcon className="w-4 h-4 mr-2 animate-spin" />
+								) : (
+									<EyeIcon className="w-4 h-4 mr-2" />
+								)}
+								Check Permission
+							</Button>
+							{canReceiveFrom.data !== undefined && (
+								<div className="p-3 bg-muted rounded-lg">
+									<p className="text-sm">
+										Can receive from {checkSenderAddress}:{" "}
+										<span className={canReceiveFrom.data ? "text-green-600" : "text-red-600"}>
+											{canReceiveFrom.data ? "Yes" : "No"}
+										</span>
+									</p>
 								</div>
-							) : (
-								<pre className="text-xs whitespace-pre-wrap">
-									{JSON.stringify(receivedShareRequests.data || [], null, 2)}
-								</pre>
 							)}
 						</div>
 					</CardContent>
 				</Card>
 
+				{/* Revoke Sender */}
 				<Card>
 					<CardHeader>
-						<div className="flex items-center justify-between">
-							<CardTitle className="text-lg">Can Receive From</CardTitle>
-							<Button
-								onClick={() => allowedList.refetch()}
-								disabled={allowedList.isFetching}
-								variant="outline"
-								size="sm"
-							>
-								{allowedList.isFetching ? (
-									<SpinnerIcon className="w-3 h-3 animate-spin mr-1" />
-								) : (
-									<EyeIcon className="w-3 h-3 mr-1" />
-								)}
-								Refetch
-							</Button>
-						</div>
+						<CardTitle className="flex items-center gap-2">
+							<XIcon className="w-5 h-5" />
+							Revoke Sender
+						</CardTitle>
+						<CardDescription>
+							Remove permission for a wallet to send documents to you
+						</CardDescription>
 					</CardHeader>
-					<CardContent>
-						<div className="bg-muted/50 p-4 rounded-lg min-h-[100px]">
-							{allowedList.isLoading ? (
-								<div className="flex items-center gap-2 text-muted-foreground">
-									<SpinnerIcon className="w-4 h-4 animate-spin" />
-									Loading...
-								</div>
-							) : (
-								<pre className="text-xs whitespace-pre-wrap">
-									{JSON.stringify(allowedList.data || [], null, 2)}
-								</pre>
-							)}
+					<CardContent className="space-y-4">
+						<div>
+							<Label htmlFor="revoke-sender-address">Sender Wallet Address</Label>
+							<Input
+								id="revoke-sender-address"
+								placeholder="0x..."
+								value={revokeSenderAddress}
+								onChange={(e) => setRevokeSenderAddress(e.target.value)}
+							/>
 						</div>
+						<Button
+							onClick={handleRevokeSender}
+							disabled={!revokeSenderAddress.trim() || revokeSender.isPending}
+							variant="destructive"
+							className="w-full"
+							size="lg"
+						>
+							{revokeSender.isPending ? (
+								<SpinnerIcon className="w-4 h-4 mr-2 animate-spin" />
+							) : (
+								<XIcon className="w-4 h-4 mr-2" />
+							)}
+							Revoke Sender
+						</Button>
 					</CardContent>
 				</Card>
 			</div>
+
 		</div>
 	);
 }
