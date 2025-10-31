@@ -39,6 +39,11 @@ contract FSManager {
 
     function approveSender(address sender_) external {
         require(isRegistered(sender_), "Sender not registered");
+        require(
+            !approvedSenders[msg.sender][sender_],
+            "Sender already approved"
+        );
+        require(msg.sender != sender_, "Cannot approve self");
         approvedSenders[msg.sender][sender_] = true;
         emit SenderApproved(msg.sender, sender_);
     }
