@@ -8,7 +8,7 @@ const schema = {
 	// ...sys,
 	...shareCapability,
 	...user,
-	// ...file,
+	...file,
 };
 
 export default schema;

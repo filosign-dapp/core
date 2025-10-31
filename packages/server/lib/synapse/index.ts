@@ -14,11 +14,11 @@ export const synapse = await Synapse.create({
 });
 
 export async function getOrCreateUserDataset(walletAddress: Address) {
-	const existing = db
+	const [existing] = await db
 		.select()
 		.from(db.schema.usersDatasets)
-		.where(eq(db.schema.usersDatasets.walletAddress, walletAddress))
-		.get();
+		.where(eq(db.schema.usersDatasets.walletAddress, walletAddress));
+
 	if (existing) {
 		const ctx = await tryCatch(
 			synapse.storage.createContext({
@@ -47,13 +47,11 @@ export async function getOrCreateUserDataset(walletAddress: Address) {
 		throw new Error("Fail to create synapse context for new user dataset");
 	}
 
-	db.insert(db.schema.usersDatasets)
-		.values({
-			walletAddress,
-			dataSetId: ctx.data.dataSetId,
-			providerAddress: ctx.data.provider.serviceProvider,
-		})
-		.run();
+	await db.insert(db.schema.usersDatasets).values({
+		walletAddress,
+		dataSetId: ctx.data.dataSetId,
+		providerAddress: ctx.data.provider.serviceProvider,
+	});
 
 	return ctx.data;
 }

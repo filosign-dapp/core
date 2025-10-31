@@ -25,16 +25,18 @@ export const users = t.pgTable("users", {
 // 	metadataJson: tJsonString().default({ value: "{}" }),
 // });
 
-// export const usersDatasets = t.sqliteTable("users_datasets", {
-// 	walletAddress: tEvmAddress().references(() => users.walletAddress, {
-// 		onDelete: "cascade",
-// 	}),
-// 	dataSetId: t.integer().notNull(),
-// 	providerAddress: t.text().notNull(),
-// 	totalDepositedBaseUnits: tBigInt().notNull().default(0n),
+export const usersDatasets = t.pgTable("users_datasets", {
+	walletAddress: tEvmAddress()
+		.references(() => users.walletAddress, {
+			onDelete: "cascade",
+		})
+		.primaryKey(),
+	dataSetId: t.integer().notNull(),
+	providerAddress: t.text().notNull(),
+	totalDepositedBaseUnits: t.bigint({ mode: "bigint" }).notNull().default(0n),
 
-// 	...timestamps,
-// });
+	...timestamps,
+});
 
 // export const userSignatures = t.sqliteTable("user_signatures", {
 // 	id: t

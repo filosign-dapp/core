@@ -1,38 +1,23 @@
 import * as t from "drizzle-orm/pg-core";
-import {
-	tBytes32,
-	tEvmAddress,
-	tHex,
-	timestamps,
-	tJsonString,
-} from "../helpers";
+import { tBytes32, tEvmAddress, tHex, timestamps } from "../helpers";
 import { users } from "./user";
 
 export const files = t.pgTable(
 	"files",
 	{
 		id: t.uuid().primaryKey().defaultRandom(),
-		pieceCid: t.text(),
-		ownerWallet: tEvmAddress()
+		pieceCid: t.text().notNull().unique(),
+		sender: tEvmAddress()
 			.notNull()
 			.references(() => users.walletAddress),
 
-		metadata: tJsonString(),
 		status: t.text({ enum: ["s3", "foc", "unpaid_for", "invalid"] }).notNull(),
-
-		ownerEncryptedKey: tHex().notNull(),
-		ownerEncryptedKeyIv: tHex().notNull(),
-		encryptedDataIv: tHex().notNull(),
-
-		onchainTxHash: tBytes32(),
+		kemCiphertext: tHex().notNull(),
+		onchainTxHash: tBytes32().unique().notNull(),
 
 		...timestamps,
 	},
-	(table) => [
-		t.index("idx_files_owner").on(table.ownerWallet),
-		t.uniqueIndex("ux_files_pieceCid").on(table.pieceCid),
-		t.uniqueIndex("ux_files_onchainTxHash").on(table.onchainTxHash),
-	],
+	(table) => [t.index("idx_files_owner").on(table.sender)],
 );
 
 // export const fileAcknowledgements = t.sqliteTable(
@@ -55,24 +40,24 @@ export const files = t.pgTable(
 // 	],
 // );
 
-// export const fileRecipients = t.sqliteTable(
-// 	"file_recipients",
-// 	{
-// 		filePieceCid: t
-// 			.text()
-// 			.notNull()
-// 			.references(() => files.pieceCid, { onDelete: "cascade" }),
-// 		recipientWallet: tEvmAddress().notNull(),
+export const fileRecipients = t.pgTable(
+	"file_recipients",
+	{
+		filePieceCid: t
+			.text()
+			.notNull()
+			.references(() => files.pieceCid, { onDelete: "cascade" }),
+		recipientWallet: tEvmAddress().notNull(),
 
-// 		...timestamps,
-// 	},
-// 	(table) => [
-// 		t
-// 			.uniqueIndex("ux_file_recipients_file_recipient")
-// 			.on(table.filePieceCid, table.recipientWallet),
-// 		t.index("idx_file_recipients_file").on(table.filePieceCid),
-// 	],
-// );
+		...timestamps,
+	},
+	(table) => [
+		t
+			.uniqueIndex("ux_file_recipients_file_recipient")
+			.on(table.filePieceCid, table.recipientWallet),
+		t.index("idx_file_recipients_file").on(table.filePieceCid),
+	],
+);
 
 // export const fileSignatures = t.sqliteTable(
 // 	"file_signatures",
