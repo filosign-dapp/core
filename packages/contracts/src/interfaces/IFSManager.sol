@@ -13,6 +13,7 @@ interface IFSManager {
     event SenderApproved();
     event SenderRevoked();
     function setActiveVersion(uint8 version_) external;
+    function isRegistered(address account_) external view returns (bool);
     function approveSender(address sender_) external;
     function revokeSender(address sender_) external;
 }
