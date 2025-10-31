@@ -3,10 +3,12 @@ import { usePrivy } from "@privy-io/react-auth";
 import { Link } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { Button } from "@/src/lib/components/ui/button";
+import { useWalletClient } from "wagmi";
 
 export default function ConnectButton() {
 	const { ready, authenticated, login: loginPrivy, user } = usePrivy();
 	const isRegistered = useIsRegistered();
+	const { data: walletClient } = useWalletClient();
 
 	// Determine button state for smooth transitions
 	const getButtonState = () => {

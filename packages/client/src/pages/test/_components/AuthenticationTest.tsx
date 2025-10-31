@@ -1,4 +1,3 @@
-import { useFilosignMutation, useFilosignQuery } from "@filosign/react";
 import {
 	CheckCircleIcon,
 	KeyIcon,
@@ -8,8 +7,6 @@ import {
 } from "@phosphor-icons/react";
 import { usePrivy } from "@privy-io/react-auth";
 import { useQueryClient } from "@tanstack/react-query";
-import { formatEther } from "viem";
-import { useWalletClient } from "wagmi";
 import { Button } from "../../../lib/components/ui/button";
 import {
 	Card,
@@ -18,24 +15,24 @@ import {
 	CardHeader,
 	CardTitle,
 } from "../../../lib/components/ui/card";
+import { useIsLoggedIn, useIsRegistered, useLogout, useLogin } from "@filosign/react/hooks";
 
 export function AuthenticationTest() {
 	const { user, login: loginPrivy, logout: logoutPrivy } = usePrivy();
 	const queryClient = useQueryClient();
 
-	const login = useFilosignMutation(["login"]);
-	const register = useFilosignMutation(["register"]);
-	const logout = useFilosignMutation(["logout"]);
-	const isRegistered = useFilosignQuery(["isRegistered"], undefined);
-	const isLoggedIn = useFilosignQuery(["isLoggedIn"], undefined);
+	const login = useLogin();
+	const logout = useLogout();
+	const isRegistered = useIsRegistered();
+	const isLoggedIn = useIsLoggedIn();
 
 	async function handleRegisterFilosign() {
 		try {
-			await register.mutateAsync({ pin: "111111" });
+			await login.mutateAsync({ pin: "111111" });
 			await queryClient.invalidateQueries({
 				queryKey: ["filosign", "isRegistered"],
 			});
-			console.log("register", register.isSuccess, register.isError);
+			console.log("register", login.isSuccess, login.isError);
 		} catch (error) {
 			console.error("Failed to register", error);
 		}
@@ -123,11 +120,11 @@ export function AuthenticationTest() {
 							{!isRegistered.data && (
 								<Button
 									onClick={handleRegisterFilosign}
-									disabled={register.isPending}
+									disabled={login.isPending}
 									className="w-full"
 									size="lg"
 								>
-									{register.isPending ? (
+									{login.isPending ? (
 										<SpinnerIcon className="w-4 h-4 mr-2 animate-spin" />
 									) : (
 										<CheckCircleIcon className="w-4 h-4 mr-2" />

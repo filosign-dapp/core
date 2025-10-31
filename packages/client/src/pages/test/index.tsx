@@ -1,4 +1,3 @@
-import { useFilosignQuery } from "@filosign/react";
 import {
 	ClockIcon,
 	EyeIcon,
@@ -35,6 +34,7 @@ import { ShareReceiverTest } from "./_components/ShareReceiverTest";
 import { ShareSenderTest } from "./_components/ShareSenderTest";
 import { SignatureTest } from "./_components/SignatureTest";
 import { StatusBadge } from "./_components/StatusBadge";
+import { useIsLoggedIn, useIsRegistered } from "@filosign/react/hooks";
 
 export default function TestPage() {
 	const { user } = usePrivy();
@@ -44,8 +44,8 @@ export default function TestPage() {
 		address: walletClient?.account.address,
 	});
 
-	const isRegistered = useFilosignQuery(["isRegistered"], undefined);
-	const isLoggedIn = useFilosignQuery(["isLoggedIn"], undefined);
+	const isRegistered = useIsRegistered();
+	const isLoggedIn = useIsLoggedIn();
 
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-background to-muted/20 p-6">
@@ -180,32 +180,32 @@ export default function TestPage() {
 
 					{/* Authentication Tab */}
 					<TabsContent value="auth" className="space-y-6">
-						<AuthenticationTest />
+						{/* <AuthenticationTest /> */}
 					</TabsContent>
 
 					{/* Share Sender Tab */}
 					<TabsContent value="share-sender" className="space-y-6">
-						<ShareSenderTest />
+						{/* <ShareSenderTest /> */}
 					</TabsContent>
 
 					{/* Share Receiver Tab */}
 					<TabsContent value="share-receiver" className="space-y-6">
-						<ShareReceiverTest />
+						{/* <ShareReceiverTest /> */}
 					</TabsContent>
 
 					{/* Files Tab */}
 					<TabsContent value="files" className="space-y-6">
-						<FileTest />
+						{/* <FileTest /> */}
 					</TabsContent>
 
 					{/* Profile Tab */}
 					<TabsContent value="profile" className="space-y-6">
-						<ProfileTest />
+						{/* <ProfileTest /> */}
 					</TabsContent>
 
 					{/* Signatures Tab */}
 					<TabsContent value="signatures" className="space-y-6">
-						<SignatureTest />
+						{/* <SignatureTest /> */}
 					</TabsContent>
 				</Tabs>
 			</div>

@@ -93,7 +93,12 @@ export default function DashboardProtector({
 	};
 
 	// Show loading while checking auth status
-	if (!ready || isRegistered.isPending || !isLoggedIn.isSuccess) {
+	// Allow proceeding if user is registered and login check isn't actively failing
+	const shouldShowLoader = !ready ||
+		isRegistered.isPending ||
+		(!isLoggedIn.data && isLoggedIn.isPending && !isLoggedIn.isError);
+
+	if (shouldShowLoader) {
 		return <Loader />;
 	}
 
