@@ -163,4 +163,50 @@ export default new Hono()
 		});
 
 		return respond.ok(ctx, {}, "File uploaded to filecoin warmstorage", 201);
+	})
+
+	.get("/:pieceCid", async (ctx) => {
+		const pieceCid = ctx.req.param("pieceCid");
+		if (!pieceCid || typeof pieceCid !== "string") {
+			return respond.err(ctx, "Invalid pieceCid", 400);
+		}
+
+		const [fileRecord] = await db
+			.select({
+				pieceCid: files.pieceCid,
+				sender: files.sender,
+				status: files.status,
+				onchainTxHash: files.onchainTxHash,
+				createdAt: files.createdAt,
+				//TODO important remove this
+				kemCiphertext: files.kemCiphertext,
+			})
+			.from(files)
+			.where(eq(files.pieceCid, pieceCid));
+
+		if (!fileRecord) {
+			return respond.err(ctx, "File not found", 404);
+		}
+
+		return respond.ok(ctx, fileRecord, "File retrieved", 200);
+	})
+
+	.get("/:pieceCid/s3", async (ctx) => {
+		const pieceCid = ctx.req.param("pieceCid");
+		if (!pieceCid || typeof pieceCid !== "string") {
+			return respond.err(ctx, "Invalid pieceCid", 400);
+		}
+
+		const fileExists = bucket.exists(`uploads/${pieceCid}`);
+
+		if (!fileExists) {
+			return respond.err(ctx, "File not found on S3", 404);
+		}
+
+		const presignedUrl = bucket.presign(`uploads/${pieceCid}`, {
+			method: "GET",
+			expiresIn: 60 * 5, // 5 minutes
+		});
+
+		return respond.ok(ctx, { presignedUrl }, "Presigned URL retrieved", 200);
 	});
