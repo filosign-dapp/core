@@ -54,10 +54,6 @@ export function AuthenticationTest() {
 	async function handleLogoutFilosign() {
 		try {
 			await logout.mutateAsync(undefined);
-			// Invalidate isLoggedIn query to refetch with updated state
-			await queryClient.invalidateQueries({
-				queryKey: ["filosign", "isLoggedIn"],
-			});
 			console.log("logout", logout.isSuccess, logout.isError);
 		} catch (error) {
 			console.error("Failed to logout", error);

@@ -190,15 +190,17 @@ export function useLogout() {
 	const { wallet } = useFilosignContext();
 	const queryClient = useQueryClient();
 
-	if (!wallet) throw new Error("login to logout");
-
-	const keyStore = idb({
-		db: wallet.account.address,
-		store: "fs-keystore",
-	});
 	return useMutation({
 		mutationKey: ["fsM-logout"],
 		mutationFn: async () => {
+			if (!wallet) {
+				throw new Error("No wallet available for logout");
+			}
+
+			const keyStore = idb({
+				db: wallet.account.address,
+				store: "fs-keystore",
+			});
 			keyStore.del("key-seed");
 			queryClient.invalidateQueries({
 				queryKey: ["fsQ-is-logged-in", wallet?.account.address],

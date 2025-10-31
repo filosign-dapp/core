@@ -180,7 +180,7 @@ export default function TestPage() {
 
 					{/* Authentication Tab */}
 					<TabsContent value="auth" className="space-y-6">
-						{/* <AuthenticationTest /> */}
+						<AuthenticationTest />
 					</TabsContent>
 
 					{/* Share Sender Tab */}
