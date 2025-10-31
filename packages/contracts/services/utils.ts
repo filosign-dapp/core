@@ -10,6 +10,8 @@ import {
 	type Transport,
 	type WalletClient,
 } from "viem";
+import type { SignTypedDataParameters } from "viem/accounts";
+import type { FilosignContracts } from "./contracts";
 
 export function parsePieceCid(pieceCid: string) {
 	const bytes = new TextEncoder().encode(pieceCid);
@@ -54,6 +56,27 @@ export function computeCidIdentifier(pieceCid: string) {
 			[digestPrefix, digestBuffer, digestTail],
 		),
 	);
+}
+
+export function eip712signature(
+	contracts: FilosignContracts,
+	contractName: keyof Pick<
+		FilosignContracts,
+		"FSManager" | "FSFileRegistry" | "FSKeyRegistry"
+	>,
+	args: Omit<SignTypedDataParameters, "domain">,
+) {
+	const domain = {
+		name: contractName,
+		version: "1",
+		chainId: contracts.$client.chain.id,
+		verifyingContract: contracts[contractName].address,
+	};
+
+	return contracts.$client.signTypedData({
+		domain,
+		...args,
+	});
 }
 
 export async function signFileSignature(options: {
