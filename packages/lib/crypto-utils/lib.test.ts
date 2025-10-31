@@ -104,14 +104,16 @@ describe("Encryption (AES-GCM)", async () => {
 			info: "encryption info",
 		});
 
+		const sent = { kemCiphertext, encryptedMessage };
+
 		//receiver
 		const { sharedSecret: ssE } = await KEM.decapsulate({
-			ciphertext: kemCiphertext,
+			ciphertext: sent.kemCiphertext,
 			privateKeySelf: receiver.privateKey,
 		});
 
 		const decryptedMessage = await encryption.decrypt({
-			ciphertext: encryptedMessage,
+			ciphertext: sent.encryptedMessage,
 			sharedSecret: ssE,
 			info: "encryption info",
 		});

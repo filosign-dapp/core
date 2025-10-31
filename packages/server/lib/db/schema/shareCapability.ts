@@ -23,9 +23,6 @@ export const shareApprovals = t.pgTable(
 			.$default(() => Date.now()),
 	},
 	(table) => [
-		t
-			.uniqueIndex("ux_share_approvals_recipient_sender")
-			.on(table.recipientWallet, table.senderWallet),
 		t.index("idx_share_approvals_recipient").on(table.recipientWallet),
 		t.index("idx_share_approvals_sender").on(table.senderWallet),
 	],
@@ -40,7 +37,7 @@ export const shareRequests = t.pgTable("share_requests", {
 	recipientWallet: tEvmAddress().notNull(),
 
 	status: t
-		.text({ enum: ["PENDING", "ACCEPTED", "REJECTED", "CANCELLED", "EXPIRED"] })
+		.text({ enum: ["PENDING", "ACCEPTED", "REJECTED", "CANCELLED"] })
 		.notNull()
 		.default("PENDING"),
 	message: t.text(),

@@ -1,4 +1,4 @@
-import * as t from "drizzle-orm/sqlite-core";
+import * as t from "drizzle-orm/pg-core";
 import {
 	tBytes32,
 	tEvmAddress,
@@ -8,16 +8,18 @@ import {
 } from "../helpers";
 import { users } from "./user";
 
-export const files = t.sqliteTable(
+export const files = t.pgTable(
 	"files",
 	{
-		pieceCid: t.text().primaryKey(),
+		id: t.uuid().primaryKey().defaultRandom(),
+		pieceCid: t.text(),
 		ownerWallet: tEvmAddress()
 			.notNull()
 			.references(() => users.walletAddress),
 
 		metadata: tJsonString(),
 		status: t.text({ enum: ["s3", "foc", "unpaid_for", "invalid"] }).notNull(),
+
 		ownerEncryptedKey: tHex().notNull(),
 		ownerEncryptedKeyIv: tHex().notNull(),
 		encryptedDataIv: tHex().notNull(),
@@ -33,81 +35,81 @@ export const files = t.sqliteTable(
 	],
 );
 
-export const fileAcknowledgements = t.sqliteTable(
-	"file_acknowledgements",
-	{
-		filePieceCid: t
-			.text()
-			.notNull()
-			.references(() => files.pieceCid, { onDelete: "cascade" }),
-		recipientWallet: tEvmAddress().notNull(),
-		acknowledgedTxHash: tBytes32(),
+// export const fileAcknowledgements = t.sqliteTable(
+// 	"file_acknowledgements",
+// 	{
+// 		filePieceCid: t
+// 			.text()
+// 			.notNull()
+// 			.references(() => files.pieceCid, { onDelete: "cascade" }),
+// 		recipientWallet: tEvmAddress().notNull(),
+// 		acknowledgedTxHash: tBytes32(),
 
-		...timestamps,
-	},
-	(table) => [
-		t
-			.uniqueIndex("ux_file_acknowledgements_file_recipient")
-			.on(table.filePieceCid, table.recipientWallet),
-		t.index("idx_file_acknowledgements_file").on(table.filePieceCid),
-	],
-);
+// 		...timestamps,
+// 	},
+// 	(table) => [
+// 		t
+// 			.uniqueIndex("ux_file_acknowledgements_file_recipient")
+// 			.on(table.filePieceCid, table.recipientWallet),
+// 		t.index("idx_file_acknowledgements_file").on(table.filePieceCid),
+// 	],
+// );
 
-export const fileRecipients = t.sqliteTable(
-	"file_recipients",
-	{
-		filePieceCid: t
-			.text()
-			.notNull()
-			.references(() => files.pieceCid, { onDelete: "cascade" }),
-		recipientWallet: tEvmAddress().notNull(),
+// export const fileRecipients = t.sqliteTable(
+// 	"file_recipients",
+// 	{
+// 		filePieceCid: t
+// 			.text()
+// 			.notNull()
+// 			.references(() => files.pieceCid, { onDelete: "cascade" }),
+// 		recipientWallet: tEvmAddress().notNull(),
 
-		...timestamps,
-	},
-	(table) => [
-		t
-			.uniqueIndex("ux_file_recipients_file_recipient")
-			.on(table.filePieceCid, table.recipientWallet),
-		t.index("idx_file_recipients_file").on(table.filePieceCid),
-	],
-);
+// 		...timestamps,
+// 	},
+// 	(table) => [
+// 		t
+// 			.uniqueIndex("ux_file_recipients_file_recipient")
+// 			.on(table.filePieceCid, table.recipientWallet),
+// 		t.index("idx_file_recipients_file").on(table.filePieceCid),
+// 	],
+// );
 
-export const fileSignatures = t.sqliteTable(
-	"file_signatures",
-	{
-		id: t.text().primaryKey().default("uuid_generate_v4()"),
-		filePieceCid: t
-			.text()
-			.notNull()
-			.references(() => files.pieceCid, { onDelete: "cascade" }),
-		signerWallet: t.text().notNull(),
-		signatureVisualHash: tBytes32().notNull(),
-		compactSignature: t.text().notNull(),
-		timestamp: t.integer().notNull(),
-		onchainTxHash: t.text(),
+// export const fileSignatures = t.sqliteTable(
+// 	"file_signatures",
+// 	{
+// 		id: t.text().primaryKey().default("uuid_generate_v4()"),
+// 		filePieceCid: t
+// 			.text()
+// 			.notNull()
+// 			.references(() => files.pieceCid, { onDelete: "cascade" }),
+// 		signerWallet: t.text().notNull(),
+// 		signatureVisualHash: tBytes32().notNull(),
+// 		compactSignature: t.text().notNull(),
+// 		timestamp: t.integer().notNull(),
+// 		onchainTxHash: t.text(),
 
-		...timestamps,
-	},
-	(table) => [t.index("idx_signatures_file").on(table.filePieceCid)],
-);
+// 		...timestamps,
+// 	},
+// 	(table) => [t.index("idx_signatures_file").on(table.filePieceCid)],
+// );
 
-export const fileKeys = t.sqliteTable(
-	"file_keys",
-	{
-		filePieceCid: t
-			.text()
-			.notNull()
-			.references(() => files.pieceCid, { onDelete: "cascade" }),
-		recipientWallet: tEvmAddress().notNull(),
-		encryptedKey: tHex().notNull(),
-		encryptedKeyIv: tHex().notNull(),
+// export const fileKeys = t.sqliteTable(
+// 	"file_keys",
+// 	{
+// 		filePieceCid: t
+// 			.text()
+// 			.notNull()
+// 			.references(() => files.pieceCid, { onDelete: "cascade" }),
+// 		recipientWallet: tEvmAddress().notNull(),
+// 		encryptedKey: tHex().notNull(),
+// 		encryptedKeyIv: tHex().notNull(),
 
-		...timestamps,
-	},
-	(table) => [
-		t
-			.uniqueIndex("ux_file_keys_file_recipient")
-			.on(table.filePieceCid, table.recipientWallet),
-		t.index("idx_file_keys_file").on(table.filePieceCid),
-	],
-);
+// 		...timestamps,
+// 	},
+// 	(table) => [
+// 		t
+// 			.uniqueIndex("ux_file_keys_file_recipient")
+// 			.on(table.filePieceCid, table.recipientWallet),
+// 		t.index("idx_file_keys_file").on(table.filePieceCid),
+// 	],
+// );
