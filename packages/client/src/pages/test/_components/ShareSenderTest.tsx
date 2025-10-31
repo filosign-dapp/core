@@ -1,9 +1,8 @@
-import { useFilosignMutation, useFilosignQuery } from "@filosign/react";
+import { useCanSendTo, useApproveSender } from "@filosign/react/hooks";
 import {
 	EyeIcon,
-	PaperPlaneIcon,
+	UserCheckIcon,
 	SpinnerIcon,
-	XIcon,
 } from "@phosphor-icons/react";
 import { useState } from "react";
 import { Button } from "../../../lib/components/ui/button";
@@ -18,225 +17,119 @@ import { Input } from "../../../lib/components/ui/input";
 import { Label } from "../../../lib/components/ui/label";
 
 export function ShareSenderTest() {
-	// Sender's side
-	const sendShareRequest = useFilosignMutation([
-		"shareCapability",
-		"sendShareRequest",
-	]);
-	const cancelShareRequest = useFilosignMutation([
-		"shareCapability",
-		"cancelShareRequest",
-	]);
-	const sentShareRequests = useFilosignQuery(
-		["shareCapability", "getSentRequests"],
-		undefined,
-	);
-	const allowedListSender = useFilosignQuery(
-		["shareCapability", "getPeopleCanSendTo"],
-		undefined,
-	);
+	// Sender's side - check if can send to someone and approve senders
+	const [checkAddress, setCheckAddress] = useState("");
+	const [approveAddress, setApproveAddress] = useState("");
 
-	// Input states for shareCapability testing
-	const [sendToAddress, setSendToAddress] = useState("");
-	const [sendMessage, setSendMessage] = useState("");
-	const [requestIdToCancel, setRequestIdToCancel] = useState("");
+	const canSendTo = useCanSendTo(checkAddress as `0x${string}`);
+	const approveSender = useApproveSender();
 
-	async function handleSendShareRequest() {
-		if (!sendToAddress.trim() || !sendMessage.trim()) return;
+	async function handleApproveSender() {
+		if (!approveAddress.trim()) return;
 		try {
-			await sendShareRequest.mutateAsync({
-				recipientWallet: sendToAddress as `0x${string}`,
-				message: sendMessage,
-			});
-			console.log("Sent share request");
-			setSendToAddress("");
-			setSendMessage("");
+			await approveSender.mutateAsync(approveAddress as `0x${string}`);
+			console.log("Approved sender");
+			setApproveAddress("");
 		} catch (error) {
-			console.error("Failed to send share request", error);
+			console.error("Failed to approve sender", error);
 		}
 	}
 
-	async function handleCancelShareRequest() {
-		if (!requestIdToCancel.trim()) return;
-		try {
-			await cancelShareRequest.mutateAsync({ requestId: requestIdToCancel });
-			console.log("Cancelled share request");
-			setRequestIdToCancel("");
-		} catch (error) {
-			console.error("Failed to cancel share request", error);
-		}
+	async function handleCheckCanSend() {
+		if (!checkAddress.trim()) return;
+		canSendTo.refetch();
 	}
 
 	return (
 		<div className="space-y-6">
 			<div className="grid gap-6 lg:grid-cols-2">
-				{/* Send Share Request */}
+				{/* Check Can Send To */}
 				<Card>
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">
-							<PaperPlaneIcon className="w-5 h-5" />
-							Send Share Request
+							<EyeIcon className="w-5 h-5" />
+							Check Can Send To
 						</CardTitle>
 						<CardDescription>
-							Send a sharing request to another wallet
+							Check if you can send documents to another wallet
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-4">
 						<div className="space-y-3">
 							<div>
-								<Label htmlFor="recipient-address">
-									Recipient Wallet Address
-								</Label>
+								<Label htmlFor="check-address">Wallet Address</Label>
 								<Input
-									id="recipient-address"
+									id="check-address"
 									placeholder="0x..."
-									value={sendToAddress}
-									onChange={(e) => setSendToAddress(e.target.value)}
-								/>
-							</div>
-							<div>
-								<Label htmlFor="share-message">Message</Label>
-								<Input
-									id="share-message"
-									placeholder="Enter your message..."
-									value={sendMessage}
-									onChange={(e) => setSendMessage(e.target.value)}
+									value={checkAddress}
+									onChange={(e) => setCheckAddress(e.target.value)}
 								/>
 							</div>
 							<Button
-								onClick={handleSendShareRequest}
-								disabled={
-									!sendToAddress.trim() ||
-									!sendMessage.trim() ||
-									sendShareRequest.isPending
-								}
+								onClick={handleCheckCanSend}
+								disabled={!checkAddress.trim() || canSendTo.isFetching}
 								className="w-full"
 								size="lg"
 							>
-								{sendShareRequest.isPending ? (
+								{canSendTo.isFetching ? (
 									<SpinnerIcon className="w-4 h-4 mr-2 animate-spin" />
 								) : (
-									<PaperPlaneIcon className="w-4 h-4 mr-2" />
+									<EyeIcon className="w-4 h-4 mr-2" />
 								)}
-								Send Request
+								Check Permission
 							</Button>
+							{canSendTo.data !== undefined && (
+								<div className="p-3 bg-muted rounded-lg">
+									<p className="text-sm">
+										Can send to {checkAddress}:{" "}
+										<span className={canSendTo.data ? "text-green-600" : "text-red-600"}>
+											{canSendTo.data ? "Yes" : "No"}
+										</span>
+									</p>
+								</div>
+							)}
 						</div>
 					</CardContent>
 				</Card>
 
-				{/* Cancel Share Request */}
+				{/* Approve Sender */}
 				<Card>
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">
-							<XIcon className="w-5 h-5" />
-							Cancel Share Request
+							<UserCheckIcon className="w-5 h-5" />
+							Approve Sender
 						</CardTitle>
 						<CardDescription>
-							Cancel a previously sent sharing request
+							Allow a wallet to send documents to you
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-4">
 						<div>
-							<Label htmlFor="cancel-request-id">Request ID</Label>
+							<Label htmlFor="approve-address">Sender Wallet Address</Label>
 							<Input
-								id="cancel-request-id"
-								placeholder="Enter request ID..."
-								value={requestIdToCancel}
-								onChange={(e) => setRequestIdToCancel(e.target.value)}
+								id="approve-address"
+								placeholder="0x..."
+								value={approveAddress}
+								onChange={(e) => setApproveAddress(e.target.value)}
 							/>
 						</div>
 						<Button
-							onClick={handleCancelShareRequest}
-							disabled={
-								!requestIdToCancel.trim() || cancelShareRequest.isPending
-							}
-							variant="destructive"
+							onClick={handleApproveSender}
+							disabled={!approveAddress.trim() || approveSender.isPending}
 							className="w-full"
 							size="lg"
 						>
-							{cancelShareRequest.isPending ? (
+							{approveSender.isPending ? (
 								<SpinnerIcon className="w-4 h-4 mr-2 animate-spin" />
 							) : (
-								<XIcon className="w-4 h-4 mr-2" />
+								<UserCheckIcon className="w-4 h-4 mr-2" />
 							)}
-							Cancel Request
+							Approve Sender
 						</Button>
 					</CardContent>
 				</Card>
 			</div>
 
-			{/* Sender Data Display */}
-			<div className="grid gap-6 md:grid-cols-2">
-				<Card>
-					<CardHeader>
-						<div className="flex items-center justify-between">
-							<CardTitle className="text-lg">Sent Requests</CardTitle>
-							<Button
-								onClick={() => sentShareRequests.refetch()}
-								disabled={sentShareRequests.isFetching}
-								variant="outline"
-								size="sm"
-							>
-								{sentShareRequests.isFetching ? (
-									<SpinnerIcon className="w-3 h-3 animate-spin mr-1" />
-								) : (
-									<EyeIcon className="w-3 h-3 mr-1" />
-								)}
-								Refetch
-							</Button>
-						</div>
-					</CardHeader>
-					<CardContent>
-						<div className="bg-muted/50 p-4 rounded-lg min-h-[100px]">
-							{sentShareRequests.isLoading ? (
-								<div className="flex items-center gap-2 text-muted-foreground">
-									<SpinnerIcon className="w-4 h-4 animate-spin" />
-									Loading...
-								</div>
-							) : (
-								<pre className="text-xs whitespace-pre-wrap">
-									{JSON.stringify(sentShareRequests.data || [], null, 2)}
-								</pre>
-							)}
-						</div>
-					</CardContent>
-				</Card>
-
-				<Card>
-					<CardHeader>
-						<div className="flex items-center justify-between">
-							<CardTitle className="text-lg">Can Send To</CardTitle>
-							<Button
-								onClick={() => allowedListSender.refetch()}
-								disabled={allowedListSender.isFetching}
-								variant="outline"
-								size="sm"
-							>
-								{allowedListSender.isFetching ? (
-									<SpinnerIcon className="w-3 h-3 animate-spin mr-1" />
-								) : (
-									<EyeIcon className="w-3 h-3 mr-1" />
-								)}
-								Refetch
-							</Button>
-						</div>
-					</CardHeader>
-					<CardContent>
-						<div className="bg-muted/50 p-4 rounded-lg min-h-[100px]">
-							{allowedListSender.isLoading ? (
-								<div className="flex items-center gap-2 text-muted-foreground">
-									<SpinnerIcon className="w-4 h-4 animate-spin" />
-									Loading...
-								</div>
-							) : (
-								<pre className="text-xs whitespace-pre-wrap">
-									{JSON.stringify(allowedListSender.data || [], null, 2)}
-								</pre>
-							)}
-						</div>
-					</CardContent>
-				</Card>
-			</div>
 		</div>
 	);
 }

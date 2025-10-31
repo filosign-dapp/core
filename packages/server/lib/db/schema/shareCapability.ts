@@ -18,7 +18,7 @@ export const shareApprovals = t.pgTable(
 		txHash: tBytes32().unique().notNull(),
 
 		createdAt: t
-			.integer()
+			.bigint({ mode: 'number' })
 			.notNull()
 			.$default(() => Date.now()),
 	},

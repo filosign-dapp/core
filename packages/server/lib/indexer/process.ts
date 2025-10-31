@@ -65,27 +65,78 @@ export async function processTransaction(
 
 	if ([receipt.contractAddress, receipt.to].includes(FSManager.address)) {
 		for (const encodedLog of receipt.logs) {
-			const log = decodeEventLog({
-				abi: FSManager.abi,
-				topics: encodedLog.topics,
-				data: encodedLog.data,
-			});
-			if (log.eventName === "SenderApproved") {
-				if (!encodedLog.transactionHash) continue;
-				await db.insert(db.schema.shareApprovals).values({
-					recipientWallet: log.args.recipient,
-					senderWallet: log.args.sender,
-					txHash: encodedLog.transactionHash,
-					active: true,
+			try {
+				const log = decodeEventLog({
+					abi: FSManager.abi,
+					topics: encodedLog.topics,
+					data: encodedLog.data,
 				});
-			}
-			if (log.eventName === "SenderRevoked") {
-				await db.insert(db.schema.shareApprovals).values({
-					recipientWallet: log.args.recipient,
-					senderWallet: log.args.sender,
-					active: false,
-					txHash: txHash,
-				});
+
+				if (log.eventName === "SenderApproved") {
+					if (!encodedLog.transactionHash) {
+						continue;
+					}
+
+					// Check if both recipient and sender exist in users table
+					const [recipientExists] = await db
+						.select()
+						.from(db.schema.users)
+						.where(eq(db.schema.users.walletAddress, log.args.recipient))
+						.limit(1);
+
+					const [senderExists] = await db
+						.select()
+						.from(db.schema.users)
+						.where(eq(db.schema.users.walletAddress, log.args.sender))
+						.limit(1);
+
+					if (!recipientExists || !senderExists) {
+						continue;
+					}
+
+					try {
+						await db.insert(db.schema.shareApprovals).values({
+							recipientWallet: log.args.recipient,
+							senderWallet: log.args.sender,
+							txHash: encodedLog.transactionHash,
+							active: true,
+						});
+					} catch (dbError) {
+						throw dbError;
+					}
+				}
+
+				if (log.eventName === "SenderRevoked") {
+					// Check if both recipient and sender exist in users table
+					const [recipientExists] = await db
+						.select()
+						.from(db.schema.users)
+						.where(eq(db.schema.users.walletAddress, log.args.recipient))
+						.limit(1);
+
+					const [senderExists] = await db
+						.select()
+						.from(db.schema.users)
+						.where(eq(db.schema.users.walletAddress, log.args.sender))
+						.limit(1);
+
+					if (!recipientExists || !senderExists) {
+						continue;
+					}
+
+					try {
+						await db.insert(db.schema.shareApprovals).values({
+							recipientWallet: log.args.recipient,
+							senderWallet: log.args.sender,
+							active: false,
+							txHash: txHash,
+						});
+					} catch (dbError) {
+						throw dbError;
+					}
+				}
+			} catch (error) {
+				// Silently ignore decode errors
 			}
 		}
 	}
