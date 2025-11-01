@@ -1,7 +1,7 @@
 export const definitions = {
   "0x7a69": {
     "FSManager": {
-      "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+      "address": "0x0165878a594ca255338adfa4d48449f69242eb8f",
       "abi": [
         {
           "inputs": [],
@@ -196,7 +196,7 @@ export const definitions = {
       ]
     },
     "FSFileRegistry": {
-      "address": "0xa16E02E87b7454126E5E10d957A927A7F5B5d2be",
+      "address": "0x3B02fF1e626Ed7a8fd6eC5299e2C54e1421B626B",
       "abi": [
         {
           "inputs": [],
@@ -281,6 +281,37 @@ export const definitions = {
             }
           ],
           "name": "FileRegistered",
+          "type": "event"
+        },
+        {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "bytes32",
+              "name": "cidIdentifier",
+              "type": "bytes32"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "sender",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "internalType": "uint48",
+              "name": "timestamp",
+              "type": "uint48"
+            }
+          ],
+          "name": "FileSigned",
           "type": "event"
         },
         {
@@ -453,6 +484,73 @@ export const definitions = {
           "inputs": [
             {
               "internalType": "address",
+              "name": "sender_",
+              "type": "address"
+            },
+            {
+              "internalType": "string",
+              "name": "pieceCid_",
+              "type": "string"
+            },
+            {
+              "internalType": "address",
+              "name": "recipient_",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes",
+              "name": "signatureBytes_",
+              "type": "bytes"
+            },
+            {
+              "internalType": "bytes20",
+              "name": "dl3SignatureCommitment_",
+              "type": "bytes20"
+            },
+            {
+              "internalType": "uint256",
+              "name": "timestamp_",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "nonce_",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes",
+              "name": "signature_",
+              "type": "bytes"
+            }
+          ],
+          "name": "registerFileSignature",
+          "outputs": [],
+          "stateMutability": "nonpayable",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "name": "signatures",
+          "outputs": [
+            {
+              "internalType": "bytes",
+              "name": "",
+              "type": "bytes"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
               "name": "recipient_",
               "type": "address"
             },
@@ -531,11 +629,60 @@ export const definitions = {
           ],
           "stateMutability": "view",
           "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "sender_",
+              "type": "address"
+            },
+            {
+              "internalType": "string",
+              "name": "pieceCid_",
+              "type": "string"
+            },
+            {
+              "internalType": "address",
+              "name": "recipient_",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "signatureVisualHash_",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes20",
+              "name": "dl3SignatureCommitment_",
+              "type": "bytes20"
+            },
+            {
+              "internalType": "uint256",
+              "name": "timestamp_",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes",
+              "name": "signature_",
+              "type": "bytes"
+            }
+          ],
+          "name": "validateFileSigningSignature",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
         }
       ]
     },
     "FSKeyRegistry": {
-      "address": "0xB7A5bd0345EF1Cc5E66bf61BdeC17D2461fBd968",
+      "address": "0xBA12646CC07ADBe43F8bD25D83FB628D29C8A762",
       "abi": [
         {
           "inputs": [],
