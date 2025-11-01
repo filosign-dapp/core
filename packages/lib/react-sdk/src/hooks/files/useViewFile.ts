@@ -1,5 +1,6 @@
 import {
     encryption,
+    jsonParse,
     KEM,
     toBytes
 } from "@filosign/crypto-utils";
@@ -94,7 +95,7 @@ export function useViewFile() {
 
             const decoder = new TextDecoder();
             const jsonString = decoder.decode(decryptedData);
-            const { fileBytes, ...parsedData } = JSON.parse(jsonString);
+            const { fileBytes, ...parsedData } = jsonParse(jsonString);
 
             z.object({
                 sender: z.string(),
