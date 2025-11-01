@@ -1,7 +1,7 @@
 export const definitions = {
   "0x7a69": {
     "FSManager": {
-      "address": "0x610178da211fef7d417bc0e6fed39f05609ad788",
+      "address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
       "abi": [
         {
           "inputs": [],
@@ -196,7 +196,7 @@ export const definitions = {
       ]
     },
     "FSFileRegistry": {
-      "address": "0x6F1216D1BFe15c98520CA1434FC1d9D57AC95321",
+      "address": "0xa16E02E87b7454126E5E10d957A927A7F5B5d2be",
       "abi": [
         {
           "inputs": [],
@@ -346,6 +346,40 @@ export const definitions = {
           "type": "function"
         },
         {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "",
+              "type": "bytes32"
+            }
+          ],
+          "name": "fileRegistrations",
+          "outputs": [
+            {
+              "internalType": "bytes32",
+              "name": "cidIdentifier",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "address",
+              "name": "sender",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "timestamp",
+              "type": "uint256"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
           "inputs": [],
           "name": "manager",
           "outputs": [
@@ -419,6 +453,45 @@ export const definitions = {
           "inputs": [
             {
               "internalType": "address",
+              "name": "recipient_",
+              "type": "address"
+            },
+            {
+              "internalType": "string",
+              "name": "pieceCid_",
+              "type": "string"
+            },
+            {
+              "internalType": "address",
+              "name": "sender_",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "timestamp_",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes",
+              "name": "signature_",
+              "type": "bytes"
+            }
+          ],
+          "name": "validateFileAckSignature",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
               "name": "sender_",
               "type": "address"
             },
@@ -451,9 +524,9 @@ export const definitions = {
           "name": "validateFileRegistrationSignature",
           "outputs": [
             {
-              "internalType": "address",
+              "internalType": "bool",
               "name": "",
-              "type": "address"
+              "type": "bool"
             }
           ],
           "stateMutability": "view",
@@ -462,7 +535,7 @@ export const definitions = {
       ]
     },
     "FSKeyRegistry": {
-      "address": "0xdAD42D43ecE0f6e8da8c2BCbC6A25FF6b3922C58",
+      "address": "0xB7A5bd0345EF1Cc5E66bf61BdeC17D2461fBd968",
       "abi": [
         {
           "inputs": [],

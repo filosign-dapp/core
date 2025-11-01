@@ -13,7 +13,7 @@ contract FSFileRegistry is EIP712 {
     struct FileRegistration {
         bytes32 cidIdentifier;
         address sender;
-        address receipient;
+        address recipient;
         uint256 timestamp;
     }
 
@@ -42,7 +42,11 @@ contract FSFileRegistry is EIP712 {
 
     bytes32 private constant REGISTER_FILE_TYPEHASH =
         keccak256(
-            "RegisterFile(bytes32 cidIdentifier,address sender,address receipient,uint256 timestamp,uint256 nonce)"
+            "RegisterFile(bytes32 cidIdentifier,address sender,address reciipient,uint256 timestamp,uint256 nonce)"
+        );
+    bytes32 private constant ACK_FILE_TYPEHASH =
+        keccak256(
+            "AckFile(bytes32 cidIdentifier,address sender,address recipient,uint256 timestamp,uint256 nonce)"
         );
 
     function registerFile(
@@ -55,28 +59,30 @@ contract FSFileRegistry is EIP712 {
     ) external onlyServer {
         require(nonce_ == nonce[sender_]++, "Invalid nonce");
         require(
-            block.timestamp <= timestamp_ + SIGNATURE_VALIDITY_PERIOD,
-            "Signature expired"
+            validateFileRegistrationSignature(
+                sender_,
+                pieceCid_,
+                recipient,
+                timestamp_,
+                nonce_,
+                signature_
+            ),
+            "Invalid signature"
         );
-
-        address recovered = validateFileRegistrationSignature(
-            sender_,
-            pieceCid_,
-            recipient,
-            timestamp_,
-            nonce_,
-            signature_
-        );
-        require(recovered == sender_, "Invalid signature");
 
         fileRegistrations[cidIdentifier(pieceCid_)] = FileRegistration({
             cidIdentifier: cidIdentifier(pieceCid_),
             sender: sender_,
-            receipient: recipient,
+            recipient: recipient,
             timestamp: timestamp_
-        });     
+        });
 
-        emit FileRegistered(cidIdentifier(pieceCid_), sender_, recipient, uint48(timestamp_));
+        emit FileRegistered(
+            cidIdentifier(pieceCid_),
+            sender_,
+            recipient,
+            uint48(timestamp_)
+        );
     }
 
     function validateFileRegistrationSignature(
@@ -86,7 +92,11 @@ contract FSFileRegistry is EIP712 {
         uint256 timestamp_,
         uint256 nonce_,
         bytes calldata signature_
-    ) public view returns (address) {
+    ) public view returns (bool) {
+        require(
+            block.timestamp <= timestamp_ + SIGNATURE_VALIDITY_PERIOD,
+            "Signature expired"
+        );
         require(manager.isRegistered(sender_), "Sender not registered");
         require(
             manager.approvedSenders(recipient_, sender_),
@@ -105,7 +115,38 @@ contract FSFileRegistry is EIP712 {
             )
         );
         bytes32 digest = _hashTypedDataV4(structHash);
-        return ECDSA.recover(digest, signature_);
+        return ECDSA.recover(digest, signature_) == sender_;
+    }
+
+    function validateFileAckSignature(
+        address recipient_,
+        string calldata pieceCid_,
+        address sender_,
+        uint256 timestamp_,
+        bytes calldata signature_
+    ) public view returns (bool) {
+        require(
+            block.timestamp <= timestamp_ + SIGNATURE_VALIDITY_PERIOD,
+            "Signature expired"
+        );
+        FileRegistration storage file = fileRegistrations[
+            cidIdentifier(pieceCid_)
+        ];
+        require(file.recipient == recipient_, "Invalid recipient");
+        require(file.sender == sender_, "Invalid sender");
+
+        bytes32 cidId = cidIdentifier(pieceCid_);
+        bytes32 structHash = keccak256(
+            abi.encode(
+                REGISTER_FILE_TYPEHASH,
+                cidId,
+                sender_,
+                recipient_,
+                timestamp_
+            )
+        );
+        bytes32 digest = _hashTypedDataV4(structHash);
+        return ECDSA.recover(digest, signature_) == recipient_;
     }
 
     function cidIdentifier(

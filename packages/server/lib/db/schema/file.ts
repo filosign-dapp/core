@@ -3,36 +3,36 @@ import { tBytes32, tEvmAddress, tHex, timestamps } from "../helpers";
 import { users } from "./user";
 
 export const files = t.pgTable(
-	"files",
-	{
-		pieceCid: t.text().notNull().primaryKey(),
-		sender: tEvmAddress()
-			.notNull()
-			.references(() => users.walletAddress),
+    "files",
+    {
+        pieceCid: t.text().notNull().primaryKey(),
+        sender: tEvmAddress()
+            .notNull()
+            .references(() => users.walletAddress),
 
-		status: t.text({ enum: ["s3", "foc", "unpaid_for", "invalid"] }).notNull(),
-		onchainTxHash: tBytes32().unique().notNull(),
+        status: t.text({ enum: ["s3", "foc", "unpaid_for", "invalid"] }).notNull(),
+        onchainTxHash: tBytes32().unique().notNull(),
 
-		...timestamps,
-	},
-	(table) => [t.index("idx_files_owner").on(table.sender)],
+        ...timestamps,
+    },
+    (table) => [t.index("idx_files_owner").on(table.sender)],
 );
 
 export const fileRecipients = t.pgTable(
-	"file_recipients",
-	{
-		filePieceCid: t
-			.text()
-			.notNull()
-			.references(() => files.pieceCid, { onDelete: "cascade" }),
-		recipientWallet: tEvmAddress().notNull(),
-		kemCiphertext: tHex().notNull(),
-		encryptedEncryptionKey: tHex().notNull(),
-		acknowledged: t.boolean().notNull().default(false),
+    "file_recipients",
+    {
+        filePieceCid: t
+            .text()
+            .notNull()
+            .references(() => files.pieceCid, { onDelete: "cascade" }),
+        ack: tHex(),
+        recipientWallet: tEvmAddress().notNull(),
+        kemCiphertext: tHex().notNull(),
+        encryptedEncryptionKey: tHex().notNull(),
 
-		...timestamps,
-	},
-	(table) => [t.index("idx_file_recipients_file").on(table.filePieceCid)],
+        ...timestamps,
+    },
+    (table) => [t.index("idx_file_recipients_file").on(table.filePieceCid)],
 );
 
 // export const fileSignatures = t.sqliteTable(

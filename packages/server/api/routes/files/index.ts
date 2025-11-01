@@ -190,12 +190,69 @@ export default new Hono()
             })
             .from(files)
             .where(eq(files.pieceCid, pieceCid));
+        const [fileRecipient] = await db
+            .select({
+                filePieceCid: fileRecipients.filePieceCid,
+                recipientWallet: fileRecipients.recipientWallet,
+                ack: fileRecipients.ack,
+                kemCiphertext: fileRecipients.kemCiphertext,
+                encryptedEncryptionKey: fileRecipients.encryptedEncryptionKey,
+            })
+            .from(fileRecipients)
+            .where(eq(fileRecipients.filePieceCid, pieceCid));
 
-        if (!fileRecord) {
+        if (!fileRecord || !fileRecipient) {
             return respond.err(ctx, "File not found", 404);
         }
 
-        return respond.ok(ctx, fileRecord, "File retrieved", 200);
+        const response = {
+            ...fileRecord,
+            recipient: fileRecipient.recipientWallet,
+            kemCiphertext: fileRecipient.ack ? fileRecipient.kemCiphertext : null,
+            encryptedEncryptionKey: fileRecipient.ack
+                ? fileRecipient.encryptedEncryptionKey
+                : null
+        }
+
+        return respond.ok(ctx, response, "File retrieved", 200);
+    })
+
+    .post("/:pieceCid/ack", async (ctx) => {
+        const pieceCid = ctx.req.param("pieceCid");
+        const { signature, timestamp } = await ctx.req.json();
+
+        if (!pieceCid || typeof pieceCid !== "string") {
+            return respond.err(ctx, "Invalid pieceCid", 400);
+        }
+        if (!signature || typeof signature !== "string" || !isHex(signature)) {
+            return respond.err(ctx, "Invalid signature", 400);
+        }
+        if (typeof timestamp !== "number" || timestamp <= 0) {
+            return respond.err(ctx, "Invalid timestamp", 400);
+        }
+
+        const [fileRecord] = await db
+            .select({
+                sender: files.sender,
+                recipient: fileRecipients.recipientWallet
+            })
+            .from(files)
+            .where(eq(files.pieceCid, pieceCid));
+
+        const valid = await FSFileRegistry.read.validateFileAckSignature([
+            fileRecord.recipient,
+            pieceCid,
+            fileRecord.sender,
+            BigInt(timestamp),
+            signature,
+        ]);
+
+        if (valid) {
+            await db.update(fileRecipients).set({ ack: signature }).where(eq(fileRecipients.filePieceCid, pieceCid));
+        } else {
+
+            return respond.err(ctx, "Invalid signature", 400);
+        }
     })
 
     .get("/:pieceCid/s3", async (ctx) => {
