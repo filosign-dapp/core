@@ -11,7 +11,7 @@ export function useUserProfileByAddress(address: Address | undefined) {
 	return useQuery({
 		queryKey: ["fsQ-user-info-by-address", address, wallet?.account.address],
 		queryFn: async () => {
-			if (!contracts || !wallet) return false;
+			if (!contracts || !wallet) throw new Error("No contracts or wallet found");
 
 			const userInfo = await api.rpc.getSafe(
 				{
@@ -20,7 +20,7 @@ export function useUserProfileByAddress(address: Address | undefined) {
 					lastActiveAt: z.number(),
 					createdAt: z.number(),
 				},
-				`/user/profile/${address}`,
+				`/users/profile/${address}`,
 			);
 
 			return userInfo.data;

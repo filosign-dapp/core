@@ -1,4 +1,4 @@
-import { customType, integer } from "drizzle-orm/pg-core";
+import { customType, integer, timestamp } from "drizzle-orm/pg-core";
 import {
 	type Address,
 	checksumAddress,
@@ -12,11 +12,11 @@ import {
 import { jsonParse, jsonStringify } from "../utils/json";
 
 export const timestamps = {
-	createdAt: integer()
+	createdAt: timestamp({ withTimezone: true })
 		.notNull()
-		.$default(() => Date.now()),
-	updatedAt: integer().$onUpdate(() => Date.now()),
-	deletedAt: integer(),
+		.defaultNow(),
+	updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+	deletedAt: timestamp({ withTimezone: true }),
 };
 
 export const tEvmAddress = customType<{

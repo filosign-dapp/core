@@ -1,5 +1,6 @@
 import {
 	ClockIcon,
+	CopyIcon,
 	EyeIcon,
 	FileIcon,
 	KeyIcon,
@@ -12,7 +13,9 @@ import {
 import { usePrivy } from "@privy-io/react-auth";
 import { formatEther } from "viem";
 import { useBalance, useWalletClient } from "wagmi";
+import { useState } from "react";
 import { Badge } from "../../lib/components/ui/badge";
+import { Button } from "../../lib/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -27,6 +30,7 @@ import {
 	TabsList,
 	TabsTrigger,
 } from "../../lib/components/ui/tabs";
+import { toast } from "sonner";
 import { AuthenticationTest } from "./_components/AuthenticationTest";
 import { FileTest } from "./_components/FileTest";
 import { ProfileTest } from "./_components/ProfileTest";
@@ -34,11 +38,12 @@ import { ShareReceiverTest } from "./_components/ShareReceiverTest";
 import { ShareSenderTest } from "./_components/ShareSenderTest";
 import { SignatureTest } from "./_components/SignatureTest";
 import { StatusBadge } from "./_components/StatusBadge";
-import { useIsLoggedIn, useIsRegistered } from "@filosign/react/hooks";
+import { useIsLoggedIn, useIsRegistered, useUserProfileByAddress } from "@filosign/react/hooks";
 
 export default function TestPage() {
 	const { user } = usePrivy();
 	const { data: walletClient } = useWalletClient();
+	const [copiedItem, setCopiedItem] = useState<string | null>(null);
 
 	const { data: balance } = useBalance({
 		address: walletClient?.account.address,
@@ -46,6 +51,10 @@ export default function TestPage() {
 
 	const isRegistered = useIsRegistered();
 	const isLoggedIn = useIsLoggedIn();
+	const { data: userProfile } = useUserProfileByAddress(walletClient?.account.address as `0x${string}`);
+	const encryptionPublicKey = userProfile?.encryptionPublicKey;
+
+	console.log({ encryptionPublicKey });
 
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-background to-muted/20 p-6">
@@ -128,6 +137,13 @@ export default function TestPage() {
 											{user.wallet?.address}
 										</code>
 									</div>
+									<div className="flex items-center gap-2">
+										<KeyIcon className="w-4 h-4 text-muted-foreground" />
+										<span className="text-sm font-medium">Encryption Public Key:</span>
+										<p className="text-xs">
+											{encryptionPublicKey as string}
+										</p>
+									</div>
 									{balance && (
 										<div className="flex items-center gap-2">
 											<WalletIcon className="w-4 h-4 text-muted-foreground" />
@@ -195,7 +211,7 @@ export default function TestPage() {
 
 					{/* Files Tab */}
 					<TabsContent value="files" className="space-y-6">
-						{/* <FileTest /> */}
+						<FileTest />
 					</TabsContent>
 
 					{/* Profile Tab */}

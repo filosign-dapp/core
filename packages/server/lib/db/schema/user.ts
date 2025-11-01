@@ -6,10 +6,10 @@ export const users = t.pgTable("users", {
 	// email: t.text(),
 	lastActiveAt: t.integer().notNull(),
 	keygenDataJson: tJsonString(),
-	encryptionPublicKey: tHex().notNull(),
-	signaturePublicKey: tHex().notNull(),
+	encryptionPublicKey: t.text().notNull(),
+	signaturePublicKey: t.text().notNull(),
 
-	...timestamps,
+	// ...timestamps,
 });
 
 // export const profiles = t.sqliteTable("profiles", {

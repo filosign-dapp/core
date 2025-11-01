@@ -49,11 +49,10 @@ export function rebuildPieceCid(options: {
 }
 
 export function computeCidIdentifier(pieceCid: string) {
-	const { digestPrefix, digestBuffer, digestTail } = parsePieceCid(pieceCid);
 	return keccak256(
 		encodePacked(
-			["bytes32", "bytes16", "bytes32"],
-			[digestPrefix, digestBuffer, digestTail],
+			["string"],
+			[pieceCid],
 		),
 	);
 }

@@ -1,4 +1,4 @@
-import { useFilosignMutation, useFilosignQuery } from "@filosign/react";
+import { useFileInfo, useSendFile, useViewFile } from "@filosign/react/hooks";
 import {
 	CheckCircleIcon,
 	DownloadIcon,
@@ -20,83 +20,71 @@ import {
 } from "../../../lib/components/ui/card";
 import { Input } from "../../../lib/components/ui/input";
 import { Label } from "../../../lib/components/ui/label";
-import { Textarea } from "../../../lib/components/ui/textarea";
 
 export function FileTest() {
-	// File operations
-	const uploadFile = useFilosignMutation(["files", "uploadFile"]);
-	const getSentFiles = useFilosignQuery(["files", "getSentFiles"], undefined);
-	const getReceivedFiles = useFilosignQuery(
-		["files", "getReceivedFiles"],
-		undefined,
-	);
-	const getFileDetails = useFilosignMutation(["files", "getFileDetails"]);
-	const acknowledgeFile = useFilosignMutation(["files", "acknowledgeFile"]);
+	// New file hooks
+	const sendFile = useSendFile();
+	const [pieceCidForInfo, setPieceCidForInfo] = useState<string | undefined>(undefined);
+	const fileInfo = useFileInfo({ pieceCid: pieceCidForInfo });
+	const viewFile = useViewFile();
 
 	const queryClient = useQueryClient();
 
 	// Input states
 	const [fileToUpload, setFileToUpload] = useState<File | null>(null);
-	const [recipientAddresses, setRecipientAddresses] = useState("");
-	const [fileMetadata, setFileMetadata] = useState("");
+	const [recipientAddress, setRecipientAddress] = useState("");
+	const [recipientEncryptionKey, setRecipientEncryptionKey] = useState("");
 	const [pieceCidToView, setPieceCidToView] = useState("");
-	const [pieceCidToAcknowledge, setPieceCidToAcknowledge] = useState("");
+	const [kemCiphertext, setKemCiphertext] = useState("");
+	const [fileStatus, setFileStatus] = useState<"s3" | "foc">("s3");
 
-	// File details state
-	const [fileDetails, setFileDetails] = useState<any>(null);
+	// File data state
+	const [downloadedFile, setDownloadedFile] = useState<Uint8Array | null>(null);
 
 	const handleFileUpload = async () => {
-		if (!fileToUpload || !recipientAddresses.trim()) return;
+		if (!fileToUpload || !recipientAddress.trim() || !recipientEncryptionKey.trim()) return;
 
 		try {
-			const recipients = recipientAddresses
-				.split(",")
-				.map((addr) => addr.trim() as `0x${string}`);
-
 			const fileData = new Uint8Array(await fileToUpload.arrayBuffer());
 
-			await uploadFile.mutateAsync({
+			await sendFile.mutateAsync({
+				recipient: {
+					address: recipientAddress as `0x${string}`,
+					encryptionPublicKey: recipientEncryptionKey,
+				},
 				data: fileData,
-				recipientAddresses: recipients,
-				metadata: fileMetadata ? JSON.parse(fileMetadata) : undefined,
 			});
 
 			console.log("File uploaded successfully");
 			setFileToUpload(null);
-			setRecipientAddresses("");
-			setFileMetadata("");
+			setRecipientAddress("");
+			setRecipientEncryptionKey("");
 		} catch (error) {
 			console.error("Failed to upload file", error);
 		}
 	};
 
-	const handleViewFileDetails = async () => {
+	const handleViewFileDetails = () => {
 		if (!pieceCidToView.trim()) return;
+		setPieceCidForInfo(pieceCidToView);
+	};
+
+	const handleDownloadFile = async () => {
+		if (!pieceCidToView.trim() || !kemCiphertext.trim()) return;
 
 		try {
-			const result = await getFileDetails.mutateAsync({
+			const fileData = await viewFile.mutateAsync({
 				pieceCid: pieceCidToView,
+				kemCiphertext: kemCiphertext,
+				status: fileStatus,
 			});
-			setFileDetails(result);
-			console.log("File details retrieved", result);
+			setDownloadedFile(fileData);
+			console.log("File downloaded successfully");
 		} catch (error) {
-			console.error("Failed to get file details", error);
+			console.error("Failed to download file", error);
 		}
 	};
 
-	const handleAcknowledgeFile = async () => {
-		if (!pieceCidToAcknowledge.trim()) return;
-
-		try {
-			await acknowledgeFile.mutateAsync({
-				pieceCid: pieceCidToAcknowledge,
-			});
-			console.log("File acknowledged");
-			setPieceCidToAcknowledge("");
-		} catch (error) {
-			console.error("Failed to acknowledge file", error);
-		}
-	};
 
 	const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const file = event.target.files?.[0];
@@ -108,15 +96,15 @@ export function FileTest() {
 	return (
 		<div className="space-y-6">
 			<div className="grid gap-6 lg:grid-cols-2">
-				{/* Upload File */}
+				{/* Send File */}
 				<Card>
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">
 							<UploadIcon className="w-5 h-5" />
-							Upload File
+							Send File
 						</CardTitle>
 						<CardDescription>
-							Upload an encrypted file to share with recipients
+							Upload and encrypt a file to send to a recipient
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-4">
@@ -136,64 +124,62 @@ export function FileTest() {
 								)}
 							</div>
 							<div>
-								<Label htmlFor="recipient-addresses">
-									Recipient Addresses (comma-separated)
-								</Label>
+								<Label htmlFor="recipient-address">Recipient Address</Label>
 								<Input
-									id="recipient-addresses"
-									placeholder="0x..., 0x..."
-									value={recipientAddresses}
-									onChange={(e) => setRecipientAddresses(e.target.value)}
+									id="recipient-address"
+									placeholder="0x..."
+									value={recipientAddress}
+									onChange={(e) => setRecipientAddress(e.target.value)}
 								/>
 							</div>
 							<div>
-								<Label htmlFor="file-metadata">Metadata (JSON)</Label>
-								<Textarea
-									id="file-metadata"
-									placeholder='{"title": "My Document", "description": "Important file"}'
-									value={fileMetadata}
-									onChange={(e) => setFileMetadata(e.target.value)}
-									rows={3}
+								<Label htmlFor="recipient-encryption-key">Recipient Encryption Public Key</Label>
+								<Input
+									id="recipient-encryption-key"
+									placeholder="Enter recipient's encryption public key..."
+									value={recipientEncryptionKey}
+									onChange={(e) => setRecipientEncryptionKey(e.target.value)}
 								/>
 							</div>
 							<Button
 								onClick={handleFileUpload}
 								disabled={
 									!fileToUpload ||
-									!recipientAddresses.trim() ||
-									uploadFile.isPending
+									!recipientAddress.trim() ||
+									!recipientEncryptionKey.trim() ||
+									sendFile.isPending
 								}
 								className="w-full"
 								size="lg"
 							>
-								{uploadFile.isPending ? (
+								{sendFile.isPending ? (
 									<SpinnerIcon className="w-4 h-4 mr-2 animate-spin" />
 								) : (
 									<UploadIcon className="w-4 h-4 mr-2" />
 								)}
-								Upload File
+								Send File
 							</Button>
 						</div>
 					</CardContent>
 				</Card>
 
-				{/* View File Details */}
+				{/* Get File Info */}
 				<Card>
 					<CardHeader>
 						<CardTitle className="flex items-center gap-2">
 							<EyeIcon className="w-5 h-5" />
-							View File Details
+							Get File Info
 						</CardTitle>
 						<CardDescription>
-							Get detailed information about a file
+							Get metadata and information about a file by its piece CID
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-4">
 						<div className="space-y-3">
 							<div>
-								<Label htmlFor="piece-cid-view">Piece CID</Label>
+								<Label htmlFor="piece-cid-info">Piece CID</Label>
 								<Input
-									id="piece-cid-view"
+									id="piece-cid-info"
 									placeholder="Enter piece CID..."
 									value={pieceCidToView}
 									onChange={(e) => setPieceCidToView(e.target.value)}
@@ -201,147 +187,167 @@ export function FileTest() {
 							</div>
 							<Button
 								onClick={handleViewFileDetails}
-								disabled={!pieceCidToView.trim() || getFileDetails.isPending}
+								disabled={!pieceCidToView.trim()}
 								className="w-full"
 								size="lg"
 							>
-								{getFileDetails.isPending ? (
-									<SpinnerIcon className="w-4 h-4 mr-2 animate-spin" />
-								) : (
-									<EyeIcon className="w-4 h-4 mr-2" />
-								)}
-								View Details
+								<EyeIcon className="w-4 h-4 mr-2" />
+								Get File Info
 							</Button>
 						</div>
 					</CardContent>
 				</Card>
 			</div>
 
-			{/* Acknowledge File */}
+			{/* Download File */}
 			<Card>
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
-						<CheckCircleIcon className="w-5 h-5" />
-						Acknowledge File
+						<DownloadIcon className="w-5 h-5" />
+						Download File
 					</CardTitle>
 					<CardDescription>
-						Acknowledge receipt of a shared file (onchain transaction)
+						Download and decrypt file content using the piece CID and KEM ciphertext
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="space-y-4">
-					<div className="flex gap-3">
-						<div className="flex-1">
-							<Label htmlFor="piece-cid-acknowledge">Piece CID</Label>
+					<div className="grid gap-4 md:grid-cols-3">
+						<div>
+							<Label htmlFor="piece-cid-download">Piece CID</Label>
 							<Input
-								id="piece-cid-acknowledge"
-								placeholder="Enter piece CID to acknowledge..."
-								value={pieceCidToAcknowledge}
-								onChange={(e) => setPieceCidToAcknowledge(e.target.value)}
+								id="piece-cid-download"
+								placeholder="Enter piece CID..."
+								value={pieceCidToView}
+								onChange={(e) => setPieceCidToView(e.target.value)}
 							/>
 						</div>
-						<Button
-							onClick={handleAcknowledgeFile}
-							disabled={
-								!pieceCidToAcknowledge.trim() || acknowledgeFile.isPending
-							}
-							className="mt-6"
-							size="lg"
-						>
-							{acknowledgeFile.isPending ? (
-								<SpinnerIcon className="w-4 h-4 mr-2 animate-spin" />
-							) : (
-								<CheckCircleIcon className="w-4 h-4 mr-2" />
-							)}
-							Acknowledge
-						</Button>
+						<div>
+							<Label htmlFor="kem-ciphertext">KEM Ciphertext</Label>
+							<Input
+								id="kem-ciphertext"
+								placeholder="Enter KEM ciphertext..."
+								value={kemCiphertext}
+								onChange={(e) => setKemCiphertext(e.target.value)}
+							/>
+						</div>
+						<div>
+							<Label htmlFor="file-status">Storage Status</Label>
+							<select
+								id="file-status"
+								value={fileStatus}
+								onChange={(e) => setFileStatus(e.target.value as "s3" | "foc")}
+								className="w-full px-3 py-2 border border-input bg-background rounded-md"
+							>
+								<option value="s3">S3 Storage</option>
+								<option value="foc">Filecoin</option>
+							</select>
+						</div>
 					</div>
+					<Button
+						onClick={handleDownloadFile}
+						disabled={
+							!pieceCidToView.trim() ||
+							!kemCiphertext.trim() ||
+							viewFile.isPending
+						}
+						size="lg"
+					>
+						{viewFile.isPending ? (
+							<SpinnerIcon className="w-4 h-4 mr-2 animate-spin" />
+						) : (
+							<DownloadIcon className="w-4 h-4 mr-2" />
+						)}
+						Download File
+					</Button>
 				</CardContent>
 			</Card>
 
-			{/* File Lists */}
-			<div className="grid gap-6 md:grid-cols-2">
+			{/* File Info Display */}
+			{fileInfo.data && (
 				<Card>
 					<CardHeader>
-						<div className="flex items-center justify-between">
-							<CardTitle className="text-lg">Sent Files</CardTitle>
-							<Button
-								onClick={() => getSentFiles.refetch()}
-								disabled={getSentFiles.isFetching}
-								variant="outline"
-								size="sm"
-							>
-								{getSentFiles.isFetching ? (
-									<SpinnerIcon className="w-3 h-3 animate-spin mr-1" />
-								) : (
-									<FileIcon className="w-3 h-3 mr-1" />
-								)}
-								Refetch
-							</Button>
-						</div>
-					</CardHeader>
-					<CardContent>
-						<div className="bg-muted/50 p-4 rounded-lg min-h-[100px]">
-							{getSentFiles.isLoading ? (
-								<div className="flex items-center gap-2 text-muted-foreground">
-									<SpinnerIcon className="w-4 h-4 animate-spin" />
-									Loading...
-								</div>
-							) : (
-								<pre className="text-xs whitespace-pre-wrap">
-									{JSON.stringify(getSentFiles.data || [], null, 2)}
-								</pre>
-							)}
-						</div>
-					</CardContent>
-				</Card>
-
-				<Card>
-					<CardHeader>
-						<div className="flex items-center justify-between">
-							<CardTitle className="text-lg">Received Files</CardTitle>
-							<Button
-								onClick={() => getReceivedFiles.refetch()}
-								disabled={getReceivedFiles.isFetching}
-								variant="outline"
-								size="sm"
-							>
-								{getReceivedFiles.isFetching ? (
-									<SpinnerIcon className="w-3 h-3 animate-spin mr-1" />
-								) : (
-									<DownloadIcon className="w-3 h-3 mr-1" />
-								)}
-								Refetch
-							</Button>
-						</div>
-					</CardHeader>
-					<CardContent>
-						<div className="bg-muted/50 p-4 rounded-lg min-h-[100px]">
-							{getReceivedFiles.isLoading ? (
-								<div className="flex items-center gap-2 text-muted-foreground">
-									<SpinnerIcon className="w-4 h-4 animate-spin" />
-									Loading...
-								</div>
-							) : (
-								<pre className="text-xs whitespace-pre-wrap">
-									{JSON.stringify(getReceivedFiles.data || [], null, 2)}
-								</pre>
-							)}
-						</div>
-					</CardContent>
-				</Card>
-			</div>
-
-			{/* File Details Display */}
-			{fileDetails && (
-				<Card>
-					<CardHeader>
-						<CardTitle className="text-lg">File Details</CardTitle>
+						<CardTitle className="flex items-center gap-2 text-lg">
+							<FileTextIcon className="w-5 h-5" />
+							File Information
+						</CardTitle>
 					</CardHeader>
 					<CardContent>
 						<div className="bg-muted/50 p-4 rounded-lg">
-							<pre className="text-xs whitespace-pre-wrap">
-								{JSON.stringify(fileDetails, null, 2)}
-							</pre>
+							{fileInfo.isLoading ? (
+								<div className="flex items-center gap-2 text-muted-foreground">
+									<SpinnerIcon className="w-4 h-4 animate-spin" />
+									Loading file info...
+								</div>
+							) : fileInfo.error ? (
+								<div className="text-red-600">
+									Error loading file info: {fileInfo.error.message}
+								</div>
+							) : (
+								<pre className="text-xs whitespace-pre-wrap">
+									{JSON.stringify(fileInfo.data, null, 2)}
+								</pre>
+							)}
+						</div>
+					</CardContent>
+				</Card>
+			)}
+
+			{/* Downloaded File Display */}
+			{downloadedFile && (
+				<Card>
+					<CardHeader>
+						<CardTitle className="flex items-center gap-2 text-lg">
+							<FileIcon className="w-5 h-5" />
+							Downloaded File
+						</CardTitle>
+						<CardDescription>
+							File has been downloaded and decrypted ({downloadedFile.length} bytes)
+						</CardDescription>
+					</CardHeader>
+					<CardContent>
+						<div className="bg-muted/50 p-4 rounded-lg">
+							<div className="flex gap-2 mb-4">
+								<Button
+									size="sm"
+									onClick={() => {
+										const blob = new Blob([downloadedFile] as any);
+										const url = URL.createObjectURL(blob);
+										const a = document.createElement('a');
+										a.href = url;
+										a.download = 'downloaded-file';
+										document.body.appendChild(a);
+										a.click();
+										document.body.removeChild(a);
+										URL.revokeObjectURL(url);
+									}}
+								>
+									<DownloadIcon className="w-4 h-4 mr-2" />
+									Download File
+								</Button>
+								<Button
+									size="sm"
+									variant="outline"
+									onClick={() => {
+										const text = new TextDecoder().decode(downloadedFile);
+										console.log('File content:', text);
+										alert('File content logged to console');
+									}}
+								>
+									<EyeIcon className="w-4 h-4 mr-2" />
+									View Content
+								</Button>
+							</div>
+							<div className="text-sm text-muted-foreground">
+								File size: {downloadedFile.length} bytes
+							</div>
+							{downloadedFile.length < 1000 && (
+								<div className="mt-2">
+									<strong>Preview (first 1000 chars):</strong>
+									<pre className="text-xs mt-1 whitespace-pre-wrap bg-background p-2 rounded border overflow-auto max-h-40">
+										{new TextDecoder().decode(downloadedFile.slice(0, 1000))}
+									</pre>
+								</div>
+							)}
 						</div>
 					</CardContent>
 				</Card>

@@ -15,12 +15,12 @@ contract FSFileRegistry is EIP712 {
         address sender;
         address receipient;
         uint256 timestamp;
-        uint256 nonce;
     }
 
     mapping(bytes32 => string) private _pieceCids;
-
     mapping(address => uint256) public nonce;
+
+    mapping(bytes32 => FileRegistration) public fileRegistrations;
 
     IFSManager public immutable manager;
 
@@ -67,9 +67,16 @@ contract FSFileRegistry is EIP712 {
             nonce_,
             signature_
         );
-        require(recovered == msg.sender, "Invalid signature");
+        require(recovered == sender_, "Invalid signature");
 
-        nonce[sender_]++;
+        fileRegistrations[cidIdentifier(pieceCid_)] = FileRegistration({
+            cidIdentifier: cidIdentifier(pieceCid_),
+            sender: sender_,
+            receipient: recipient,
+            timestamp: timestamp_
+        });     
+
+        emit FileRegistered(cidIdentifier(pieceCid_), sender_, recipient, uint48(timestamp_));
     }
 
     function validateFileRegistrationSignature(
@@ -82,7 +89,7 @@ contract FSFileRegistry is EIP712 {
     ) public view returns (address) {
         require(manager.isRegistered(sender_), "Sender not registered");
         require(
-            manager.approvedSenders(recipient_, msg.sender),
+            manager.approvedSenders(recipient_, sender_),
             "Sender not approved by recipient"
         );
 
