@@ -32,7 +32,7 @@ export const fileRecipients = t.pgTable(
 
         ...timestamps,
     },
-    (table) => [t.index("idx_file_recipients_file").on(table.filePieceCid)],
+    // (table) => [t.index("idx_file_recipients_file").on(table.filePieceCid)],
 );
 
 // export const fileSignatures = t.sqliteTable(
