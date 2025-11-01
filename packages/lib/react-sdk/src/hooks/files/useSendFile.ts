@@ -1,31 +1,37 @@
 import { computeCidIdentifier, eip712signature } from "@filosign/contracts";
 import {
     encryption,
+    jsonStringify,
     KEM,
     randomBytes,
     toBytes,
     toHex,
 } from "@filosign/crypto-utils";
-import { Synapse } from "@filoz/synapse-sdk";
 import { calculate as calculatePieceCid } from "@filoz/synapse-sdk/piece";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import type { Address } from "viem";
 import z from "zod";
-import { idb } from "../../utils/idb";
-import { useFilosignContext } from "../context/FilosignProvider";
+import { idb } from "../../../utils/idb";
+import { useFilosignContext } from "../../context/FilosignProvider";
 
 export function useSendFile() {
     const { contracts, wallet, api } = useFilosignContext();
 
     // TODO invalidate and refetch files
-    const queryClient = useQueryClient();
+    // const queryClient = useQueryClient();
 
     return useMutation({
         mutationFn: async (args: {
             recipient: { address: Address; encryptionPublicKey: string };
-            data: Uint8Array;
+            bytes: Uint8Array;
+            signaturePositionOffset: {
+                top: number;
+                left: number;
+            };
         }) => {
-            const { recipient, data } = args;
+            const { recipient, bytes, signaturePositionOffset } = args;
+            const timestamp = Math.floor(Date.now() / 1000);
+            const encoder = new TextEncoder();
 
             if (!contracts || !wallet) {
                 throw new Error("not conected iido");
@@ -37,6 +43,15 @@ export function useSendFile() {
             });
             const keySeed = await keyStore.secret.get("key-seed");
             if (!keySeed) throw new Error("No key seed found in keystore");
+
+            const data = encoder.encode(
+                jsonStringify({
+                    fileBytes: bytes,
+                    sender: wallet.account.address,
+                    timestamp: timestamp,
+                    signaturePositionOffset: signaturePositionOffset,
+                }),
+            );
 
             const pieceCid = calculatePieceCid(data);
 
@@ -62,7 +77,6 @@ export function useSendFile() {
             const uploadStartResponse = await api.rpc.postSafe(
                 {
                     uploadUrl: z.string(),
-                    key: z.string(),
                 },
                 "/files/upload/start",
                 {
@@ -106,7 +120,7 @@ export function useSendFile() {
                     cidIdentifier: cidIdentifier,
                     sender: wallet.account.address,
                     receipient: recipient.address,
-                    timestamp: BigInt(Date.now()),
+                    timestamp: BigInt(timestamp),
                     nonce: BigInt(nonce),
                 },
             });
@@ -118,126 +132,11 @@ export function useSendFile() {
                 signature,
                 encryptedEncryptionKey: toHex(encryptedEncryptionKey),
                 kemCiphertext: toHex(kemCiphertext),
-                timestamp: Math.floor(Date.now() / 1000),
+                timestamp: timestamp,
                 nonce: Number(nonce),
             });
 
             return registerResponse.success;
-        },
-    });
-}
-
-export function useFileInfo(args: { pieceCid: string | undefined }) {
-    const { api } = useFilosignContext();
-
-    return useQuery({
-        queryKey: ["fsQ-file-info", args.pieceCid],
-        queryFn: async () => {
-            const response = await api.rpc.getSafe(
-                {
-                    pieceCid: z.string(),
-                    sender: z.string(),
-                    status: z.string(),
-                    onchainTxHash: z.string(),
-                    createdAt: z.string(),
-                    kemCiphertext: z.string(),
-                },
-                `/files/${args.pieceCid}`,
-            );
-
-            if (!response.success) {
-                throw new Error("Failed to fetch file info");
-            }
-            return response.data;
-        },
-        enabled: !!args.pieceCid,
-    });
-}
-
-export function useViewFile() {
-    const { contracts, wallet, api } = useFilosignContext();
-
-    // TODO invalidate and refetch files
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: async (args: {
-            pieceCid: string;
-            kemCiphertext: string;
-            encryptedEncryptionKey: string;
-            status: "s3" | "foc";
-        }) => {
-            const { pieceCid, kemCiphertext, encryptedEncryptionKey, status } = args;
-
-            if (!contracts || !wallet) {
-                throw new Error("not conected iido");
-            }
-
-            let data: Uint8Array;
-
-            if (status === "s3") {
-                const s3Response = await api.rpc.getSafe(
-                    {
-                        presignedUrl: z.string(),
-                    },
-                    `/files/${pieceCid}/s3`,
-                );
-
-                if (!s3Response.success) {
-                    throw new Error("Failed to fetch file from S3");
-                }
-
-                const { presignedUrl } = s3Response.data;
-
-                const uploadResponse = await fetch(presignedUrl, {
-                    method: "GET",
-                });
-
-                if (!uploadResponse.ok) {
-                    throw new Error("Failed to fetch file from S3");
-                }
-
-                data = new Uint8Array(await uploadResponse.arrayBuffer());
-            } else {
-                const synapse = await Synapse.create({});
-
-                const fileResponse = await synapse.storage.download(pieceCid, {
-                    withCDN: true,
-                });
-
-                if (!fileResponse) {
-                    throw new Error("Failed to fetch file");
-                }
-
-                data = fileResponse;
-            }
-
-            const keyStore = idb({
-                db: wallet.account.address,
-                store: "fs-keystore",
-            });
-            const keySeed = await keyStore.secret.get("key-seed");
-            if (!keySeed) throw new Error("No key seed found in keystore");
-
-            const { privateKey } = await KEM.keyGen({ seed: keySeed });
-            const { sharedSecret: ssE } = await KEM.decapsulate({
-                ciphertext: toBytes(kemCiphertext),
-                privateKeySelf: privateKey,
-            });
-
-            const encryptionKey = await encryption.decrypt({
-                ciphertext: toBytes(encryptedEncryptionKey),
-                secretKey: ssE,
-                info: `${pieceCid}:${wallet.account.address}`,
-            });
-
-            const decryptedData = await encryption.decrypt({
-                ciphertext: data,
-                secretKey: encryptionKey,
-                info: pieceCid,
-            });
-
-            return decryptedData;
         },
     });
 }
