@@ -250,7 +250,6 @@ export default new Hono()
         if (valid) {
             await db.update(fileRecipients).set({ ack: signature }).where(eq(fileRecipients.filePieceCid, pieceCid));
         } else {
-
             return respond.err(ctx, "Invalid signature", 400);
         }
     })
