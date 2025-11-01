@@ -16,18 +16,6 @@ async function main() {
             value: 1_000_000_000_000_000n,
         });
     }
-
-    const contracts1 = getContracts({
-        chainId: 31337,
-        client: u1
-    })
-    const contracts2 = getContracts({
-        chainId: 31337,
-        client: u2
-    })
-
-    await contracts1.FSManager.write.approveSender([u2.account.address])
-    await contracts2.FSManager.write.approveSender([u1.account.address])
 }
 
 
