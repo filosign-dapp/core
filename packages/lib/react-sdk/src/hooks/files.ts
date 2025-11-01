@@ -1,4 +1,4 @@
-import { eip712signature } from "@filosign/contracts";
+import { computeCidIdentifier, eip712signature } from "@filosign/contracts";
 import { encryption, KEM, toBytes, toHex } from "@filosign/crypto-utils";
 import { Synapse } from "@filoz/synapse-sdk";
 import { calculate as calculatePieceCid } from "@filoz/synapse-sdk/piece";
@@ -71,25 +71,27 @@ export function useSendFile() {
 				throw new Error(`Upload failed: ${uploadResponse.statusText}`);
 			}
 
-			const signature = eip712signature(contracts, "FSFileRegistry", {
+			const nonce = await contracts.FSFileRegistry.read.nonce([wallet.account.address]);
+
+			const cidIdentifier = computeCidIdentifier(pieceCid.toString());
+
+			const signature = await eip712signature(contracts, "FSFileRegistry", {
 				types: {
 					RegisterFile: [
+						{ name: "cidIdentifier", type: "bytes32" },
 						{ name: "sender", type: "address" },
-						{ name: "recipient", type: "address" },
-						{ name: "pieceCid", type: "string" },
-						{ name: "kemCiphertext", type: "bytes" },
+						{ name: "receipient", type: "address" },
 						{ name: "timestamp", type: "uint256" },
 						{ name: "nonce", type: "uint256" },
 					],
 				},
 				primaryType: "RegisterFile",
 				message: {
+					cidIdentifier: cidIdentifier,
 					sender: wallet.account.address,
-					recipient,
-					pieceCid,
-					kemCiphertext,
-					timestamp: Date.now(),
-					nonce: Math.floor(Math.random() * 1000000),
+					receipient: recipient.address,
+					timestamp: BigInt(Date.now()),
+					nonce: BigInt(nonce),
 				},
 			});
 
@@ -99,8 +101,8 @@ export function useSendFile() {
 				pieceCid: pieceCid.toString(),
 				signature,
 				kemCiphertext: toHex(kemCiphertext),
-				timestamp: Date.now(),
-				nonce: Math.floor(Math.random() * 1000000),
+				timestamp: Math.floor(Date.now() / 1000),
+				nonce: Number(nonce),
 			});
 
 			return registerResponse.success;
