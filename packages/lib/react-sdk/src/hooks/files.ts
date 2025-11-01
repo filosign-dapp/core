@@ -1,5 +1,11 @@
 import { eip712signature } from "@filosign/contracts";
-import { encryption, KEM, toBytes, toHex } from "@filosign/crypto-utils";
+import {
+	encryption,
+	KEM,
+	randomBytes,
+	toBytes,
+	toHex,
+} from "@filosign/crypto-utils";
 import { Synapse } from "@filoz/synapse-sdk";
 import { calculate as calculatePieceCid } from "@filoz/synapse-sdk/piece";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -32,18 +38,26 @@ export function useSendFile() {
 			const keySeed = await keyStore.secret.get("key-seed");
 			if (!keySeed) throw new Error("No key seed found in keystore");
 
-			const { ciphertext: kemCiphertext, sharedSecret: ssA } =
+			const pieceCid = calculatePieceCid(data);
+
+			const encryptionKey = randomBytes(32);
+
+			const encryptedData = await encryption.encrypt({
+				message: data,
+				secretKey: encryptionKey,
+				info: pieceCid.toString(),
+			});
+
+			const { ciphertext: kemCiphertext, sharedSecret: ssKEM } =
 				await KEM.encapsulate({
 					publicKeyOther: toBytes(recipient.encryptionPublicKey),
 				});
 
-			const encryptedData = await encryption.encrypt({
-				message: data,
-				sharedSecret: ssA,
-				info: "encryption info",
+			const encryptedEncryptionKey = await encryption.encrypt({
+				message: encryptionKey,
+				secretKey: ssKEM,
+				info: `${pieceCid.toString()}:${wallet.account.address}>${recipient.address}`,
 			});
-
-			const pieceCid = calculatePieceCid(data);
 
 			const uploadStartResponse = await api.rpc.postSafe(
 				{
@@ -98,6 +112,7 @@ export function useSendFile() {
 				recipient: recipient.address,
 				pieceCid: pieceCid.toString(),
 				signature,
+				encryptedEncryptionKey: toHex(encryptedEncryptionKey),
 				kemCiphertext: toHex(kemCiphertext),
 				timestamp: Date.now(),
 				nonce: Math.floor(Math.random() * 1000000),

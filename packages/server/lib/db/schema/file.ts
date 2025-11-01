@@ -11,33 +11,12 @@ export const files = t.pgTable(
 			.references(() => users.walletAddress),
 
 		status: t.text({ enum: ["s3", "foc", "unpaid_for", "invalid"] }).notNull(),
-		kemCiphertext: tHex().notNull(),
 		onchainTxHash: tBytes32().unique().notNull(),
 
 		...timestamps,
 	},
 	(table) => [t.index("idx_files_owner").on(table.sender)],
 );
-
-// export const fileAcknowledgements = t.sqliteTable(
-// 	"file_acknowledgements",
-// 	{
-// 		filePieceCid: t
-// 			.text()
-// 			.notNull()
-// 			.references(() => files.pieceCid, { onDelete: "cascade" }),
-// 		recipientWallet: tEvmAddress().notNull(),
-// 		acknowledgedTxHash: tBytes32(),
-
-// 		...timestamps,
-// 	},
-// 	(table) => [
-// 		t
-// 			.uniqueIndex("ux_file_acknowledgements_file_recipient")
-// 			.on(table.filePieceCid, table.recipientWallet),
-// 		t.index("idx_file_acknowledgements_file").on(table.filePieceCid),
-// 	],
-// );
 
 export const fileRecipients = t.pgTable(
 	"file_recipients",
@@ -47,15 +26,13 @@ export const fileRecipients = t.pgTable(
 			.notNull()
 			.references(() => files.pieceCid, { onDelete: "cascade" }),
 		recipientWallet: tEvmAddress().notNull(),
+		kemCiphertext: tHex().notNull(),
+		encryptedEncryptionKey: tHex().notNull(),
+		acknowledged: t.boolean().notNull().default(false),
 
 		...timestamps,
 	},
-	(table) => [
-		t
-			.uniqueIndex("ux_file_recipients_file_recipient")
-			.on(table.filePieceCid, table.recipientWallet),
-		t.index("idx_file_recipients_file").on(table.filePieceCid),
-	],
+	(table) => [t.index("idx_file_recipients_file").on(table.filePieceCid)],
 );
 
 // export const fileSignatures = t.sqliteTable(

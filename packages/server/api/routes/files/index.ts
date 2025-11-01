@@ -44,6 +44,7 @@ export default new Hono()
 			recipient,
 			signature,
 			kemCiphertext,
+			encryptedEncryptionKey,
 			timestamp,
 			nonce,
 		} = await ctx.req.json();
@@ -68,6 +69,13 @@ export default new Hono()
 		}
 		if (typeof kemCiphertext !== "string" || !isHex(kemCiphertext)) {
 			return respond.err(ctx, "Invalid kemCiphertext", 400);
+		}
+		if (
+			!encryptedEncryptionKey ||
+			typeof encryptedEncryptionKey !== "string" ||
+			!isHex(encryptedEncryptionKey)
+		) {
+			return respond.err(ctx, "Invalid encryptedEncryptionKey", 400);
 		}
 		if (!recipient || typeof recipient !== "string" || !isAddress(recipient)) {
 			return respond.err(ctx, "Invalid recipient address", 400);
@@ -113,13 +121,12 @@ export default new Hono()
 			signature,
 		]);
 
-		const insertResult = await db.transaction(async (tx) => {
+		await db.transaction(async (tx) => {
 			const [insertResult] = await tx
 				.insert(files)
 				.values({
 					pieceCid,
 					status: "s3",
-					kemCiphertext,
 					sender,
 					onchainTxHash: txHash,
 				})
@@ -128,6 +135,8 @@ export default new Hono()
 			await tx.insert(fileRecipients).values({
 				filePieceCid: pieceCid,
 				recipientWallet: recipient,
+				kemCiphertext: kemCiphertext,
+				encryptedEncryptionKey: encryptedEncryptionKey,
 			});
 
 			return insertResult;
@@ -178,8 +187,6 @@ export default new Hono()
 				status: files.status,
 				onchainTxHash: files.onchainTxHash,
 				createdAt: files.createdAt,
-				//TODO important remove this
-				kemCiphertext: files.kemCiphertext,
 			})
 			.from(files)
 			.where(eq(files.pieceCid, pieceCid));

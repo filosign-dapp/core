@@ -44,13 +44,13 @@ async function deriveAesGcmKey(sharedSecret: ArrayBuffer, info?: string) {
 
 export async function encrypt(args: {
 	message: Uint8Array;
-	sharedSecret: Uint8Array;
+	secretKey: Uint8Array;
 	info?: string;
 	aad?: Uint8Array;
 }) {
-	const { message, sharedSecret, info, aad } = args;
+	const { message, secretKey, info, aad } = args;
 
-	const key = await deriveAesGcmKey(new Uint8Array(sharedSecret).buffer, info);
+	const key = await deriveAesGcmKey(new Uint8Array(secretKey).buffer, info);
 	const iv = new Uint8Array(12);
 	crypto.getRandomValues(iv);
 	const ct = await crypto.subtle.encrypt(
@@ -69,17 +69,17 @@ export async function encrypt(args: {
 
 export async function decrypt(args: {
 	ciphertext: Uint8Array;
-	sharedSecret: Uint8Array;
+	secretKey: Uint8Array;
 	info?: string;
 	aad?: Uint8Array;
 }) {
-	const { ciphertext, sharedSecret, info, aad } = args;
+	const { ciphertext, secretKey, info, aad } = args;
 
 	const ctArr = new Uint8Array(ciphertext);
 	if (ctArr.length < 12) throw new Error("ciphertext too short");
 	const iv = ctArr.slice(0, 12);
 	const ct = ctArr.slice(12);
-	const key = await deriveAesGcmKey(new Uint8Array(sharedSecret).buffer, info);
+	const key = await deriveAesGcmKey(new Uint8Array(secretKey).buffer, info);
 	const pt = await crypto.subtle.decrypt(
 		{
 			name: "AES-GCM",
