@@ -1,4 +1,5 @@
 cd packages/contracts
+bun compile
 FC_PVT_KEY="0xdf57089febbacf7ba0bc227dafbffa9fc08a93fdc68e1e42411a14efcf23656e" bunx --bun hardhat run --network localhost scripts/deploy.ts
 FC_PVT_KEY="0xdf57089febbacf7ba0bc227dafbffa9fc08a93fdc68e1e42411a14efcf23656e" bunx --bun hardhat run --network localhost scripts/localfund.ts
 cd ../server
