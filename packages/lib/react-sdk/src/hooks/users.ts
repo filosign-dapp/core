@@ -12,11 +12,12 @@ export function useUserProfileByAddress(address: Address | undefined) {
 		queryKey: ["fsQ-user-info-by-address", address, wallet?.account.address],
 		queryFn: async () => {
 			if (!contracts || !wallet) throw new Error("No contracts or wallet found");
+			if (!address) throw new Error("No address provided");
 
 			const userInfo = await api.rpc.getSafe(
 				{
-					walletAddress: zHexString,
-					encryptionPublicKey: zHexString,
+					walletAddress: zHexString(),
+					encryptionPublicKey: zHexString(),
 					lastActiveAt: z.number(),
 					createdAt: z.number(),
 				},
@@ -25,7 +26,7 @@ export function useUserProfileByAddress(address: Address | undefined) {
 
 			return userInfo.data;
 		},
-		enabled: !!wallet && !!contracts,
+		enabled: !!wallet && !!contracts && !!address,
 		staleTime: 1 * DAY,
 	});
 }

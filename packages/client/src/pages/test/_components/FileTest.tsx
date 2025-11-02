@@ -1,10 +1,11 @@
-import { useFileInfo, useSendFile, useViewFile } from "@filosign/react/hooks";
+import { useAckFile, useFileInfo, useSendFile, useSignFile, useViewFile } from "@filosign/react/hooks";
 import {
 	CheckCircleIcon,
 	DownloadIcon,
 	EyeIcon,
 	FileIcon,
 	FileTextIcon,
+	SignatureIcon,
 	SpinnerIcon,
 	UploadIcon,
 } from "@phosphor-icons/react";
@@ -27,6 +28,8 @@ export function FileTest() {
 	const [pieceCidForInfo, setPieceCidForInfo] = useState<string | undefined>(undefined);
 	const fileInfo = useFileInfo({ pieceCid: pieceCidForInfo });
 	const viewFile = useViewFile();
+	const ackFile = useAckFile();
+	const signFile = useSignFile();
 
 	const queryClient = useQueryClient();
 
@@ -37,6 +40,11 @@ export function FileTest() {
 	const [pieceCidToView, setPieceCidToView] = useState("");
 	const [kemCiphertext, setKemCiphertext] = useState("");
 	const [fileStatus, setFileStatus] = useState<"s3" | "foc">("s3");
+	const [pieceCidToAck, setPieceCidToAck] = useState("");
+	const [pieceCidToSign, setPieceCidToSign] = useState("");
+	const [signatureBytes, setSignatureBytes] = useState("");
+	const [encryptedEncryptionKey, setEncryptedEncryptionKey] = useState("");
+	const [signaturePosition, setSignaturePosition] = useState({ top: 0, left: 0 });
 
 	// File data state
 	const [downloadedFile, setDownloadedFile] = useState<Uint8Array | null>(null);
@@ -52,7 +60,8 @@ export function FileTest() {
 					address: recipientAddress as `0x${string}`,
 					encryptionPublicKey: recipientEncryptionKey,
 				},
-				data: fileData,
+				bytes: fileData,
+				signaturePositionOffset: signaturePosition,
 			});
 
 			console.log("File uploaded successfully");
@@ -70,18 +79,52 @@ export function FileTest() {
 	};
 
 	const handleDownloadFile = async () => {
-		if (!pieceCidToView.trim() || !kemCiphertext.trim()) return;
+		if (!pieceCidToView.trim() || !kemCiphertext.trim() || !encryptedEncryptionKey.trim()) return;
 
 		try {
 			const fileData = await viewFile.mutateAsync({
 				pieceCid: pieceCidToView,
 				kemCiphertext: kemCiphertext,
+				encryptedEncryptionKey: encryptedEncryptionKey,
 				status: fileStatus,
 			});
 			setDownloadedFile(fileData);
 			console.log("File downloaded successfully");
 		} catch (error) {
 			console.error("Failed to download file", error);
+		}
+	};
+
+	const handleAckFile = async () => {
+		if (!pieceCidToAck.trim()) return;
+
+		try {
+			await ackFile.mutateAsync({
+				pieceCid: pieceCidToAck,
+			});
+			console.log("File acknowledged successfully");
+			setPieceCidToAck("");
+		} catch (error) {
+			console.error("Failed to acknowledge file", error);
+		}
+	};
+
+	const handleSignFile = async () => {
+		if (!pieceCidToSign.trim() || !signatureBytes.trim()) return;
+
+		try {
+			// Convert hex string to Uint8Array for signing
+			const signatureBytesArray = new Uint8Array(signatureBytes.match(/.{1,2}/g)?.map(byte => parseInt(byte, 16)) || []);
+
+			await signFile.mutateAsync({
+				pieceCid: pieceCidToSign,
+				signatureBytes: signatureBytesArray,
+			});
+			console.log("File signed successfully");
+			setPieceCidToSign("");
+			setSignatureBytes("");
+		} catch (error) {
+			console.error("Failed to sign file", error);
 		}
 	};
 
@@ -95,7 +138,7 @@ export function FileTest() {
 
 	return (
 		<div className="space-y-6">
-			<div className="grid gap-6 lg:grid-cols-2">
+			<div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-4">
 				{/* Send File */}
 				<Card>
 					<CardHeader>
@@ -197,6 +240,96 @@ export function FileTest() {
 						</div>
 					</CardContent>
 				</Card>
+
+				{/* Acknowledge File */}
+				<Card>
+					<CardHeader>
+						<CardTitle className="flex items-center gap-2">
+							<CheckCircleIcon className="w-5 h-5" />
+							Acknowledge File
+						</CardTitle>
+						<CardDescription>
+							Acknowledge receipt of a file sent to you
+						</CardDescription>
+					</CardHeader>
+					<CardContent className="space-y-4">
+						<div className="space-y-3">
+							<div>
+								<Label htmlFor="piece-cid-ack">Piece CID</Label>
+								<Input
+									id="piece-cid-ack"
+									placeholder="Enter piece CID to acknowledge..."
+									value={pieceCidToAck}
+									onChange={(e) => setPieceCidToAck(e.target.value)}
+								/>
+							</div>
+							<Button
+								onClick={handleAckFile}
+								disabled={!pieceCidToAck.trim() || ackFile.isPending}
+								className="w-full"
+								size="lg"
+							>
+								{ackFile.isPending ? (
+									<SpinnerIcon className="w-4 h-4 mr-2 animate-spin" />
+								) : (
+									<CheckCircleIcon className="w-4 h-4 mr-2" />
+								)}
+								Acknowledge File
+							</Button>
+						</div>
+					</CardContent>
+				</Card>
+
+				{/* Sign File */}
+				<Card>
+					<CardHeader>
+						<CardTitle className="flex items-center gap-2">
+							<SignatureIcon className="w-5 h-5" />
+							Sign File
+						</CardTitle>
+						<CardDescription>
+							Sign a file you've received with your cryptographic signature
+						</CardDescription>
+					</CardHeader>
+					<CardContent className="space-y-4">
+						<div className="space-y-3">
+							<div>
+								<Label htmlFor="piece-cid-sign">Piece CID</Label>
+								<Input
+									id="piece-cid-sign"
+									placeholder="Enter piece CID to sign..."
+									value={pieceCidToSign}
+									onChange={(e) => setPieceCidToSign(e.target.value)}
+								/>
+							</div>
+							<div>
+								<Label htmlFor="signature-bytes">Signature Bytes (hex)</Label>
+								<Input
+									id="signature-bytes"
+									placeholder="Enter signature bytes in hex format..."
+									value={signatureBytes}
+									onChange={(e) => setSignatureBytes(e.target.value)}
+								/>
+								<p className="text-xs text-muted-foreground mt-1">
+									Enter your visual signature as hex bytes (e.g., from drawing or text)
+								</p>
+							</div>
+							<Button
+								onClick={handleSignFile}
+								disabled={!pieceCidToSign.trim() || !signatureBytes.trim() || signFile.isPending}
+								className="w-full"
+								size="lg"
+							>
+								{signFile.isPending ? (
+									<SpinnerIcon className="w-4 h-4 mr-2 animate-spin" />
+								) : (
+									<SignatureIcon className="w-4 h-4 mr-2" />
+								)}
+								Sign File
+							</Button>
+						</div>
+					</CardContent>
+				</Card>
 			</div>
 
 			{/* Download File */}
@@ -211,7 +344,7 @@ export function FileTest() {
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="space-y-4">
-					<div className="grid gap-4 md:grid-cols-3">
+					<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 						<div>
 							<Label htmlFor="piece-cid-download">Piece CID</Label>
 							<Input
@@ -228,6 +361,15 @@ export function FileTest() {
 								placeholder="Enter KEM ciphertext..."
 								value={kemCiphertext}
 								onChange={(e) => setKemCiphertext(e.target.value)}
+							/>
+						</div>
+						<div>
+							<Label htmlFor="encrypted-encryption-key">Encrypted Encryption Key</Label>
+							<Input
+								id="encrypted-encryption-key"
+								placeholder="Enter encrypted encryption key..."
+								value={encryptedEncryptionKey}
+								onChange={(e) => setEncryptedEncryptionKey(e.target.value)}
 							/>
 						</div>
 						<div>
@@ -248,6 +390,7 @@ export function FileTest() {
 						disabled={
 							!pieceCidToView.trim() ||
 							!kemCiphertext.trim() ||
+							!encryptedEncryptionKey.trim() ||
 							viewFile.isPending
 						}
 						size="lg"

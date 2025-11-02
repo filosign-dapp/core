@@ -1,11 +1,9 @@
 import {
 	ClockIcon,
-	CopyIcon,
 	EyeIcon,
 	FileIcon,
 	KeyIcon,
 	PaperPlaneIcon,
-	SignatureIcon,
 	UserCheckIcon,
 	UserIcon,
 	WalletIcon,
@@ -15,7 +13,6 @@ import { formatEther } from "viem";
 import { useBalance, useWalletClient } from "wagmi";
 import { useState } from "react";
 import { Badge } from "../../lib/components/ui/badge";
-import { Button } from "../../lib/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -30,13 +27,11 @@ import {
 	TabsList,
 	TabsTrigger,
 } from "../../lib/components/ui/tabs";
-import { toast } from "sonner";
 import { AuthenticationTest } from "./_components/AuthenticationTest";
 import { FileTest } from "./_components/FileTest";
 import { ProfileTest } from "./_components/ProfileTest";
 import { ShareReceiverTest } from "./_components/ShareReceiverTest";
 import { ShareSenderTest } from "./_components/ShareSenderTest";
-import { SignatureTest } from "./_components/SignatureTest";
 import { StatusBadge } from "./_components/StatusBadge";
 import { useIsLoggedIn, useIsRegistered, useUserProfileByAddress } from "@filosign/react/hooks";
 
@@ -51,10 +46,8 @@ export default function TestPage() {
 
 	const isRegistered = useIsRegistered();
 	const isLoggedIn = useIsLoggedIn();
-	const { data: userProfile } = useUserProfileByAddress(walletClient?.account.address as `0x${string}`);
-	const encryptionPublicKey = userProfile?.encryptionPublicKey;
 
-	console.log({ encryptionPublicKey });
+	const { data: userProfile } = useUserProfileByAddress(walletClient?.account.address as `0x${string}`);
 
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-background to-muted/20 p-6">
@@ -141,7 +134,7 @@ export default function TestPage() {
 										<KeyIcon className="w-4 h-4 text-muted-foreground" />
 										<span className="text-sm font-medium">Encryption Public Key:</span>
 										<p className="text-xs">
-											{encryptionPublicKey as string}
+
 										</p>
 									</div>
 									{balance && (
@@ -161,7 +154,7 @@ export default function TestPage() {
 
 				{/* Main Test Interface */}
 				<Tabs defaultValue="auth" className="space-y-6">
-					<TabsList className="grid w-full grid-cols-3 lg:grid-cols-6">
+					<TabsList className="grid w-full grid-cols-3 lg:grid-cols-5">
 						<TabsTrigger value="auth" className="flex items-center gap-2">
 							<KeyIcon className="w-4 h-4" />
 							Auth
@@ -188,10 +181,6 @@ export default function TestPage() {
 							<UserIcon className="w-4 h-4" />
 							Profile
 						</TabsTrigger>
-						<TabsTrigger value="signatures" className="flex items-center gap-2">
-							<SignatureIcon className="w-4 h-4" />
-							Signatures
-						</TabsTrigger>
 					</TabsList>
 
 					{/* Authentication Tab */}
@@ -216,12 +205,7 @@ export default function TestPage() {
 
 					{/* Profile Tab */}
 					<TabsContent value="profile" className="space-y-6">
-						{/* <ProfileTest /> */}
-					</TabsContent>
-
-					{/* Signatures Tab */}
-					<TabsContent value="signatures" className="space-y-6">
-						{/* <SignatureTest /> */}
+						<ProfileTest />
 					</TabsContent>
 				</Tabs>
 			</div>
