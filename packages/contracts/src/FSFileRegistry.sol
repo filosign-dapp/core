@@ -1,14 +1,15 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 pragma solidity ^0.8.26;
 
-import "./interfaces/IFSManager.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
+
+import "./interfaces/IFSManager.sol";
 
 contract FSFileRegistry is EIP712 {
     using ECDSA for bytes32;
 
-    uint256 constant SIGNATURE_VALIDITY_PERIOD = 5 minutes;
+    uint256 constant SIGNATURE_VALIDITY_PERIOD = 2 minutes;
 
     struct FileRegistration {
         bytes32 cidIdentifier;
