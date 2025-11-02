@@ -1,13 +1,17 @@
 import * as t from "drizzle-orm/pg-core";
-import { tEvmAddress, timestamps, tJsonString } from "../helpers";
+import { tEvmAddress, timestamps } from "../helpers";
 
 export const users = t.pgTable("users", {
     walletAddress: tEvmAddress().primaryKey(),
-    // email: t.text(),
-    lastActiveAt: t.integer().notNull(),
-    keygenDataJson: tJsonString(),
+    keygenDataJson: t.jsonb(),
     encryptionPublicKey: t.text().notNull(),
     signaturePublicKey: t.text().notNull(),
+
+    /**non core here */
+    lastActiveAt: t.timestamp(),
+    email: t.text(),
+    username: t.text().unique(),
+    avatarUrl: t.text(),
 
     ...timestamps,
 });
@@ -18,9 +22,7 @@ export const users = t.pgTable("users", {
 // 			onDelete: "cascade",
 // 		})
 // 		.primaryKey(),
-// 	username: t.text().notNull().unique(),
 // 	displayName: t.text().notNull(),
-// 	avatarUrl: t.text(),
 // 	bio: t.text().default(""),
 // 	metadataJson: tJsonString().default({ value: "{}" }),
 // });
