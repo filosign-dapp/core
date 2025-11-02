@@ -15,11 +15,12 @@ export function useFileInfo(args: { pieceCid: string | undefined }) {
                     sender: z.string(),
                     status: z.string(),
                     onchainTxHash: zHexString(),
+                    senderEncryptedEncryptionKey: z.string().nullable(),
                     createdAt: z.string(),
                     recipient: z.string(),
                     kemCiphertext: z.string().nullable(),
+                    senderKemCiphertext: z.string().nullable(),
                     encryptedEncryptionKey: z.string().nullable(),
-                    senderEncryptedEncryptionKey: z.string().nullable(),
                 },
                 `/files/${args.pieceCid}`,
             );

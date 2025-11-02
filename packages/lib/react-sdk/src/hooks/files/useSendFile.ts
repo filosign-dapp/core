@@ -132,6 +132,7 @@ export function useSendFile() {
                 encryptedEncryptionKey: toHex(recipientEncryptedEncryptionKey),
                 senderEncryptedEncryptionKey: toHex(selfEncryptedEncryptionKey),
                 kemCiphertext: toHex(kemCiphertext),
+                senderKemCiphertext: toHex(recipientKemCiphertext),
                 timestamp: timestamp,
                 nonce: Number(nonce),
             };

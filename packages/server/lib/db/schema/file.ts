@@ -11,6 +11,7 @@ export const files = t.pgTable(
             .references(() => users.walletAddress),
 
         senderEncryptedEncryptionKey: tHex().notNull(),
+        senderKemCiphertext: tHex().notNull(),
 
         status: t.text({ enum: ["s3", "foc", "unpaid_for", "invalid"] }).notNull(),
         onchainTxHash: tBytes32().unique().notNull(),

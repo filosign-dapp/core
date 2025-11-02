@@ -54,6 +54,7 @@ export default new Hono()
             kemCiphertext,
             encryptedEncryptionKey,
             senderEncryptedEncryptionKey,
+            senderKemCiphertext,
             timestamp,
             nonce,
         } = await ctx.req.json();
@@ -92,6 +93,9 @@ export default new Hono()
         }
         if (!recipient || typeof recipient !== "string" || !isAddress(recipient)) {
             return respond.err(ctx, "Invalid recipient address", 400);
+        }
+        if (typeof senderKemCiphertext !== "string" || !isHex(senderKemCiphertext)) {
+            return respond.err(ctx, "Invalid senderKemCiphertext", 400);
         }
 
         const valid = await FSFileRegistry.read.validateFileRegistrationSignature([
@@ -142,6 +146,7 @@ export default new Hono()
                     status: "s3",
                     sender,
                     senderEncryptedEncryptionKey,
+                    senderKemCiphertext,
                     onchainTxHash: txHash,
                 })
                 .returning();
@@ -213,6 +218,7 @@ export default new Hono()
                 status: files.status,
                 onchainTxHash: files.onchainTxHash,
                 senderEncryptedEncryptionKey: files.senderEncryptedEncryptionKey,
+                senderKemCiphertext: files.senderKemCiphertext,
                 createdAt: files.createdAt,
             })
             .from(files)
@@ -232,15 +238,14 @@ export default new Hono()
             return respond.err(ctx, "File not found", 404);
         }
 
-        if (fileRecipient.recipientWallet !== userWallet) {
-            // @ts-expect-error <- this we have to do because we ont want to send the senderEncryptedEncryptionKey to anyone
-            fileRecord.senderEncryptedEncryptionKey = null;
-        }
-
         const response = {
             ...fileRecord,
             recipient: fileRecipient.recipientWallet,
             kemCiphertext: fileRecipient.ack ? fileRecipient.kemCiphertext : null,
+
+            senderEncryptedEncryptionKey: userWallet === fileRecord.sender ? fileRecord.senderEncryptedEncryptionKey : null,
+            senderKemCiphertext: userWallet === fileRecord.sender ? fileRecord.senderKemCiphertext : null,
+
             encryptedEncryptionKey: (fileRecipient.ack && userWallet === fileRecipient.recipientWallet)
                 ? fileRecipient.encryptedEncryptionKey
                 : null,
