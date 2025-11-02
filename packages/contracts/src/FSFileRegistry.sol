@@ -52,7 +52,7 @@ contract FSFileRegistry is EIP712 {
         );
     bytes32 private constant ACK_FILE_TYPEHASH =
         keccak256(
-            "AckFile(bytes32 cidIdentifier,address sender,address recipient,uint256 timestamp,uint256 nonce)"
+            "AckFile(bytes32 cidIdentifier,address sender,address recipient,uint256 timestamp)"
         );
     bytes32 private constant SIGN_FILE_TYPEHASH =
         keccak256(
@@ -105,7 +105,7 @@ contract FSFileRegistry is EIP712 {
         uint256 nonce_,
         bytes calldata signature_
     ) external onlyServer {
-        require(nonce_ == nonce[sender_]++, "Invalid nonce");
+        require(nonce_ == nonce[recipient_]++, "Invalid nonce");
         require(
             validateFileSigningSignature(
                 sender_,
@@ -114,6 +114,7 @@ contract FSFileRegistry is EIP712 {
                 keccak256(signatureBytes_),
                 dl3SignatureCommitment_,
                 timestamp_,
+                nonce_,
                 signature_
             ),
             "Invalid signature"
@@ -167,6 +168,7 @@ contract FSFileRegistry is EIP712 {
         bytes32 signatureVisualHash_,
         bytes20 dl3SignatureCommitment_,
         uint256 timestamp_,
+        uint256 nonce_,
         bytes calldata signature_
     ) public view returns (bool) {
         require(
@@ -189,11 +191,12 @@ contract FSFileRegistry is EIP712 {
                 recipient_,
                 signatureVisualHash_,
                 dl3SignatureCommitment_,
-                timestamp_
+                timestamp_,
+                nonce_
             )
         );
         bytes32 digest = _hashTypedDataV4(structHash);
-        return ECDSA.recover(digest, signature_) == sender_;
+        return ECDSA.recover(digest, signature_) == recipient_;
     }
 
     function validateFileAckSignature(

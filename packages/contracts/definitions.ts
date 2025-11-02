@@ -1,7 +1,7 @@
 export const definitions = {
   "0x7a69": {
     "FSManager": {
-      "address": "0x0165878a594ca255338adfa4d48449f69242eb8f",
+      "address": "0x9fe46736679d2d9a65f0992f2272de9f3c7fa6e0",
       "abi": [
         {
           "inputs": [],
@@ -196,7 +196,7 @@ export const definitions = {
       ]
     },
     "FSFileRegistry": {
-      "address": "0x3B02fF1e626Ed7a8fd6eC5299e2C54e1421B626B",
+      "address": "0x75537828f2ce51be7289709686A69CbFDbB714F1",
       "abi": [
         {
           "inputs": [],
@@ -663,6 +663,11 @@ export const definitions = {
               "type": "uint256"
             },
             {
+              "internalType": "uint256",
+              "name": "nonce_",
+              "type": "uint256"
+            },
+            {
               "internalType": "bytes",
               "name": "signature_",
               "type": "bytes"
@@ -682,7 +687,7 @@ export const definitions = {
       ]
     },
     "FSKeyRegistry": {
-      "address": "0xBA12646CC07ADBe43F8bD25D83FB628D29C8A762",
+      "address": "0xE451980132E65465d0a498c53f0b5227326Dd73F",
       "abi": [
         {
           "inputs": [],
