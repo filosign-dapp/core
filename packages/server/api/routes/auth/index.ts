@@ -24,7 +24,7 @@ export default new Hono()
         return respond.ok(ctx, { nonce }, "nonce generated", 200);
     })
 
-    .get("/verify", async (ctx) => {
+    .post("/verify", async (ctx) => {
         const address = ctx.req.query("address");
         const signature = ctx.req.query("signature");
 
