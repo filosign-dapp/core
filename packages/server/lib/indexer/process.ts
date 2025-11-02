@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { decodeEventLog, type Hash, isHex } from "viem";
 import db from "../db";
 import { evmClient, fsContracts } from "../evm";
@@ -106,6 +106,18 @@ export async function processTransaction(
                         txHash: encodedLog.transactionHash,
                         active: true,
                     });
+
+                    // Check if there's a pending request and mark it as approved
+                    await db
+                        .update(db.schema.shareRequests)
+                        .set({ status: "ACCEPTED" })
+                        .where(
+                            and(
+                                eq(db.schema.shareRequests.senderWallet, log.args.sender),
+                                eq(db.schema.shareRequests.recipientWallet, log.args.recipient),
+                                eq(db.schema.shareRequests.status, "PENDING")
+                            )
+                        );
                 }
 
                 if (log.eventName === "SenderRevoked") {
@@ -133,7 +145,7 @@ export async function processTransaction(
                         txHash: txHash,
                     });
                 }
-            } catch (error) {
+            } catch (_error) {
                 // Silently ignore decode errors
             }
         }
