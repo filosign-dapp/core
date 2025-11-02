@@ -1,11 +1,11 @@
 {
-	"name": "server",
+	"name": "@filosign/server",
 	"scripts": {
 		"db:migrate": "bunx --bun drizzle-kit push"
 	},
 	"dependencies": {
-			"@filosign/contracts": "workspace:*",
-	"@filosign/crypto-utils": "workspace:*",
+		"@filosign/contracts": "workspace:*",
+		"@filosign/crypto-utils": "workspace:*",
 		"@filoz/synapse-sdk": "^0.28.0",
 		"@hono/zod-validator": "^0.7.3",
 		"@libsql/client": "^0.14.0",

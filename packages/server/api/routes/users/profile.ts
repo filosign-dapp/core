@@ -29,32 +29,27 @@ export default new Hono().
 
     .put("/", authenticated, async (ctx) => {
         const wallet = ctx.var.userWallet;
-        const body = await ctx.req.json();
+        const { emailRaw, usernameRaw } = await ctx.req.json();
+        const email = emailRaw?.trim();
+        const username = usernameRaw?.trim();
 
-        const updates: Partial<typeof users.$inferInsert> = {};
-
-        if (body.email !== undefined) {
-            if (typeof body.email !== "string" || !body.email.includes("@")) {
+        if (email !== undefined) {
+            if (typeof email !== "string" || !email.includes("@")) {
                 return respond.err(ctx, "Invalid email format", 400);
             }
-            updates.email = body.email;
         }
-        if (body.username !== undefined) {
-            if (typeof body.username !== "string" || body.username.length < 3 || body.username.length > 16) {
+        if (username !== undefined) {
+            if (typeof username !== "string" || username.length < 3 || username.length > 16) {
                 return respond.err(ctx, "Username must be between 3 and 16 characters", 400);
             }
-            updates.username = body.username;
-        }
-        if (body.avatarUrl !== undefined) {
-            if (typeof body.avatarUrl !== "string") {
-                return respond.err(ctx, "Invalid avatar URL", 400);
-            }
-            updates.avatarUrl = body.avatarUrl;
         }
 
         await db
             .update(users)
-            .set(updates)
+            .set({
+                email: email ?? users.email,
+                username: username ?? users.username,
+            })
             .where(eq(users.walletAddress, wallet));
 
         return respond.ok(ctx, {}, "Profile updated successfully", 200);
