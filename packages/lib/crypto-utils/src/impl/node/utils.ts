@@ -63,12 +63,15 @@ export function generateRegisterChallenge(
     return challenge;
 }
 
-export function computeCommitment(args: (string | number)[]) {
-    function determineType(value: string | number): "string" | "uint256" {
+export function computeCommitment(args: (string | number | bigint)[] | readonly (string | number | bigint)[]) {
+    function determineType(value: string | number | bigint): "string" | "uint256" {
         if (typeof value === "string") {
             return "string";
         }
         if (typeof value === "number") {
+            return "uint256";
+        }
+        if (typeof value === "bigint") {
             return "uint256";
         }
         throw new Error("Unsupported type");
