@@ -13,6 +13,7 @@ import type { Address } from "viem";
 import z from "zod";
 import { idb } from "../../../utils/idb";
 import { useFilosignContext } from "../../context/FilosignProvider";
+import { useCryptoSeed } from "../auth";
 
 export function useSendFile() {
     const { contracts, wallet, api } = useFilosignContext();
@@ -36,14 +37,6 @@ export function useSendFile() {
             if (!contracts || !wallet) {
                 throw new Error("not conected iido");
             }
-
-            const keyStore = idb({
-                db: wallet.account.address,
-                store: "fs-keystore",
-            });
-            const keySeed = await keyStore.secret.get("key-seed");
-            if (!keySeed) throw new Error("No key seed found in keystore");
-
             const data = encoder.encode(
                 jsonStringify({
                     fileBytes: bytes,

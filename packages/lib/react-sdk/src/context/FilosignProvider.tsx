@@ -57,8 +57,7 @@ export function FilosignProvider(props: FilosignConfig) {
     const runtime = useQuery({
         queryKey: [
             "runtime",
-            apiBaseUrl,
-            // apiBaseUrl.includes("localhost") ? Date.now() : null,
+            apiBaseUrl
         ],
         queryFn: async () => {
             const runtime = await fetch(`${apiBaseUrl}/runtime`).then((res) =>

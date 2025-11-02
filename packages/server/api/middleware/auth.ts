@@ -1,5 +1,7 @@
+import { eq } from "drizzle-orm";
 import { createMiddleware } from "hono/factory";
 import type { Address } from "viem";
+import db from "../../lib/db";
 import { verifyJwt } from "../../lib/utils/jwt";
 import { respond } from "../../lib/utils/respond";
 
@@ -22,6 +24,11 @@ export const authenticated = createMiddleware<{
         return respond.err(ctx, "Invalid or expired token", 401);
     }
 
+
     ctx.set("userWallet", payload.sub);
     await next();
+    console.log("If this is reacjed, tell spandan")
+    await db.update(db.schema.users)
+        .set({ lastActiveAt: Date.now() })
+        .where(eq(db.schema.users.walletAddress, payload.sub));
 });

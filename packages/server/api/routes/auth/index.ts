@@ -71,6 +71,11 @@ export default new Hono()
             return respond.err(ctx, "Invalid signature", 400);
         }
 
+        await db.update(users)
+            .set({ lastActiveAt: Date.now() })
+            .where(eq(users.walletAddress, address));
+
         const token = issueJwtToken(address);
+
         return respond.ok(ctx, { valid, token }, "Signature verified", 200);
     });

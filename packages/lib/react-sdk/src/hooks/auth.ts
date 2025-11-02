@@ -5,206 +5,240 @@ import { DAY, MINUTE } from "../constants";
 import { useFilosignContext } from "../context/FilosignProvider";
 
 export function useIsRegistered() {
-	const { contracts, wallet } = useFilosignContext();
+    const { contracts, wallet } = useFilosignContext();
 
-	return useQuery({
-		queryKey: ["fsQ-is-registered", wallet?.account.address],
-		queryFn: async () => {
-			if (!contracts || !wallet) {
-				throw new Error("unreachable");
-			}
+    return useQuery({
+        queryKey: ["fsQ-is-registered", wallet?.account.address],
+        queryFn: async () => {
+            if (!contracts || !wallet) {
+                throw new Error("unreachable");
+            }
 
-			try {
-				const isRegistered = await contracts.FSKeyRegistry.read.isRegistered([
-					wallet.account.address,
-				]);
-				return isRegistered;
-			} catch (error) {
-				console.error("Failed to check if user is registered", error);
-				throw error;
-			}
-		},
-		staleTime: 5 * MINUTE,
-		enabled: !!contracts,
-	});
+            try {
+                const isRegistered = await contracts.FSKeyRegistry.read.isRegistered([
+                    wallet.account.address,
+                ]);
+                return isRegistered;
+            } catch (error) {
+                console.error("Failed to check if user is registered", error);
+                throw error;
+            }
+        },
+        staleTime: 5 * MINUTE,
+        enabled: !!contracts,
+    });
 }
 
 export function useStoredKeygenData() {
-	const { wallet, contracts } = useFilosignContext();
+    const { wallet, contracts } = useFilosignContext();
 
-	return useQuery({
-		queryKey: ["fsQ-stored-keygen-data", wallet?.account.address],
-		queryFn: async () => {
-			if (!wallet || !contracts) {
-				throw new Error("unreachable");
-			}
+    return useQuery({
+        queryKey: ["fsQ-stored-keygen-data", wallet?.account.address],
+        queryFn: async () => {
+            if (!wallet || !contracts) {
+                throw new Error("unreachable");
+            }
 
-			const [saltPin, saltSeed, saltChallenge, commitmentKem, commitmentSig] =
-				await contracts.FSKeyRegistry.read.keygenData([wallet.account.address]);
+            const [saltPin, saltSeed, saltChallenge, commitmentKem, commitmentSig] =
+                await contracts.FSKeyRegistry.read.keygenData([wallet.account.address]);
 
-			if (
-				!saltPin ||
-				!saltSeed ||
-				!saltChallenge ||
-				!commitmentKem ||
-				!commitmentSig
-			)
-				return undefined;
+            if (
+                !saltPin ||
+                !saltSeed ||
+                !saltChallenge ||
+                !commitmentKem ||
+                !commitmentSig
+            )
+                return undefined;
 
-			return {
-				saltPin,
-				saltSeed,
-				saltChallenge,
-				commitmentKem,
-				commitmentSig,
-			};
-		},
-		staleTime: 1 * DAY,
-		enabled: !!wallet && !!contracts,
-	});
+            return {
+                saltPin,
+                saltSeed,
+                saltChallenge,
+                commitmentKem,
+                commitmentSig,
+            };
+        },
+        staleTime: 1 * DAY,
+        enabled: !!wallet && !!contracts,
+    });
 }
 
 export function useIsLoggedIn() {
-	const { wallet, contracts, wasm } = useFilosignContext();
-	const { data: isRegistered } = useIsRegistered();
-	const { data: storedKeygenData } = useStoredKeygenData();
+    const { wallet, contracts, wasm } = useFilosignContext();
+    const { data: isRegistered } = useIsRegistered();
+    const { data: storedKeygenData } = useStoredKeygenData();
 
-	return useQuery({
-		queryKey: ["fsQ-is-logged-in", wallet?.account.address],
-		queryFn: async () => {
-			if (!wallet || !contracts || !wasm.dilithium) return false;
-			if (!isRegistered || !storedKeygenData) return false;
+    return useQuery({
+        queryKey: ["fsQ-is-logged-in", wallet?.account.address],
+        queryFn: async () => {
+            if (!wallet || !contracts || !wasm.dilithium) return false;
+            if (!isRegistered || !storedKeygenData) return false;
 
-			const keyStore = idb({
-				db: wallet.account.address,
-				store: "fs-keystore",
-			});
-			const keySeed = await keyStore.secret.get("key-seed");
-			if (!keySeed) return false;
+            const keyStore = idb({
+                db: wallet.account.address,
+                store: "fs-keystore",
+            });
+            const keySeed = await keyStore.secret.get("key-seed");
+            if (!keySeed) return false;
 
-			const keygenData = await seedKeyGen(keySeed, { dl: wasm.dilithium });
+            const keygenData = await seedKeyGen(keySeed, { dl: wasm.dilithium });
 
-			const { commitmentKem, commitmentSig } = storedKeygenData;
+            const { commitmentKem, commitmentSig } = storedKeygenData;
 
-			if (
-				commitmentKem !== keygenData.commitmentKem ||
-				commitmentSig !== keygenData.commitmentSig
-			) {
-				keyStore.del("key-seed");
-				return false;
-			}
+            if (
+                commitmentKem !== keygenData.commitmentKem ||
+                commitmentSig !== keygenData.commitmentSig
+            ) {
+                keyStore.del("key-seed");
+                return false;
+            }
 
-			return true;
-		},
-		staleTime: 1 * DAY,
-		enabled:
-			!!wallet &&
-			!!contracts &&
-			!!wasm.dilithium &&
-			!!isRegistered &&
-			!!storedKeygenData,
-	});
+            return true;
+        },
+        staleTime: 1 * DAY,
+        enabled:
+            !!wallet &&
+            !!contracts &&
+            !!wasm.dilithium &&
+            !!isRegistered &&
+            !!storedKeygenData,
+    });
+}
+
+export function useAuthedApi() {
+    const { api } = useFilosignContext();
+    const { action: cryptoAction } = useCryptoSeed();
+
+    if (api.jwtExists) {
+        api.validateJwt()
+        return api;
+    }
+
+
+
+}
+
+export function useCryptoSeed() {
+    const { wallet, } = useFilosignContext();
+
+    async function action<T>(fn: (seed: Uint8Array<ArrayBuffer>) => T) {
+        if (!wallet) {
+            throw new Error("No wallet available");
+        }
+        const keyStore = idb({
+            db: wallet.account.address,
+            store: "fs-keystore",
+        });
+
+        const keySeed = await keyStore.secret.get("key-seed");
+        if (!keySeed) throw new Error("No key seed found in keystore, most probably not logged in");
+
+        return fn(new Uint8Array(keySeed));
+    }
+
+    return { action };
 }
 
 export function useLogin() {
-	const { api, contracts, wallet, wasm } = useFilosignContext();
-	const queryClient = useQueryClient();
+    const { api, contracts, wallet, wasm } = useFilosignContext();
+    const queryClient = useQueryClient();
 
-	const { data: isRegistered } = useIsRegistered();
-	const { data: isLoggedIn } = useIsLoggedIn();
+    const { data: isRegistered } = useIsRegistered();
+    const { data: isLoggedIn } = useIsLoggedIn();
 
-	return useMutation({
-		mutationKey: ["fsM-login"],
-		mutationFn: async (params: { pin: string }) => {
-			if (isLoggedIn) return;
+    return useMutation({
+        mutationKey: ["fsM-login"],
+        mutationFn: async (params: { pin: string }) => {
+            if (isLoggedIn) return;
 
-			const { pin } = params;
+            const { pin } = params;
 
-			if (!contracts || !wallet || !wasm.dilithium) {
-				throw new Error("unreachable");
-			}
+            if (!contracts || !wallet || !wasm.dilithium) {
+                throw new Error("unreachable");
+            }
 
-			const keyStore = idb({
-				db: wallet.account.address,
-				store: "fs-keystore",
-			});
+            const keyStore = idb({
+                db: wallet.account.address,
+                store: "fs-keystore",
+            });
 
-			if (!isRegistered) {
-				const keygenData = await walletKeyGen(wallet, {
-					pin,
-					dl: wasm.dilithium,
-				});
+            if (!isRegistered) {
+                const keygenData = await walletKeyGen(wallet, {
+                    pin,
+                    dl: wasm.dilithium,
+                });
 
-				const tx = await contracts.FSKeyRegistry.write.registerKeygenData([
-					keygenData.saltPin,
-					keygenData.saltSeed,
-					keygenData.saltChallenge,
-					keygenData.commitmentKem,
-					keygenData.commitmentSig,
-				]);
+                const tx = await contracts.FSKeyRegistry.write.registerKeygenData([
+                    keygenData.saltPin,
+                    keygenData.saltSeed,
+                    keygenData.saltChallenge,
+                    keygenData.commitmentKem,
+                    keygenData.commitmentSig,
+                ]);
 
-				const success = await api.rpc.tx(tx, {
-					encryptionPublicKey: toHex(keygenData.kemKeypair.publicKey),
-					signaturePublicKey: toHex(keygenData.sigKeypair.publicKey),
-				});
+                const success = await api.rpc.tx(tx, {
+                    encryptionPublicKey: toHex(keygenData.kemKeypair.publicKey),
+                    signaturePublicKey: toHex(keygenData.sigKeypair.publicKey),
+                });
 
-				if (!success) {
-					throw new Error("Failed to register keygen data");
-				}
+                if (!success) {
+                    throw new Error("Failed to register keygen data");
+                }
 
-				await keyStore.secret.put("key-seed", new Uint8Array(keygenData.seed));
-			} else {
-				const [saltPin, saltSeed, saltChallenge, commitmentKem, commitmentSig] =
-					await contracts.FSKeyRegistry.read.keygenData([
-						wallet.account.address,
-					]);
+                await keyStore.secret.put("key-seed", new Uint8Array(keygenData.seed));
+            } else {
+                const [saltPin, saltSeed, saltChallenge, commitmentKem, commitmentSig] =
+                    await contracts.FSKeyRegistry.read.keygenData([
+                        wallet.account.address,
+                    ]);
 
-				const keygenData = await walletKeyGen(wallet, {
-					pin,
-					salts: {
-						challenge: saltChallenge,
-						seed: saltSeed,
-						pin: saltPin,
-					},
-					dl: wasm.dilithium,
-				});
+                const keygenData = await walletKeyGen(wallet, {
+                    pin,
+                    salts: {
+                        challenge: saltChallenge,
+                        seed: saltSeed,
+                        pin: saltPin,
+                    },
+                    dl: wasm.dilithium,
+                });
 
-				if (
-					commitmentKem !== keygenData.commitmentKem ||
-					commitmentSig !== keygenData.commitmentSig
-				) {
-					throw new Error("Invalid PIN");
-				}
+                if (
+                    commitmentKem !== keygenData.commitmentKem ||
+                    commitmentSig !== keygenData.commitmentSig
+                ) {
+                    throw new Error("Invalid PIN");
+                }
 
-				await keyStore.secret.put("key-seed", new Uint8Array(keygenData.seed));
-			}
+                await keyStore.secret.put("key-seed", new Uint8Array(keygenData.seed));
+            }
 
-			queryClient.refetchQueries({
-				queryKey: ["fsQ-is-logged-in", wallet?.account.address],
-			});
-		},
-	});
+            queryClient.refetchQueries({
+                queryKey: ["fsQ-is-logged-in", wallet?.account.address],
+            });
+        },
+    });
 }
 
 export function useLogout() {
-	const { wallet } = useFilosignContext();
-	const queryClient = useQueryClient();
+    const { wallet } = useFilosignContext();
+    const queryClient = useQueryClient();
 
-	return useMutation({
-		mutationKey: ["fsM-logout"],
-		mutationFn: async () => {
-			if (!wallet) {
-				throw new Error("No wallet available for logout");
-			}
+    return useMutation({
+        mutationKey: ["fsM-logout"],
+        mutationFn: async () => {
+            if (!wallet) {
+                throw new Error("No wallet available for logout");
+            }
 
-			const keyStore = idb({
-				db: wallet.account.address,
-				store: "fs-keystore",
-			});
-			keyStore.del("key-seed");
-			queryClient.invalidateQueries({
-				queryKey: ["fsQ-is-logged-in", wallet?.account.address],
-			});
-		},
-	});
+            const keyStore = idb({
+                db: wallet.account.address,
+                store: "fs-keystore",
+            });
+            keyStore.del("key-seed");
+            queryClient.invalidateQueries({
+                queryKey: ["fsQ-is-logged-in", wallet?.account.address],
+            });
+        },
+    });
 }
