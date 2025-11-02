@@ -11,7 +11,7 @@ import analytics from "../../../lib/analytics/logger";
 import db from "../../../lib/db";
 import { fsContracts } from "../../../lib/evm";
 import { bucket } from "../../../lib/s3/client";
-import { getOrCreateUserDataset } from "../../../lib/synapse";
+import { getOrCreateUserDataset, synapse } from "../../../lib/synapse";
 import { respond } from "../../../lib/utils/respond";
 import { authenticated } from "../../middleware/auth";
 

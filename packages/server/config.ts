@@ -1,28 +1,39 @@
+import { isHex } from "viem";
+import { privateKeyToAddress } from "viem/accounts";
 import * as chains from "viem/chains";
 import env from "./env";
 
 const INDEXER = {
-	CONFIRMATIONS: 0n,
-	MAX_BATCH_BLOCKS: 200n,
-	POLL_INTERVAL_MS: 2_000,
-	LOGS_PER_TX: 10,
-	DEFAULT_START_BLOCK: 3_081_600n,
-	JOB_LOCK_TTL_MS: 30_000,
-	DEFAULT_MAX_JOB_ATTEMPTS: 5,
-	MAX_NODE_LOOKBACK_PERIOD_MS: 16 * 60 * 60 * 1000,
+    CONFIRMATIONS: 0n,
+    MAX_BATCH_BLOCKS: 200n,
+    POLL_INTERVAL_MS: 2_000,
+    LOGS_PER_TX: 10,
+    DEFAULT_START_BLOCK: 3_081_600n,
+    JOB_LOCK_TTL_MS: 30_000,
+    DEFAULT_MAX_JOB_ATTEMPTS: 5,
+    MAX_NODE_LOOKBACK_PERIOD_MS: 16 * 60 * 60 * 1000,
 };
 
 const runtimeChain = Object.values(chains).find(
-	(chain) => chain.id === Number(env.RUNTIME_CHAIN_ID),
+    (chain) => chain.id === Number(env.RUNTIME_CHAIN_ID),
 );
 
 if (!runtimeChain) {
-	throw new Error(`Chain with id ${env.RUNTIME_CHAIN_ID} not found`);
+    throw new Error(`Chain with id ${env.RUNTIME_CHAIN_ID} not found`);
 }
 
+if (!isHex(env.EVM_PRIVATE_KEY_SYNAPSE)) {
+    throw new Error(
+        "EVM_PRIVATE_KEY_SYNAPSE is not set properly in environment variables",
+    );
+}
+
+const serverAddressSynapse = privateKeyToAddress(env.EVM_PRIVATE_KEY_SYNAPSE);
+
 const config = {
-	runtimeChain,
-	INDEXER,
+    runtimeChain,
+    serverAddressSynapse,
+    INDEXER,
 };
 
 export default config;
