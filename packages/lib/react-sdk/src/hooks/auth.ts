@@ -110,11 +110,6 @@ export function useAuthedApi() {
     const { api } = useFilosignContext();
     const { action: cryptoAction } = useCryptoSeed();
 
-    if (api.jwtExists) {
-        api.validateJwt()
-        return api;
-    }
-
 
 
 }

@@ -15,7 +15,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "../../../lib/components/ui/card";
-import { useIsLoggedIn, useIsRegistered, useLogout, useLogin } from "@filosign/react/hooks";
+import { useIsLoggedIn, useIsRegistered, useLogout, useLogin, useStoredKeygenData } from "@filosign/react/hooks";
 
 export function AuthenticationTest() {
 	const { user, login: loginPrivy, logout: logoutPrivy } = usePrivy();
@@ -25,6 +25,7 @@ export function AuthenticationTest() {
 	const logout = useLogout();
 	const isRegistered = useIsRegistered();
 	const isLoggedIn = useIsLoggedIn();
+	const storedKeygenData = useStoredKeygenData();
 
 	async function handleRegisterFilosign() {
 		try {
@@ -33,6 +34,9 @@ export function AuthenticationTest() {
 				queryKey: ["filosign", "isRegistered"],
 			});
 			console.log("register", login.isSuccess, login.isError);
+
+			// Force page refresh after successful registration
+			window.location.reload();
 		} catch (error) {
 			console.error("Failed to register", error);
 		}
@@ -165,6 +169,41 @@ export function AuthenticationTest() {
 					</CardContent>
 				</Card>
 			</div>
+
+			{/* Keygen Data Display */}
+			<Card>
+				<CardHeader>
+					<CardTitle className="flex items-center gap-2">
+						<KeyIcon className="w-5 h-5" />
+						Stored Keygen Data
+					</CardTitle>
+					<CardDescription>
+						Current cryptographic key data stored for this wallet
+					</CardDescription>
+				</CardHeader>
+				<CardContent>
+					<div className="bg-muted/50 p-4 rounded-lg">
+						{storedKeygenData.isLoading ? (
+							<div className="flex items-center gap-2 text-muted-foreground">
+								<SpinnerIcon className="w-4 h-4 animate-spin" />
+								Loading keygen data...
+							</div>
+						) : storedKeygenData.error ? (
+							<div className="text-red-600">
+								Error loading keygen data: {storedKeygenData.error.message}
+							</div>
+						) : storedKeygenData.data ? (
+							<pre className="text-xs whitespace-pre-wrap">
+								{JSON.stringify(storedKeygenData.data, null, 2)}
+							</pre>
+						) : (
+							<div className="text-muted-foreground">
+								No keygen data found. Register with Filosign to generate cryptographic keys.
+							</div>
+						)}
+					</div>
+				</CardContent>
+			</Card>
 		</div>
 	);
 }
