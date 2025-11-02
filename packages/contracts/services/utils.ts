@@ -69,16 +69,15 @@ export async function eip712signature(
 	// 	verifyingContract: contracts[contractName].address,
 	// };
 
-	const domain = await contracts[contractName].read.eip712Domain();
+	const domain = {
+		name: contractName,
+		version: "1",
+		chainId: contracts.$client.chain.id,
+		verifyingContract: contracts[contractName].address,
+	};
 
 	return contracts.$client.signTypedData({
-		domain: {
-			name: domain[1],
-			version: domain[2],
-			chainId: domain[3],
-			verifyingContract: domain[4],
-			salt: domain[5],
-		},
+		domain,
 		...args,
 	});
 }

@@ -49,6 +49,7 @@ export default function TestPage() {
 	const isLoggedIn = useIsLoggedIn();
 
 	const { data: userProfile } = useUserProfileByAddress(walletClient?.account.address as `0x${string}`);
+	console.log({ userProfile });
 
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-background to-muted/20 p-6">
@@ -130,6 +131,12 @@ export default function TestPage() {
 										<code className="text-xs bg-muted px-2 py-1 rounded">
 											{user.wallet?.address}
 										</code>
+										<Button variant="ghost" size="icon" onClick={() => {
+											if (!user.wallet?.address) return;
+											copyToClipboard(user.wallet?.address);
+										}}>
+											<CopyIcon className="w-4 h-4" />
+										</Button>
 									</div>
 									<div className="flex items-center gap-2">
 										<KeyIcon className="w-4 h-4 text-muted-foreground" />
