@@ -7,6 +7,9 @@ import { authenticated } from "../../middleware/auth";
 
 const { shareRequests, shareApprovals } = db.schema;
 
+// Base hours for spam prevention: wait this^(cancelled_count) hours after cancelling
+const REQUEST_SPAM_BASE_HOURS = 3;
+
 export default new Hono()
     .post("/request", authenticated, async (ctx) => {
         const { recipientWallet, message, signature } = await ctx.req.json();
@@ -38,6 +41,30 @@ export default new Hono()
 
         if (existingRequest) {
             return respond.err(ctx, "A pending request already exists", 409);
+        }
+
+        // spam prevetion: count cancelsed requests
+        const cancelledRequests = await db
+            .select()
+            .from(shareRequests)
+            .where(
+                and(
+                    eq(shareRequests.senderWallet, sender),
+                    eq(shareRequests.recipientWallet, recipient),
+                    eq(shareRequests.status, "CANCELLED"),
+                ),
+            )
+            .orderBy(desc(shareRequests.createdAt));
+
+        if (cancelledRequests.length > 0) {
+            const lastCancelled = cancelledRequests[0];
+            const hoursSinceCancel = (Date.now() - Number(lastCancelled.createdAt)) / (1000 * 60 * 60);
+            const requiredWaitHours = REQUEST_SPAM_BASE_HOURS ** cancelledRequests.length;
+
+            if (hoursSinceCancel < requiredWaitHours) {
+                const remainingHours = Math.ceil(requiredWaitHours - hoursSinceCancel);
+                return respond.err(ctx, `Please wait ${remainingHours} more hours before sending another request (spam prevention)`, 429);
+            }
         }
 
         const newRequest = db
@@ -94,20 +121,42 @@ export default new Hono()
         const userWallet = ctx.var.userWallet;
         const [approval] = await db
             .select()
-            .from(shareApprovals)
+            .from(shareRequests)
             .where(
                 and(
-                    eq(shareApprovals.id, id),
-                    eq(shareApprovals.recipientWallet, userWallet),
-                    eq(shareApprovals.active, true),
+                    eq(shareRequests.id, id),
+                    eq(shareRequests.senderWallet, userWallet),
+                    eq(shareRequests.status, "PENDING")
                 ),
             );
         if (!approval) {
             return respond.err(ctx, "Approval not found or cannot cancel", 404);
         }
         await db
-            .update(shareApprovals)
-            .set({ active: false })
-            .where(eq(shareApprovals.id, id));
-        return respond.ok(ctx, {}, "Approval cancelled", 200);
+            .update(shareRequests)
+            .set({ status: "CANCELLED" })
+            .where(eq(shareRequests.id, id));
+        return respond.ok(ctx, {}, "Request cancelled", 200);
+    })
+    .delete("/:id/reject", authenticated, async (ctx) => {
+        const id = ctx.req.param("id");
+        const userWallet = ctx.var.userWallet;
+        const [approval] = await db
+            .select()
+            .from(shareRequests)
+            .where(
+                and(
+                    eq(shareRequests.id, id),
+                    eq(shareRequests.recipientWallet, userWallet),
+                    eq(shareRequests.status, "PENDING")
+                ),
+            );
+        if (!approval) {
+            return respond.err(ctx, "Request not found or cannot reject", 404);
+        }
+        await db
+            .update(shareRequests)
+            .set({ status: "REJECTED" })
+            .where(eq(shareRequests.id, id));
+        return respond.ok(ctx, {}, "Request rejected", 200);
     });
