@@ -18,24 +18,20 @@ export default new Hono()
             return respond.err(ctx, "Missing wallet address", 400);
         }
 
-        const nonce = keccak256(numberToHex(Date.now() + Math.random() * 1e10));
+        const nonce = keccak256(numberToHex(Math.floor(Date.now() + Math.random() * 1e10)));
         nonces[wallet] = { nonce, validTill: Date.now() + 5 * MINUTE };
 
         return respond.ok(ctx, { nonce }, "nonce generated", 200);
     })
 
     .post("/verify", async (ctx) => {
-        const address = ctx.req.query("address");
-        const signature = ctx.req.query("signature");
+        const { address, signature } = await ctx.req.json();
 
         if (!address || !isAddress(address)) {
             return respond.err(ctx, "Missing or invalid address", 400);
         }
-        if (!signature) {
+        if (!signature || typeof signature !== "string" || !isHex(signature)) {
             return respond.err(ctx, "Missing signature", 400);
-        }
-        if (!isHex(signature)) {
-            return respond.err(ctx, "Invalid signature format", 400);
         }
 
         const msgData = nonces[address];
@@ -72,7 +68,7 @@ export default new Hono()
         }
 
         await db.update(users)
-            .set({ lastActiveAt: Date.now() })
+            .set({ lastActiveAt: new Date() })
             .where(eq(users.walletAddress, address));
 
         const token = issueJwtToken(address);

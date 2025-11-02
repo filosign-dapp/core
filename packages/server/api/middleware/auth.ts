@@ -29,6 +29,6 @@ export const authenticated = createMiddleware<{
     await next();
     console.log("If this is reacjed, tell spandan")
     await db.update(db.schema.users)
-        .set({ lastActiveAt: Date.now() })
+        .set({ lastActiveAt: new Date() })
         .where(eq(db.schema.users.walletAddress, payload.sub));
 });

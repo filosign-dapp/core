@@ -128,7 +128,7 @@ export function useAuthedApi() {
                     {
                         nonce: z.string(),
                     },
-                    "/auth/nonce",
+                    `/auth/nonce?address=${wallet.account.address}`,
                 );
 
                 const dl3Keypair = await signatures.keyGen({
@@ -146,8 +146,11 @@ export function useAuthedApi() {
                     {
                         token: z.string()
                     },
-                    "/auth/verify",
-                    { address: wallet.account.address, signature: toHex(signature) }
+                    `/auth/verify`,
+                    {
+                        address: wallet.account.address,
+                        signature: toHex(signature)
+                    }
                 )
 
                 api.setJwt(token)

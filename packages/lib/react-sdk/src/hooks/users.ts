@@ -3,30 +3,29 @@ import type { Address } from "viem";
 import z from "zod";
 import { zHexString } from "../../utils/zod";
 import { DAY } from "../constants";
-import { useFilosignContext } from "../context/FilosignProvider";
+import { useAuthedApi } from "./auth";
 
 export function useUserProfileByAddress(address: Address | undefined) {
-	const { contracts, wallet, api } = useFilosignContext();
+	const { data: api } = useAuthedApi()
 
 	return useQuery({
-		queryKey: ["fsQ-user-info-by-address", address, wallet?.account.address],
+		queryKey: ["fsQ-user-info-by-address", address],
 		queryFn: async () => {
-			if (!contracts || !wallet) throw new Error("No contracts or wallet found");
-			if (!address) throw new Error("No address provided");
+			if (!address || !api) throw new Error("Not unreachable");
 
 			const userInfo = await api.rpc.getSafe(
 				{
 					walletAddress: zHexString(),
 					encryptionPublicKey: zHexString(),
-					lastActiveAt: z.number(),
-					createdAt: z.number(),
+					lastActiveAt: z.string(),
+					createdAt: z.string(),
 				},
 				`/users/profile/${address}`,
 			);
 
 			return userInfo.data;
 		},
-		enabled: !!wallet && !!contracts && !!address,
+		enabled: !!address && !!api,
 		staleTime: 1 * DAY,
 	});
 }
