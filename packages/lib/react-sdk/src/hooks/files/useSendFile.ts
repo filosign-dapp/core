@@ -1,6 +1,5 @@
 import { computeCidIdentifier, eip712signature } from "@filosign/contracts";
 import {
-    computeCommitment,
     encryption,
     jsonStringify,
     KEM,
@@ -58,15 +57,23 @@ export function useSendFile() {
 
             const pieceCid = calculatePieceCid(encryptedData);
 
-            const { ciphertext: kemCiphertext, sharedSecret: ssKEM } =
+            const { ciphertext: recipientKemCiphertext, sharedSecret: ssKEM } =
                 await KEM.encapsulate({
                     publicKeyOther: toBytes(recipient.encryptionPublicKey),
                 });
-
-            const encryptedEncryptionKey = await encryption.encrypt({
+            const recipientEncryptedEncryptionKey = await encryption.encrypt({
                 message: encryptionKey,
                 secretKey: ssKEM,
                 info: `${pieceCid.toString()}:${recipient.address}`,
+            });
+
+            const { ciphertext: kemCiphertext, sharedSecret: sKEM } = await KEM.encapsulate({
+                publicKeyOther: toBytes(recipient.encryptionPublicKey),
+            });
+            const selfEncryptedEncryptionKey = await encryption.encrypt({
+                message: encryptionKey,
+                secretKey: sKEM,
+                info: `${pieceCid.toString()}:${wallet.account.address}`,
             });
 
             const uploadStartResponse = await api.rpc.postSafe(
@@ -122,13 +129,18 @@ export function useSendFile() {
                 recipient: recipient.address,
                 pieceCid: pieceCid.toString(),
                 signature,
-                encryptedEncryptionKey: toHex(encryptedEncryptionKey),
+                encryptedEncryptionKey: toHex(recipientEncryptedEncryptionKey),
+                senderEncryptedEncryptionKey: toHex(selfEncryptedEncryptionKey),
                 kemCiphertext: toHex(kemCiphertext),
                 timestamp: timestamp,
                 nonce: Number(nonce),
             };
 
-            const registerResponse = await api.rpc.postSafe({}, "/files", requestPayload);
+            const registerResponse = await api.rpc.postSafe(
+                {},
+                "/files",
+                requestPayload,
+            );
 
             return registerResponse.success;
         },

@@ -13,17 +13,17 @@ export function useFileInfo(args: { pieceCid: string | undefined }) {
                 {
                     pieceCid: z.string(),
                     sender: z.string(),
-                    status: zHexString(),
+                    status: z.string(),
                     onchainTxHash: zHexString(),
                     createdAt: z.string(),
-                    kemCiphertext: z.string(),
+                    recipient: z.string(),
+                    kemCiphertext: z.string().nullable(),
+                    encryptedEncryptionKey: z.string().nullable(),
+                    senderEncryptedEncryptionKey: z.string().nullable(),
                 },
                 `/files/${args.pieceCid}`,
             );
 
-            if (!response.success) {
-                throw new Error("Failed to fetch file info");
-            }
             return response.data;
         },
         enabled: !!args.pieceCid,
