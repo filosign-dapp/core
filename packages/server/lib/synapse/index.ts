@@ -5,7 +5,7 @@ import env from "../../env";
 import db from "../db";
 import { tryCatch } from "../utils/tryCatch";
 
-const WITH_CDN = false;
+const WITH_CDN = true;
 
 export const synapse = await Synapse.create({
 	privateKey: env.EVM_PRIVATE_KEY_SYNAPSE,

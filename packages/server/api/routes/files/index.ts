@@ -158,14 +158,14 @@ export default new Hono()
             );
         }
 
-        ds.upload(bytes).then((uploadResult) => {
-            file.delete();
+        ds.upload(bytes).then(async (uploadResult) => {
+            await file.delete();
 
             if (uploadResult.pieceCid.toString() !== pieceCid) {
-                db.delete(files).where(eq(files.pieceCid, pieceCid));
+                await db.delete(files).where(eq(files.pieceCid, pieceCid));
             }
 
-            analytics.log("file uploaded to filecoin warmstorage", {
+            await analytics.log("file uploaded to filecoin warmstorage", {
                 pieceCid: pieceCid,
                 sender: sender,
                 recipient: recipient,
@@ -174,11 +174,11 @@ export default new Hono()
                 uploadResult: uploadResult,
             });
 
-            db.update(files)
+            await db.update(files)
                 .set({ status: "foc" })
                 .where(eq(files.pieceCid, pieceCid))
-                .catch((_) => {
-                    db.delete(files).where(eq(files.pieceCid, pieceCid));
+                .catch(async (_) => {
+                    await db.delete(files).where(eq(files.pieceCid, pieceCid));
                 });
         });
 
