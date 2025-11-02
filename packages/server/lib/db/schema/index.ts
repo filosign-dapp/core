@@ -1,11 +1,9 @@
 import * as file from "./file";
-import * as shareCapability from "./shareCapability";
-import * as sys from "./sys";
+import * as shareCapability from "./sharing";
 import * as user from "./user";
 
 // Combine all schema parts
 const schema = {
-	// ...sys,
 	...shareCapability,
 	...user,
 	...file,
