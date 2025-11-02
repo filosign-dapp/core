@@ -1,20 +1,27 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
+import imageCompression from "browser-image-compression";
 import type { Address } from "viem";
 import z from "zod";
 import { zHexString } from "../../utils/zod";
 import { DAY, MINUTE } from "../constants";
 import { useAuthedApi } from "./auth";
 
-export function useUserProfileByQuery(query: { address?: Address | undefined, username?: string | undefined }) {
-    const { data: api } = useAuthedApi()
+export function useUserProfileByQuery(query: {
+    address?: Address | undefined;
+    username?: string | undefined;
+}) {
+    const { data: api } = useAuthedApi();
 
     return useQuery({
         queryKey: ["fsQ-user-info-by-address", query],
         queryFn: async () => {
-            if (!query.address && !query.username || !api) throw new Error("Not unreachable");
+            if ((!query.address && !query.username) || !api)
+                throw new Error("Not unreachable");
 
             if (!!query.address && !!query.username) {
-                console.warn("Both address and username provided to useUserProfileByQuery, using address");
+                console.warn(
+                    "Both address and username provided to useUserProfileByQuery, using address",
+                );
             }
 
             const userInfo = await api.rpc.getSafe(
@@ -34,7 +41,6 @@ export function useUserProfileByQuery(query: { address?: Address | undefined, us
         enabled: (!!query.address || !!query.username) && !!api,
         staleTime: 1 * DAY,
     });
-
 }
 
 export function useUserProfile() {
@@ -62,7 +68,10 @@ export function useUserProfile() {
     });
 }
 
-export function useUpdateUserProfilePrevalidate(args: { email?: string; username?: string }) {
+export function useUpdateUserProfilePrevalidate(args: {
+    email?: string;
+    username?: string;
+}) {
     const { data: api } = useAuthedApi();
 
     return useQuery({
@@ -97,14 +106,10 @@ export function useUpdateUserProfile() {
         mutationFn: async (args: { email?: string; username?: string }) => {
             if (!api) throw new Error("Not reachable");
 
-            await api.rpc.putSafe(
-                {},
-                `/users/profile`,
-                {
-                    email: args.email,
-                    username: args.username,
-                },
-            );
+            await api.rpc.putSafe({}, `/users/profile`, {
+                email: args.email,
+                username: args.username,
+            });
         },
     });
 }
@@ -116,8 +121,17 @@ export function useUpdateUserAvatar() {
         mutationFn: async (args: { avatar: File }) => {
             if (!api) throw new Error("Not reachable");
 
+            if (!args.avatar.type.startsWith("image/")) {
+                throw new Error("File must be an image");
+            }
+            const compressedFile = await imageCompression(args.avatar, {
+                maxSizeMB: 32 / 1024, // 32KB
+                fileType: "image/webp",
+                useWebWorker: true,
+            });
+
             const formData = new FormData();
-            formData.append("avatar", args.avatar);
+            formData.append("avatar", compressedFile);
 
             const response = await api.rpc.putSafe(
                 {
