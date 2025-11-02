@@ -16,6 +16,8 @@ export default new Hono().
                 walletAddress: users.walletAddress,
                 keygenData: users.keygenDataJson,
                 createdAt: users.createdAt,
+                email: users.email,
+                username: users.username,
             })
             .from(users)
             .where(eq(users.walletAddress, wallet));
@@ -30,19 +32,20 @@ export default new Hono().
     .put("/", authenticated, async (ctx) => {
         const wallet = ctx.var.userWallet;
         const { emailRaw, usernameRaw } = await ctx.req.json();
-        const email = emailRaw?.trim();
-        const username = usernameRaw?.trim();
 
-        if (email !== undefined) {
-            if (typeof email !== "string" || !email.includes("@")) {
+        if (emailRaw !== undefined) {
+            if (typeof emailRaw !== "string" || !emailRaw.includes("@")) {
                 return respond.err(ctx, "Invalid email format", 400);
             }
         }
-        if (username !== undefined) {
-            if (typeof username !== "string" || username.length < 3 || username.length > 16) {
+        if (usernameRaw !== undefined) {
+            if (typeof usernameRaw !== "string" || usernameRaw.trim().length < 3 || usernameRaw.length > 16) {
                 return respond.err(ctx, "Username must be between 3 and 16 characters", 400);
             }
         }
+
+        const email = emailRaw?.trim();
+        const username = usernameRaw?.trim();
 
         await db
             .update(users)
@@ -83,26 +86,34 @@ export default new Hono().
 
     })
 
-    .get("/:address", authenticated, async (ctx) => {
-        const wallet = ctx.req.param("address");
+    .get("/:q", authenticated, async (ctx) => {
+        const q = ctx.req.param("q");
 
-        if (!isAddress(wallet)) {
-            return respond.err(ctx, "Invalid wallet address", 400);
+        const returns = {
+            walletAddress: users.walletAddress,
+            encryptionPublicKey: users.encryptionPublicKey,
+            lastActiveAt: users.lastActiveAt,
+            createdAt: users.createdAt
         }
+        let userData: Record<string, unknown> | null = null;
 
-        const [userData] = await db
-            .select({
-                walletAddress: users.walletAddress,
-                encryptionPublicKey: users.encryptionPublicKey,
-                lastActiveAt: users.lastActiveAt,
-                createdAt: users.createdAt,
-            })
-            .from(users)
-            .where(eq(users.walletAddress, wallet));
+        if (isAddress(q)) {
+            const [dbResp] = await db
+                .select(returns)
+                .from(users)
+                .where(eq(users.walletAddress, q));
+            userData = dbResp;
+        } else {
+            const [dbResp] = await db
+                .select(returns)
+                .from(users)
+                .where(eq(users.username, q));
+            userData = dbResp;
+        }
 
         if (!userData) {
             return respond.err(ctx, "User not found", 404);
         }
 
         return respond.ok(ctx, userData, "User data retrieved", 200);
-    });
+    })
