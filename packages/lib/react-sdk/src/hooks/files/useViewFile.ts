@@ -4,7 +4,6 @@ import {
     KEM,
     toBytes
 } from "@filosign/crypto-utils";
-import { RPC_URLS, Synapse } from "@filoz/synapse-sdk";
 import { useMutation } from "@tanstack/react-query";
 import z from "zod";
 import { idb } from "../../../utils/idb";
