@@ -95,7 +95,7 @@ export default new Hono().
                 walletAddress: users.walletAddress,
                 encryptionPublicKey: users.encryptionPublicKey,
                 lastActiveAt: users.lastActiveAt,
-                // createdAt: users.createdAt,
+                createdAt: users.createdAt,
             })
             .from(users)
             .where(eq(users.walletAddress, wallet));

@@ -1,4 +1,4 @@
-import { customType, integer, timestamp } from "drizzle-orm/pg-core";
+import { customType, timestamp } from "drizzle-orm/pg-core";
 import {
 	type Address,
 	checksumAddress,

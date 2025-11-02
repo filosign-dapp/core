@@ -1,5 +1,6 @@
 import {
 	ClockIcon,
+	CopyIcon,
 	EyeIcon,
 	FileIcon,
 	KeyIcon,
@@ -11,7 +12,6 @@ import {
 import { usePrivy } from "@privy-io/react-auth";
 import { formatEther } from "viem";
 import { useBalance, useWalletClient } from "wagmi";
-import { useState } from "react";
 import { Badge } from "../../lib/components/ui/badge";
 import {
 	Card,
@@ -34,11 +34,12 @@ import { ShareReceiverTest } from "./_components/ShareReceiverTest";
 import { ShareSenderTest } from "./_components/ShareSenderTest";
 import { StatusBadge } from "./_components/StatusBadge";
 import { useIsLoggedIn, useIsRegistered, useUserProfileByAddress } from "@filosign/react/hooks";
+import { copyToClipboard, truncateAddress } from "@/src/lib/utils";
+import { Button } from "@/src/lib/components/ui/button";
 
 export default function TestPage() {
 	const { user } = usePrivy();
 	const { data: walletClient } = useWalletClient();
-	const [copiedItem, setCopiedItem] = useState<string | null>(null);
 
 	const { data: balance } = useBalance({
 		address: walletClient?.account.address,
@@ -134,8 +135,14 @@ export default function TestPage() {
 										<KeyIcon className="w-4 h-4 text-muted-foreground" />
 										<span className="text-sm font-medium">Encryption Public Key:</span>
 										<p className="text-xs">
-
+											{truncateAddress(userProfile?.encryptionPublicKey)}
 										</p>
+										<Button variant="ghost" size="icon" onClick={() => {
+											if (!userProfile?.encryptionPublicKey) return;
+											copyToClipboard(userProfile?.encryptionPublicKey);
+										}}>
+											<CopyIcon className="w-4 h-4" />
+										</Button>
 									</div>
 									{balance && (
 										<div className="flex items-center gap-2">

@@ -4,11 +4,12 @@ import { tEvmAddress, timestamps } from "../helpers";
 export const users = t.pgTable("users", {
     walletAddress: tEvmAddress().primaryKey(),
     keygenDataJson: t.jsonb(),
+    // email: t.text(),
     encryptionPublicKey: t.text().notNull(),
     signaturePublicKey: t.text().notNull(),
 
     /**non core here */
-    lastActiveAt: t.timestamp(),
+    lastActiveAt: t.timestamp({ withTimezone: true }),
     email: t.text(),
     username: t.text().unique(),
     avatarUrl: t.text(),
@@ -35,7 +36,7 @@ export const usersDatasets = t.pgTable("users_datasets", {
         .primaryKey(),
     dataSetId: t.integer().notNull(),
     providerAddress: t.text().notNull(),
-    totalDepositedBaseUnits: t.bigint({ mode: "bigint" }).notNull().default(0n),
+    totalDepositedBaseUnits: t.bigint({ mode: "bigint" }).notNull().default(BigInt(0)),
 
     ...timestamps,
 });

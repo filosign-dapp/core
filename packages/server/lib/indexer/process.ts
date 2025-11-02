@@ -60,7 +60,7 @@ export async function processTransaction(
                             commitmentKem: keygenData[3],
                             commitmentSig: keygenData[4],
                         }),
-                    }).execute();
+                    });
                 } catch (error) {
                     console.error(`Error inserting user: ${error}`);
                     throw error;

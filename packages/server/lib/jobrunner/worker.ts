@@ -261,7 +261,7 @@ async function processJob(job: Job, dbC: ReturnType<typeof createDbClient>) {
 							.values({
 								walletAddress: log.args.user,
 								encryptionPublicKey: publicKey,
-								lastActiveAt: Date.now(),
+								lastActiveAt: new Date(),
 
 								keygenDataJson: {
 									salt_auth: keyData[0],
