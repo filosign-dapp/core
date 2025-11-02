@@ -118,6 +118,11 @@ export function useAuthedApi() {
                 throw new Error("unreachable");
             }
 
+            if (api.jwtExists) {
+                api.ensureJwt();
+                return api;
+            }
+
             await cryptoAction(async (seed) => {
                 const { data: { nonce } } = await api.rpc.getSafe(
                     {
