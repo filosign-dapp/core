@@ -12,7 +12,7 @@ export const MB = 1024 * KB;
 export const MAX_FILE_SIZE = 30 * MB;
 
 export const JWTalgorithm = "HS512";
-export const JWTexpiration = (7 * DAY) / 1000; // 7 days
+export const JWTexpiration = (3 * HOUR) / 1000; // 3 hours
 const JWTPrivateKey = keccak256(Uint8Array.from(env.EVM_PRIVATE_KEY_SYNAPSE));
 const JWTPublicKey = privateKeyToAccount(JWTPrivateKey).publicKey;
 export const JWTKeypair = { private: JWTPrivateKey, public: JWTPublicKey };
