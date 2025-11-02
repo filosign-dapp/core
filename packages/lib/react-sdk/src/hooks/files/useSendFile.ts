@@ -1,5 +1,6 @@
 import { computeCidIdentifier, eip712signature } from "@filosign/contracts";
 import {
+    computeCommitment,
     encryption,
     jsonStringify,
     KEM,
@@ -45,15 +46,17 @@ export function useSendFile() {
                 }),
             );
 
-            const pieceCid = calculatePieceCid(data);
-
             const encryptionKey = randomBytes(32);
+
+            const encryptionInfo = "ignore-encryption-info";
 
             const encryptedData = await encryption.encrypt({
                 message: data,
                 secretKey: encryptionKey,
-                info: pieceCid.toString(),
+                info: encryptionInfo,
             });
+
+            const pieceCid = calculatePieceCid(encryptedData);
 
             const { ciphertext: kemCiphertext, sharedSecret: ssKEM } =
                 await KEM.encapsulate({
@@ -63,7 +66,7 @@ export function useSendFile() {
             const encryptedEncryptionKey = await encryption.encrypt({
                 message: encryptionKey,
                 secretKey: ssKEM,
-                info: `${pieceCid.toString()}:${wallet.account.address}>${recipient.address}`,
+                info: `${pieceCid.toString()}:${recipient.address}`,
             });
 
             const uploadStartResponse = await api.rpc.postSafe(

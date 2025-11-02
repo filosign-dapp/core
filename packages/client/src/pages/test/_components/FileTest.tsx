@@ -431,67 +431,6 @@ export function FileTest() {
 					</CardContent>
 				</Card>
 			)}
-
-			{/* Downloaded File Display */}
-			{downloadedFile && (
-				<Card>
-					<CardHeader>
-						<CardTitle className="flex items-center gap-2 text-lg">
-							<FileIcon className="w-5 h-5" />
-							Downloaded File
-						</CardTitle>
-						<CardDescription>
-							File has been downloaded and decrypted ({downloadedFile.length} bytes)
-						</CardDescription>
-					</CardHeader>
-					<CardContent>
-						<div className="bg-muted/50 p-4 rounded-lg">
-							<div className="flex gap-2 mb-4">
-								<Button
-									size="sm"
-									onClick={() => {
-										const blob = new Blob([downloadedFile] as any);
-										const url = URL.createObjectURL(blob);
-										const a = document.createElement('a');
-										a.href = url;
-										a.download = 'downloaded-file';
-										document.body.appendChild(a);
-										a.click();
-										document.body.removeChild(a);
-										URL.revokeObjectURL(url);
-									}}
-								>
-									<DownloadIcon className="w-4 h-4 mr-2" />
-									Download File
-								</Button>
-								<Button
-									size="sm"
-									variant="outline"
-									onClick={() => {
-										const text = new TextDecoder().decode(downloadedFile);
-										console.log('File content:', text);
-										alert('File content logged to console');
-									}}
-								>
-									<EyeIcon className="w-4 h-4 mr-2" />
-									View Content
-								</Button>
-							</div>
-							<div className="text-sm text-muted-foreground">
-								File size: {downloadedFile.length} bytes
-							</div>
-							{downloadedFile.length < 1000 && (
-								<div className="mt-2">
-									<strong>Preview (first 1000 chars):</strong>
-									<pre className="text-xs mt-1 whitespace-pre-wrap bg-background p-2 rounded border overflow-auto max-h-40">
-										{new TextDecoder().decode(downloadedFile.slice(0, 1000))}
-									</pre>
-								</div>
-							)}
-						</div>
-					</CardContent>
-				</Card>
-			)}
 		</div>
 	);
 }
