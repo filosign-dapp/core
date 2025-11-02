@@ -1,13 +1,19 @@
-import { computeCommitment, hash as fsHash, signatures, toBytes } from "@filosign/crypto-utils/node";
-import analytics from "../../../lib/analytics/logger";
+import {
+    computeCommitment,
+    hash as fsHash,
+    signatures,
+    toBytes,
+} from "@filosign/crypto-utils/node";
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { isAddress, isHex } from "viem";
+import analytics from "../../../lib/analytics/logger";
 import db from "../../../lib/db";
 import { fsContracts } from "../../../lib/evm";
 import { bucket } from "../../../lib/s3/client";
 import { getOrCreateUserDataset } from "../../../lib/synapse";
 import { respond } from "../../../lib/utils/respond";
+import { authenticated } from "../../middleware/auth";
 
 const { FSFileRegistry } = fsContracts;
 
@@ -15,7 +21,7 @@ const { files, fileRecipients, users } = db.schema;
 const MAX_FILE_SIZE = 30 * 1024 * 1024;
 
 export default new Hono()
-    .post("/upload/start", async (ctx) => {
+    .post("/upload/start", authenticated, async (ctx) => {
         const { pieceCid } = await ctx.req.json();
 
         if (!pieceCid || typeof pieceCid !== "string") {
@@ -39,21 +45,19 @@ export default new Hono()
         );
     })
 
-    .post("/", async (ctx) => {
+    .post("/", authenticated, async (ctx) => {
+        const sender = ctx.var.userWallet;
         const {
-            sender,
             pieceCid,
             recipient,
             signature,
             kemCiphertext,
             encryptedEncryptionKey,
+            senderEncryptedEncryptionKey,
             timestamp,
             nonce,
         } = await ctx.req.json();
 
-        if (typeof sender !== "string" || !isAddress(sender)) {
-            return respond.err(ctx, "Invalid sender address", 400);
-        }
         if (typeof timestamp !== "number" || timestamp <= 0) {
             return respond.err(ctx, "Invalid timestamp", 400);
         }
@@ -78,6 +82,13 @@ export default new Hono()
             !isHex(encryptedEncryptionKey)
         ) {
             return respond.err(ctx, "Invalid encryptedEncryptionKey", 400);
+        }
+        if (
+            !senderEncryptedEncryptionKey ||
+            typeof senderEncryptedEncryptionKey !== "string" ||
+            !isHex(senderEncryptedEncryptionKey)
+        ) {
+            return respond.err(ctx, "Invalid senderEncryptedEncryptionKey", 400);
         }
         if (!recipient || typeof recipient !== "string" || !isAddress(recipient)) {
             return respond.err(ctx, "Invalid recipient address", 400);
@@ -130,6 +141,7 @@ export default new Hono()
                     pieceCid,
                     status: "s3",
                     sender,
+                    senderEncryptedEncryptionKey,
                     onchainTxHash: txHash,
                 })
                 .returning();
@@ -174,7 +186,8 @@ export default new Hono()
                 uploadResult: uploadResult,
             });
 
-            await db.update(files)
+            await db
+                .update(files)
                 .set({ status: "foc" })
                 .where(eq(files.pieceCid, pieceCid))
                 .catch(async (_) => {
@@ -185,7 +198,9 @@ export default new Hono()
         return respond.ok(ctx, {}, "File uploaded to filecoin warmstorage", 201);
     })
 
-    .get("/:pieceCid", async (ctx) => {
+    .get("/:pieceCid", authenticated, async (ctx) => {
+        const userWallet = ctx.var.userWallet;
+
         const pieceCid = ctx.req.param("pieceCid");
         if (!pieceCid || typeof pieceCid !== "string") {
             return respond.err(ctx, "Invalid pieceCid", 400);
@@ -197,6 +212,7 @@ export default new Hono()
                 sender: files.sender,
                 status: files.status,
                 onchainTxHash: files.onchainTxHash,
+                senderEncryptedEncryptionKey: files.senderEncryptedEncryptionKey,
                 createdAt: files.createdAt,
             })
             .from(files)
@@ -216,11 +232,16 @@ export default new Hono()
             return respond.err(ctx, "File not found", 404);
         }
 
+        if (fileRecipient.recipientWallet !== userWallet) {
+            // @ts-expect-error <- this we have to do because we ont want to send the senderEncryptedEncryptionKey to anyone
+            fileRecord.senderEncryptedEncryptionKey = null;
+        }
+
         const response = {
             ...fileRecord,
             recipient: fileRecipient.recipientWallet,
             kemCiphertext: fileRecipient.ack ? fileRecipient.kemCiphertext : null,
-            encryptedEncryptionKey: fileRecipient.ack
+            encryptedEncryptionKey: (fileRecipient.ack && userWallet === fileRecipient.recipientWallet)
                 ? fileRecipient.encryptedEncryptionKey
                 : null,
         };
@@ -254,9 +275,7 @@ export default new Hono()
                 wallet: fileRecipients.recipientWallet,
             })
             .from(fileRecipients)
-            .where(
-                eq(fileRecipients.filePieceCid, pieceCid),
-            );
+            .where(eq(fileRecipients.filePieceCid, pieceCid));
 
         if (!recipientRecord) {
             return respond.err(ctx, "Recipient not found", 404);
@@ -319,20 +338,16 @@ export default new Hono()
 
         const [recipientRecord] = await db
             .select({
-                wallet: fileRecipients.recipientWallet
+                wallet: fileRecipients.recipientWallet,
             })
             .from(fileRecipients)
-            .where(
-                eq(fileRecipients.filePieceCid, pieceCid),
-            );
+            .where(eq(fileRecipients.filePieceCid, pieceCid));
         const [recipientUserRecord] = await db
             .select({
                 signaturePublicKey: users.signaturePublicKey,
             })
             .from(users)
-            .where(
-                eq(users.walletAddress, recipientRecord.wallet),
-            );
+            .where(eq(users.walletAddress, recipientRecord.wallet));
 
         const userNonce = await FSFileRegistry.read.nonce([recipientRecord.wallet]);
 
@@ -346,22 +361,22 @@ export default new Hono()
             dl3SignatureCommitment,
             BigInt(timestamp),
             BigInt(userNonce),
-            signature
+            signature,
         ] as const;
 
         const dilithium = await signatures.dilithiumInstance();
         const isDl3SignatureValid = signatures.verify({
             dl: dilithium,
             message: toBytes(computeCommitment(message)),
-            signature: (toBytes(dl3Signature)),
+            signature: toBytes(dl3Signature),
             publicKey: toBytes(recipientUserRecord.signaturePublicKey),
         });
         if (!isDl3SignatureValid) {
             return respond.err(ctx, "Invalid DL3 signature", 400);
         }
 
-
-        const valid = await FSFileRegistry.read.validateFileSigningSignature(message);
+        const valid =
+            await FSFileRegistry.read.validateFileSigningSignature(message);
 
         if (valid) {
             await db
