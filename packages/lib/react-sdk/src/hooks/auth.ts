@@ -1,5 +1,6 @@
-import { seedKeyGen, toHex, walletKeyGen } from "@filosign/crypto-utils";
+import { seedKeyGen, signatures, toBytes, toHex, walletKeyGen } from "@filosign/crypto-utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import z from "zod";
 import { idb } from "../../utils/idb";
 import { DAY, MINUTE } from "../constants";
 import { useFilosignContext } from "../context/FilosignProvider";
@@ -107,17 +108,61 @@ export function useIsLoggedIn() {
 }
 
 export function useAuthedApi() {
-    const { api } = useFilosignContext();
+    const { api, wallet, wasm } = useFilosignContext();
     const { action: cryptoAction } = useCryptoSeed();
 
+    return useQuery({
+        queryKey: ["fsQ-authed-api", api.rpc, wallet?.account.address],
+        queryFn: async () => {
+            if (!api || !wallet) {
+                throw new Error("unreachable");
+            }
 
+            await cryptoAction(async (seed) => {
+                const { data: { nonce } } = await api.rpc.getSafe(
+                    {
+                        nonce: z.string(),
+                    },
+                    "/auth/nonce",
+                );
 
+                const dl3Keypair = await signatures.keyGen({
+                    dl: wasm.dilithium,
+                    seed: seed
+                })
+
+                const signature = await signatures.sign({
+                    dl: wasm.dilithium,
+                    privateKey: (dl3Keypair).privateKey,
+                    message: toBytes(nonce)
+                })
+
+                const { data: { token } } = await api.rpc.postSafe(
+                    {
+                        token: z.string()
+                    },
+                    "/auth/verify",
+                    { address: wallet.account.address, signature: toHex(signature) }
+                )
+
+                api.setJwt(token)
+            });
+
+            api.ensureJwt();
+
+            return api;
+        },
+        enabled: !!wallet && !!api,
+    });
 }
 
 export function useCryptoSeed() {
-    const { wallet, } = useFilosignContext();
+    const { wallet, wasm } = useFilosignContext();
 
     async function action<T>(fn: (seed: Uint8Array<ArrayBuffer>) => T) {
+        while (!wasm.dilithium) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
         if (!wallet) {
             throw new Error("No wallet available");
         }
@@ -127,7 +172,10 @@ export function useCryptoSeed() {
         });
 
         const keySeed = await keyStore.secret.get("key-seed");
-        if (!keySeed) throw new Error("No key seed found in keystore, most probably not logged in");
+        if (!keySeed)
+            throw new Error(
+                "No key seed found in keystore, most probably not logged in",
+            );
 
         return fn(new Uint8Array(keySeed));
     }
