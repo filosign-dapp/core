@@ -202,6 +202,8 @@ export function useLogin() {
 
             const { pin } = params;
 
+            console.log(!!contracts, !!wallet, !!wasm.dilithium, isRegistered);
+
             if (!contracts || !wallet || !wasm.dilithium) {
                 throw new Error("unreachable");
             }
@@ -263,6 +265,9 @@ export function useLogin() {
 
             queryClient.refetchQueries({
                 queryKey: ["fsQ-is-logged-in", wallet?.account.address],
+            });
+            queryClient.refetchQueries({
+                queryKey: ["fsQ-is-registered", wallet?.account.address],
             });
         },
     });
