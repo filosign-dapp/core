@@ -1,163 +1,113 @@
+import { and, desc, eq } from "drizzle-orm";
+import { Hono } from "hono";
+import { getAddress, isAddress, isHex } from "viem";
+import db from "../../../lib/db";
+import { respond } from "../../../lib/utils/respond";
+import { authenticated } from "../../middleware/auth";
+
+const { shareRequests, shareApprovals } = db.schema;
+
 export default new Hono()
-    .post("/request", async (ctx) => {
-        const { senderWallet, recipientWallet, message, signature } =
-            await ctx.req.json();
+    .post("/request", authenticated, async (ctx) => {
+        const { recipientWallet, message, signature } = await ctx.req.json();
 
         if (!recipientWallet || !isAddress(recipientWallet)) {
             return respond.err(ctx, "Invalid recipientWallet", 400);
         }
+        if (!signature || typeof signature !== "string" || !isHex(signature)) {
+            return respond.err(ctx, "Invalid signature", 400);
+        }
 
         const recipient = getAddress(recipientWallet);
-        const sender = getAddress(senderWallet);
+        const sender = ctx.var.userWallet;
 
         if (recipient === sender) {
             return respond.err(ctx, "Don't ask yourself for permission", 400);
         }
 
+        const [existingRequest] = await db
+            .select()
+            .from(shareRequests)
+            .where(
+                and(
+                    eq(shareRequests.senderWallet, sender),
+                    eq(shareRequests.recipientWallet, recipient),
+                    eq(shareRequests.status, "PENDING"),
+                ),
+            )
+
+        if (existingRequest) {
+            return respond.err(ctx, "A pending request already exists", 409);
+        }
+
         const newRequest = db
             .insert(shareRequests)
             .values({
-                senderWallet: wallet,
+                senderWallet: sender,
                 recipientWallet: recipient,
-                message: message.toString().slice(0, 255),
-                metadata: metadata,
+                message: message || null,
             })
-            .returning()
-            .get();
+            .returning({
+                id: shareRequests.id,
+                senderWallet: shareRequests.senderWallet,
+                recipientWallet: shareRequests.recipientWallet,
+                message: shareRequests.message,
+                status: shareRequests.status,
+                createdAt: shareRequests.createdAt,
+            });
 
         return respond.ok(ctx, newRequest, "Share request created", 201);
     })
-    // .get("/received", authenticated, async (ctx) => {
-    // 	const rows = db
-    // 		.select()
-    // 		.from(shareRequests)
-    // 		.where(eq(shareRequests.recipientWallet, ctx.var.userWallet))
-    // 		.orderBy(shareRequests.createdAt)
-    // 		.all();
-
-    // 	if (rows.length === 0) {
-    // 		return respond.ok(ctx, { requests: [] }, "No received requests", 200);
-    // 	}
-
-    // 	// if status is not PENDING, remove from rows
-    // 	const filteredRows = rows.filter((row) => row.status === "PENDING");
-
-    // 	return respond.ok(
-    // 		ctx,
-    // 		{ requests: filteredRows },
-    // 		"Received requests fetched",
-    // 		200,
-    // 	);
-    // })
-    // .get("/sent", authenticated, async (ctx) => {
-    // 	const rows = db
-    // 		.select()
-    // 		.from(shareRequests)
-    // 		.where(eq(shareRequests.senderWallet, ctx.var.userWallet))
-    // 		.orderBy(shareRequests.createdAt)
-    // 		.all();
-
-    // 	return respond.ok(ctx, { requests: rows }, "Sent requests fetched", 200);
-    // })
-    .get("/can-send-to", authenticated, async (ctx) => {
-        const subq = db
-            .select({
-                recipientWallet: shareApprovals.recipientWallet,
-                maxCreatedAt: sql<number>`max(${shareApprovals.createdAt})`,
-            })
+    .get("/received", authenticated, async (ctx) => {
+        const userWallet = ctx.var.userWallet;
+        const approvals = await db
+            .select()
             .from(shareApprovals)
-            .where(eq(shareApprovals.senderWallet, ctx.var.userWallet))
-            .groupBy(shareApprovals.recipientWallet)
-            .as("subq");
-
-        const rows = db
-            .select({
-                walletAddress: shareApprovals.recipientWallet,
-                active: shareApprovals.active,
-                createdAt: shareApprovals.createdAt,
-            })
-            .from(shareApprovals)
-            .innerJoin(
-                subq,
-                and(
-                    eq(shareApprovals.recipientWallet, subq.recipientWallet),
-                    eq(shareApprovals.createdAt, subq.maxCreatedAt),
-                ),
-            )
-            .where(eq(shareApprovals.active, true))
-            .execute();
-
-        return respond.ok(
-            ctx,
-            { people: rows },
-            "People you can send requests to",
-            200,
-        );
+            .where(eq(shareApprovals.recipientWallet, userWallet))
+            .orderBy(desc(shareApprovals.createdAt));
+        return respond.ok(ctx, { approvals }, "Share approvals retrieved", 200);
     })
-    .get("/can-receive-from", authenticated, async (ctx) => {
-        const rows = db
-            .select({
-                walletAddress: shareApprovals.senderWallet,
-                username: profiles.username,
-                displayName: profiles.displayName,
-                avatarUrl: profiles.avatarUrl,
-                active: shareApprovals.active,
-                createdAt: shareApprovals.createdAt,
-            })
+    .get("/can-send-to", authenticated, async (ctx) => {
+        const { recipient } = ctx.req.query();
+        if (!recipient || !isAddress(recipient)) {
+            return respond.err(ctx, "Invalid recipient", 400);
+        }
+        const recipientAddr = getAddress(recipient);
+        const sender = ctx.var.userWallet;
+        if (recipientAddr === sender) {
+            return respond.ok(ctx, { canSend: false, reason: "Cannot send to yourself" }, "Checked send capability", 200);
+        }
+        const [approval] = await db
+            .select()
             .from(shareApprovals)
-            .leftJoin(
-                profiles,
-                eq(shareApprovals.senderWallet, profiles.walletAddress),
-            )
             .where(
                 and(
-                    eq(shareApprovals.recipientWallet, ctx.var.userWallet),
+                    eq(shareApprovals.senderWallet, sender),
+                    eq(shareApprovals.recipientWallet, recipientAddr),
                     eq(shareApprovals.active, true),
                 ),
-            )
-            .orderBy(shareApprovals.createdAt)
-            .all();
-
-        return respond.ok(
-            ctx,
-            { people: rows },
-            "People who can send you requests",
-            200,
-        );
+            );
+        return respond.ok(ctx, { canSend: !!approval, reason: approval ? null : "No active approval" }, "Checked send capability", 200);
     })
     .delete("/:id/cancel", authenticated, async (ctx) => {
-        const { id } = ctx.req.param();
-        if (!id) return respond.err(ctx, "Missing id parameter", 400);
-
-        const row = db
+        const id = ctx.req.param("id");
+        const userWallet = ctx.var.userWallet;
+        const [approval] = await db
             .select()
-            .from(shareRequests)
-            .where(eq(shareRequests.id, id))
-            .get();
-        if (!row) return respond.err(ctx, "Request not found", 404);
-
-        const sender = getAddress(row.senderWallet);
-        if (sender !== ctx.var.userWallet) {
-            return respond.err(ctx, "Only the sender may cancel this request", 403);
+            .from(shareApprovals)
+            .where(
+                and(
+                    eq(shareApprovals.id, id),
+                    eq(shareApprovals.recipientWallet, userWallet),
+                    eq(shareApprovals.active, true),
+                ),
+            );
+        if (!approval) {
+            return respond.err(ctx, "Approval not found or cannot cancel", 404);
         }
-
-        if (row.status !== "PENDING") {
-            return respond.err(ctx, "Only pending requests can be cancelled", 409);
-        }
-
-        db.update(shareRequests)
-            .set({
-                status: "CANCELLED",
-            })
-            .where(eq(shareRequests.id, id))
-            .run();
-
-        void enqueueJob({
-            type: "request:cancelled",
-            payload: {
-                requestId: id,
-            },
-        });
-
-        return respond.ok(ctx, { canceled: id }, `Request ${id} canceled`, 200);
+        await db
+            .update(shareApprovals)
+            .set({ active: false })
+            .where(eq(shareApprovals.id, id));
+        return respond.ok(ctx, {}, "Approval cancelled", 200);
     });
