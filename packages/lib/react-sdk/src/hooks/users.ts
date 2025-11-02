@@ -1,8 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type { Address } from "viem";
 import z from "zod";
 import { zHexString } from "../../utils/zod";
-import { DAY } from "../constants";
+import { DAY, MINUTE } from "../constants";
 import { useAuthedApi } from "./auth";
 
 export function useUserProfileByQuery(query: { address?: Address | undefined, username?: string | undefined }) {
@@ -24,6 +24,7 @@ export function useUserProfileByQuery(query: { address?: Address | undefined, us
 
                     lastActiveAt: z.string(),
                     createdAt: z.string(),
+                    avatarUrl: z.string().nullable(),
                 },
                 `/users/profile/${query.address ?? query.username}`,
             );
@@ -50,6 +51,7 @@ export function useUserProfile() {
                     createdAt: z.string(),
                     email: z.string().nullable(),
                     username: z.string().nullable(),
+                    avatarUrl: z.string().nullable(),
                 },
                 `/users/profile`,
             );
@@ -60,8 +62,72 @@ export function useUserProfile() {
     });
 }
 
+export function useUpdateUserProfilePrevalidate(args: { email?: string; username?: string }) {
+    const { data: api } = useAuthedApi();
+
+    return useQuery({
+        queryKey: ["fsQ-user-profile-prevalidate", args],
+        queryFn: async () => {
+            if (!api) throw new Error("Not reachable");
+
+            const { email, username } = args;
+
+            const prevalidateResponse = await api.rpc.getSafe(
+                {
+                    valid: z.boolean(),
+                    message: z.string(),
+                },
+                `/users/profile/prevalidate?${new URLSearchParams({
+                    ...(email ? { email } : {}),
+                    ...(username ? { username } : {}),
+                })}`,
+            );
+
+            return prevalidateResponse.data;
+        },
+        enabled: !!api,
+        staleTime: 5 * MINUTE,
+    });
+}
+
 export function useUpdateUserProfile() {
     const { data: api } = useAuthedApi();
 
+    return useMutation({
+        mutationFn: async (args: { email?: string; username?: string }) => {
+            if (!api) throw new Error("Not reachable");
 
+            await api.rpc.putSafe(
+                {},
+                `/users/profile`,
+                {
+                    email: args.email,
+                    username: args.username,
+                },
+            );
+        },
+    });
+}
+
+export function useUpdateUserAvatar() {
+    const { data: api } = useAuthedApi();
+
+    return useMutation({
+        mutationFn: async (args: { avatar: File }) => {
+            if (!api) throw new Error("Not reachable");
+
+            const formData = new FormData();
+            formData.append("avatar", args.avatar);
+
+            const response = await api.rpc.putSafe(
+                {
+                    avatarKey: z.string(),
+                },
+                `/users/profile/avatar`,
+                formData,
+            );
+
+            return response.data;
+        },
+    });
 }
