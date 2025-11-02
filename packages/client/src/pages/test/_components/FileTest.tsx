@@ -9,7 +9,6 @@ import {
 	SpinnerIcon,
 	UploadIcon,
 } from "@phosphor-icons/react";
-import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Button } from "../../../lib/components/ui/button";
 import {
@@ -30,8 +29,6 @@ export function FileTest() {
 	const viewFile = useViewFile();
 	const ackFile = useAckFile();
 	const signFile = useSignFile();
-
-	const queryClient = useQueryClient();
 
 	// Input states
 	const [fileToUpload, setFileToUpload] = useState<File | null>(null);

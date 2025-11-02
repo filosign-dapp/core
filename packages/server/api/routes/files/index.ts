@@ -1,4 +1,5 @@
 import { computeCommitment, hash as fsHash, signatures, toBytes } from "@filosign/crypto-utils/node";
+import analytics from "../../../lib/analytics/logger";
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { isAddress, isHex } from "viem";
@@ -147,7 +148,7 @@ export default new Hono()
 
         const ds = await getOrCreateUserDataset(sender);
 
-        const preflight = await ds.preflightUpload(Math.floor(actualSize));
+        const preflight = await ds.preflightUpload(Math.ceil(actualSize));
 
         if (!preflight.allowanceCheck.sufficient) {
             return respond.err(
@@ -157,18 +158,27 @@ export default new Hono()
             );
         }
 
-        ds.upload(bytes).then((uploadResult) => {
-            file.delete();
+        ds.upload(bytes).then(async (uploadResult) => {
+            await file.delete();
 
             if (uploadResult.pieceCid.toString() !== pieceCid) {
-                db.delete(files).where(eq(files.pieceCid, pieceCid));
+                await db.delete(files).where(eq(files.pieceCid, pieceCid));
             }
 
-            db.update(files)
+            await analytics.log("file uploaded to filecoin warmstorage", {
+                pieceCid: pieceCid,
+                sender: sender,
+                recipient: recipient,
+                size: actualSize,
+                preflight: preflight,
+                uploadResult: uploadResult,
+            });
+
+            await db.update(files)
                 .set({ status: "foc" })
                 .where(eq(files.pieceCid, pieceCid))
-                .catch((_) => {
-                    db.delete(files).where(eq(files.pieceCid, pieceCid));
+                .catch(async (_) => {
+                    await db.delete(files).where(eq(files.pieceCid, pieceCid));
                 });
         });
 
@@ -235,13 +245,25 @@ export default new Hono()
         const [fileRecord] = await db
             .select({
                 sender: files.sender,
-                recipient: fileRecipients.recipientWallet,
             })
             .from(files)
             .where(eq(files.pieceCid, pieceCid));
 
+        const [recipientRecord] = await db
+            .select({
+                wallet: fileRecipients.recipientWallet,
+            })
+            .from(fileRecipients)
+            .where(
+                eq(fileRecipients.filePieceCid, pieceCid),
+            );
+
+        if (!recipientRecord) {
+            return respond.err(ctx, "Recipient not found", 404);
+        }
+
         const valid = await FSFileRegistry.read.validateFileAckSignature([
-            fileRecord.recipient,
+            recipientRecord.wallet,
             pieceCid,
             fileRecord.sender,
             BigInt(timestamp),
@@ -253,6 +275,7 @@ export default new Hono()
                 .update(fileRecipients)
                 .set({ ack: signature })
                 .where(eq(fileRecipients.filePieceCid, pieceCid));
+            return respond.ok(ctx, {}, "File acknowledged successfully", 200);
         } else {
             return respond.err(ctx, "Invalid signature", 400);
         }

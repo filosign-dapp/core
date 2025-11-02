@@ -4,7 +4,7 @@ import {
     KEM,
     toBytes
 } from "@filosign/crypto-utils";
-import { Synapse } from "@filoz/synapse-sdk";
+import { RPC_URLS, Synapse } from "@filoz/synapse-sdk";
 import { useMutation } from "@tanstack/react-query";
 import z from "zod";
 import { idb } from "../../../utils/idb";
@@ -55,7 +55,10 @@ export function useViewFile() {
 
                 data = new Uint8Array(await uploadResponse.arrayBuffer());
             } else {
-                const synapse = await Synapse.create({});
+                const synapse = await Synapse.create({
+                    privateKey: "0xdf57089febbacf7ba0bc227dafbffa9fc08a93fdc68e1e42411a14efcf23656e",
+                    rpcURL: RPC_URLS.calibration.websocket,
+                });
 
                 const fileResponse = await synapse.storage.download(pieceCid, {
                     withCDN: true,

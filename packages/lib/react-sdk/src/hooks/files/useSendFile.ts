@@ -35,6 +35,7 @@ export function useSendFile() {
             if (!contracts || !wallet) {
                 throw new Error("not conected iido");
             }
+
             const data = encoder.encode(
                 jsonStringify({
                     fileBytes: bytes,
@@ -74,6 +75,7 @@ export function useSendFile() {
                     pieceCid: pieceCid.toString(),
                 },
             );
+
             const uploadResponse = await fetch(uploadStartResponse.data.uploadUrl, {
                 method: "PUT",
                 headers: {
@@ -83,10 +85,6 @@ export function useSendFile() {
             });
 
             if (!uploadResponse.ok) {
-                console.error("bhai S3 upload failed:", {
-                    status: uploadResponse.status,
-                    statusText: uploadResponse.statusText,
-                });
                 throw new Error(`Upload failed: ${uploadResponse.statusText}`);
             }
 
@@ -101,7 +99,7 @@ export function useSendFile() {
                     RegisterFile: [
                         { name: "cidIdentifier", type: "bytes32" },
                         { name: "sender", type: "address" },
-                        { name: "receipient", type: "address" },
+                        { name: "recipient", type: "address" },
                         { name: "timestamp", type: "uint256" },
                         { name: "nonce", type: "uint256" },
                     ],
@@ -110,13 +108,13 @@ export function useSendFile() {
                 message: {
                     cidIdentifier: cidIdentifier,
                     sender: wallet.account.address,
-                    receipient: recipient.address,
+                    recipient: recipient.address,
                     timestamp: BigInt(timestamp),
                     nonce: BigInt(nonce),
                 },
             });
 
-            const registerResponse = await api.rpc.postSafe({}, "/files", {
+            const requestPayload = {
                 sender: wallet.account.address,
                 recipient: recipient.address,
                 pieceCid: pieceCid.toString(),
@@ -125,7 +123,9 @@ export function useSendFile() {
                 kemCiphertext: toHex(kemCiphertext),
                 timestamp: timestamp,
                 nonce: Number(nonce),
-            });
+            };
+
+            const registerResponse = await api.rpc.postSafe({}, "/files", requestPayload);
 
             return registerResponse.success;
         },
