@@ -1,40 +1,30 @@
 import { computeCidIdentifier, eip712signature } from "@filosign/contracts";
 import {
-    encryption,
-    jsonStringify,
-    KEM,
-    randomBytes,
+    computeCommitment,
+    hash as fsHash,
+    seedKeyGen,
+    signatures,
     toBytes,
     toHex,
 } from "@filosign/crypto-utils";
-import { calculate as calculatePieceCid } from "@filoz/synapse-sdk/piece";
 import { useMutation } from "@tanstack/react-query";
-import type { Address } from "viem";
 import z from "zod";
 import { idb } from "../../../utils/idb";
 import { useFilosignContext } from "../../context/FilosignProvider";
 
-export function useSendFile() {
-    const { contracts, wallet, api } = useFilosignContext();
-
-    // TODO invalidate and refetch files
-    // const queryClient = useQueryClient();
+export function useSignFile() {
+    const { contracts, wallet, api, wasm } = useFilosignContext();
 
     return useMutation({
         mutationFn: async (args: {
-            sender: { address: Address; encryptionPublicKey: string };
+            pieceCid: string;
             signatureBytes: Uint8Array;
-            signaturePositionOffset: {
-                top: number;
-                left: number;
-            };
         }) => {
-            const { sender, signatureBytes, signaturePositionOffset } = args;
+            const { pieceCid, signatureBytes } = args;
             const timestamp = Math.floor(Date.now() / 1000);
-            const encoder = new TextEncoder();
 
-            if (!contracts || !wallet) {
-                throw new Error("not conected iido");
+            if (!contracts || !wallet || !wasm.dilithium) {
+                throw new Error("not connected");
             }
 
             const keyStore = idb({
@@ -44,99 +34,87 @@ export function useSendFile() {
             const keySeed = await keyStore.secret.get("key-seed");
             if (!keySeed) throw new Error("No key seed found in keystore");
 
-            const data = encoder.encode(
-                jsonStringify({
-                    fileBytes: bytes,
-                    sender: wallet.account.address,
-                    timestamp: timestamp,
-                    signaturePositionOffset: signaturePositionOffset,
-                }),
+            const keygenData = await seedKeyGen(keySeed, { dl: wasm.dilithium });
+
+            const fileResponse = await api.rpc.getSafe(
+                {
+                    pieceCid: z.string(),
+                    sender: z.string(),
+                    status: z.string(),
+                    createdAt: z.string(),
+                    recipient: z.string(),
+                },
+                `/files/${pieceCid}`,
             );
 
-            const pieceCid = calculatePieceCid(data);
-
-            const encryptionKey = randomBytes(32);
-
-            const encryptedData = await encryption.encrypt({
-                message: data,
-                secretKey: encryptionKey,
-                info: pieceCid.toString(),
-            });
-
-            const { ciphertext: kemCiphertext, sharedSecret: ssKEM } =
-                await KEM.encapsulate({
-                    publicKeyOther: toBytes(recipient.encryptionPublicKey),
-                });
-
-            const encryptedEncryptionKey = await encryption.encrypt({
-                message: encryptionKey,
-                secretKey: ssKEM,
-                info: `${pieceCid.toString()}:${wallet.account.address}>${recipient.address}`,
-            });
-
-            const uploadStartResponse = await api.rpc.postSafe(
-                {
-                    uploadUrl: z.string(),
-                },
-                "/files/upload/start",
-                {
-                    pieceCid: pieceCid.toString(),
-                },
-            );
-            const uploadResponse = await fetch(uploadStartResponse.data.uploadUrl, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/octet-stream",
-                },
-                body: encryptedData,
-            });
-
-            if (!uploadResponse.ok) {
-                console.error("bhai S3 upload failed:", {
-                    status: uploadResponse.status,
-                    statusText: uploadResponse.statusText,
-                });
-                throw new Error(`Upload failed: ${uploadResponse.statusText}`);
+            if (!fileResponse.success) {
+                throw new Error("Failed to fetch file info");
             }
+
+            const { sender, recipient } = fileResponse.data;
+
+            if (recipient !== wallet.account.address) {
+                throw new Error("You are not the recipient of this file");
+            }
+
+            const cidIdentifier = computeCidIdentifier(pieceCid);
 
             const nonce = await contracts.FSFileRegistry.read.nonce([
                 wallet.account.address,
             ]);
 
-            const cidIdentifier = computeCidIdentifier(pieceCid.toString());
+            const signatureVisualHash = fsHash.digest(signatureBytes);
+            const dl3SignatureCommitment = computeCommitment([toHex(signatureBytes)]);
 
             const signature = await eip712signature(contracts, "FSFileRegistry", {
                 types: {
-                    RegisterFile: [
+                    SignFile: [
                         { name: "cidIdentifier", type: "bytes32" },
                         { name: "sender", type: "address" },
-                        { name: "receipient", type: "address" },
+                        { name: "recipient", type: "address" },
+                        { name: "signatureVisualHash", type: "bytes32" },
+                        { name: "dl3SignatureCommitment", type: "bytes20" },
                         { name: "timestamp", type: "uint256" },
                         { name: "nonce", type: "uint256" },
                     ],
                 },
-                primaryType: "RegisterFile",
+                primaryType: "SignFile",
                 message: {
-                    cidIdentifier: cidIdentifier,
-                    sender: wallet.account.address,
-                    receipient: recipient.address,
+                    cidIdentifier,
+                    sender,
+                    recipient,
+                    signatureVisualHash,
+                    dl3SignatureCommitment,
                     timestamp: BigInt(timestamp),
                     nonce: BigInt(nonce),
                 },
             });
 
-            const registerResponse = await api.rpc.postSafe({}, "/files", {
-                sender: wallet.account.address,
-                recipient: recipient.address,
-                pieceCid: pieceCid.toString(),
+            const message = [
+                sender,
+                pieceCid,
+                recipient,
+                signatureVisualHash,
+                dl3SignatureCommitment,
+                BigInt(timestamp),
+                BigInt(nonce),
                 signature,
-                encryptedEncryptionKey: toHex(encryptedEncryptionKey),
-                kemCiphertext: toHex(kemCiphertext),
-                timestamp: timestamp,
-                nonce: Number(nonce),
+            ] as const;
+
+            const dl3Signature = await signatures.sign({
+                dl: wasm.dilithium,
+                message: toBytes(computeCommitment(message)),
+                privateKey: keygenData.sigKeypair.privateKey,
             });
 
-            return registerResponse.success;
+            const signResponse = await api.rpc.postSafe({}, `/files/${pieceCid}/sign`, {
+                signature,
+                timestamp: timestamp,
+                signatureVisualBytes: toHex(signatureBytes),
+                dl3Signature: toHex(dl3Signature),
+            });
+
+            return signResponse.success;
         },
     });
 }
