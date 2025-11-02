@@ -1,3 +1,4 @@
+import { computeCommitment, hash as fsHash, signatures, toBytes } from "@filosign/crypto-utils/node";
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { isAddress, isHex } from "viem";
@@ -9,7 +10,7 @@ import { respond } from "../../../lib/utils/respond";
 
 const { FSFileRegistry } = fsContracts;
 
-const { files, fileRecipients } = db.schema;
+const { files, fileRecipients, users } = db.schema;
 const MAX_FILE_SIZE = 30 * 1024 * 1024;
 
 export default new Hono()
@@ -211,8 +212,8 @@ export default new Hono()
             kemCiphertext: fileRecipient.ack ? fileRecipient.kemCiphertext : null,
             encryptedEncryptionKey: fileRecipient.ack
                 ? fileRecipient.encryptedEncryptionKey
-                : null
-        }
+                : null,
+        };
 
         return respond.ok(ctx, response, "File retrieved", 200);
     })
@@ -234,7 +235,7 @@ export default new Hono()
         const [fileRecord] = await db
             .select({
                 sender: files.sender,
-                recipient: fileRecipients.recipientWallet
+                recipient: fileRecipients.recipientWallet,
             })
             .from(files)
             .where(eq(files.pieceCid, pieceCid));
@@ -248,7 +249,102 @@ export default new Hono()
         ]);
 
         if (valid) {
-            await db.update(fileRecipients).set({ ack: signature }).where(eq(fileRecipients.filePieceCid, pieceCid));
+            await db
+                .update(fileRecipients)
+                .set({ ack: signature })
+                .where(eq(fileRecipients.filePieceCid, pieceCid));
+        } else {
+            return respond.err(ctx, "Invalid signature", 400);
+        }
+    })
+
+    .post("/:pieceCid/sign", async (ctx) => {
+        const pieceCid = ctx.req.param("pieceCid");
+        const { signature, timestamp, signatureVisualBytes, dl3Signature } =
+            await ctx.req.json();
+
+        if (!pieceCid || typeof pieceCid !== "string") {
+            return respond.err(ctx, "Invalid pieceCid", 400);
+        }
+        if (!signature || typeof signature !== "string" || !isHex(signature)) {
+            return respond.err(ctx, "Invalid signature", 400);
+        }
+        if (typeof timestamp !== "number" || timestamp <= 0) {
+            return respond.err(ctx, "Invalid timestamp", 400);
+        }
+        if (
+            !signatureVisualBytes ||
+            typeof signatureVisualBytes !== "string" ||
+            !isHex(signatureVisualBytes)
+        ) {
+            return respond.err(ctx, "Invalid signatureVisualBytes", 400);
+        }
+        if (
+            !dl3Signature ||
+            typeof dl3Signature !== "string" ||
+            !isHex(dl3Signature)
+        ) {
+            return respond.err(ctx, "Invalid dl3Signature", 400);
+        }
+
+        const [fileRecord] = await db
+            .select({
+                sender: files.sender,
+            })
+            .from(files)
+            .where(eq(files.pieceCid, pieceCid));
+
+        const [recipientRecord] = await db
+            .select({
+                wallet: fileRecipients.recipientWallet
+            })
+            .from(fileRecipients)
+            .where(
+                eq(fileRecipients.filePieceCid, pieceCid),
+            );
+        const [recipientUserRecord] = await db
+            .select({
+                signaturePublicKey: users.signaturePublicKey,
+            })
+            .from(users)
+            .where(
+                eq(users.walletAddress, recipientRecord.wallet),
+            );
+
+        const userNonce = await FSFileRegistry.read.nonce([recipientRecord.wallet]);
+
+        const signatureVisualHash = fsHash.digest(signatureVisualBytes);
+        const dl3SignatureCommitment = computeCommitment([dl3Signature]);
+        const message = [
+            fileRecord.sender,
+            pieceCid,
+            recipientRecord.wallet,
+            signatureVisualHash,
+            dl3SignatureCommitment,
+            BigInt(timestamp),
+            BigInt(userNonce),
+            signature
+        ] as const;
+
+        const dilithium = await signatures.dilithiumInstance();
+        const isDl3SignatureValid = signatures.verify({
+            dl: dilithium,
+            message: toBytes(computeCommitment(message)),
+            signature: (toBytes(dl3Signature)),
+            publicKey: toBytes(recipientUserRecord.signaturePublicKey),
+        });
+        if (!isDl3SignatureValid) {
+            return respond.err(ctx, "Invalid DL3 signature", 400);
+        }
+
+
+        const valid = await FSFileRegistry.read.validateFileSigningSignature(message);
+
+        if (valid) {
+            await db
+                .update(fileRecipients)
+                .set({ ack: signature })
+                .where(eq(fileRecipients.filePieceCid, pieceCid));
         } else {
             return respond.err(ctx, "Invalid signature", 400);
         }
