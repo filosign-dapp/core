@@ -2,7 +2,6 @@ import { type FilosignContracts, getContracts } from "@filosign/contracts";
 import { useQuery } from "@tanstack/react-query";
 import {
     createContext,
-    createElement,
     type ReactNode,
     useContext,
     useEffect,
@@ -60,6 +59,7 @@ export function FilosignProvider(props: FilosignConfig) {
             apiBaseUrl
         ],
         queryFn: async () => {
+            console.log("Fetching runtime from", `${apiBaseUrl}/runtime`);
             const runtime = await fetch(`${apiBaseUrl}/runtime`).then((res) =>
                 res.json(),
             );
@@ -74,6 +74,7 @@ export function FilosignProvider(props: FilosignConfig) {
 
     useEffect(() => {
         if (!flag.current && wallet && runtime.data) {
+            flag.current = true;
             const fsContracts = getContracts({
                 client: wallet,
                 chainId: runtime.data.chain.id,
@@ -93,7 +94,7 @@ export function FilosignProvider(props: FilosignConfig) {
         [api, wallet, contracts, wasm],
     );
 
-    return createElement(FilosignContext.Provider, { value }, children);
+    return <FilosignContext.Provider value={value}>{children}</FilosignContext.Provider>;
 }
 
 export function useFilosignContext() {

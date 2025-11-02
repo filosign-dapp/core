@@ -11,9 +11,7 @@ import { calculate as calculatePieceCid } from "@filoz/synapse-sdk/piece";
 import { useMutation } from "@tanstack/react-query";
 import type { Address } from "viem";
 import z from "zod";
-import { idb } from "../../../utils/idb";
 import { useFilosignContext } from "../../context/FilosignProvider";
-import { useCryptoSeed } from "../auth";
 
 export function useSendFile() {
     const { contracts, wallet, api } = useFilosignContext();
