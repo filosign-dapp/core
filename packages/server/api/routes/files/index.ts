@@ -411,4 +411,38 @@ export default new Hono()
         });
 
         return respond.ok(ctx, { presignedUrl }, "Presigned URL retrieved", 200);
+    })
+
+    .get("/sent", authenticated, async (ctx) => {
+        const userWallet = ctx.var.userWallet;
+
+        const sentFiles = await db
+            .select({
+                pieceCid: files.pieceCid,
+                sender: files.sender,
+                status: files.status,
+            })
+            .from(files)
+            .where(eq(files.sender, userWallet));
+
+        return respond.ok(ctx, { sentFiles }, "Sent files retrieved", 200);
+    })
+
+    .get("/received", authenticated, async (ctx) => {
+        const userWallet = ctx.var.userWallet;
+
+        const receivedFiles = await db
+            .select({
+                pieceCid: files.pieceCid,
+                sender: files.sender,
+                status: files.status,
+            })
+            .from(files)
+            .innerJoin(
+                fileRecipients,
+                eq(files.pieceCid, fileRecipients.filePieceCid),
+            )
+            .where(eq(fileRecipients.recipientWallet, userWallet));
+
+        return respond.ok(ctx, { receivedFiles }, "Received files retrieved", 200);
     });
