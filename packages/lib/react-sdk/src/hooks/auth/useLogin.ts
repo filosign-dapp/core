@@ -13,13 +13,10 @@ export function useLogin() {
 	const { data: isLoggedIn } = useIsLoggedIn();
 
 	return useMutation({
-		mutationKey: ["fsM-login"],
 		mutationFn: async (params: { pin: string }) => {
-			if (isLoggedIn) return;
+			if (isLoggedIn) return true;
 
 			const { pin } = params;
-
-			console.log(!!contracts, !!wallet, !!wasm.dilithium, isRegistered);
 
 			if (!contracts || !wallet || !wasm.dilithium) {
 				throw new Error("unreachable");
@@ -86,6 +83,7 @@ export function useLogin() {
 			queryClient.refetchQueries({
 				queryKey: ["fsQ-is-registered", wallet?.account.address],
 			});
+			return true;
 		},
 	});
 }
