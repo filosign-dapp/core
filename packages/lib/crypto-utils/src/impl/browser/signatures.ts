@@ -1,5 +1,7 @@
 import type Dilithium from "dilithium-crystals-js";
 import { DILITHIUM_KIND } from "../../constants";
+import * as fsHash from "../node/hash";
+import { toBytes } from "../node/utils";
 
 const dilithiumKind = DILITHIUM_KIND;
 type DL = Awaited<typeof Dilithium>;
@@ -26,7 +28,11 @@ export async function sign(args: {
 }) {
 	const { message, privateKey, dl } = args;
 
-	const { signature } = dl.sign(message, privateKey, dilithiumKind);
+	const { signature } = dl.sign(
+		toBytes(fsHash.digest(message)),
+		privateKey,
+		dilithiumKind,
+	);
 	if (!signature) {
 		throw new Error("Signing failed");
 	}
@@ -41,7 +47,12 @@ export async function verify(args: {
 }) {
 	const { message, signature, publicKey, dl } = args;
 
-	const { result } = dl.verify(signature, message, publicKey, dilithiumKind);
+	const { result } = dl.verify(
+		signature,
+		toBytes(fsHash.digest(message)),
+		publicKey,
+		dilithiumKind,
+	);
 
 	return result === 0;
 }
