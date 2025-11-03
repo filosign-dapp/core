@@ -61,12 +61,7 @@ export function FilosignProvider(props: FilosignConfig) {
         queryKey: ["runtime", apiBaseUrl],
         queryFn: async () => {
             console.log("Fetching runtime from", `${apiBaseUrl}/runtime`);
-            const parsed = await api.rpc.getSafe(
-                {
-                    uptime: z.number(),
-                    chain: z.any(),
-                    serverAddressSynapse: zHexString(),
-                },
+            const parsed = await api.rpc.base.get(
                 "/runtime",
             );
             return parsed.data;
@@ -101,7 +96,7 @@ export function FilosignProvider(props: FilosignConfig) {
         [api, wallet, contracts, wasm, runtime.data],
     );
 
-    if (!runtime.data) return <>loadnging</>;
+    if (!runtime.data) return <>Runtime Loading...</>;
 
     return (
         <FilosignContext.Provider value={value}>
