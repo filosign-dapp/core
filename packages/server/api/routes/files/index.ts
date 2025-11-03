@@ -393,10 +393,35 @@ export default new Hono()
         }
     })
 
-    .get("/:pieceCid/s3", async (ctx) => {
+    .get("/:pieceCid/s3", authenticated, async (ctx) => {
         const pieceCid = ctx.req.param("pieceCid");
+        const userWallet = ctx.get("userWallet");
+
         if (!pieceCid || typeof pieceCid !== "string") {
             return respond.err(ctx, "Invalid pieceCid", 400);
+        }
+
+        // Check if user is authorized to access this file (sender or recipient)
+        const [fileRecord] = await db
+            .select({
+                sender: files.sender,
+            })
+            .from(files)
+            .where(eq(files.pieceCid, pieceCid));
+
+        const [recipientRecord] = await db
+            .select({
+                recipientWallet: fileRecipients.recipientWallet,
+            })
+            .from(fileRecipients)
+            .where(eq(fileRecipients.filePieceCid, pieceCid));
+
+        if (!fileRecord || !recipientRecord) {
+            return respond.err(ctx, "File not found", 404);
+        }
+
+        if (fileRecord.sender !== userWallet && recipientRecord.recipientWallet !== userWallet) {
+            return respond.err(ctx, "Unauthorized to access this file", 403);
         }
 
         const fileExists = bucket.exists(`uploads/${pieceCid}`);
