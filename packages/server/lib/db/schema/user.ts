@@ -34,13 +34,12 @@ export const usersDatasets = t.pgTable("users_datasets", {
 });
 
 export const userInvites = t.pgTable("user_invites", {
-	id: t
-		.text()
-		.primaryKey()
-		.$default(() => Bun.randomUUIDv7()),
-	sender: tEvmAddress().references(() => users.walletAddress, {
-		onDelete: "cascade",
-	}),
+	id: t.uuid().primaryKey().defaultRandom(),
+	sender: tEvmAddress()
+		.references(() => users.walletAddress, {
+			onDelete: "cascade",
+		})
+		.notNull(),
 	inviteeEmail: t.text().notNull(),
 	accepted: t.boolean().notNull().default(false),
 

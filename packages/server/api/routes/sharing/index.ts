@@ -1,6 +1,6 @@
 import { and, desc, eq, sql } from "drizzle-orm";
 import { Hono } from "hono";
-import { getAddress, isAddress, isHex } from "viem";
+import { getAddress, isAddress } from "viem";
 import db from "../../../lib/db";
 import { respond } from "../../../lib/utils/respond";
 import { authenticated } from "../../middleware/auth";
@@ -12,13 +12,10 @@ const REQUEST_SPAM_BASE_HOURS = 3;
 
 export default new Hono()
 	.post("/request", authenticated, async (ctx) => {
-		const { recipientWallet, message, signature } = await ctx.req.json();
+		const { recipientWallet, message } = await ctx.req.json();
 
 		if (!recipientWallet || !isAddress(recipientWallet)) {
 			return respond.err(ctx, "Invalid recipientWallet", 400);
-		}
-		if (!signature || typeof signature !== "string" || !isHex(signature)) {
-			return respond.err(ctx, "Invalid signature", 400);
 		}
 
 		const recipient = getAddress(recipientWallet);
@@ -27,8 +24,6 @@ export default new Hono()
 		if (recipient === sender) {
 			return respond.err(ctx, "Don't ask yourself for permission", 400);
 		}
-
-		//ADD check if already apprvoed
 
 		const [existingRequest] = await db
 			.select()
@@ -45,7 +40,6 @@ export default new Hono()
 			return respond.err(ctx, "A pending request already exists", 409);
 		}
 
-		// Check if already approved
 		const [latestApproval] = await db
 			.select()
 			.from(shareApprovals)
@@ -109,6 +103,61 @@ export default new Hono()
 			});
 
 		return respond.ok(ctx, newRequest, "Share request created", 201);
+	})
+	.post("/request/invite", authenticated, async (ctx) => {
+		const { inviteeEmail } = await ctx.req.json();
+
+		if (
+			!inviteeEmail ||
+			typeof inviteeEmail !== "string" ||
+			!inviteeEmail.includes("@")
+		) {
+			return respond.err(ctx, "Invalid inviteeEmail", 400);
+		}
+
+		const [existingUser] = await db
+			.select()
+			.from(db.schema.users)
+			.where(eq(db.schema.users.email, inviteeEmail));
+
+		ctx.res.headers.set("Location", `/api/sharing/request`);
+
+		if (existingUser) {
+			return respond.ok(
+				ctx,
+				{ address: existingUser.walletAddress },
+				"Email is alreadt registered on the platform, request by address instead",
+				303,
+			);
+		}
+
+		const [existingInvite] = await db
+			.select()
+			.from(db.schema.userInvites)
+			.where(
+				and(
+					eq(db.schema.userInvites.sender, ctx.var.userWallet),
+					eq(db.schema.userInvites.inviteeEmail, inviteeEmail),
+				),
+			);
+
+		if (existingInvite) {
+			return respond.err(
+				ctx,
+				"An invite to this email from you already exists",
+				409,
+			);
+		}
+
+		const [newInvite] = await db
+			.insert(db.schema.userInvites)
+			.values({
+				sender: ctx.var.userWallet,
+				inviteeEmail,
+			})
+			.returning();
+
+		return respond.ok(ctx, newInvite, "Invite sent", 201);
 	})
 	.get("/received", authenticated, async (ctx) => {
 		const userWallet = ctx.var.userWallet;
