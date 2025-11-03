@@ -33,7 +33,7 @@ import { ProfileTest } from "./_components/ProfileTest";
 import { ShareReceiverTest } from "./_components/ShareReceiverTest";
 import { ShareSenderTest } from "./_components/ShareSenderTest";
 import { StatusBadge } from "./_components/StatusBadge";
-import { useIsLoggedIn, useIsRegistered, useUserProfileByAddress } from "@filosign/react/hooks";
+import { useIsLoggedIn, useIsRegistered, useUserProfileByQuery } from "@filosign/react/hooks";
 import { copyToClipboard, truncateAddress } from "@/src/lib/utils";
 import { Button } from "@/src/lib/components/ui/button";
 
@@ -48,8 +48,7 @@ export default function TestPage() {
 	const isRegistered = useIsRegistered();
 	const isLoggedIn = useIsLoggedIn();
 
-	const { data: userProfile } = useUserProfileByAddress(walletClient?.account.address as `0x${string}`);
-	console.log({ userProfile });
+	const { data: userProfile } = useUserProfileByQuery({ address: walletClient?.account.address as `0x${string}` });
 
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-background to-muted/20 p-6">
@@ -168,24 +167,17 @@ export default function TestPage() {
 
 				{/* Main Test Interface */}
 				<Tabs defaultValue="auth" className="space-y-6">
-					<TabsList className="grid w-full grid-cols-3 lg:grid-cols-5">
+					<TabsList className="grid w-full grid-cols-3 lg:grid-cols-4">
 						<TabsTrigger value="auth" className="flex items-center gap-2">
 							<KeyIcon className="w-4 h-4" />
 							Auth
 						</TabsTrigger>
 						<TabsTrigger
-							value="share-sender"
-							className="flex items-center gap-2"
-						>
-							<PaperPlaneIcon className="w-4 h-4" />
-							Send
-						</TabsTrigger>
-						<TabsTrigger
-							value="share-receiver"
+							value="approve"
 							className="flex items-center gap-2"
 						>
 							<UserCheckIcon className="w-4 h-4" />
-							Receive
+							Approve
 						</TabsTrigger>
 						<TabsTrigger value="files" className="flex items-center gap-2">
 							<FileIcon className="w-4 h-4" />
@@ -202,13 +194,9 @@ export default function TestPage() {
 						<AuthenticationTest />
 					</TabsContent>
 
-					{/* Share Sender Tab */}
-					<TabsContent value="share-sender" className="space-y-6">
+					{/* Approve Tab */}
+					<TabsContent value="approve" className="space-y-6">
 						<ShareSenderTest />
-					</TabsContent>
-
-					{/* Share Receiver Tab */}
-					<TabsContent value="share-receiver" className="space-y-6">
 						<ShareReceiverTest />
 					</TabsContent>
 
