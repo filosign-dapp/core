@@ -31,6 +31,7 @@ export async function getOrCreateUserDataset(walletAddress: Address) {
 		if (ctx.error) {
 			throw new Error(
 				"Fail to create synapse context for existing user dataset",
+				ctx.error,
 			);
 		}
 
