@@ -21,6 +21,8 @@ export function useLogout() {
 			queryClient.invalidateQueries({
 				queryKey: ["fsQ-is-logged-in", wallet?.account.address],
 			});
+			queryClient.invalidateQueries();
+			queryClient.refetchQueries();
 		},
 	});
 }
