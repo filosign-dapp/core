@@ -498,9 +498,9 @@ export const definitions = {
               "type": "address"
             },
             {
-              "internalType": "bytes",
-              "name": "signatureBytes_",
-              "type": "bytes"
+              "internalType": "bytes32",
+              "name": "signatureVisualHash_",
+              "type": "bytes32"
             },
             {
               "internalType": "bytes20",
