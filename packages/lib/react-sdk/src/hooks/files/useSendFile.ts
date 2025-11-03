@@ -7,10 +7,10 @@ import {
 	toBytes,
 	toHex,
 } from "@filosign/crypto-utils";
-import { calculate as calculatePieceCid } from "@filoz/synapse-sdk/piece";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Address } from "viem";
 import z from "zod";
+import { calculatePieceCid } from "../../../utils/piece";
 import { useFilosignContext } from "../../context/FilosignProvider";
 
 export function useSendFile() {
