@@ -61,10 +61,10 @@ export function FilosignProvider(props: FilosignConfig) {
         queryKey: ["runtime", apiBaseUrl],
         queryFn: async () => {
             console.log("Fetching runtime from", `${apiBaseUrl}/runtime`);
-            const parsed = await api.rpc.base.get(
+            const response = await api.rpc.base.get(
                 "/runtime",
             );
-            return parsed.data;
+            return response.data;
         },
         staleTime: 5 * MINUTE,
 
