@@ -11,8 +11,6 @@ import {
 } from "react";
 import type { Chain } from "viem";
 import type { UseWalletClientReturnType } from "wagmi";
-import { z } from "zod";
-import { zHexString } from "../../utils/zod";
 import ApiClient from "../ApiClient";
 import { MINUTE } from "../constants";
 
