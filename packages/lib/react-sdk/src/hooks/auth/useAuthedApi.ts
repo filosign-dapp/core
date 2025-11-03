@@ -1,6 +1,7 @@
 import { signatures, toBytes, toHex } from "@filosign/crypto-utils";
 import { useQuery } from "@tanstack/react-query";
 import z from "zod";
+import { zHexString } from "../../../utils/zod";
 import { useFilosignContext } from "../../context/FilosignProvider";
 import { useCryptoSeed } from "./useCryptoSeed";
 
@@ -25,7 +26,7 @@ export function useAuthedApi() {
 					data: { nonce },
 				} = await api.rpc.getSafe(
 					{
-						nonce: z.string(),
+						nonce: zHexString(),
 					},
 					`/auth/nonce?address=${wallet.account.address}`,
 				);
