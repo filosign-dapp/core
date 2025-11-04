@@ -12,9 +12,13 @@ import type { Address } from "viem";
 import z from "zod";
 import { calculatePieceCid } from "../../../utils/piece";
 import { useFilosignContext } from "../../context/FilosignProvider";
+import { useUserProfileByQuery } from "../users";
 
 export function useSendFile() {
 	const { contracts, wallet, api } = useFilosignContext();
+	const { data: user } = useUserProfileByQuery({
+		address: wallet?.account.address,
+	});
 
 	const queryClient = useQueryClient();
 
@@ -31,7 +35,7 @@ export function useSendFile() {
 			const timestamp = Math.floor(Date.now() / 1000);
 			const encoder = new TextEncoder();
 
-			if (!contracts || !wallet) {
+			if (!contracts || !wallet || !user) {
 				throw new Error("not conected iido");
 			}
 
@@ -66,9 +70,9 @@ export function useSendFile() {
 				info: `${pieceCid.toString()}:${recipient.address}`,
 			});
 
-			const { ciphertext: kemCiphertext, sharedSecret: sKEM } =
+			const { ciphertext: selfKemCiphertext, sharedSecret: sKEM } =
 				await KEM.encapsulate({
-					publicKeyOther: toBytes(recipient.encryptionPublicKey),
+					publicKeyOther: toBytes(user.encryptionPublicKey),
 				});
 			const selfEncryptedEncryptionKey = await encryption.encrypt({
 				message: encryptionKey,
@@ -131,8 +135,8 @@ export function useSendFile() {
 				signature,
 				encryptedEncryptionKey: toHex(recipientEncryptedEncryptionKey),
 				senderEncryptedEncryptionKey: toHex(selfEncryptedEncryptionKey),
-				kemCiphertext: toHex(kemCiphertext),
-				senderKemCiphertext: toHex(recipientKemCiphertext),
+				kemCiphertext: toHex(recipientKemCiphertext),
+				senderKemCiphertext: toHex(selfKemCiphertext),
 				timestamp: timestamp,
 				nonce: Number(nonce),
 			};

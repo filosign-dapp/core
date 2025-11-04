@@ -11,7 +11,7 @@ export function useSentFiles() {
 		queryFn: async () => {
 			const response = await api.rpc.getSafe(
 				{
-					sentFiles: z.array(
+					files: z.array(
 						z.object({
 							pieceCid: z.string(),
 							sender: z.string(),
@@ -22,7 +22,7 @@ export function useSentFiles() {
 				"/files/sent",
 			);
 
-			return response.data.sentFiles;
+			return response.data.files;
 		},
 		staleTime: 5 * MINUTE,
 	});

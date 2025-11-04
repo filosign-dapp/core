@@ -1,120 +1,125 @@
 import { computeCidIdentifier, eip712signature } from "@filosign/contracts";
 import {
-    computeCommitment,
-    hash as fsHash,
-    seedKeyGen,
-    signatures,
-    toBytes,
-    toHex,
+	computeCommitment,
+	hash as fsHash,
+	jsonStringify,
+	signatures,
+	toHex,
 } from "@filosign/crypto-utils";
 import { useMutation } from "@tanstack/react-query";
 import z from "zod";
-import { idb } from "../../../utils/idb";
 import { useFilosignContext } from "../../context/FilosignProvider";
+import { useCryptoSeed } from "../auth";
 
 export function useSignFile() {
-    const { contracts, wallet, api, wasm } = useFilosignContext();
+	const { contracts, wallet, api, wasm } = useFilosignContext();
+	const { action: cryptoAction } = useCryptoSeed();
 
-    return useMutation({
-        mutationFn: async (args: {
-            pieceCid: string;
-            signatureBytes: Uint8Array;
-        }) => {
-            const { pieceCid, signatureBytes } = args;
-            const timestamp = Math.floor(Date.now() / 1000);
+	return useMutation({
+		mutationFn: async (args: {
+			pieceCid: string;
+			signatureVisualBytes: Uint8Array;
+		}) => {
+			let success = false;
 
-            if (!contracts || !wallet || !wasm.dilithium) {
-                throw new Error("not connected");
-            }
+			const { pieceCid, signatureVisualBytes } = args;
+			const timestamp = Math.floor(Date.now() / 1000);
+			const textEncoder = new TextEncoder();
 
-            const keyStore = idb({
-                db: wallet.account.address,
-                store: "fs-keystore",
-            });
-            const keySeed = await keyStore.secret.get("key-seed");
-            if (!keySeed) throw new Error("No key seed found in keystore");
+			if (!contracts || !wallet || !wasm.dilithium) {
+				throw new Error("not connected");
+			}
 
-            const keygenData = await seedKeyGen(keySeed, { dl: wasm.dilithium });
+			await cryptoAction(async (seed: Uint8Array) => {
+				const fileResponse = await api.rpc.getSafe(
+					{
+						pieceCid: z.string(),
+						sender: z.string(),
+						status: z.string(),
+						createdAt: z.string(),
+						recipient: z.string(),
+					},
+					`/files/${pieceCid}`,
+				);
 
-            const fileResponse = await api.rpc.getSafe(
-                {
-                    pieceCid: z.string(),
-                    sender: z.string(),
-                    status: z.string(),
-                    createdAt: z.string(),
-                    recipient: z.string(),
-                },
-                `/files/${pieceCid}`,
-            );
+				if (!fileResponse.success) {
+					throw new Error("Failed to fetch file info");
+				}
 
-            if (!fileResponse.success) {
-                throw new Error("Failed to fetch file info");
-            }
+				const { sender, recipient } = fileResponse.data;
 
-            const { sender, recipient } = fileResponse.data;
+				if (recipient !== wallet.account.address) {
+					throw new Error("You are not the recipient of this file");
+				}
 
-            if (recipient !== wallet.account.address) {
-                throw new Error("You are not the recipient of this file");
-            }
+				const cidIdentifier = computeCidIdentifier(pieceCid);
 
-            const cidIdentifier = computeCidIdentifier(pieceCid);
+				const nonce = await contracts.FSFileRegistry.read.nonce([
+					wallet.account.address,
+				]);
 
-            const nonce = await contracts.FSFileRegistry.read.nonce([
-                wallet.account.address,
-            ]);
+				const signatureVisualHash = fsHash.digest(signatureVisualBytes);
+				const dl3SignatureMessage = jsonStringify({
+					sender,
+					pieceCid,
+					recipient,
+					signatureVisualHash,
+					timestamp: timestamp,
+					nonce: nonce,
+				});
 
-            const signatureVisualHash = fsHash.digest(signatureBytes);
-            const dl3SignatureCommitment = computeCommitment([toHex(signatureBytes)]);
+				const dl3Keypair = await signatures.keyGen({
+					dl: wasm.dilithium,
+					seed: seed,
+				});
 
-            const signature = await eip712signature(contracts, "FSFileRegistry", {
-                types: {
-                    SignFile: [
-                        { name: "cidIdentifier", type: "bytes32" },
-                        { name: "sender", type: "address" },
-                        { name: "recipient", type: "address" },
-                        { name: "signatureVisualHash", type: "bytes32" },
-                        { name: "dl3SignatureCommitment", type: "bytes20" },
-                        { name: "timestamp", type: "uint256" },
-                        { name: "nonce", type: "uint256" },
-                    ],
-                },
-                primaryType: "SignFile",
-                message: {
-                    cidIdentifier,
-                    sender,
-                    recipient,
-                    signatureVisualHash,
-                    dl3SignatureCommitment,
-                    timestamp: BigInt(timestamp),
-                    nonce: BigInt(nonce),
-                },
-            });
+				const dl3Signature = await signatures.sign({
+					dl: wasm.dilithium,
+					privateKey: dl3Keypair.privateKey,
+					message: textEncoder.encode(dl3SignatureMessage),
+				});
 
-            const message = [
-                sender,
-                pieceCid,
-                recipient,
-                signatureVisualHash,
-                dl3SignatureCommitment,
-                BigInt(timestamp),
-                BigInt(nonce),
-                signature,
-            ] as const;
+				const dl3SignatureCommitment = computeCommitment([toHex(dl3Signature)]);
 
-            const dl3Signature = await signatures.sign({
-                dl: wasm.dilithium,
-                message: toBytes(computeCommitment(message)),
-                privateKey: keygenData.sigKeypair.privateKey,
-            });
+				const signature = await eip712signature(contracts, "FSFileRegistry", {
+					types: {
+						SignFile: [
+							{ name: "cidIdentifier", type: "bytes32" },
+							{ name: "sender", type: "address" },
+							{ name: "recipient", type: "address" },
+							{ name: "signatureVisualHash", type: "bytes32" },
+							{ name: "dl3SignatureCommitment", type: "bytes20" },
+							{ name: "timestamp", type: "uint256" },
+							{ name: "nonce", type: "uint256" },
+						],
+					},
+					primaryType: "SignFile",
+					message: {
+						cidIdentifier,
+						sender,
+						recipient,
+						signatureVisualHash,
+						dl3SignatureCommitment,
+						timestamp: BigInt(timestamp),
+						nonce: BigInt(nonce),
+					},
+				});
 
-            const signResponse = await api.rpc.postSafe({}, `/files/${pieceCid}/sign`, {
-                signature,
-                timestamp: timestamp,
-                signatureVisualBytes: toHex(signatureBytes),
-                dl3Signature: toHex(dl3Signature),
-            });
+				const signResponse = await api.rpc.postSafe(
+					{},
+					`/files/${pieceCid}/sign`,
+					{
+						signature,
+						timestamp: timestamp,
+						signatureVisualBytes: toHex(signatureVisualBytes),
+						dl3Signature: toHex(dl3Signature),
+					},
+				);
 
-            return signResponse.success;
-        },
-    });
+				success = signResponse.success;
+			});
+
+			return success;
+		},
+	});
 }

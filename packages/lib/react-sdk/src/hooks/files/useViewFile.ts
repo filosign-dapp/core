@@ -15,6 +15,7 @@ export function useViewFile() {
 			status: "s3" | "foc";
 		}) => {
 			const { pieceCid, kemCiphertext, encryptedEncryptionKey, status } = args;
+			console.log("asdasd", args);
 
 			if (!contracts || !wallet || !runtime) {
 				throw new Error("not conected iido");
@@ -77,12 +78,17 @@ export function useViewFile() {
 				ciphertext: toBytes(kemCiphertext),
 				privateKeySelf: privateKey,
 			});
-
-			const encryptionKey = await encryption.decrypt({
-				ciphertext: toBytes(encryptedEncryptionKey),
-				secretKey: ssE,
-				info: `${pieceCid}:${wallet.account.address}`,
-			});
+			let encryptionKey: Uint8Array;
+			try {
+				encryptionKey = await encryption.decrypt({
+					ciphertext: toBytes(encryptedEncryptionKey),
+					secretKey: ssE,
+					info: `${pieceCid}:${wallet.account.address}`,
+				});
+			} catch (e) {
+				console.error("Decryption error: ", e);
+				throw e;
+			}
 
 			const encryptionInfo = "ignore-encryption-info";
 
@@ -95,7 +101,7 @@ export function useViewFile() {
 			const decoder = new TextDecoder();
 			const jsonString = decoder.decode(decryptedData);
 
-			const { fileBytes, ...parsedData } = jsonParse(jsonString);
+			const { fileBytes, ...rawData } = jsonParse(jsonString);
 
 			// Handle case where fileBytes was serialized as an object with numeric keys
 			let fileBytesArray: number[];
@@ -114,14 +120,16 @@ export function useViewFile() {
 				throw new Error("Invalid fileBytes format");
 			}
 
-			z.object({
-				sender: z.string(),
-				timestamp: z.number(),
-				signaturePositionOffset: z.object({
-					top: z.number(),
-					left: z.number(),
-				}),
-			}).parse(parsedData);
+			const parsedData = z
+				.object({
+					sender: z.string(),
+					timestamp: z.number(),
+					signaturePositionOffset: z.object({
+						top: z.number(),
+						left: z.number(),
+					}),
+				})
+				.parse(rawData);
 
 			return {
 				...parsedData,
