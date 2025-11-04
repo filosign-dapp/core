@@ -6,148 +6,158 @@ import { evmClient, fsContracts } from "../evm";
 const { FSKeyRegistry, FSManager } = fsContracts;
 
 export async function processTransaction(
-    txHash: Hash,
-    data: Record<string, unknown>,
+	txHash: Hash,
+	data: Record<string, unknown>,
 ) {
-    const receipt = await evmClient.waitForTransactionReceipt({ hash: txHash });
+	const receipt = await evmClient.waitForTransactionReceipt({ hash: txHash });
 
-    if (!receipt) {
-        throw new Error(`Transaction receipt not found for hash: ${txHash}`);
-    }
+	if (!receipt) {
+		throw new Error(`Transaction receipt not found for hash: ${txHash}`);
+	}
 
-    if ([receipt.contractAddress?.toLowerCase(), receipt.to?.toLowerCase()].includes(FSKeyRegistry.address.toLowerCase())) {
-        for (const encodedLog of receipt.logs) {
-            const log = decodeEventLog({
-                abi: FSKeyRegistry.abi,
-                topics: encodedLog.topics,
-                data: encodedLog.data,
-            });
-            if (log.eventName === "KeygenDataRegistered") {
-                const { encryptionPublicKey, signaturePublicKey } = data;
+	if (
+		[
+			receipt.contractAddress?.toLowerCase(),
+			receipt.to?.toLowerCase(),
+		].includes(FSKeyRegistry.address.toLowerCase())
+	) {
+		for (const encodedLog of receipt.logs) {
+			const log = decodeEventLog({
+				abi: FSKeyRegistry.abi,
+				topics: encodedLog.topics,
+				data: encodedLog.data,
+			});
+			if (log.eventName === "KeygenDataRegistered") {
+				const { encryptionPublicKey, signaturePublicKey } = data;
 
-                if (
-                    typeof encryptionPublicKey !== "string" ||
-                    !isHex(encryptionPublicKey)
-                ) {
-                    throw new Error("Invalid encryption public key");
-                }
-                if (
-                    typeof signaturePublicKey !== "string" ||
-                    !isHex(signaturePublicKey)
-                ) {
-                    throw new Error("Invalid signature public key");
-                }
+				if (
+					typeof encryptionPublicKey !== "string" ||
+					!isHex(encryptionPublicKey)
+				) {
+					throw new Error("Invalid encryption public key");
+				}
+				if (
+					typeof signaturePublicKey !== "string" ||
+					!isHex(signaturePublicKey)
+				) {
+					throw new Error("Invalid signature public key");
+				}
 
-                const keygenData = await FSKeyRegistry.read.keygenData([log.args.user]);
+				const keygenData = await FSKeyRegistry.read.keygenData([log.args.user]);
 
-                const [exists] = await db
-                    .select()
-                    .from(db.schema.users)
-                    .where(eq(db.schema.users.walletAddress, log.args.user));
-                if (exists) continue;
+				const [exists] = await db
+					.select()
+					.from(db.schema.users)
+					.where(eq(db.schema.users.walletAddress, log.args.user));
+				if (exists) continue;
 
-                try {
-                    await db.insert(db.schema.users).values({
-                        walletAddress: log.args.user,
-                        encryptionPublicKey,
-                        signaturePublicKey,
+				try {
+					await db.insert(db.schema.users).values({
+						walletAddress: log.args.user,
+						encryptionPublicKey,
+						signaturePublicKey,
 
-                        lastActiveAt: new Date(),
-                        keygenDataJson: ({
-                            saltPin: keygenData[0],
-                            saltSeed: keygenData[1],
-                            saltChallenge: keygenData[2],
-                            commitmentKem: keygenData[3],
-                            commitmentSig: keygenData[4],
-                        }),
-                    });
-                } catch (error) {
-                    console.error(`Error inserting user: ${error}`);
-                    throw error;
-                }
-            }
-        }
-    }
+						lastActiveAt: new Date(),
+						keygenDataJson: {
+							saltPin: keygenData[0],
+							saltSeed: keygenData[1],
+							saltChallenge: keygenData[2],
+							commitmentKem: keygenData[3],
+							commitmentSig: keygenData[4],
+						},
+					});
+				} catch (error) {
+					console.error(`Error inserting user: ${error}`);
+					throw error;
+				}
+			}
+		}
+	}
 
-    if ([receipt.contractAddress?.toLowerCase(), receipt.to?.toLowerCase()].includes(FSManager.address.toLowerCase())) {
-        for (const encodedLog of receipt.logs) {
-            try {
-                const log = decodeEventLog({
-                    abi: FSManager.abi,
-                    topics: encodedLog.topics,
-                    data: encodedLog.data,
-                });
+	if (
+		[
+			receipt.contractAddress?.toLowerCase(),
+			receipt.to?.toLowerCase(),
+		].includes(FSManager.address.toLowerCase())
+	) {
+		for (const encodedLog of receipt.logs) {
+			try {
+				const log = decodeEventLog({
+					abi: FSManager.abi,
+					topics: encodedLog.topics,
+					data: encodedLog.data,
+				});
 
-                if (log.eventName === "SenderApproved") {
-                    if (!encodedLog.transactionHash) {
-                        continue;
-                    }
+				if (log.eventName === "SenderApproved") {
+					if (!encodedLog.transactionHash) {
+						continue;
+					}
 
-                    // Check if both recipient and sender exist in users table
-                    const [recipientExists] = await db
-                        .select()
-                        .from(db.schema.users)
-                        .where(eq(db.schema.users.walletAddress, log.args.recipient))
-                        .limit(1);
+					// Check if both recipient and sender exist in users table
+					const [recipientExists] = await db
+						.select()
+						.from(db.schema.users)
+						.where(eq(db.schema.users.walletAddress, log.args.recipient))
+						.limit(1);
 
-                    const [senderExists] = await db
-                        .select()
-                        .from(db.schema.users)
-                        .where(eq(db.schema.users.walletAddress, log.args.sender))
-                        .limit(1);
+					const [senderExists] = await db
+						.select()
+						.from(db.schema.users)
+						.where(eq(db.schema.users.walletAddress, log.args.sender))
+						.limit(1);
 
-                    if (!recipientExists || !senderExists) {
-                        continue;
-                    }
+					if (!recipientExists || !senderExists) {
+						continue;
+					}
 
-                    await db.insert(db.schema.shareApprovals).values({
-                        recipientWallet: log.args.recipient,
-                        senderWallet: log.args.sender,
-                        txHash: encodedLog.transactionHash,
-                        active: true,
-                    });
+					await db.insert(db.schema.shareApprovals).values({
+						recipientWallet: log.args.recipient,
+						senderWallet: log.args.sender,
+						txHash: encodedLog.transactionHash,
+						active: true,
+					});
 
-                    // Check if there's a pending request and mark it as approved
-                    await db
-                        .update(db.schema.shareRequests)
-                        .set({ status: "ACCEPTED" })
-                        .where(
-                            and(
-                                eq(db.schema.shareRequests.senderWallet, log.args.sender),
-                                eq(db.schema.shareRequests.recipientWallet, log.args.recipient),
-                                eq(db.schema.shareRequests.status, "PENDING")
-                            )
-                        );
-                }
+					// Check if there's a pending request and mark it as approved
+					await db
+						.update(db.schema.shareRequests)
+						.set({ status: "ACCEPTED" })
+						.where(
+							and(
+								eq(db.schema.shareRequests.senderWallet, log.args.sender),
+								eq(db.schema.shareRequests.recipientWallet, log.args.recipient),
+								eq(db.schema.shareRequests.status, "PENDING"),
+							),
+						);
+				}
 
-                if (log.eventName === "SenderRevoked") {
-                    // Check if both recipient and sender exist in users table
-                    const [recipientExists] = await db
-                        .select()
-                        .from(db.schema.users)
-                        .where(eq(db.schema.users.walletAddress, log.args.recipient))
-                        .limit(1);
+				if (log.eventName === "SenderRevoked") {
+					// Check if both recipient and sender exist in users table
+					const [recipientExists] = await db
+						.select()
+						.from(db.schema.users)
+						.where(eq(db.schema.users.walletAddress, log.args.recipient))
+						.limit(1);
 
-                    const [senderExists] = await db
-                        .select()
-                        .from(db.schema.users)
-                        .where(eq(db.schema.users.walletAddress, log.args.sender))
-                        .limit(1);
+					const [senderExists] = await db
+						.select()
+						.from(db.schema.users)
+						.where(eq(db.schema.users.walletAddress, log.args.sender))
+						.limit(1);
 
-                    if (!recipientExists || !senderExists) {
-                        continue;
-                    }
+					if (!recipientExists || !senderExists) {
+						continue;
+					}
 
-                    await db.insert(db.schema.shareApprovals).values({
-                        recipientWallet: log.args.recipient,
-                        senderWallet: log.args.sender,
-                        active: false,
-                        txHash: txHash,
-                    });
-                }
-            } catch (_error) {
-                // Silently ignore decode errors
-            }
-        }
-    }
+					await db.insert(db.schema.shareApprovals).values({
+						recipientWallet: log.args.recipient,
+						senderWallet: log.args.sender,
+						active: false,
+						txHash: txHash,
+					});
+				}
+			} catch (_error) {
+				// Silently ignore decode errors
+			}
+		}
+	}
 }

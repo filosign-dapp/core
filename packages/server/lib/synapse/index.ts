@@ -47,12 +47,16 @@ export async function getOrCreateUserDataset(walletAddress: Address) {
 	if (ctx.error) {
 		throw new Error("Fail to create synapse context for new user dataset");
 	}
+	// if (!ctx.data.dataSetId) {
+	// 	console.error("ctx.data:", ctx.data);
+	// 	throw new Error("No dataSetId returned from synapse fo some reason");
+	// }
 
-	await db.insert(db.schema.usersDatasets).values({
-		walletAddress,
-		dataSetId: ctx.data.dataSetId,
-		providerAddress: ctx.data.provider.serviceProvider,
-	});
+	// await db.insert(db.schema.usersDatasets).values({
+	// 	walletAddress,
+	// 	dataSetId: ctx.data.dataSetId,
+	// 	providerAddress: ctx.data.provider.serviceProvider,
+	// });
 
 	return ctx.data;
 }
