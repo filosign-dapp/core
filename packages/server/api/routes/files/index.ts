@@ -1,13 +1,13 @@
 import {
 	computeCommitment,
 	hash as fsHash,
+	jsonStringify,
 	signatures,
 	toBytes,
 } from "@filosign/crypto-utils/node";
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { isAddress, isHex } from "viem";
-import analytics from "../../../lib/analytics/logger";
 import db from "../../../lib/db";
 import { fsContracts } from "../../../lib/evm";
 import { bucket } from "../../../lib/s3/client";
@@ -17,7 +17,7 @@ import { authenticated } from "../../middleware/auth";
 
 const { FSFileRegistry } = fsContracts;
 
-const { files, fileRecipients, users } = db.schema;
+const { files, fileRecipients, users, fileSignatures } = db.schema;
 const MAX_FILE_SIZE = 30 * 1024 * 1024;
 
 export default new Hono()
@@ -101,14 +101,34 @@ export default new Hono()
 			return respond.err(ctx, "Invalid senderKemCiphertext", 400);
 		}
 
-		const valid = await FSFileRegistry.read.validateFileRegistrationSignature([
-			sender,
-			pieceCid,
-			recipient,
-			BigInt(timestamp),
-			BigInt(nonce),
-			signature,
-		]);
+		let valid: boolean;
+		try {
+			valid = await FSFileRegistry.read.validateFileRegistrationSignature([
+				sender,
+				pieceCid,
+				recipient,
+				BigInt(timestamp),
+				BigInt(nonce),
+				signature,
+			]);
+		} catch (error: unknown) {
+			// Catch contract revert messages
+			const errorMessage =
+				error instanceof Error ? error.message : String(error);
+			if (errorMessage.includes("Signature expired")) {
+				return respond.err(ctx, "Signature expired", 400);
+			} else if (errorMessage.includes("Sender not registered")) {
+				return respond.err(ctx, "Sender not registered", 400);
+			} else if (errorMessage.includes("Sender not approved by recipient")) {
+				return respond.err(ctx, "Sender not approved by recipient", 400);
+			} else {
+				return respond.err(
+					ctx,
+					`Signature validation failed: ${errorMessage}`,
+					400,
+				);
+			}
+		}
 
 		if (!valid) {
 			return respond.err(ctx, "Invalid signature", 400);
@@ -141,6 +161,36 @@ export default new Hono()
 			signature,
 		]);
 
+		const actualSize = bytes.byteLength;
+
+		const ds = await getOrCreateUserDataset(sender);
+
+		const preflight = await ds.preflightUpload(Math.ceil(actualSize));
+
+		if (!preflight.allowanceCheck.sufficient) {
+			return respond.err(
+				ctx,
+				"Insufficient storage allowance, complain to the devs",
+				402,
+			);
+		}
+
+		ds.upload(bytes).then(async (uploadResult) => {
+			await file.delete();
+
+			if (uploadResult.pieceCid.toString() !== pieceCid) {
+				await db.delete(files).where(eq(files.pieceCid, pieceCid));
+			}
+
+			await db
+				.update(files)
+				.set({ status: "foc" })
+				.where(eq(files.pieceCid, pieceCid))
+				.catch(async (_) => {
+					await db.delete(files).where(eq(files.pieceCid, pieceCid));
+				});
+		});
+
 		await db.transaction(async (tx) => {
 			const [insertResult] = await tx
 				.insert(files)
@@ -164,46 +214,46 @@ export default new Hono()
 			return insertResult;
 		});
 
-		const actualSize = bytes.byteLength;
-
-		const ds = await getOrCreateUserDataset(sender);
-
-		const preflight = await ds.preflightUpload(Math.ceil(actualSize));
-
-		if (!preflight.allowanceCheck.sufficient) {
-			return respond.err(
-				ctx,
-				"Insufficient storage allowance, complain to the devs",
-				402,
-			);
-		}
-
-		ds.upload(bytes).then(async (uploadResult) => {
-			await file.delete();
-
-			if (uploadResult.pieceCid.toString() !== pieceCid) {
-				await db.delete(files).where(eq(files.pieceCid, pieceCid));
-			}
-
-			await analytics.log("file uploaded to filecoin warmstorage", {
-				pieceCid: pieceCid,
-				sender: sender,
-				recipient: recipient,
-				size: actualSize,
-				preflight: preflight,
-				uploadResult: uploadResult,
-			});
-
-			await db
-				.update(files)
-				.set({ status: "foc" })
-				.where(eq(files.pieceCid, pieceCid))
-				.catch(async (_) => {
-					await db.delete(files).where(eq(files.pieceCid, pieceCid));
-				});
-		});
-
 		return respond.ok(ctx, {}, "File uploaded to filecoin warmstorage", 201);
+	})
+
+	.get("/sent", authenticated, async (ctx) => {
+		const userWallet = ctx.var.userWallet;
+
+		const sentFiles = await db
+			.select({
+				pieceCid: files.pieceCid,
+				sender: files.sender,
+				status: files.status,
+			})
+			.from(files)
+			.where(eq(files.sender, userWallet));
+
+		return respond.ok(ctx, { files: sentFiles }, "Sent files retrieved", 200);
+	})
+
+	.get("/received", authenticated, async (ctx) => {
+		const userWallet = ctx.var.userWallet;
+
+		const receivedFiles = await db
+			.select({
+				pieceCid: files.pieceCid,
+				sender: files.sender,
+				status: files.status,
+			})
+			.from(files)
+			.innerJoin(
+				fileRecipients,
+				eq(files.pieceCid, fileRecipients.filePieceCid),
+			)
+			.where(eq(fileRecipients.recipientWallet, userWallet));
+
+		return respond.ok(
+			ctx,
+			{ files: receivedFiles },
+			"Received files retrieved",
+			200,
+		);
 	})
 
 	.get("/:pieceCid", authenticated, async (ctx) => {
@@ -241,10 +291,32 @@ export default new Hono()
 			return respond.err(ctx, "File not found", 404);
 		}
 
+		if (
+			userWallet !== fileRecord.sender &&
+			userWallet !== fileRecipient.recipientWallet
+		) {
+			return respond.err(ctx, "You dont need to access this fle :D", 403);
+		}
+
+		const fileSignaturesRecord = await db
+			.select({
+				signer: fileSignatures.signer,
+				signatureVisualHash: fileSignatures.signatureVisualHash,
+				evmSignature: fileSignatures.evmSignature,
+				dl3Signature: fileSignatures.dl3Signature,
+				timestamp: fileSignatures.timestamp,
+				onchainTxHash: fileSignatures.onchainTxHash,
+			})
+			.from(fileSignatures)
+			.where(eq(fileSignatures.filePieceCid, pieceCid));
+
 		const response = {
 			...fileRecord,
 			recipient: fileRecipient.recipientWallet,
 			kemCiphertext: fileRecipient.ack ? fileRecipient.kemCiphertext : null,
+
+			acked: !!fileRecipient.ack,
+			signatures: fileSignaturesRecord,
 
 			senderEncryptedEncryptionKey:
 				userWallet === fileRecord.sender
@@ -317,6 +389,7 @@ export default new Hono()
 
 	.post("/:pieceCid/sign", async (ctx) => {
 		const pieceCid = ctx.req.param("pieceCid");
+		const encoder = new TextEncoder();
 		const { signature, timestamp, signatureVisualBytes, dl3Signature } =
 			await ctx.req.json();
 
@@ -324,7 +397,7 @@ export default new Hono()
 			return respond.err(ctx, "Invalid pieceCid", 400);
 		}
 		if (!signature || typeof signature !== "string" || !isHex(signature)) {
-			return respond.err(ctx, "Invalid signature", 400);
+			return respond.err(ctx, "Invalid signature format", 400);
 		}
 		if (typeof timestamp !== "number" || timestamp <= 0) {
 			return respond.err(ctx, "Invalid timestamp", 400);
@@ -366,9 +439,32 @@ export default new Hono()
 
 		const userNonce = await FSFileRegistry.read.nonce([recipientRecord.wallet]);
 
-		const signatureVisualHash = fsHash.digest(signatureVisualBytes);
+		const signatureVisualHash = fsHash.digest(toBytes(signatureVisualBytes));
+		const dl3SignatureMessage = jsonStringify({
+			sender: fileRecord.sender,
+			pieceCid,
+			recipient: recipientRecord.wallet,
+			signatureVisualHash,
+			timestamp: timestamp,
+			nonce: userNonce,
+		});
+
 		const dl3SignatureCommitment = computeCommitment([dl3Signature]);
-		const message = [
+
+		const dilithium = await signatures.dilithiumInstance();
+
+		const isDl3SignatureValid = await signatures.verify({
+			dl: dilithium,
+			message: encoder.encode(dl3SignatureMessage),
+			signature: toBytes(dl3Signature),
+			publicKey: toBytes(recipientUserRecord.signaturePublicKey),
+		});
+
+		if (!isDl3SignatureValid) {
+			return respond.err(ctx, "Invalid DL3 signature", 400);
+		}
+
+		const valid = await FSFileRegistry.read.validateFileSigningSignature([
 			fileRecord.sender,
 			pieceCid,
 			recipientRecord.wallet,
@@ -377,35 +473,38 @@ export default new Hono()
 			BigInt(timestamp),
 			BigInt(userNonce),
 			signature,
-		] as const;
+		]);
 
-		const dilithium = await signatures.dilithiumInstance();
-		const isDl3SignatureValid = signatures.verify({
-			dl: dilithium,
-			message: toBytes(computeCommitment(message)),
-			signature: toBytes(dl3Signature),
-			publicKey: toBytes(recipientUserRecord.signaturePublicKey),
-		});
-		if (!isDl3SignatureValid) {
-			return respond.err(ctx, "Invalid DL3 signature", 400);
-		}
-
-		const valid =
-			await FSFileRegistry.read.validateFileSigningSignature(message);
-
-		if (valid) {
-			await db
-				.update(fileRecipients)
-				.set({ ack: signature })
-				.where(eq(fileRecipients.filePieceCid, pieceCid));
-		} else {
+		if (!valid) {
 			return respond.err(ctx, "Invalid signature", 400);
 		}
+		const txHash = await FSFileRegistry.write.registerFileSignature([
+			fileRecord.sender,
+			pieceCid,
+			recipientRecord.wallet,
+			signatureVisualHash,
+			dl3SignatureCommitment,
+			BigInt(timestamp),
+			BigInt(userNonce),
+			signature,
+		]);
+
+		await db.insert(fileSignatures).values({
+			filePieceCid: pieceCid,
+			signer: recipientRecord.wallet,
+			signatureVisualHash: signatureVisualHash,
+			evmSignature: signature,
+			dl3Signature: dl3Signature,
+			timestamp: timestamp,
+			onchainTxHash: txHash,
+		});
+
+		return respond.ok(ctx, {}, "File signed successfully", 200);
 	})
 
 	.get("/:pieceCid/s3", authenticated, async (ctx) => {
 		const pieceCid = ctx.req.param("pieceCid");
-		const userWallet = ctx.get("userWallet");
+		const userWallet = ctx.var.userWallet;
 
 		if (!pieceCid || typeof pieceCid !== "string") {
 			return respond.err(ctx, "Invalid pieceCid", 400);
@@ -449,38 +548,4 @@ export default new Hono()
 		});
 
 		return respond.ok(ctx, { presignedUrl }, "Presigned URL retrieved", 200);
-	})
-
-	.get("/sent", authenticated, async (ctx) => {
-		const userWallet = ctx.var.userWallet;
-
-		const sentFiles = await db
-			.select({
-				pieceCid: files.pieceCid,
-				sender: files.sender,
-				status: files.status,
-			})
-			.from(files)
-			.where(eq(files.sender, userWallet));
-
-		return respond.ok(ctx, { sentFiles }, "Sent files retrieved", 200);
-	})
-
-	.get("/received", authenticated, async (ctx) => {
-		const userWallet = ctx.var.userWallet;
-
-		const receivedFiles = await db
-			.select({
-				pieceCid: files.pieceCid,
-				sender: files.sender,
-				status: files.status,
-			})
-			.from(files)
-			.innerJoin(
-				fileRecipients,
-				eq(files.pieceCid, fileRecipients.filePieceCid),
-			)
-			.where(eq(fileRecipients.recipientWallet, userWallet));
-
-		return respond.ok(ctx, { receivedFiles }, "Received files retrieved", 200);
 	});
