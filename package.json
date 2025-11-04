@@ -4,6 +4,7 @@
 	"description": "Filosign monorepo",
 	"private": true,
 	"workspaces": [
+		"test",
 		"packages/client",
 		"packages/server",
 		"packages/contracts",
