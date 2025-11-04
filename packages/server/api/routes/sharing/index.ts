@@ -107,6 +107,19 @@ export default new Hono()
 	.post("/request/invite", authenticated, async (ctx) => {
 		const { inviteeEmail } = await ctx.req.json();
 
+		const [self] = await db
+			.select()
+			.from(db.schema.users)
+			.where(eq(db.schema.users.walletAddress, ctx.var.userWallet));
+
+		if (!self.email) {
+			return respond.err(
+				ctx,
+				"You must have an email associated with your account to send invites",
+				400,
+			);
+		}
+
 		if (
 			!inviteeEmail ||
 			typeof inviteeEmail !== "string" ||
