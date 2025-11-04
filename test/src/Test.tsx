@@ -1,0 +1,430 @@
+import { useFilosignContext } from "@filosign/react";
+import {
+    useAckFile,
+    useApproveSender,
+    useCanReceiveFrom,
+    useCanSendTo,
+    useFileInfo,
+    useIsLoggedIn,
+    useIsRegistered,
+    useLogin,
+    useLogout,
+    useReceivedFiles,
+    useSendFile,
+    useSentFiles,
+    useSignFile,
+    useUserProfile,
+    useUserProfileByQuery,
+    useViewFile,
+} from "@filosign/react/hooks";
+import { useState } from "react";
+import { useOtherAddress, useOtherReload } from "./App";
+import Button from "./Button";
+import { dummyBytes } from "./dumy";
+import { useEffectOnce } from "./hooks/useEffectOnce";
+
+type TestName =
+    | "login"
+    | "check-this-user-info"
+    | "check-other-user-info"
+    | "approve-sender"
+    | "check-send"
+    | "file-send"
+    | "file-sign";
+type NotifierFn = (name: TestName) => void;
+
+export default function () {
+    const { ready } = useFilosignContext();
+    const logout = useLogout();
+    const isLoggedIn = useIsLoggedIn();
+
+    const [done, setDone] = useState<TestName[]>([]);
+    function notifyDone(name: TestName) {
+        setDone((prev) => {
+            if (prev.includes(name)) return prev;
+            return [...prev, name];
+        });
+    }
+    function isDone(name: TestName) {
+        return done.includes(name);
+    }
+
+    return (
+        ready && (
+            <div className="flex flex-col">
+                <TestLogin notify={notifyDone} />
+
+                {isLoggedIn.data === true && (
+                    <>
+                        {isDone("login") && <TestThisUserInfo notify={notifyDone} />}
+
+                        {isDone("check-this-user-info") && (
+                            <TestOtherUserInfo notify={notifyDone} />
+                        )}
+
+                        {isDone("check-other-user-info") && (
+                            <TestApproveSender notify={notifyDone} />
+                        )}
+
+                        {isDone("approve-sender") && (
+                            <TestCheckCanSendTo notify={notifyDone} />
+                        )}
+
+                        {isDone("check-send") && (
+                            <>
+                                <TestFileSend notify={notifyDone} />
+                                <ShowReceivedFiles />
+                                <ShowSentFiles />
+                            </>
+                        )}
+                    </>
+                )}
+
+                <Button mutation={logout}>Logout</Button>
+            </div>
+        )
+    );
+}
+
+function TestLogin(props: { notify: NotifierFn }) {
+    const { notify } = props;
+
+    const login = useLogin();
+    const isRegistered = useIsRegistered();
+    const isLoggedIn = useIsLoggedIn();
+
+    useEffectOnce(() => {
+        if (isRegistered.data === false) {
+            login.mutate({ pin: "1234" });
+        }
+    }, [isRegistered.data]);
+    useEffectOnce(() => {
+        if (isLoggedIn.data === false) {
+            login.mutate({ pin: "1234" });
+        }
+    }, [isLoggedIn.data]);
+
+    useEffectOnce(() => {
+        if (isLoggedIn.data === true) {
+            notify("login");
+        }
+    }, [login.isSuccess || isLoggedIn.data]);
+
+    return (
+        <div className="p-4 space-y-2">
+            {isLoggedIn.data === false && (
+                <Button mutation={login} mutationArgs={{ pin: "1234" }}>
+                    Login
+                </Button>
+            )}
+            {login.isPending && <p>Logging in...</p>}
+            {login.isError && (
+                <p className="text-red-600">Login error: {String(login.error)}</p>
+            )}
+            {login.isSuccess && (
+                <p className="text-green-600">Logged in successfully!</p>
+            )}
+
+            <p>Is Registered: {isRegistered.data ? "Yes" : "No"}</p>
+            <p>Is Logged In: {isLoggedIn.data ? "Yes" : "No"}</p>
+        </div>
+    );
+}
+
+function TestApproveSender(props: { notify: NotifierFn }) {
+    const { notify } = props;
+
+    const otherAddress = useOtherAddress();
+    const approveSender = useApproveSender();
+    const canReceiveFrom = useCanReceiveFrom({ sender: otherAddress });
+    const { reload: otherReload } = useOtherReload();
+
+    useEffectOnce(() => {
+        if (canReceiveFrom.data === false) {
+            approveSender.mutate({
+                sender: otherAddress,
+            });
+
+            setTimeout(() => {
+                otherReload();
+            }, 1000);
+        }
+    }, [canReceiveFrom.data]);
+
+    useEffectOnce(() => {
+        if (canReceiveFrom.data || approveSender.isSuccess) {
+            notify("approve-sender");
+        }
+    }, [canReceiveFrom.data, approveSender.isSuccess]);
+
+    return (
+        <div className="p-4 space-y-2">
+            {canReceiveFrom.data === true && (
+                <p className="text-green-600">Can already receive from sender.</p>
+            )}
+            {approveSender.isPending && <p>Approving sender...</p>}
+            {approveSender.isError && (
+                <p className="text-red-600">
+                    Approve sender error: {String(approveSender.error)}
+                </p>
+            )}
+            {approveSender.isSuccess && (
+                <p className="text-green-600">Sender approved successfully!</p>
+            )}
+        </div>
+    );
+}
+
+function TestCheckCanSendTo(props: { notify: NotifierFn }) {
+    const { notify } = props;
+
+    const otherAddress = useOtherAddress();
+    const canSendTo = useCanSendTo({ recipient: otherAddress });
+
+    useEffectOnce(() => {
+        if (canSendTo.data === true) {
+            notify("check-send");
+        }
+    }, [canSendTo.data]);
+
+    return (
+        <div className="p-4 space-y-2">
+            {canSendTo.isPending && <p>Checking if can receive from sender...</p>}
+            {canSendTo.data === true && (
+                <p className="text-green-600">Can receive from sender.</p>
+            )}
+            {canSendTo.data === false && (
+                <p className="text-red-600">Cannot receive from sender.</p>
+            )}
+        </div>
+    );
+}
+
+function TestThisUserInfo(props: { notify: NotifierFn }) {
+    const { notify } = props;
+    const selfProfile = useUserProfile();
+
+    useEffectOnce(() => {
+        if (selfProfile.data) {
+            notify("check-this-user-info");
+        }
+    }, [selfProfile.data]);
+
+    return (
+        <div className="p-4 space-y-2">
+            <p>This User Info:</p>
+            {selfProfile.isPending && <p>Loading user profile...</p>}
+            {selfProfile.isError && (
+                <p className="text-red-600">
+                    Load user profile error: {String(selfProfile.error)}
+                </p>
+            )}
+            {selfProfile.data && (
+                <pre className="bg-gray-100 p-2 rounded">
+                    {JSON.stringify(selfProfile.data, null, 2)}
+                </pre>
+            )}
+        </div>
+    );
+}
+
+function TestOtherUserInfo(props: { notify: NotifierFn }) {
+    const { notify } = props;
+    const otherAddress = useOtherAddress();
+    const otherProfile = useUserProfileByQuery({ address: otherAddress });
+
+    useEffectOnce(() => {
+        if (otherProfile.data) {
+            notify("check-other-user-info");
+        }
+    }, [otherProfile.data]);
+
+    return (
+        <div className="p-4 space-y-2">
+            <p>Other User Info:</p>
+            {otherProfile.isPending && <p>Loading other user profile...</p>}
+            {otherProfile.isError && (
+                <p className="text-red-600">
+                    Load other user profile error: {String(otherProfile.error)}
+                </p>
+            )}
+            {otherProfile.data && (
+                <pre className="bg-gray-100 p-2 rounded max-w-[30vw] overflow-scroll">
+                    {JSON.stringify(otherProfile.data, null, 2)}
+                </pre>
+            )}
+        </div>
+    );
+}
+
+function TestFileSend(props: { notify: NotifierFn }) {
+    const { notify } = props;
+    const otherAddress = useOtherAddress();
+    const { data: otherProfile } = useUserProfileByQuery({
+        address: otherAddress,
+    });
+    const { reload: otherReload } = useOtherReload();
+    const sendFile = useSendFile();
+
+    useEffectOnce(() => {
+        if (sendFile.data) {
+            notify("file-send");
+            setTimeout(() => {
+                otherReload();
+            }, 1000);
+        }
+    }, [sendFile.data]);
+
+    if (!otherProfile) return <p>loading other person profile, wait</p>;
+
+    return (
+        <div className="p-4 space-y-2">
+            <Button
+                mutation={sendFile}
+                mutationArgs={{
+                    bytes: dummyBytes,
+                    signaturePositionOffset: {
+                        top: 11,
+                        left: 12,
+                    },
+                    recipient: {
+                        address: otherAddress,
+                        encryptionPublicKey: otherProfile.encryptionPublicKey,
+                    },
+                }}
+            >
+                Send File
+            </Button>
+        </div>
+    );
+}
+
+function ShowReceivedFiles() {
+    const receivedFiles = useReceivedFiles();
+
+    return (
+        <div className="p-4 space-y-2">
+            <p>Received Files:</p>
+            {receivedFiles.isPending && <p>Loading received files...</p>}
+            {receivedFiles.isError && (
+                <p className="text-red-600">
+                    Load received files error: {String(receivedFiles.error)}
+                </p>
+            )}
+            {receivedFiles.data && receivedFiles.data.length === 0 && (
+                <p>No received files.</p>
+            )}
+            {receivedFiles.data && receivedFiles.data.length > 0 && (
+                <div className="space-y-2">
+                    {receivedFiles.data.map((file) => (
+                        <ReceivedFileItem key={file.pieceCid.toString()} pieceCid={file.pieceCid} />
+                    ))}
+                </div>
+            )}
+
+        </div>
+    );
+}
+
+function ReceivedFileItem(props: { pieceCid: string }) {
+    const { pieceCid } = props;
+    const { data: file } = useFileInfo({ pieceCid })
+    const viewFile = useViewFile();
+    const decoder = new TextDecoder();
+    const ackFile = useAckFile();
+    const signFile = useSignFile();
+    const { reload: otherReload } = useOtherReload();
+
+
+    useEffectOnce(() => {
+        if (signFile.data) {
+            setTimeout(() => {
+                otherReload();
+            }, 1000);
+        }
+    }, [signFile.data]);
+
+    if (!file) return <p>Loading file info...</p>;
+    return <div className="bg-gray-100 p-2 rounded">
+        <p>File CID: {file.pieceCid.toString()}</p>
+        <p>Sender: {file.sender}</p>
+        <p>Status: {file.status}</p>
+        {file.acked ?
+            <Button mutation={viewFile} mutationArgs={{
+                pieceCid: file.pieceCid,
+                kemCiphertext: file.kemCiphertext,
+                encryptedEncryptionKey: file.encryptedEncryptionKey,
+                status: file.status
+            }}>
+                View File
+            </Button>
+            : <Button mutation={ackFile} mutationArgs={{ pieceCid: file.pieceCid }}>
+                Acknowledge File
+            </Button>
+        }        <div>
+            {viewFile.isSuccess && viewFile.data && <p>
+                {decoder.decode(viewFile.data.fileBytes)}
+            </p>}
+
+            {file.acked && file.signatures.length === 0 && (
+                <Button mutation={signFile} mutationArgs={{
+                    pieceCid: file.pieceCid,
+                    signatureVisualBytes: new Uint8Array([1, 2, 3])
+                }}>
+                    Sign File
+                </Button>
+            )}
+        </div>
+    </div>
+}
+
+function ShowSentFiles() {
+    const sentFiles = useSentFiles();
+
+    return (
+        <div className="p-4 space-y-2">
+            <p>Sent Files:</p>
+            {sentFiles.isPending && <p>Loading sent files...</p>}
+            {sentFiles.isError && (
+                <p className="text-red-600">
+                    Load sent files error: {String(sentFiles.error)}
+                </p>
+            )}
+            {sentFiles.data && sentFiles.data.length === 0 && <p>No sent files.</p>}
+            <ul className="space-y-2">
+                {sentFiles.data?.map((file) => (
+                    <SentFileItem key={file.pieceCid.toString()} pieceCid={file.pieceCid} />
+                ))}
+            </ul>
+        </div>
+    );
+}
+
+function SentFileItem(props: { pieceCid: string }) {
+    const { pieceCid } = props;
+    const { data: file } = useFileInfo({ pieceCid })
+    const viewFile = useViewFile();
+    const decoder = new TextDecoder();
+
+    if (!file) return <p>Loading file info...</p>;
+
+    return <div className="bg-gray-100 p-2 rounded">
+        <p>File CID: {file.pieceCid.toString()}</p>
+        <p>Sender: {file.sender}</p>
+        <p>Status: {file.status}</p>
+        <p>File signatures : {file.signatures.length}</p>
+        <Button mutation={viewFile} mutationArgs={{
+            pieceCid: file.pieceCid,
+            kemCiphertext: file.senderKemCiphertext,
+            encryptedEncryptionKey: file.senderEncryptedEncryptionKey,
+            status: file.status
+        }}>
+            View File
+        </Button>
+        <div>
+            {viewFile.isSuccess && viewFile.data && <p>
+                {decoder.decode(viewFile.data.fileBytes)}
+            </p>}
+        </div>
+    </div>
+}
