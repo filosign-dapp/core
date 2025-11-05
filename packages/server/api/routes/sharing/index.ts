@@ -3,6 +3,7 @@ import { Hono } from "hono";
 import { getAddress, isAddress } from "viem";
 import db from "../../../lib/db";
 import { respond } from "../../../lib/utils/respond";
+import { tryCatch } from "../../../lib/utils/tryCatch";
 import { authenticated } from "../../middleware/auth";
 
 const { shareRequests, shareApprovals } = db.schema;
@@ -105,7 +106,19 @@ export default new Hono()
 		return respond.ok(ctx, newRequest, "Share request created", 201);
 	})
 	.post("/request/invite", authenticated, async (ctx) => {
-		const { inviteeEmail } = await ctx.req.json();
+		const { inviteeEmail, message } = await ctx.req.json();
+
+		if (
+			!inviteeEmail ||
+			typeof inviteeEmail !== "string" ||
+			!inviteeEmail.includes("@")
+		) {
+			return respond.err(ctx, "Invalid inviteeEmail", 400);
+		}
+
+		if (message && (typeof message !== "string" || message.length > 500)) {
+			return respond.err(ctx, "Invalid message", 400);
+		}
 
 		const [self] = await db
 			.select()
@@ -167,10 +180,64 @@ export default new Hono()
 			.values({
 				sender: ctx.var.userWallet,
 				inviteeEmail,
+				message: message ?? null,
 			})
 			.returning();
 
 		return respond.ok(ctx, newInvite, "Invite sent", 201);
+	})
+	.post("/invite/:id/claim", authenticated, async (ctx) => {
+		const id = ctx.req.param("id");
+		if (!id) {
+			return respond.err(ctx, "Invite ID is required", 400);
+		}
+
+		const result = await tryCatch(
+			db.transaction(async (tx) => {
+				const [primaryInvite] = await tx
+					.select()
+					.from(db.schema.userInvites)
+					.where(eq(db.schema.userInvites.id, id));
+
+				if (!primaryInvite) {
+					throw new Error("Invite not found");
+				}
+
+				const allInvites = await tx
+					.select()
+					.from(db.schema.userInvites)
+					.where(
+						and(
+							eq(
+								db.schema.userInvites.inviteeEmail,
+								primaryInvite.inviteeEmail,
+							),
+						),
+					);
+
+				for (const invite of allInvites) {
+					await tx.insert(shareRequests).values({
+						senderWallet: invite.sender,
+						recipientWallet: ctx.var.userWallet,
+						message:
+							invite.message ??
+							`Auto-generated request from invite to ${invite.inviteeEmail}`,
+						createdAt: invite.createdAt,
+					});
+					await tx
+						.delete(db.schema.userInvites)
+						.where(eq(db.schema.userInvites.id, invite.id));
+				}
+
+				return primaryInvite;
+			}),
+		);
+
+		if (result.error) {
+			return respond.err(ctx, result.error.message, 400);
+		}
+
+		return respond.ok(ctx, result.data, "Invite claimed", 200);
 	})
 	.get("/received", authenticated, async (ctx) => {
 		const userWallet = ctx.var.userWallet;

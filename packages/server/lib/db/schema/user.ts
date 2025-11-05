@@ -13,6 +13,7 @@ export const users = t.pgTable("users", {
 	email: t.text(),
 	username: t.text().unique(),
 	avatarKey: t.text(),
+	invitedBy: tEvmAddress(),
 
 	...timestamps,
 });
@@ -42,6 +43,7 @@ export const userInvites = t.pgTable("user_invites", {
 		.notNull(),
 	inviteeEmail: t.text().notNull(),
 	accepted: t.boolean().notNull().default(false),
+	message: t.text(),
 
 	...timestamps,
 });
