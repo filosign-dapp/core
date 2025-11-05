@@ -105,6 +105,7 @@ export default new Hono()
 
 		return respond.ok(ctx, newRequest, "Share request created", 201);
 	})
+	// TODO - @kartikay please implement the email sending logic and encode invite ID in sent link
 	.post("/request/invite", authenticated, async (ctx) => {
 		const { inviteeEmail, message } = await ctx.req.json();
 
