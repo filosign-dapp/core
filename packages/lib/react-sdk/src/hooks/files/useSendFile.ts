@@ -30,8 +30,12 @@ export function useSendFile() {
 				top: number;
 				left: number;
 			};
+			metadata: {
+				name: string;
+				mimeType: string;
+			};
 		}) => {
-			const { recipient, bytes, signaturePositionOffset } = args;
+			const { recipient, bytes, signaturePositionOffset, metadata } = args;
 			const timestamp = Math.floor(Date.now() / 1000);
 			const encoder = new TextEncoder();
 
@@ -43,8 +47,9 @@ export function useSendFile() {
 				jsonStringify({
 					fileBytes: bytes,
 					sender: wallet.account.address,
-					timestamp: timestamp,
-					signaturePositionOffset: signaturePositionOffset,
+					timestamp,
+					signaturePositionOffset,
+					metadata,
 				}),
 			);
 

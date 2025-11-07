@@ -128,6 +128,10 @@ export function useViewFile() {
 						top: z.number(),
 						left: z.number(),
 					}),
+					metadata: z.object({
+						name: z.string(),
+						mimeType: z.string(),
+					}),
 				})
 				.parse(rawData);
 
