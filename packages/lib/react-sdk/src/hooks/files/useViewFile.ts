@@ -101,27 +101,9 @@ export function useViewFile() {
 			const decoder = new TextDecoder();
 			const jsonString = decoder.decode(decryptedData);
 
-			const { fileBytes, ...rawData } = jsonParse(jsonString);
-
-			// Handle case where fileBytes was serialized as an object with numeric keys
-			let fileBytesArray: number[];
-			if (Array.isArray(fileBytes)) {
-				fileBytesArray = fileBytes;
-			} else if (typeof fileBytes === "object" && fileBytes !== null) {
-				// Convert object with numeric string keys back to array
-				const maxIndex = Math.max(
-					...Object.keys(fileBytes).map((k) => parseInt(k, 10)),
-				);
-				fileBytesArray = new Array(maxIndex + 1);
-				for (let i = 0; i <= maxIndex; i++) {
-					fileBytesArray[i] = fileBytes[i] || 0;
-				}
-			} else {
-				throw new Error("Invalid fileBytes format");
-			}
-
 			const parsedData = z
 				.object({
+					fileBytes: z.instanceof(Uint8Array),
 					sender: z.string(),
 					timestamp: z.number(),
 					signaturePositionOffset: z.object({
@@ -133,12 +115,9 @@ export function useViewFile() {
 						mimeType: z.string(),
 					}),
 				})
-				.parse(rawData);
+				.parse(jsonParse(jsonString));
 
-			return {
-				...parsedData,
-				fileBytes: new Uint8Array(fileBytesArray),
-			};
+			return parsedData;
 		},
 	});
 }
