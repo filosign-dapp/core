@@ -291,6 +291,7 @@ function TestFileSend(props: { notify: NotifierFn }) {
                         address: otherAddress,
                         encryptionPublicKey: otherProfile.encryptionPublicKey,
                     },
+                    metadata: { name: "Test File", mimeType: "text/plain" }
                 }}
             >
                 Send File
