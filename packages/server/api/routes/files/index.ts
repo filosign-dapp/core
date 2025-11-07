@@ -314,6 +314,7 @@ export default new Hono()
 		const response = {
 			...fileRecord,
 			recipient: fileRecipient.recipientWallet,
+			acked: !!fileRecipient.ack,
 			kemCiphertext: fileRecipient.ack ? fileRecipient.kemCiphertext : null,
 
 			ackedAt: fileRecipient.ackedAt,

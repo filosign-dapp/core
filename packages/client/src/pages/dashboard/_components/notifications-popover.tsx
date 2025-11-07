@@ -6,7 +6,6 @@ import {
 	UserCheckIcon,
 } from "@phosphor-icons/react";
 import { useAcceptRequest, useAckFile, useApproveSender, useFileInfo, useReceivedFiles, useReceivedRequests, useViewFile } from "@filosign/react/hooks";
-import { usePrivy } from "@privy-io/react-auth";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -19,7 +18,6 @@ import {
 	AlertDialogFooter,
 	AlertDialogHeader,
 	AlertDialogTitle,
-	AlertDialogTrigger,
 } from "@/src/lib/components/ui/alert-dialog";
 import { Badge } from "@/src/lib/components/ui/badge";
 import { Button } from "@/src/lib/components/ui/button";
@@ -219,12 +217,9 @@ export function NotificationsPopover() {
 							{pendingRequests.length > 0 && <Separator className="mb-4" />}
 
 							<div className="flex items-center gap-2 mb-4">
-								<FileTextIcon className="h-4 w-4 text-blue-600" />
+								<FileTextIcon className="h-4 w-4 text-primary" />
 								<h4 className="text-sm font-semibold">Received Files</h4>
-								<Badge
-									variant="secondary"
-									className="text-xs bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
-								>
+								<Badge variant="secondary" className="text-xs">
 									{allReceivedFiles.length}
 								</Badge>
 							</div>
@@ -245,7 +240,7 @@ export function NotificationsPopover() {
 					{notificationCount === 0 &&
 						!(receivedRequests.isLoading || receivedFiles.isLoading) && (
 							<div className="p-8 text-center">
-								<CheckCircleIcon className="h-12 w-12 text-green-500 mx-auto mb-3" />
+								<CheckCircleIcon className="h-12 w-12 text-chart-2 mx-auto mb-3" />
 								<h4 className="text-sm font-medium mb-1">All caught up!</h4>
 								<p className="text-xs text-muted-foreground">
 									No pending actions at this time.
@@ -322,14 +317,14 @@ function ReceivedFileNotification({ pieceCid, sender }: { pieceCid: string; send
 			});
 			console.log("File data received:", fileData);
 
-			// Save file to computer as binary
+			// Save file to computer using metadata
 			const arrayBuffer = new ArrayBuffer(fileData.fileBytes.length);
 			new Uint8Array(arrayBuffer).set(fileData.fileBytes);
-			const blob = new Blob([arrayBuffer], { type: 'application/octet-stream' });
+			const blob = new Blob([arrayBuffer], { type: fileData.metadata.mimeType });
 			const url = URL.createObjectURL(blob);
 			const a = document.createElement("a");
 			a.href = url;
-			a.download = `file-${file.pieceCid.slice(0, 8)}.bin`;
+			a.download = fileData.metadata.name;
 			document.body.appendChild(a);
 			a.click();
 			document.body.removeChild(a);
@@ -348,7 +343,7 @@ function ReceivedFileNotification({ pieceCid, sender }: { pieceCid: string; send
 	if (!file) {
 		return (
 			<NotificationItemCard
-				icon={<FileTextIcon className="h-4 w-4 text-blue-600" />}
+				icon={<FileTextIcon className="h-4 w-4 text-primary" />}
 				title={`File ${pieceCid.slice(0, 8)}...`}
 				subtitle={`From: ${formatAddress(sender)}`}
 				variant="info"
@@ -360,14 +355,14 @@ function ReceivedFileNotification({ pieceCid, sender }: { pieceCid: string; send
 
 	return (
 		<NotificationItemCard
-			icon={<FileTextIcon className="h-4 w-4 text-blue-600" />}
+			icon={<FileTextIcon className="h-4 w-4 text-primary" />}
 			title={`File ${pieceCid.slice(0, 8)}...`}
 			subtitle={`From: ${formatAddress(sender)}`}
 			variant={isAcknowledged ? "default" : "info"}
 			actionButton={{
 				label: isAcknowledged
 					? (viewFile.isPending ? "Downloading..." : "Download")
-					: (acknowledgeFile.isPending ? "Acknowledging..." : "Acknowledge"),
+					: (acknowledgeFile.isPending ? "Accepting..." : "Accept"),
 				onClick: isAcknowledged ? handleViewFile : handleAcknowledge,
 				loading: viewFile.isPending || acknowledgeFile.isPending,
 				variant: isAcknowledged ? "default" : "outline",

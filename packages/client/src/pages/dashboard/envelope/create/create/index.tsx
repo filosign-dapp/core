@@ -78,6 +78,10 @@ export default function CreateEnvelopePage() {
 							address: recipientProfile.data!.walletAddress as `0x${string}`,
 							encryptionPublicKey: recipientProfile.data!.encryptionPublicKey,
 						},
+						metadata: {
+							name: doc.file.name,
+							mimeType: doc.file.type,
+						}
 					})
 				);
 			}
