@@ -14,7 +14,7 @@ export type UploadedFile = {
 };
 
 export type EnvelopeForm = {
-	recipients: Recipient[];
+	recipient: Recipient;
 	emailMessage: string;
 	documents: UploadedFile[];
 };
@@ -50,7 +50,7 @@ export type StoredDocument = {
 
 // Create form
 export type CreateForm = {
-	recipients: Recipient[];
+	recipient: Recipient;
 	emailMessage: string;
 	documents: StoredDocument[];
 };

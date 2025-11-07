@@ -1,4 +1,4 @@
-import { useFilosignQuery } from "@filosign/react";
+import { useAcceptedPeople } from "@filosign/react/hooks";
 import {
 	CaretDownIcon,
 	MagnifyingGlassIcon,
@@ -22,7 +22,6 @@ import {
 	FormLabel,
 	FormMessage,
 } from "@/src/lib/components/ui/form";
-import { Input } from "@/src/lib/components/ui/input";
 import {
 	Select,
 	SelectContent,
@@ -34,6 +33,7 @@ import { Textarea } from "@/src/lib/components/ui/textarea";
 import { cn } from "@/src/lib/utils/utils";
 import type { EnvelopeForm } from "../../types";
 
+
 interface RecipientsSectionProps {
 	control: Control<EnvelopeForm>;
 }
@@ -41,10 +41,7 @@ interface RecipientsSectionProps {
 export default function RecipientsSection({ control }: RecipientsSectionProps) {
 	const [isRecipientsOpen, setIsRecipientsOpen] = useState(true);
 
-	const { data: allowedRecipients, refetch } = useFilosignQuery(
-		["shareCapability", "getPeopleCanSendTo"],
-		undefined,
-	);
+	const { data: acceptedPeople, refetch } = useAcceptedPeople();
 
 	return (
 		<motion.section
@@ -83,9 +80,9 @@ export default function RecipientsSection({ control }: RecipientsSectionProps) {
 				<CollapsibleContent className="mt-6">
 					<div className="space-y-6">
 						{/* Recipient Selector */}
-						<FormField
+							<FormField
 							control={control}
-							name="recipients.0"
+							name="recipient"
 							rules={{
 								required: "Please select a recipient",
 							}}
@@ -94,7 +91,7 @@ export default function RecipientsSection({ control }: RecipientsSectionProps) {
 									<FormLabel>Recipient</FormLabel>
 									<Select
 										onValueChange={(value) => {
-											const selectedPerson = allowedRecipients?.people.find(
+											const selectedPerson = acceptedPeople?.people.find(
 												(person) => person.walletAddress === value,
 											);
 											if (selectedPerson) {
@@ -118,23 +115,17 @@ export default function RecipientsSection({ control }: RecipientsSectionProps) {
 										</FormControl>
 										<SelectContent
 											emptyContent={
-												<div className="space-y-3">
+												<div className="space-y-3 p-2">
 													<p className="text-sm text-muted-foreground">
-														No recipients available
+														No recipients available yet
 													</p>
-													<AddRecipientDialog
-														onSuccess={() => refetch()}
-														trigger={
-															<Button variant="primary" size="sm" className="">
-																<PlusIcon className="w-4 h-4 mr-2" />
-																Add Recipient
-															</Button>
-														}
-													/>
+													<p className="text-xs text-muted-foreground">
+														Send sharing requests to add people you can send documents to.
+													</p>
 												</div>
 											}
 										>
-											{allowedRecipients?.people.map((person) => (
+											{acceptedPeople?.people.map((person) => (
 												<SelectItem
 													key={person.walletAddress}
 													value={person.walletAddress}
@@ -150,6 +141,21 @@ export default function RecipientsSection({ control }: RecipientsSectionProps) {
 													</div>
 												</SelectItem>
 											))}
+											<div className="border-t mt-2 pt-2">
+												<AddRecipientDialog
+													onSuccess={() => refetch()}
+													trigger={
+														<Button
+															variant="ghost"
+															size="sm"
+															className="w-full justify-start h-auto py-2 px-2"
+														>
+															<PlusIcon className="w-4 h-4 mr-2" />
+															Add new recipient
+														</Button>
+													}
+												/>
+											</div>
 										</SelectContent>
 									</Select>
 									<FormMessage />

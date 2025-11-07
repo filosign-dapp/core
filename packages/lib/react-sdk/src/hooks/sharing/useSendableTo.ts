@@ -25,3 +25,33 @@ export function useSendableTo() {
 		enabled: !!api,
 	});
 }
+
+// Hook to get people who have accepted your requests (for envelope creation)
+export function useAcceptedRecipients() {
+	const { api } = useFilosignContext();
+
+	return useQuery({
+		queryKey: ["accepted-recipients"],
+		queryFn: async () => {
+			const response = await api.rpc.getSafe(
+				{
+					requests: z.array(
+						z.object({
+							id: z.string(),
+							senderWallet: z.string(),
+							recipientWallet: z.string(),
+							message: z.string().nullable(),
+							status: z.enum(["PENDING", "ACCEPTED", "REJECTED", "CANCELLED"]),
+							createdAt: z.string(),
+							updatedAt: z.string(),
+						}),
+					),
+				},
+				"/sharing/sent", // This would need to be added to show sent requests
+			);
+			// Filter for accepted requests
+			return response.data.requests.filter(req => req.status === "ACCEPTED");
+		},
+		enabled: !!api,
+	});
+}

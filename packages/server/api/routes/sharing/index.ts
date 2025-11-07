@@ -87,7 +87,7 @@ export default new Hono()
 			}
 		}
 
-		const newRequest = db
+		const [newRequest] = await db
 			.insert(shareRequests)
 			.values({
 				senderWallet: sender,
@@ -238,16 +238,41 @@ export default new Hono()
 			return respond.err(ctx, result.error.message, 400);
 		}
 
-		return respond.ok(ctx, result.data, "Invite claimed", 200);
+		return respond.ok(ctx, result.data as any, "Invite claimed", 200);
 	})
 	.get("/received", authenticated, async (ctx) => {
 		const userWallet = ctx.var.userWallet;
-		const approvals = await db
-			.select()
-			.from(shareApprovals)
-			.where(eq(shareApprovals.recipientWallet, userWallet))
-			.orderBy(desc(shareApprovals.createdAt));
-		return respond.ok(ctx, { approvals }, "Share approvals retrieved", 200);
+		const requests = await db
+			.select({
+				id: shareRequests.id,
+				senderWallet: shareRequests.senderWallet,
+				recipientWallet: shareRequests.recipientWallet,
+				message: shareRequests.message,
+				status: shareRequests.status,
+				createdAt: shareRequests.createdAt,
+				updatedAt: shareRequests.updatedAt,
+			})
+			.from(shareRequests)
+			.where(eq(shareRequests.recipientWallet, userWallet))
+			.orderBy(desc(shareRequests.createdAt));
+		return respond.ok(ctx, { requests }, "Received requests retrieved", 200);
+	})
+	.get("/sent", authenticated, async (ctx) => {
+		const userWallet = ctx.var.userWallet;
+		const requests = await db
+			.select({
+				id: shareRequests.id,
+				senderWallet: shareRequests.senderWallet,
+				recipientWallet: shareRequests.recipientWallet,
+				message: shareRequests.message,
+				status: shareRequests.status,
+				createdAt: shareRequests.createdAt,
+				updatedAt: shareRequests.updatedAt,
+			})
+			.from(shareRequests)
+			.where(eq(shareRequests.senderWallet, userWallet))
+			.orderBy(desc(shareRequests.createdAt));
+		return respond.ok(ctx, { requests }, "Sent requests retrieved", 200);
 	})
 	.get("/can-send-to", authenticated, async (ctx) => {
 		const { recipient } = ctx.req.query();
@@ -326,6 +351,31 @@ export default new Hono()
 			.set({ status: "REJECTED" })
 			.where(eq(shareRequests.id, id));
 		return respond.ok(ctx, {}, "Request rejected", 200);
+	})
+	.post("/:id/accept", authenticated, async (ctx) => {
+		const id = ctx.req.param("id");
+		const userWallet = ctx.var.userWallet;
+		const [request] = await db
+			.select()
+			.from(shareRequests)
+			.where(
+				and(
+					eq(shareRequests.id, id),
+					eq(shareRequests.recipientWallet, userWallet),
+					eq(shareRequests.status, "PENDING"),
+				),
+			);
+		if (!request) {
+			return respond.err(ctx, "Request not found or cannot accept", 404);
+		}
+
+		// Update request status
+		await db
+			.update(shareRequests)
+			.set({ status: "ACCEPTED" })
+			.where(eq(shareRequests.id, id));
+
+		return respond.ok(ctx, {}, "Request accepted", 200);
 	})
 	.get("/receivable-from", authenticated, async (ctx) => {
 		const userWallet = ctx.var.userWallet;

@@ -1,4 +1,4 @@
-import { useFilosignMutation } from "@filosign/react";
+import { useSendFile, useUserProfileByQuery } from "@filosign/react/hooks";
 import { CaretLeftIcon } from "@phosphor-icons/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
@@ -8,22 +8,19 @@ import { toast } from "sonner";
 import Logo from "@/src/lib/components/custom/Logo";
 import { Button } from "@/src/lib/components/ui/button";
 import { Form } from "@/src/lib/components/ui/form";
-import { useStorePersist } from "@/src/lib/hooks/use-store";
 import type { EnvelopeForm } from "../types";
 import DocumentsSection from "./_components/DocumentUpload";
 import RecipientsSection from "./_components/RecipientsSection";
 
 export default function CreateEnvelopePage() {
 	const navigate = useNavigate();
-	const { setCreateForm } = useStorePersist();
-	const queryClient = useQueryClient();
 
 	// SDK mutations for file uploads
-	const uploadFile = useFilosignMutation(["files", "uploadFile"]);
+	const sendFile = useSendFile();
 
 	const form = useForm<EnvelopeForm>({
 		defaultValues: {
-			recipients: [{ name: "", email: "", walletAddress: "", role: "signer" }],
+			recipient: { name: "", email: "", walletAddress: "", role: "signer" },
 			emailMessage: "",
 			documents: [],
 		},
@@ -38,65 +35,56 @@ export default function CreateEnvelopePage() {
 		name: "documents",
 	});
 
+	const { watch } = form;
+	const selectedRecipient = watch("recipient");
+
+	// Get recipient profile data for encryption key
+	const recipientProfile = useUserProfileByQuery({
+		address: selectedRecipient?.walletAddress as `0x${string}` | undefined
+	});
+
 	const onSubmit = async (data: EnvelopeForm) => {
 		if (!data.documents || data.documents.length === 0) {
 			toast.error("Please upload at least one document");
 			return;
 		}
 
-		if (
-			!data.recipients ||
-			data.recipients.length === 0 ||
-			!data.recipients[0].walletAddress
-		) {
-			toast.error("Please select at least one recipient");
+		if (!data.recipient || !data.recipient.walletAddress) {
+			toast.error("Please select a recipient");
+			return;
+		}
+
+		if (!recipientProfile.data) {
+			toast.error("Loading recipient information...");
 			return;
 		}
 
 		try {
-			toast.loading("Uploading documents...", { id: "upload-progress" });
+			toast.loading("Sending documents...", { id: "upload-progress" });
 
-			// Upload each file to the SDK
-			const uploadPromises = data.documents.map(async (doc) => {
+			// Send each document to the recipient
+			const sendPromises = [];
+			for (const doc of data.documents) {
 				const fileData = new Uint8Array(await doc.file.arrayBuffer());
-				const recipientAddresses = data.recipients
-					.filter((r) => r.walletAddress)
-					.map((r) => r.walletAddress as `0x${string}`);
 
-				const result = await uploadFile.mutateAsync({
-					data: fileData,
-					recipientAddresses,
-					metadata: {
-						fileName: doc.name,
-						fileSize: doc.size,
-						fileType: doc.type,
-						message: data.emailMessage,
-						originalId: doc.id,
-					},
-				});
+				sendPromises.push(
+					sendFile.mutateAsync({
+						bytes: fileData,
+						signaturePositionOffset: {
+							top: 10, // Default position - you might want to make this configurable
+							left: 10,
+						},
+						recipient: {
+							address: recipientProfile.data!.walletAddress as `0x${string}`,
+							encryptionPublicKey: recipientProfile.data!.encryptionPublicKey,
+						},
+					})
+				);
+			}
 
-				return {
-					id: doc.id,
-					pieceCid: result.pieceCid,
-					name: doc.name,
-					type: doc.type,
-					size: doc.size,
-					// Keep data URL for preview if needed
-					dataUrl:
-						doc.type.includes("image") || doc.type.includes("pdf")
-							? await new Promise<string>((resolve, reject) => {
-									const reader = new FileReader();
-									reader.onload = () => resolve(reader.result as string);
-									reader.onerror = reject;
-									reader.readAsDataURL(doc.file);
-								})
-							: undefined,
-				};
-			});
+			await Promise.all(sendPromises);
 
-			const uploadedDocuments = await Promise.all(uploadPromises);
-
-			toast.success("Documents uploaded successfully!", {
+			toast.success("Documents sent successfully!", {
 				id: "upload-progress",
 			});
 
@@ -105,8 +93,8 @@ export default function CreateEnvelopePage() {
 				navigate({ to: "/dashboard" });
 			}, 1000);
 		} catch (error) {
-			console.error("Failed to upload documents:", error);
-			toast.error("Failed to upload documents. Please try again.", {
+			console.error("Failed to send documents:", error);
+			toast.error("Failed to send documents. Please try again.", {
 				id: "upload-progress",
 			});
 		}
@@ -163,9 +151,9 @@ export default function CreateEnvelopePage() {
 							variant="primary"
 							size="lg"
 							className="gap-2 group transition-all duration-200"
-							disabled={uploadFile.isPending}
+							disabled={sendFile.isPending}
 						>
-							{uploadFile.isPending ? "Uploading..." : "Send Envelope"}
+							{sendFile.isPending ? "Sending..." : "Send Envelope"}
 						</Button>
 					</motion.div>
 				</form>

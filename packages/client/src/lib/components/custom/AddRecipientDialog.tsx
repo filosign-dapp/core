@@ -1,11 +1,10 @@
-import { useFilosignMutation } from "@filosign/react";
+import { useRequestApproval } from "@filosign/react/hooks";
 import {
-	EnvelopeIcon,
+	ChatCircleIcon,
 	PlusIcon,
 	WalletIcon,
-	XIcon,
 } from "@phosphor-icons/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { isAddress } from "viem";
 import { Button } from "@/src/lib/components/ui/button";
@@ -34,12 +33,7 @@ export default function AddRecipientDialog({
 	const [walletAddress, setWalletAddress] = useState("");
 	const [message, setMessage] = useState("");
 
-	const sendShareRequest = useFilosignMutation([
-		"shareCapability",
-		"sendShareRequest",
-	]);
-
-	console.log(sendShareRequest.isPending);
+	const sendShareRequest = useRequestApproval();
 
 	const handleSendRequest = async () => {
 		if (!isAddress(walletAddress)) {
@@ -47,24 +41,23 @@ export default function AddRecipientDialog({
 			return;
 		}
 
-		try {
-			await sendShareRequest.mutateAsync({
-				recipientWallet: walletAddress,
-				message: message.trim() || "",
-			});
+		await sendShareRequest.mutateAsync({
+			recipientWallet: walletAddress,
+			message: message.trim() || undefined,
+		});
 
-			toast.success("Share request sent successfully!");
+		toast.success("Share request sent successfully!");
+		setWalletAddress("");
+		setMessage("");
+		setOpen(false);
+		onSuccess?.();
+	};
 
-			// Reset form and close dialog
-			setWalletAddress("");
-			setMessage("");
-			setOpen(false);
-			onSuccess?.();
-		} catch (error) {
-			console.error("Failed to send share request:", error);
+	useEffect(() => {
+		if (sendShareRequest.isError) {
 			toast.error("Failed to send share request. Please try again.");
 		}
-	};
+	}, [sendShareRequest.isError]);
 
 	const handleClose = () => {
 		setWalletAddress("");
@@ -109,17 +102,18 @@ export default function AddRecipientDialog({
 					{/* Message Input */}
 					<div className="space-y-2">
 						<Label htmlFor="message" className="flex items-center gap-2">
-							<EnvelopeIcon className="w-4 h-4" />
-							Message (optional)
+							<ChatCircleIcon className="w-4 h-4" />
+							Message (Optional)
 						</Label>
 						<Textarea
 							id="message"
-							placeholder="Add a personal message with your request..."
+							placeholder="Add a personal message with your share request..."
 							value={message}
 							onChange={(e) => setMessage(e.target.value)}
 							rows={3}
 						/>
 					</div>
+
 				</div>
 
 				<div className="flex justify-end gap-3">

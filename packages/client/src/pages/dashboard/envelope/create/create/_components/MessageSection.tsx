@@ -92,7 +92,7 @@ export default function MessageSection({
 									<FormLabel>Email Message</FormLabel>
 									<FormControl>
 										<Textarea
-											placeholder="Enter your message to recipients..."
+											placeholder="Enter your message to the recipient..."
 											{...field}
 										/>
 									</FormControl>

@@ -34,7 +34,7 @@ export default function OnboardingWelcomeCompletePage() {
 		if (onboardingForm?.firstName) {
 			await updateUserProfile.mutateAsync({
 				firstName: onboardingForm.firstName,
-				lastName: onboardingForm.lastName,
+				lastName: onboardingForm.lastName ? onboardingForm.lastName : undefined,
 			});
 
 			setOnboardingForm({
@@ -69,6 +69,12 @@ export default function OnboardingWelcomeCompletePage() {
 							className="w-full group"
 							variant="primary"
 							onClick={handleSubmit}
+							onKeyDown={(e) => {
+								if (e.key === "Enter") {
+									handleSubmit();
+								}
+							}}
+							disabled={isLoggedIn.isPending || !isLoggedIn.data}
 						>
 							Go to Dashboard
 							<CaretRightIcon

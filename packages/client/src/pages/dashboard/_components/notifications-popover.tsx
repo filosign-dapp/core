@@ -5,7 +5,7 @@ import {
 	FileTextIcon,
 	UserCheckIcon,
 } from "@phosphor-icons/react";
-import { useAckFile, useApproveSender, useReceivedFiles, useReceivedRequests } from "@filosign/react/hooks";
+import { useAcceptRequest, useAckFile, useApproveSender, useFileInfo, useReceivedFiles, useReceivedRequests, useViewFile } from "@filosign/react/hooks";
 import { usePrivy } from "@privy-io/react-auth";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -34,6 +34,9 @@ import { NotificationItemCard } from "./notification-item-card";
 export function NotificationsPopover() {
 	const [open, setOpen] = useState(false);
 	const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+	const [pendingAcceptRequestId, setPendingAcceptRequestId] = useState<string | null>(
+		null,
+	);
 	const [pendingAcceptWallet, setPendingAcceptWallet] = useState<string | null>(
 		null,
 	);
@@ -42,18 +45,16 @@ export function NotificationsPopover() {
 	// Only get the actionable data - pending requests and unacknowledged files
 	const receivedRequests = useReceivedRequests();
 	const receivedFiles = useReceivedFiles();
-	const acknowledgeFile = useAckFile();
+	const acceptRequest = useAcceptRequest();
 	const allowSharing = useApproveSender();
 
-	// Calculate notification counts - only actionable items
+	// Calculate notification counts - all received files and requests
 	const getNotificationCount = () => {
 		let count = 0;
 
-		// Count unacknowledged received files
+		// Count all received files (both acknowledged and unacknowledged)
 		if (receivedFiles.data && Array.isArray(receivedFiles.data)) {
-			count += receivedFiles.data.filter(
-				(file: any) => !file.acknowledged,
-			).length;
+			count += receivedFiles.data.length;
 		}
 
 		// Count pending received requests
@@ -72,29 +73,24 @@ export function NotificationsPopover() {
 		return `${address.slice(0, 6)}...${address.slice(-4)}`;
 	};
 
-	const handleAcknowledgeFile = async (pieceCid: string) => {
-		try {
-			await acknowledgeFile.mutateAsync({ pieceCid });
-			toast.success("File acknowledged!");
-			// Refresh the files list
-			await queryClient.invalidateQueries({
-				queryKey: ["received-files"],
-			});
-		} catch (error) {
-			toast.error("Failed to acknowledge file");
-		}
-	};
 
-	const handleAllowSharing = (senderWallet: string) => {
+	const handleAllowSharing = (requestId: string, senderWallet: string) => {
+		setPendingAcceptRequestId(requestId);
 		setPendingAcceptWallet(senderWallet);
 		setConfirmDialogOpen(true);
 	};
 
 	const confirmAllowSharing = async () => {
-		if (!pendingAcceptWallet) return;
+		if (!pendingAcceptRequestId || !pendingAcceptWallet) return;
 
-		console.log("Attempting to allow sharing for wallet:", pendingAcceptWallet);
+		console.log("Attempting to accept sharing request:", pendingAcceptRequestId);
 		try {
+			// First accept the share request in the database
+			await acceptRequest.mutateAsync({
+				requestId: pendingAcceptRequestId,
+			});
+
+			// Then approve the sender on the smart contract
 			console.log("Calling allowSharing.mutateAsync with:", {
 				sender: pendingAcceptWallet,
 			});
@@ -109,6 +105,7 @@ export function NotificationsPopover() {
 			});
 			console.log("Queries invalidated");
 			setConfirmDialogOpen(false);
+			setPendingAcceptRequestId(null);
 			setPendingAcceptWallet(null);
 		} catch (error) {
 			console.error("Failed to accept sharing request:", error);
@@ -124,9 +121,9 @@ export function NotificationsPopover() {
 			: [];
 	})();
 
-	const unacknowledgedFiles =
+	const allReceivedFiles =
 		receivedFiles.data && Array.isArray(receivedFiles.data)
-			? receivedFiles.data.filter((file: any) => !file.acknowledged)
+			? receivedFiles.data
 			: [];
 
 	return (
@@ -145,7 +142,7 @@ export function NotificationsPopover() {
 				</Button>
 			</PopoverTrigger>
 
-			<PopoverContent className="w-96 p-0" align="end">
+			<PopoverContent className="w-96 mt-2 p-0" align="end">
 				<div className="p-4 border-b">
 					<div className="flex items-center justify-between">
 						<div>
@@ -186,11 +183,11 @@ export function NotificationsPopover() {
 					{pendingRequests.length > 0 && (
 						<div className="p-4">
 							<div className="flex items-center gap-2 mb-4">
-								<UserCheckIcon className="h-4 w-4 text-orange-600" />
+								<UserCheckIcon className="h-4 w-4 text-primary" />
 								<h4 className="text-sm font-semibold">Sharing Requests</h4>
 								<Badge
 									variant="secondary"
-									className="text-xs bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300"
+									className="text-xs"
 								>
 									{pendingRequests.length}
 								</Badge>
@@ -200,14 +197,14 @@ export function NotificationsPopover() {
 								{pendingRequests.map((req: any, i: number) => (
 									<NotificationItemCard
 										key={i}
-										icon={<UserCheckIcon className="h-4 w-4 text-orange-600" />}
+										icon={<UserCheckIcon className="h-4 w-4 text-primary" />}
 										title={`From: ${formatAddress(req.senderWallet)}`}
 										subtitle={req.message || "No message provided"}
-										variant="warning"
+										variant="default"
 										actionButton={{
-											label: allowSharing.isPending ? "Accepting..." : "Accept",
-											onClick: () => handleAllowSharing(req.senderWallet),
-											loading: allowSharing.isPending,
+											label: acceptRequest.isPending || allowSharing.isPending ? "Accepting..." : "Accept",
+											onClick: () => handleAllowSharing(req.id, req.senderWallet),
+											loading: acceptRequest.isPending || allowSharing.isPending,
 											variant: "default",
 										}}
 									/>
@@ -216,38 +213,28 @@ export function NotificationsPopover() {
 						</div>
 					)}
 
-					{/* Unacknowledged Files */}
-					{unacknowledgedFiles.length > 0 && (
+					{/* Received Files */}
+					{allReceivedFiles.length > 0 && (
 						<div className="p-4">
 							{pendingRequests.length > 0 && <Separator className="mb-4" />}
 
 							<div className="flex items-center gap-2 mb-4">
 								<FileTextIcon className="h-4 w-4 text-blue-600" />
-								<h4 className="text-sm font-semibold">Files to Acknowledge</h4>
+								<h4 className="text-sm font-semibold">Received Files</h4>
 								<Badge
 									variant="secondary"
 									className="text-xs bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
 								>
-									{unacknowledgedFiles.length}
+									{allReceivedFiles.length}
 								</Badge>
 							</div>
 
 							<div className="space-y-3">
-								{unacknowledgedFiles.map((file: any, i: number) => (
-									<NotificationItemCard
-										key={i}
-										icon={<FileTextIcon className="h-4 w-4 text-blue-600" />}
-										title={`File ${file.pieceCid.slice(0, 8)}...`}
-										subtitle={`From: ${formatAddress(file.sender)}`}
-										variant="info"
-										actionButton={{
-											label: acknowledgeFile.isPending
-												? "Acknowledging..."
-												: "Acknowledge",
-											onClick: () => handleAcknowledgeFile(file.pieceCid),
-											loading: acknowledgeFile.isPending,
-											variant: "outline",
-										}}
+								{allReceivedFiles.map((file: any, i: number) => (
+									<ReceivedFileNotification
+										key={file.pieceCid}
+										pieceCid={file.pieceCid}
+										sender={file.sender}
 									/>
 								))}
 							</div>
@@ -282,6 +269,7 @@ export function NotificationsPopover() {
 						<AlertDialogCancel
 							onClick={() => {
 								setConfirmDialogOpen(false);
+								setPendingAcceptRequestId(null);
 								setPendingAcceptWallet(null);
 							}}
 						>
@@ -289,13 +277,101 @@ export function NotificationsPopover() {
 						</AlertDialogCancel>
 						<AlertDialogAction
 							onClick={confirmAllowSharing}
-							disabled={allowSharing.isPending}
+							disabled={acceptRequest.isPending || allowSharing.isPending}
 						>
-							{allowSharing.isPending ? "Accepting..." : "Accept Request"}
+							{acceptRequest.isPending || allowSharing.isPending ? "Accepting..." : "Accept Request"}
 						</AlertDialogAction>
 					</AlertDialogFooter>
 				</AlertDialogContent>
 			</AlertDialog>
 		</Popover>
+	);
+}
+
+// Component to handle individual received file notifications
+function ReceivedFileNotification({ pieceCid, sender }: { pieceCid: string; sender: string }) {
+	const queryClient = useQueryClient();
+	const { data: file } = useFileInfo({ pieceCid });
+	const acknowledgeFile = useAckFile();
+	const viewFile = useViewFile();
+
+	console.log("error:", viewFile.error);
+
+	const handleAcknowledge = async () => {
+		try {
+			await acknowledgeFile.mutateAsync({ pieceCid });
+			toast.success("File acknowledged!");
+			// Refresh the files list
+			await queryClient.invalidateQueries({
+				queryKey: ["received-files"],
+			});
+		} catch (error) {
+			toast.error("Failed to acknowledge file");
+		}
+	};
+
+	const handleViewFile = async () => {
+		if (!file || !file.kemCiphertext || !file.encryptedEncryptionKey) return;
+
+		try {
+			const fileData = await viewFile.mutateAsync({
+				pieceCid: file.pieceCid,
+				kemCiphertext: file.kemCiphertext,
+				encryptedEncryptionKey: file.encryptedEncryptionKey,
+				status: file.status as "s3" | "foc"
+			});
+			console.log("File data received:", fileData);
+
+			// Save file to computer as binary
+			const arrayBuffer = new ArrayBuffer(fileData.fileBytes.length);
+			new Uint8Array(arrayBuffer).set(fileData.fileBytes);
+			const blob = new Blob([arrayBuffer], { type: 'application/octet-stream' });
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement("a");
+			a.href = url;
+			a.download = `file-${file.pieceCid.slice(0, 8)}.bin`;
+			document.body.appendChild(a);
+			a.click();
+			document.body.removeChild(a);
+			URL.revokeObjectURL(url);
+
+			toast.success("File downloaded!");
+		} catch (error) {
+			toast.error("Failed to download file");
+		}
+	};
+
+	const formatAddress = (address: string) => {
+		return `${address.slice(0, 6)}...${address.slice(-4)}`;
+	};
+
+	if (!file) {
+		return (
+			<NotificationItemCard
+				icon={<FileTextIcon className="h-4 w-4 text-blue-600" />}
+				title={`File ${pieceCid.slice(0, 8)}...`}
+				subtitle={`From: ${formatAddress(sender)}`}
+				variant="info"
+			/>
+		);
+	}
+
+	const isAcknowledged = file.acked;
+
+	return (
+		<NotificationItemCard
+			icon={<FileTextIcon className="h-4 w-4 text-blue-600" />}
+			title={`File ${pieceCid.slice(0, 8)}...`}
+			subtitle={`From: ${formatAddress(sender)}`}
+			variant={isAcknowledged ? "default" : "info"}
+			actionButton={{
+				label: isAcknowledged
+					? (viewFile.isPending ? "Downloading..." : "Download")
+					: (acknowledgeFile.isPending ? "Acknowledging..." : "Acknowledge"),
+				onClick: isAcknowledged ? handleViewFile : handleAcknowledge,
+				loading: viewFile.isPending || acknowledgeFile.isPending,
+				variant: isAcknowledged ? "default" : "outline",
+			}}
+		/>
 	);
 }
