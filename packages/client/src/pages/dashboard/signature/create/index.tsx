@@ -9,7 +9,7 @@ import {
 } from "@phosphor-icons/react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { motion } from "motion/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Image } from "@/src/lib/components/custom/Image";
 import Logo from "@/src/lib/components/custom/Logo";
 import { Button } from "@/src/lib/components/ui/button";
@@ -31,10 +31,31 @@ export default function CreateNewSignaturePage({
 }: {
 	onboarding?: boolean;
 }) {
-	const [fullName, setFullName] = useState("John Doe");
-	const [initials, setInitials] = useState("JD");
 	const navigate = useNavigate();
 	const { onboardingForm, setOnboardingForm } = useStorePersist();
+	const [firstName, setFirstName] = useState(onboardingForm?.firstName || "");
+	const [lastName, setLastName] = useState(onboardingForm?.lastName || "");
+	const [initials, setInitials] = useState("");
+
+	// Sync names from onboarding form when it changes (only if local state is empty)
+	useEffect(() => {
+		if (onboardingForm?.firstName && !firstName) {
+			setFirstName(onboardingForm.firstName);
+		}
+		if (onboardingForm?.lastName && !lastName) {
+			setLastName(onboardingForm.lastName);
+		}
+	}, [onboardingForm?.firstName, onboardingForm?.lastName]);
+
+	// Auto-generate initials from first and last names
+	useEffect(() => {
+		if (firstName.trim() && lastName.trim()) {
+			const generatedInitials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+			setInitials(generatedInitials);
+		} else {
+			setInitials("");
+		}
+	}, [firstName, lastName]);
 
 	// Tab state
 	const [activeTab, setActiveTab] = useState("choose");
@@ -98,7 +119,7 @@ export default function CreateNewSignaturePage({
 
 	// Calculate if save button should be disabled for each tab
 	const isChooseDisabled =
-		!selectedSignatureId || !fullName.trim() || !initials.trim();
+		!selectedSignatureId || !firstName.trim() || !lastName.trim() || !initials.trim();
 	const isDrawDisabled = !signatureData || !initialsData;
 	const isUploadDisabled = !signatureData || !initialsData;
 
@@ -107,12 +128,18 @@ export default function CreateNewSignaturePage({
 		// TODO: Save signature data to your backend/state management
 		console.log("Signature Data:", signatureData);
 		console.log("Initials Data:", initialsData);
-		console.log("Full Name:", fullName);
+		console.log("First Name:", firstName);
+		console.log("Last Name:", lastName);
 		console.log("Initials:", initials);
 
 		// For now, just log the data - you can implement saving logic here
 		if (onboarding && onboardingForm) {
-			setOnboardingForm({ ...onboardingForm, hasOnboarded: true });
+			setOnboardingForm({
+				...onboardingForm,
+				firstName,
+				lastName,
+				hasOnboarded: true
+			});
 			navigate({ to: "/onboarding/set-pin" });
 		}
 	};
@@ -175,7 +202,7 @@ export default function CreateNewSignaturePage({
 				</motion.div>
 				{/* Name and Initials Input */}
 				{/* <motion.div
-          className="grid grid-cols-2 gap-4 w-full"
+          className="grid grid-cols-3 gap-4 w-full"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{
@@ -186,14 +213,25 @@ export default function CreateNewSignaturePage({
           }}
         >
           <div className="space-y-2">
-            <label htmlFor="fullName" className="text-sm font-medium">
-              Full Name *
+            <label htmlFor="firstName" className="text-sm font-medium">
+              First Name *
             </label>
             <Input
-              id="fullName"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              placeholder="Enter your full name"
+              id="firstName"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              placeholder="Enter your first name"
+            />
+          </div>
+          <div className="space-y-2">
+            <label htmlFor="lastName" className="text-sm font-medium">
+              Last Name *
+            </label>
+            <Input
+              id="lastName"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              placeholder="Enter your last name"
             />
           </div>
           <div className="space-y-2">

@@ -5,12 +5,14 @@ export function useUpdateUserProfile() {
 	const { data: api } = useAuthedApi();
 
 	return useMutation({
-		mutationFn: async (args: { email?: string; username?: string }) => {
+		mutationFn: async (args: { email?: string; username?: string; firstName?: string; lastName?: string }) => {
 			if (!api) throw new Error("Not reachable");
 
 			await api.rpc.putSafe({}, `/users/profile`, {
 				email: args.email,
 				username: args.username,
+				firstName: args.firstName,
+				lastName: args.lastName,
 			});
 		},
 	});

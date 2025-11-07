@@ -7,26 +7,26 @@ import { Switch } from "@/src/lib/components/ui/switch";
 
 const plans = [
 	{
-		name: "Hobby",
+		name: "Trial",
 		price: 0,
 		priceSuffix: "",
 		description:
-			"For personal projects and casual use. Get a feel for trustless signing.",
+			"Try out Filosign on the filecoin calibration testnet. Get a feel for trustless signing.",
 		features: [
-			"Up to 5 documents per month",
-			"Secure signing on the Filecoin network",
-			"Verifiable on-chain audit trails",
-			"No credit card required",
+			"Files are stored temporarily for 7 days",
+			"Share upto 5 files",
+			"Access all the platform features",
+			"No ",
 		],
 		buttonText: "Start for Free",
 	},
 	{
-		name: "Pro",
+		name: "Standard",
 		price: 25,
 		priceSuffix: "per/month",
 		billedYearly: {
 			price: 20,
-			save: 60,
+			save: 5 * 12,
 		},
 		description:
 			"For professionals and freelancers who need unlimited, secure signing.",
@@ -40,39 +40,21 @@ const plans = [
 		buttonText: "Get Started",
 	},
 	{
-		name: "Teams",
-		price: 8,
-		priceSuffix: "per/month/user",
+		name: "Enterprise",
+		price: "50",
+		priceSuffix: "per user, per month",
 		billedYearly: {
-			price: 7,
-			save: 120,
-		},
-		description: "For collaborative teams who need a shared, secure workspace.",
-		features: [
-			"Everything in Pro",
-			"Shared team workspace",
-			"Team management features",
-			"API Access for Automation",
-			"Document Embedding",
-		],
-		buttonText: "Get Started",
-	},
-	{
-		name: "Business",
-		price: 250,
-		priceSuffix: "per/month",
-		billedYearly: {
-			price: 200,
-			save: 600,
+			price: 40,
+			save: 10 * 12,
 		},
 		description:
-			"For businesses that need advanced features and integration capabilities.",
+			"For professionals and freelancers who need unlimited, secure signing.",
 		features: [
-			"Everything in Teams",
-			"Whitelabeled Embedding",
-			"Dedicated Integration Support",
-			"Email, Slack, or Discord Support",
-			"Advanced API access",
+			"Everything in Hobby",
+			"Unlimited documents",
+			"Personal API Access",
+			"Priority Email Support",
+			"Custom Branding",
 		],
 		buttonText: "Get Started",
 	},
@@ -117,17 +99,15 @@ export default function PricingSection() {
 					/>
 					<button
 						onClick={() => setBilledYearly(false)}
-						className={`relative z-10 flex-1 rounded-full py-2 text-center text-sm font-medium transition-colors ${
-							!billedYearly ? "text-foreground" : "text-background"
-						}`}
+						className={`relative z-10 flex-1 rounded-full py-2 text-center text-sm font-medium transition-colors ${!billedYearly ? "text-foreground" : "text-background"
+							}`}
 					>
 						Monthly
 					</button>
 					<button
 						onClick={() => setBilledYearly(true)}
-						className={`relative z-10 flex-1 rounded-full py-2 text-center text-sm font-medium transition-colors ${
-							billedYearly ? "text-foreground" : "text-background"
-						}`}
+						className={`relative z-10 flex-1 rounded-full py-2 text-center text-sm font-medium transition-colors ${billedYearly ? "text-foreground" : "text-background"
+							}`}
 					>
 						Yearly
 					</button>

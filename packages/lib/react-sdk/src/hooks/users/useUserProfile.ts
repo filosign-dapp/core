@@ -18,6 +18,8 @@ export function useUserProfile() {
 					createdAt: z.string(),
 					email: z.string().nullable(),
 					username: z.string().nullable(),
+					firstName: z.string().nullable(),
+					lastName: z.string().nullable(),
 					avatarUrl: z.string().nullable(),
 				},
 				`/users/profile`,

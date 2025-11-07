@@ -18,6 +18,8 @@ export default new Hono()
 				createdAt: users.createdAt,
 				email: users.email,
 				username: users.username,
+				firstName: users.firstName,
+				lastName: users.lastName,
 				avatarKey: users.avatarKey,
 			})
 			.from(users)
@@ -45,7 +47,7 @@ export default new Hono()
 
 	.put("/", authenticated, async (ctx) => {
 		const wallet = ctx.var.userWallet;
-		const { email: emailRaw, username: usernameRaw } = await ctx.req.json();
+		const { email: emailRaw, username: usernameRaw, firstName: firstNameRaw, lastName: lastNameRaw } = await ctx.req.json();
 
 		if (emailRaw !== undefined) {
 			if (typeof emailRaw !== "string" || !emailRaw.includes("@")) {
@@ -65,9 +67,21 @@ export default new Hono()
 				);
 			}
 		}
+		if (firstNameRaw !== undefined) {
+			if (typeof firstNameRaw !== "string" || firstNameRaw.trim().length < 1 || firstNameRaw.length > 50) {
+				return respond.err(ctx, "First name must be between 1 and 50 characters", 400);
+			}
+		}
+		if (lastNameRaw !== undefined) {
+			if (typeof lastNameRaw !== "string" || lastNameRaw.trim().length < 1 || lastNameRaw.length > 50) {
+				return respond.err(ctx, "Last name must be between 1 and 50 characters", 400);
+			}
+		}
 
 		const email = emailRaw?.trim();
 		const username = usernameRaw?.trim();
+		const firstName = firstNameRaw?.trim();
+		const lastName = lastNameRaw?.trim();
 
 		const [previous] = await db
 			.select()
@@ -83,6 +97,8 @@ export default new Hono()
 			.set({
 				email: email ?? users.email,
 				username: username ?? users.username,
+				firstName: firstName ?? users.firstName,
+				lastName: lastName ?? users.lastName,
 			})
 			.where(eq(users.walletAddress, wallet));
 
@@ -172,6 +188,8 @@ export default new Hono()
 			encryptionPublicKey: users.encryptionPublicKey,
 			lastActiveAt: users.lastActiveAt,
 			createdAt: users.createdAt,
+			firstName: users.firstName,
+			lastName: users.lastName,
 			avatarKey: users.avatarKey,
 		};
 		let userData: Record<string, unknown> | null = null;

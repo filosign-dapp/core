@@ -1,4 +1,4 @@
-import { CaretRightIcon } from "@phosphor-icons/react";
+import { CaretRightIcon, SpinnerIcon } from "@phosphor-icons/react";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
@@ -12,16 +12,41 @@ import {
 	CardTitle,
 } from "@/src/lib/components/ui/card";
 import { useStorePersist } from "@/src/lib/hooks/use-store";
+import { useIsLoggedIn, useUpdateUserProfile } from "@filosign/react/hooks";
 
 export default function OnboardingWelcomeCompletePage() {
 	const [userName, setUserName] = useState("");
-	const { onboardingForm } = useStorePersist();
-	const navigate = useNavigate();
+	const { onboardingForm, setOnboardingForm } = useStorePersist();
+	const isLoggedIn = useIsLoggedIn();
+	const updateUserProfile = useUpdateUserProfile();
 
 	useEffect(() => {
-		const name = onboardingForm?.name || "there";
-		setUserName(name);
+		if (onboardingForm?.firstName || onboardingForm?.lastName) {
+			setUserName(`${onboardingForm.firstName} ${onboardingForm.lastName}`);
+		}
 	}, [onboardingForm]);
+
+	async function handleSubmit() {
+		if (isLoggedIn.isPending || !isLoggedIn.data) {
+			return window.location.reload();
+		}
+
+		if (onboardingForm?.firstName) {
+			await updateUserProfile.mutateAsync({
+				firstName: onboardingForm.firstName,
+				lastName: onboardingForm.lastName,
+			});
+
+			setOnboardingForm({
+				...onboardingForm,
+				firstName: "",
+				lastName: "",
+				hasOnboarded: true,
+			});
+		}
+
+		window.location.href = "/dashboard";
+	}
 
 	return (
 		<div className="flex justify-center items-center min-h-screen">
@@ -43,7 +68,7 @@ export default function OnboardingWelcomeCompletePage() {
 						<Button
 							className="w-full group"
 							variant="primary"
-							onClick={() => navigate({ to: "/dashboard" })}
+							onClick={handleSubmit}
 						>
 							Go to Dashboard
 							<CaretRightIcon

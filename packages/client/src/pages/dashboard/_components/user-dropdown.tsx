@@ -1,11 +1,11 @@
-import { useLogout } from "@filosign/react/hooks";
+import { useLogout, useUserProfile } from "@filosign/react/hooks";
 import {
 	BellIcon,
 	GearIcon,
 	SignOutIcon,
 	UserIcon,
 } from "@phosphor-icons/react";
-import { usePrivy } from "@privy-io/react-auth";
+import { usePrivy, useUser } from "@privy-io/react-auth";
 import { useNavigate } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import * as React from "react";
@@ -26,18 +26,30 @@ export function UserDropdown() {
 	const logoutFilosign = useLogout();
 	const navigate = useNavigate();
 
-	const handleSignOut = () => {
-		logoutFilosign.mutateAsync();
-		logoutPrivy();
-		navigate({ to: "/", replace: true });
+	const { data: userProfile } = useUserProfile();
+
+	const handleSignOut = async () => {
+		await logoutFilosign.mutateAsync();
+		await logoutPrivy();
+		window.location.href = "/";
 	};
 
 	const formatAddress = (address: string) => {
 		return `${address.slice(0, 6)}...${address.slice(-4)}`;
 	};
 
-	const displayName = user?.google?.name || user?.email?.address || "User";
+	// Use userProfile data for display name, fallback to Privy data
+	const displayName = userProfile
+		? userProfile.username ||
+		(userProfile.firstName && userProfile.lastName
+			? `${userProfile.firstName} ${userProfile.lastName}`
+			: userProfile.firstName || userProfile.lastName) ||
+		userProfile.email ||
+		"User"
+		: user?.google?.name || user?.email?.address || "User";
+
 	const walletAddress = user?.wallet?.address;
+	const avatarUrl = userProfile?.avatarUrl;
 
 	return (
 		<DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
@@ -71,14 +83,25 @@ export function UserDropdown() {
 					}}
 				>
 					<DropdownMenuItem className="gap-3 p-3 cursor-default">
-						<div className="flex aspect-square size-10 items-center justify-center bg-muted/10 rounded-full">
-							<UserIcon className="size-6 text-muted-foreground" />
-						</div>
+						<Image
+							src={avatarUrl}
+							alt="Profile"
+							className="aspect-square size-10 rounded-full object-cover"
+						>
+							<div className="flex aspect-square size-10 items-center justify-center bg-muted/10 rounded-full">
+								<UserIcon className="size-6 text-muted-foreground" />
+							</div>
+						</Image>
 						<div className="flex flex-col">
 							<p className="font-medium text-sm">{displayName}</p>
 							<p className="text-xs text-muted-foreground">
 								{walletAddress ? formatAddress(walletAddress) : "No wallet"}
 							</p>
+							{userProfile?.email && (
+								<p className="text-xs text-muted-foreground">
+									{userProfile.email}
+								</p>
+							)}
 						</div>
 					</DropdownMenuItem>
 				</motion.div>

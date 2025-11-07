@@ -1,4 +1,5 @@
 import { useLogin, useIsRegistered, useIsLoggedIn } from "@filosign/react/hooks";
+import { useFilosignContext } from "@filosign/react";
 import { CaretRightIcon } from "@phosphor-icons/react";
 import { usePrivy } from "@privy-io/react-auth";
 import { useQueryClient } from "@tanstack/react-query";
@@ -26,6 +27,7 @@ export default function DashboardProtector({
 	children,
 }: DashboardProtectorProps) {
 	const { ready, authenticated } = usePrivy();
+	const { wallet } = useFilosignContext();
 	const isRegistered = useIsRegistered();
 	const isLoggedIn = useIsLoggedIn();
 	const login = useLogin();
@@ -35,8 +37,6 @@ export default function DashboardProtector({
 	const [showPinAuth, setShowPinAuth] = useState(false);
 	const [pin, setPin] = useState("");
 	const [error, setError] = useState("");
-
-	console.log("isLoggedIn", isLoggedIn.data, isLoggedIn.status);
 
 	useEffect(() => {
 		if (
@@ -59,10 +59,7 @@ export default function DashboardProtector({
 		ready,
 		authenticated,
 		isRegistered.data,
-		isRegistered.isPending,
 		isLoggedIn.data,
-		isLoggedIn.isPending,
-		navigate,
 	]);
 
 	const handlePinSubmit = async () => {
@@ -71,9 +68,12 @@ export default function DashboardProtector({
 		try {
 			setError("");
 			await login.mutateAsync({ pin });
-			// Invalidate isLoggedIn query to refetch with new JWT
+			// Invalidate both isRegistered and isLoggedIn queries to refetch with updated state
 			await queryClient.invalidateQueries({
-				queryKey: ["filosign", "isLoggedIn"],
+				queryKey: ["fsQ-is-registered", wallet?.account.address],
+			});
+			await queryClient.invalidateQueries({
+				queryKey: ["fsQ-is-logged-in", wallet?.account.address],
 			});
 			toast.success("Successfully logged in!");
 			setShowPinAuth(false);

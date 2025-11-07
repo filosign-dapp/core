@@ -8,8 +8,17 @@ import FooterSection from "./footer-section";
 import HeroSection from "./hero-section";
 import LandingNavbar from "./landing-nav";
 import WaitlistSection from "./waitlist-section";
+import PricingSection from "./pricing-section";
 
 export default function LandingPage() {
+	const { user } = usePrivy();
+	const { data: balance } = useBalance({
+		address: user?.wallet?.address as `0x${string}`,
+	});
+
+	console.log({ balance });
+
+
 	return (
 		<div className="[--section-gap:4rem]">
 			{/* Navbar */}
@@ -25,7 +34,7 @@ export default function LandingPage() {
 
 			<div className="h-[var(--section-gap)]" />
 
-			{/* <PricingSection /> */}
+			<PricingSection />
 
 			<Separator className="mt-16 md:mt-56" />
 

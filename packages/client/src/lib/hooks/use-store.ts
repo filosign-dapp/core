@@ -3,7 +3,8 @@ import { persist } from "zustand/middleware";
 import type { CreateForm } from "@/src/pages/dashboard/envelope/create/types";
 
 interface OnboardingForm {
-	name: string;
+	firstName: string;
+	lastName: string;
 	pin: string;
 	hasOnboarded: boolean;
 	selectedSignature?: string;
@@ -37,7 +38,8 @@ export const useStorePersist = create<StorePersist>()(
 			clearCreateForm: () => set({ createForm: null }),
 
 			onboardingForm: {
-				name: "",
+				firstName: "",
+				lastName: "",
 				pin: "",
 				hasOnboarded: false,
 				selectedSignature: undefined,
@@ -49,7 +51,8 @@ export const useStorePersist = create<StorePersist>()(
 			clearOnboardingForm: () =>
 				set({
 					onboardingForm: {
-						name: "",
+						firstName: "",
+						lastName: "",
 						pin: "",
 						hasOnboarded: false,
 						selectedSignature: undefined,

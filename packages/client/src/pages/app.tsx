@@ -24,10 +24,13 @@ import OnboardingSetPinPage from "./onboarding/set-pin";
 import OnboardingWelcomeCompletePage from "./onboarding/welcome";
 import PitchPage from "./pitch";
 import TestPage from "./test";
+import { useIsLoggedIn } from "@filosign/react/hooks";
 
 const rootRoute = createRootRoute({
 	component: () => {
 		useAnalytics();
+		const isLoggedIn = useIsLoggedIn();
+		console.log({ isLoggedIn: isLoggedIn.data, status: isLoggedIn.status });
 
 		return (
 			<>

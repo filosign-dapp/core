@@ -21,12 +21,14 @@ export default function ProfilePage() {
 	const { onboardingForm } = useStorePersist();
 	const { user } = usePrivy();
 
-	const fullName = onboardingForm?.name || "John Doe";
+	const firstName = onboardingForm?.firstName || "";
+	const lastName = onboardingForm?.lastName || "";
 	const walletAddress = user?.wallet?.address || "";
 
 	const mockProfileData = {
 		personal: {
-			fullName,
+			firstName,
+			lastName,
 			bio: "",
 			walletAddress,
 		},

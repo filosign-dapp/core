@@ -10,7 +10,8 @@ interface SignatureOption {
 }
 
 interface SignatureChooseProps {
-	fullName: string;
+	firstName: string;
+	lastName: string;
 	initials: string;
 	selectedSignatureId?: string;
 	onSignatureSelection: (selectedSignatureId: string) => void;
@@ -20,9 +21,11 @@ interface SignatureChooseProps {
 
 // Generate different signature styles using actual handwritten fonts
 const generateSignatureStyles = (
-	fullName: string,
+	firstName: string,
+	lastName: string,
 	initials: string,
 ): SignatureOption[] => {
+	const fullName = `${firstName} ${lastName}`.trim();
 	const styles = [
 		{
 			id: "typed",
@@ -72,7 +75,8 @@ const generateSignatureStyles = (
 };
 
 export default function SignatureChoose({
-	fullName,
+	firstName,
+	lastName,
 	initials,
 	selectedSignatureId,
 	onSignatureSelection,
@@ -82,7 +86,7 @@ export default function SignatureChoose({
 	const [selectedId, setSelectedId] = useState<string | null>(
 		selectedSignatureId || null,
 	);
-	const signatureOptions = generateSignatureStyles(fullName, initials);
+	const signatureOptions = generateSignatureStyles(firstName, lastName, initials);
 
 	const handleSelect = (option: SignatureOption) => {
 		setSelectedId(option.id);

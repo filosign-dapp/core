@@ -2,10 +2,14 @@ import { z } from "zod";
 
 export const profileSchema = z.object({
 	personal: z.object({
-		fullName: z
+		firstName: z
 			.string()
-			.min(1, "Full name is required")
-			.max(100, "Full name too long"),
+			.min(1, "First name is required")
+			.max(50, "First name too long"),
+		lastName: z
+			.string()
+			.min(1, "Last name is required")
+			.max(50, "Last name too long"),
 		bio: z.string().max(500, "Bio must be less than 500 characters"),
 		walletAddress: z.string().optional(),
 	}),

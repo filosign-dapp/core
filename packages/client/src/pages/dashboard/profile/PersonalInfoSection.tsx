@@ -64,19 +64,35 @@ export function PersonalInfoSection({
 					)}
 				/>
 
-				<FormField
-					control={form.control}
-					name="personal.fullName"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Full Name</FormLabel>
-							<FormControl>
-								<Input placeholder="Enter your full name" {...field} />
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
+				<div className="grid grid-cols-2 gap-4">
+					<FormField
+						control={form.control}
+						name="personal.firstName"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>First Name</FormLabel>
+								<FormControl>
+									<Input placeholder="Enter your first name" {...field} />
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+
+					<FormField
+						control={form.control}
+						name="personal.lastName"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>Last Name</FormLabel>
+								<FormControl>
+									<Input placeholder="Enter your last name" {...field} />
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+				</div>
 
 				<FormField
 					control={form.control}

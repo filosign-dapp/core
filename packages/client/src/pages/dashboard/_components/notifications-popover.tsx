@@ -1,4 +1,3 @@
-import { useFilosignMutation, useFilosignQuery } from "@filosign/react";
 import {
 	ArrowClockwiseIcon,
 	BellIcon,
@@ -6,6 +5,7 @@ import {
 	FileTextIcon,
 	UserCheckIcon,
 } from "@phosphor-icons/react";
+import { useAckFile, useApproveSender, useReceivedFiles, useReceivedRequests } from "@filosign/react/hooks";
 import { usePrivy } from "@privy-io/react-auth";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -40,16 +40,10 @@ export function NotificationsPopover() {
 	const queryClient = useQueryClient();
 
 	// Only get the actionable data - pending requests and unacknowledged files
-	const receivedRequests = useFilosignQuery(
-		["shareCapability", "getReceivedRequests"],
-		undefined,
-	);
-	const receivedFiles = useFilosignQuery(
-		["files", "getReceivedFiles"],
-		undefined,
-	);
-	const acknowledgeFile = useFilosignMutation(["files", "acknowledgeFile"]);
-	const allowSharing = useFilosignMutation(["shareCapability", "allowSharing"]);
+	const receivedRequests = useReceivedRequests();
+	const receivedFiles = useReceivedFiles();
+	const acknowledgeFile = useAckFile();
+	const allowSharing = useApproveSender();
 
 	// Calculate notification counts - only actionable items
 	const getNotificationCount = () => {
@@ -62,11 +56,9 @@ export function NotificationsPopover() {
 			).length;
 		}
 
-		// Count pending received requests - check both data.requests and data directly
-		const requestsData =
-			(receivedRequests.data as any)?.requests || receivedRequests.data;
-		if (requestsData && Array.isArray(requestsData)) {
-			count += requestsData.filter(
+		// Count pending received requests
+		if (receivedRequests.data && Array.isArray(receivedRequests.data)) {
+			count += receivedRequests.data.filter(
 				(req: any) => req.status === "PENDING" || req.status === "pending",
 			).length;
 		}
@@ -86,7 +78,7 @@ export function NotificationsPopover() {
 			toast.success("File acknowledged!");
 			// Refresh the files list
 			await queryClient.invalidateQueries({
-				queryKey: ["filosign", "files", "getReceivedFiles"],
+				queryKey: ["received-files"],
 			});
 		} catch (error) {
 			toast.error("Failed to acknowledge file");
@@ -104,16 +96,16 @@ export function NotificationsPopover() {
 		console.log("Attempting to allow sharing for wallet:", pendingAcceptWallet);
 		try {
 			console.log("Calling allowSharing.mutateAsync with:", {
-				senderWallet: pendingAcceptWallet,
+				sender: pendingAcceptWallet,
 			});
 			const result = await allowSharing.mutateAsync({
-				senderWallet: pendingAcceptWallet,
+				sender: pendingAcceptWallet as `0x${string}`,
 			});
 			console.log("allowSharing result:", result);
 			toast.success("Sharing request accepted!");
 			// Refresh the requests list
 			await queryClient.invalidateQueries({
-				queryKey: ["filosign", "shareCapability", "getReceivedRequests"],
+				queryKey: ["received-requests"],
 			});
 			console.log("Queries invalidated");
 			setConfirmDialogOpen(false);
@@ -125,10 +117,8 @@ export function NotificationsPopover() {
 	};
 
 	const pendingRequests = (() => {
-		const requestsData =
-			(receivedRequests.data as any)?.requests || receivedRequests.data;
-		return requestsData && Array.isArray(requestsData)
-			? requestsData.filter(
+		return receivedRequests.data && Array.isArray(receivedRequests.data)
+			? receivedRequests.data.filter(
 				(req: any) => req.status === "PENDING" || req.status === "pending",
 			)
 			: [];
@@ -247,8 +237,8 @@ export function NotificationsPopover() {
 									<NotificationItemCard
 										key={i}
 										icon={<FileTextIcon className="h-4 w-4 text-blue-600" />}
-										title={file.metadata?.fileName || "Unknown file"}
-										subtitle={`From: ${formatAddress(file.senderAddress)}`}
+										title={`File ${file.pieceCid.slice(0, 8)}...`}
+										subtitle={`From: ${formatAddress(file.sender)}`}
 										variant="info"
 										actionButton={{
 											label: acknowledgeFile.isPending

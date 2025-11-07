@@ -4,10 +4,14 @@ import { z } from "zod";
 // Simplified form validation schema
 const profileSchema = z.object({
 	personal: z.object({
-		fullName: z
+		firstName: z
 			.string()
-			.min(1, "Full name is required")
-			.max(100, "Full name too long"),
+			.min(1, "First name is required")
+			.max(50, "First name too long"),
+		lastName: z
+			.string()
+			.min(1, "Last name is required")
+			.max(50, "Last name too long"),
 		bio: z.string().max(500, "Bio must be less than 500 characters"),
 		walletAddress: z.string().optional(),
 	}),
@@ -73,7 +77,9 @@ export const useSectionState = (
 					const personalValues = form.getValues("personal");
 					const original = originalValues.personal;
 					const hasPersonalChanges =
-						JSON.stringify(personalValues) !== JSON.stringify(original);
+						personalValues.firstName !== original.firstName ||
+						personalValues.lastName !== original.lastName ||
+						personalValues.bio !== original.bio;
 					setHasChangesState(hasPersonalChanges);
 				} else if (
 					sectionKey === "preferences" &&
