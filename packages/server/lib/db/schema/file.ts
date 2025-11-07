@@ -29,6 +29,7 @@ export const fileRecipients = t.pgTable(
 			.notNull()
 			.references(() => files.pieceCid, { onDelete: "cascade" }),
 		ack: tHex(),
+		ackedAt: t.timestamp(),
 		recipientWallet: tEvmAddress().notNull(),
 		kemCiphertext: tHex().notNull(),
 		encryptedEncryptionKey: tHex().notNull(),

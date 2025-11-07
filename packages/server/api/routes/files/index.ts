@@ -281,6 +281,7 @@ export default new Hono()
 				filePieceCid: fileRecipients.filePieceCid,
 				recipientWallet: fileRecipients.recipientWallet,
 				ack: fileRecipients.ack,
+				ackedAt: fileRecipients.ackedAt,
 				kemCiphertext: fileRecipients.kemCiphertext,
 				encryptedEncryptionKey: fileRecipients.encryptedEncryptionKey,
 			})
@@ -315,7 +316,7 @@ export default new Hono()
 			recipient: fileRecipient.recipientWallet,
 			kemCiphertext: fileRecipient.ack ? fileRecipient.kemCiphertext : null,
 
-			acked: !!fileRecipient.ack,
+			ackedAt: fileRecipient.ackedAt,
 			signatures: fileSignaturesRecord,
 
 			senderEncryptedEncryptionKey:
@@ -379,7 +380,7 @@ export default new Hono()
 		if (valid) {
 			await db
 				.update(fileRecipients)
-				.set({ ack: signature })
+				.set({ ack: signature, ackedAt: new Date() })
 				.where(eq(fileRecipients.filePieceCid, pieceCid));
 			return respond.ok(ctx, {}, "File acknowledged successfully", 200);
 		} else {
