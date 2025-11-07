@@ -1,16 +1,16 @@
 import fjsStringify from "fast-json-stable-stringify";
 import {
-    type Account,
-    type Address,
-    type Chain,
-    encodePacked,
-    type Hex,
-    keccak256,
-    ripemd160,
-    type Transport,
-    toBytes,
-    toHex,
-    type WalletClient,
+	type Account,
+	type Address,
+	type Chain,
+	encodePacked,
+	type Hex,
+	keccak256,
+	ripemd160,
+	type Transport,
+	toBytes,
+	toHex,
+	type WalletClient,
 } from "viem";
 import { argon, hash } from "./hash";
 import * as KEM from "./KEM";
@@ -19,159 +19,205 @@ import * as signatures from "./signatures";
 export { toHex, toBytes };
 
 export function randomBytes(n = 32) {
-    return crypto.getRandomValues(new Uint8Array(n));
+	return crypto.getRandomValues(new Uint8Array(n));
 }
 
 export function randomHex(n = 32) {
-    const bytes = randomBytes(n);
-    return toHex(bytes);
+	const bytes = randomBytes(n);
+	return toHex(bytes);
 }
 
 export async function hkdfExtractExpand(
-    source: Uint8Array,
-    salt: Uint8Array | null,
-    info: Uint8Array | null,
-    length: number,
+	source: Uint8Array,
+	salt: Uint8Array | null,
+	info: Uint8Array | null,
+	length: number,
 ): Promise<Uint8Array> {
-    const subtle = crypto.subtle;
-    const hkdfKey = await subtle.importKey(
-        "raw",
-        source as BufferSource,
-        "HKDF",
-        false,
-        ["deriveBits"],
-    );
-    const derivedBits = await subtle.deriveBits(
-        {
-            name: "HKDF",
-            hash: "SHA-256",
-            salt: (salt ?? new Uint8Array([])) as BufferSource,
-            info: (info ?? new Uint8Array([])) as BufferSource,
-        },
-        hkdfKey,
-        length * 8,
-    );
-    return new Uint8Array(derivedBits);
+	const subtle = crypto.subtle;
+	const hkdfKey = await subtle.importKey(
+		"raw",
+		source as BufferSource,
+		"HKDF",
+		false,
+		["deriveBits"],
+	);
+	const derivedBits = await subtle.deriveBits(
+		{
+			name: "HKDF",
+			hash: "SHA-256",
+			salt: (salt ?? new Uint8Array([])) as BufferSource,
+			info: (info ?? new Uint8Array([])) as BufferSource,
+		},
+		hkdfKey,
+		length * 8,
+	);
+	return new Uint8Array(derivedBits);
 }
 
 export function generateRegisterChallenge(
-    userAddress: Address,
-    salt: Hex,
-    info: string,
+	userAddress: Address,
+	salt: Hex,
+	info: string,
 ) {
-    const challenge = `filosign:${userAddress}:${salt}:${info}`;
-    return challenge;
+	const challenge = `filosign:${userAddress}:${salt}:${info}`;
+	return challenge;
 }
 
-export function computeCommitment(args: (string | number | bigint)[] | readonly (string | number | bigint)[]) {
-    function determineType(value: string | number | bigint): "string" | "uint256" {
-        if (typeof value === "string") {
-            return "string";
-        }
-        if (typeof value === "number") {
-            return "uint256";
-        }
-        if (typeof value === "bigint") {
-            return "uint256";
-        }
-        throw new Error("Unsupported type");
-    }
+export function computeCommitment(
+	args: (string | number | bigint)[] | readonly (string | number | bigint)[],
+) {
+	function determineType(
+		value: string | number | bigint,
+	): "string" | "uint256" {
+		if (typeof value === "string") {
+			return "string";
+		}
+		if (typeof value === "number") {
+			return "uint256";
+		}
+		if (typeof value === "bigint") {
+			return "uint256";
+		}
+		throw new Error("Unsupported type");
+	}
 
-    const types = args.map((i) => determineType(i));
-    //@ts-expect-error <- this is very important here and I don't think there is a way to fix this
-    return ripemd160(keccak256(encodePacked(types, args)));
+	const types = args.map((i) => determineType(i));
+	//@ts-expect-error <- this is very important here and I don't think there is a way to fix this
+	return ripemd160(keccak256(encodePacked(types, args)));
 }
 
 export async function walletKeyGen(
-    wallet: Wallet,
-    args: {
-        dl: signatures.DL;
-        pin: string;
-        salts?: {
-            challenge: Hex;
-            seed: Hex;
-            pin: Hex;
-        };
-    },
+	wallet: Wallet,
+	args: {
+		dl: signatures.DL;
+		pin: string;
+		salts?: {
+			challenge: Hex;
+			seed: Hex;
+			pin: Hex;
+		};
+	},
 ) {
-    const { pin, salts, dl } = args;
-    const saltPin = salts?.pin ? toBytes(salts.pin) : randomBytes(16);
-    const saltSeed = salts?.seed ? toBytes(salts.seed) : randomBytes(16);
-    const saltChallenge = salts?.challenge
-        ? toBytes(salts.challenge)
-        : randomBytes(16);
+	const { pin, salts, dl } = args;
+	const saltPin = salts?.pin ? toBytes(salts.pin) : randomBytes(16);
+	const saltSeed = salts?.seed ? toBytes(salts.seed) : randomBytes(16);
+	const saltChallenge = salts?.challenge
+		? toBytes(salts.challenge)
+		: randomBytes(16);
 
-    const pinArgoned = argon(hash(pin));
+	const pinArgoned = argon(hash(pin));
 
-    const registerChallenge = generateRegisterChallenge(
-        wallet.account.address,
-        toHex(saltChallenge),
-        pinArgoned.toString(),
-    );
+	const registerChallenge = generateRegisterChallenge(
+		wallet.account.address,
+		toHex(saltChallenge),
+		pinArgoned.toString(),
+	);
 
-    const signature = await wallet.signMessage({
-        message: registerChallenge,
-    });
+	const signature = await wallet.signMessage({
+		message: registerChallenge,
+	});
 
-    const seed = await hkdfExtractExpand(
-        saltSeed,
-        toBytes(signature),
-        toBytes(pinArgoned.toString()),
-        64,
-    );
+	const seed = await hkdfExtractExpand(
+		saltSeed,
+		toBytes(signature),
+		toBytes(pinArgoned.toString()),
+		64,
+	);
 
-    const kemKeypair = await KEM.keyGen({ seed });
-    const sigKeypair = await signatures.keyGen({ seed, dl });
+	const kemKeypair = await KEM.keyGen({ seed });
+	const sigKeypair = await signatures.keyGen({ seed, dl });
 
-    const commitmentKem = computeCommitment([kemKeypair.publicKey.toString()]);
-    const commitmentSig = computeCommitment([sigKeypair.publicKey.toString()]);
+	const commitmentKem = computeCommitment([kemKeypair.publicKey.toString()]);
+	const commitmentSig = computeCommitment([sigKeypair.publicKey.toString()]);
 
-    return {
-        seed,
-        saltPin: toHex(saltPin),
-        saltSeed: toHex(saltSeed),
-        saltChallenge: toHex(saltChallenge),
-        kemKeypair,
-        sigKeypair,
-        commitmentKem,
-        commitmentSig,
-    };
+	return {
+		seed,
+		saltPin: toHex(saltPin),
+		saltSeed: toHex(saltSeed),
+		saltChallenge: toHex(saltChallenge),
+		kemKeypair,
+		sigKeypair,
+		commitmentKem,
+		commitmentSig,
+	};
 }
 
 export async function seedKeyGen(
-    seed: Uint8Array<ArrayBuffer>,
-    args: { dl: signatures.DL },
+	seed: Uint8Array<ArrayBuffer>,
+	args: { dl: signatures.DL },
 ) {
-    const kemKeypair = await KEM.keyGen({ seed });
-    const sigKeypair = await signatures.keyGen({ seed, dl: args.dl });
+	const kemKeypair = await KEM.keyGen({ seed });
+	const sigKeypair = await signatures.keyGen({ seed, dl: args.dl });
 
-    const commitmentKem = computeCommitment([kemKeypair.publicKey.toString()]);
-    const commitmentSig = computeCommitment([sigKeypair.publicKey.toString()]);
+	const commitmentKem = computeCommitment([kemKeypair.publicKey.toString()]);
+	const commitmentSig = computeCommitment([sigKeypair.publicKey.toString()]);
 
-    return {
-        kemKeypair,
-        sigKeypair,
-        commitmentKem,
-        commitmentSig,
-    };
+	return {
+		kemKeypair,
+		sigKeypair,
+		commitmentKem,
+		commitmentSig,
+	};
 }
 
 function stringifyReplacer(_: string, value: unknown) {
-    if (typeof value === "bigint") {
-        const asNumber = Number(value);
-        if (BigInt(asNumber) === value) return asNumber;
-        return value.toString();
-    }
-    return value;
+	if (typeof value === "bigint") {
+		const asNumber = Number(value);
+		if (BigInt(asNumber) === value) return asNumber;
+		return value.toString();
+	}
+	if (value instanceof Uint8Array) {
+		// Convert Uint8Array to base64 string to reduce JSON size
+		if (typeof Buffer !== "undefined") {
+			return {
+				__type: "Uint8Array",
+				data: Buffer.from(value).toString("base64"),
+			};
+		} else {
+			let binary = "";
+			for (let i = 0; i < value.length; i++) {
+				const v = value[i];
+				if (!v) continue;
+				binary += String.fromCharCode(v);
+			}
+			return { __type: "Uint8Array", data: btoa(binary) };
+		}
+	}
+	return value;
+}
+
+function parseReviver(_: string, value: unknown) {
+	if (
+		value &&
+		typeof value === "object" &&
+		"__type" in value &&
+		value.__type === "Uint8Array" &&
+		"data" in value &&
+		typeof value.data === "string"
+	) {
+		// Convert base64 string back to Uint8Array
+		if (typeof Buffer !== "undefined") {
+			return new Uint8Array(Buffer.from(value.data, "base64"));
+		} else {
+			const binary = atob(value.data);
+			const bytes = new Uint8Array(binary.length);
+			for (let i = 0; i < binary.length; i++) {
+				bytes[i] = binary.charCodeAt(i);
+			}
+			return bytes;
+		}
+	}
+	return value;
 }
 
 export const jsonStringify = (obj: unknown): string =>
-    fjsStringify(JSON.parse(JSON.stringify(obj, stringifyReplacer)));
+	fjsStringify(JSON.parse(JSON.stringify(obj, stringifyReplacer)));
 
-export const jsonParse = JSON.parse;
+export const jsonParse = (str: string): unknown =>
+	JSON.parse(str, parseReviver);
 
 export const jsonClone = <T>(obj: T): T => {
-    return jsonParse(jsonStringify(obj));
+	return jsonParse(jsonStringify(obj)) as T;
 };
 
 export type Wallet = WalletClient<Transport, Chain, Account>;
