@@ -15,6 +15,7 @@ export function useFileInfo(args: { pieceCid: string | undefined }) {
 					sender: z.string(),
 					status: z.string(),
 					acked: z.boolean(),
+					ackedAt: z.string().nullable(),
 					onchainTxHash: zHexString(),
 					senderEncryptedEncryptionKey: z.string().nullable(),
 					createdAt: z.string(),
