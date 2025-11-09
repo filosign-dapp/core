@@ -27,19 +27,17 @@ export function NotificationItemCard({
 	className = "",
 }: NotificationItemCardProps) {
 	const variantStyles = {
-		default:
-			"bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800",
-		warning:
-			"bg-orange-50 dark:bg-orange-950/20 border-orange-200 dark:border-orange-800",
-		info: "bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800",
+		default: "bg-card border-border",
+		warning: "bg-orange-50 dark:bg-orange-950/20 border-orange-200 dark:border-orange-800",
+		info: "bg-accent/50 border-accent/20",
 	};
 
 	return (
 		<div
 			className={`p-4 rounded-lg border ${variantStyles[variant]} ${className}`}
 		>
-			<div className="flex items-start justify-between gap-3">
-				<div className="flex items-start gap-3 flex-1 min-w-0">
+			<div className="flex items-center justify-between gap-3">
+				<div className="flex items-center gap-3 flex-1 min-w-0">
 					<div className="flex-shrink-0 mt-0.5">{icon}</div>
 					<div className="flex-1 min-w-0">
 						<div className="flex items-center gap-2 mb-1">
