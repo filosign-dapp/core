@@ -25,6 +25,6 @@ export const app = new Hono()
 	.route("/api", apiRouter);
 
 export default {
-	port: Bun.env.PORT ?? 30011,
+	port: Bun.env.PORT ? parseInt(Bun.env.PORT, 10) : 30011,
 	fetch: app.fetch,
 };
