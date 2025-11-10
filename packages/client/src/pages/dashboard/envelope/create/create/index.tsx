@@ -1,22 +1,19 @@
-import { useSendFile, useUserProfileByQuery } from "@filosign/react/hooks";
-import { CaretLeftIcon } from "@phosphor-icons/react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useUserProfileByQuery } from "@filosign/react/hooks";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { useStorePersist } from "@/src/lib/hooks/use-store";
 import Logo from "@/src/lib/components/custom/Logo";
 import { Button } from "@/src/lib/components/ui/button";
 import { Form } from "@/src/lib/components/ui/form";
-import type { EnvelopeForm } from "../types";
+import type { EnvelopeForm, StoredDocument } from "../types";
 import DocumentsSection from "./_components/DocumentUpload";
 import RecipientsSection from "./_components/RecipientsSection";
 
 export default function CreateEnvelopePage() {
 	const navigate = useNavigate();
-
-	// SDK mutations for file uploads
-	const sendFile = useSendFile();
+	const { setCreateForm } = useStorePersist();
 
 	const form = useForm<EnvelopeForm>({
 		defaultValues: {
@@ -60,46 +57,41 @@ export default function CreateEnvelopePage() {
 		}
 
 		try {
-			toast.loading("Sending documents...", { id: "upload-progress" });
+			// Convert files to data URLs for storage
+			const storedDocuments: StoredDocument[] = await Promise.all(
+				data.documents.map(async (doc) => {
+					const dataUrl = await new Promise<string>((resolve, reject) => {
+						const reader = new FileReader();
+						reader.onload = () => resolve(reader.result as string);
+						reader.onerror = reject;
+						reader.readAsDataURL(doc.file);
+					});
 
-			// Send each document to the recipient
-			const sendPromises = [];
-			for (const doc of data.documents) {
-				const fileData = new Uint8Array(await doc.file.arrayBuffer());
+					return {
+						id: doc.id,
+						name: doc.name,
+						size: doc.size,
+						type: doc.type,
+						dataUrl,
+					};
+				})
+			);
 
-				sendPromises.push(
-					sendFile.mutateAsync({
-						bytes: fileData,
-						signaturePositionOffset: {
-							top: 10, // Default position - you might want to make this configurable
-							left: 10,
-						},
-						recipient: {
-							address: recipientProfile.data!.walletAddress as `0x${string}`,
-							encryptionPublicKey: recipientProfile.data!.encryptionPublicKey,
-						},
-						metadata: {
-							name: doc.file.name,
-							mimeType: doc.file.type,
-						}
-					})
-				);
-			}
+			// Store form data in persistent store
+			const createFormData = {
+				recipient: data.recipient,
+				emailMessage: data.emailMessage,
+				documents: storedDocuments,
+			};
 
-			await Promise.all(sendPromises);
+			setCreateForm(createFormData);
 
-			toast.success("Documents sent successfully!", {
-				id: "upload-progress",
-			});
-
-			// Wait for 1 second then navigate back to dashboard
-			setTimeout(() => {
-				navigate({ to: "/dashboard" });
-			}, 1000);
+			// Navigate to add-sign page
+			navigate({ to: "/dashboard/envelope/create/add-sign" });
 		} catch (error) {
-			console.error("Failed to send documents:", error);
-			toast.error("Failed to send documents. Please try again.", {
-				id: "upload-progress",
+			console.error("Failed to prepare documents:", error);
+			toast.error("Failed to prepare documents. Please try again.", {
+				id: "prepare-progress",
 			});
 		}
 	};
@@ -155,9 +147,8 @@ export default function CreateEnvelopePage() {
 							variant="primary"
 							size="lg"
 							className="gap-2 group transition-all duration-200"
-							disabled={sendFile.isPending}
 						>
-							{sendFile.isPending ? "Sending..." : "Send Envelope"}
+							Next Step
 						</Button>
 					</motion.div>
 				</form>

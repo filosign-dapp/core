@@ -1,4 +1,4 @@
-import { PlusIcon } from "@phosphor-icons/react";
+import { FileTextIcon, PlusIcon } from "@phosphor-icons/react";
 import { Link } from "@tanstack/react-router";
 import Logo from "@/src/lib/components/custom/Logo";
 import { Button } from "@/src/lib/components/ui/button";
@@ -22,10 +22,6 @@ export default function DashboardNav() {
 			<div className="flex gap-4 items-center">
 				<Link to="/dashboard/envelope/create">
 					<Button variant="primary" className="gap-2 group">
-						<PlusIcon
-							weight="bold"
-							className="group-hover:rotate-90 transition-transform duration-200"
-						/>
 						<p className="hidden sm:inline">New Document</p>
 					</Button>
 				</Link>
