@@ -9,14 +9,14 @@ export function useRevokeSender() {
     return useMutation({
         mutationFn: async (sender: Address) => {
             if (!contracts || !wallet) {
-                throw new Error("not conected iido");
+                throw new Error("Not connected to wallet");
             }
 
             const tx = await contracts.FSManager.write.revokeSender([sender]);
             const success = await api.rpc.tx(tx, {});
 
             if (!success) {
-                throw new Error("Failed sverer to know you revoke sender");
+                throw new Error("Failed to revoke sender");
             }
 
             queryClient.refetchQueries({

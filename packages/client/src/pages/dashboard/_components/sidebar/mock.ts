@@ -81,6 +81,10 @@ export const sidebarData = {
 					url: "/dashboard/settings/profile",
 				},
 				{
+					title: "Connections",
+					url: "/dashboard/connections",
+				},
+				{
 					title: "Permissions",
 					url: "/dashboard/settings/permissions",
 				},

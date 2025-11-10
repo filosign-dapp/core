@@ -16,6 +16,7 @@ import CreateEnvelopePage from "./dashboard/envelope/create/create";
 import FilesPage from "./dashboard/files";
 import PermissionsPage from "./dashboard/permissions";
 import ProfilePage from "./dashboard/profile";
+import ConnectionsPage from "./dashboard/connections";
 import CreateNewSignaturePage from "./dashboard/signature/create";
 import LandingPage from "./landing";
 import OnboardingWelcomePage from "./onboarding";
@@ -87,6 +88,18 @@ const permissionsRoute = createRoute({
 		return (
 			<DashboardProtector>
 				{withPageErrorBoundary(PermissionsPage)({})}
+			</DashboardProtector>
+		);
+	},
+});
+
+const connectionsRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: "/dashboard/connections",
+	component: function Connections() {
+		return (
+			<DashboardProtector>
+				{withPageErrorBoundary(ConnectionsPage)({})}
 			</DashboardProtector>
 		);
 	},
@@ -219,6 +232,7 @@ const routeTree = rootRoute.addChildren([
 	dashboardRoute,
 	profileRoute,
 	permissionsRoute,
+	connectionsRoute,
 	dashboardDocumentAllRoute,
 	dashboardDocumentFolderRoute,
 	createEnvelopeRoute,

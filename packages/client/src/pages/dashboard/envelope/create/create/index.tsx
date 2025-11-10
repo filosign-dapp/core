@@ -114,7 +114,7 @@ export default function CreateEnvelopePage() {
 						textClassName="text-foreground font-bold"
 						iconOnly
 					/>
-					<h3>Create New Envelope</h3>
+					<h3>Create New Document</h3>
 				</div>
 			</header>
 

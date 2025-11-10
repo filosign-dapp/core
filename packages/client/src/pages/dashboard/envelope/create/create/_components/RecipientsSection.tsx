@@ -80,7 +80,7 @@ export default function RecipientsSection({ control }: RecipientsSectionProps) {
 				<CollapsibleContent className="mt-6">
 					<div className="space-y-6">
 						{/* Recipient Selector */}
-							<FormField
+						<FormField
 							control={control}
 							name="recipient"
 							rules={{

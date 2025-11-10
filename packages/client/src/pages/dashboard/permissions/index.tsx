@@ -1,4 +1,3 @@
-import { useFilosignMutation, useFilosignQuery } from "@filosign/react";
 import {
 	ArrowClockwiseIcon,
 	CaretLeftIcon,
@@ -6,6 +5,14 @@ import {
 	ClockIcon,
 	XCircleIcon,
 } from "@phosphor-icons/react";
+import {
+	useSentRequests,
+	useReceivedRequests,
+	useSendableTo,
+	useReceivableFrom,
+	useApproveSender,
+	useCancelRequest,
+} from "@filosign/react/hooks";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
@@ -27,29 +34,14 @@ export default function PermissionsPage() {
 	const queryClient = useQueryClient();
 
 	// Fetch all permission-related data
-	const sentRequests = useFilosignQuery(
-		["shareCapability", "getSentRequests"],
-		undefined,
-	);
-	const receivedRequests = useFilosignQuery(
-		["shareCapability", "getReceivedRequests"],
-		undefined,
-	);
-	const allowedSenders = useFilosignQuery(
-		["shareCapability", "getPeopleCanSendTo"],
-		undefined,
-	);
-	const allowedReceivers = useFilosignQuery(
-		["shareCapability", "getPeopleCanReceiveFrom"],
-		undefined,
-	);
+	const sentRequests = useSentRequests();
+	const receivedRequests = useReceivedRequests();
+	const allowedSenders = useSendableTo();
+	const allowedReceivers = useReceivableFrom();
 
 	// Mutations for managing permissions
-	const allowSharing = useFilosignMutation(["shareCapability", "allowSharing"]);
-	const cancelRequest = useFilosignMutation([
-		"shareCapability",
-		"cancelShareRequest",
-	]);
+	const allowSharing = useApproveSender();
+	const cancelRequest = useCancelRequest();
 
 	const formatAddress = (address: string) => {
 		return `${address.slice(0, 6)}...${address.slice(-4)}`;
@@ -104,39 +96,37 @@ export default function PermissionsPage() {
 
 	const handleCancelRequest = async (requestId: string) => {
 		try {
-			await cancelRequest.mutateAsync({ requestId });
+			await cancelRequest.mutateAsync(requestId);
 			toast.success("Request cancelled");
-			sentRequests.refetch();
 		} catch (error) {
 			toast.error("Failed to cancel request");
 		}
 	};
 
 	// Categorize requests
-	const requestsData =
-		(receivedRequests.data as any)?.requests || receivedRequests.data || [];
-	const pendingRequests = Array.isArray(requestsData)
-		? requestsData.filter(
-				(req: any) => req.status === "PENDING" || req.status === "pending",
-			)
+	const receivedRequestsData = receivedRequests.data || [];
+	const pendingRequests = Array.isArray(receivedRequestsData)
+		? receivedRequestsData.filter(
+			(req: any) => req.status === "PENDING" || req.status === "pending",
+		)
 		: [];
-	const allowedRequests = Array.isArray(requestsData)
-		? requestsData.filter(
-				(req: any) =>
-					req.status === "ACCEPTED" ||
-					req.status === "ALLOWED" ||
-					req.status === "accepted" ||
-					req.status === "allowed",
-			)
+	const allowedRequests = Array.isArray(receivedRequestsData)
+		? receivedRequestsData.filter(
+			(req: any) =>
+				req.status === "ACCEPTED" ||
+				req.status === "ALLOWED" ||
+				req.status === "accepted" ||
+				req.status === "allowed",
+		)
 		: [];
-	const rejectedRequests = Array.isArray(requestsData)
-		? requestsData.filter(
-				(req: any) =>
-					req.status === "REJECTED" ||
-					req.status === "DENIED" ||
-					req.status === "rejected" ||
-					req.status === "denied",
-			)
+	const rejectedRequests = Array.isArray(receivedRequestsData)
+		? receivedRequestsData.filter(
+			(req: any) =>
+				req.status === "REJECTED" ||
+				req.status === "DENIED" ||
+				req.status === "rejected" ||
+				req.status === "denied",
+		)
 		: [];
 
 	return (
@@ -259,8 +249,7 @@ export default function PermissionsPage() {
 									<ArrowClockwiseIcon className="h-6 w-6 animate-spin mx-auto mb-2" />
 									<p className="text-sm text-muted-foreground">Loading...</p>
 								</div>
-							) : !(allowedSenders.data as any)?.people ||
-								(allowedSenders.data as any).people.length === 0 ? (
+							) : !allowedSenders.data || allowedSenders.data.length === 0 ? (
 								<div className="text-center py-8 text-muted-foreground">
 									<CheckCircleIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
 									<p className="text-sm">
@@ -269,8 +258,9 @@ export default function PermissionsPage() {
 								</div>
 							) : (
 								<div className="space-y-3">
-									{((allowedSenders.data as any).people as any[]).map(
-										(person: any, i: number) => (
+									{allowedSenders.data
+										.filter((approval: any) => approval.active)
+										.map((approval: any, i: number) => (
 											<div
 												key={i}
 												className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
@@ -279,22 +269,16 @@ export default function PermissionsPage() {
 													<div className="flex-shrink-0">
 														<div className="w-8 h-8 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
 															<span className="text-xs font-medium text-green-700 dark:text-green-300">
-																{person.username?.[0]?.toUpperCase() ||
-																	person.displayName?.[0]?.toUpperCase() ||
-																	formatAddress(
-																		person.walletAddress,
-																	)[2].toUpperCase()}
+																{formatAddress(approval.recipientWallet)[2].toUpperCase()}
 															</span>
 														</div>
 													</div>
 													<div>
 														<div className="font-medium text-sm">
-															{person.displayName ||
-																person.username ||
-																formatAddress(person.walletAddress)}
+															{formatAddress(approval.recipientWallet)}
 														</div>
 														<div className="text-xs text-muted-foreground">
-															{formatAddress(person.walletAddress)}
+															Approved {new Date(approval.createdAt).toLocaleDateString()}
 														</div>
 													</div>
 												</div>
@@ -305,8 +289,7 @@ export default function PermissionsPage() {
 													Can Send To
 												</Badge>
 											</div>
-										),
-									)}
+										))}
 								</div>
 							)}
 						</CardContent>
@@ -327,16 +310,14 @@ export default function PermissionsPage() {
 									<ArrowClockwiseIcon className="h-6 w-6 animate-spin mx-auto mb-2" />
 									<p className="text-sm text-muted-foreground">Loading...</p>
 								</div>
-							) : !sentRequests.data ||
-								!Array.isArray(sentRequests.data) ||
-								sentRequests.data.length === 0 ? (
+							) : !sentRequests.data || sentRequests.data.length === 0 ? (
 								<div className="text-center py-8 text-muted-foreground">
 									<ArrowClockwiseIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
 									<p className="text-sm">No requests sent</p>
 								</div>
 							) : (
 								<div className="space-y-3">
-									{(sentRequests.data as any[]).map((req: any, i: number) => (
+									{sentRequests.data.map((req: any, i: number) => (
 										<div
 											key={i}
 											className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
@@ -389,16 +370,16 @@ export default function PermissionsPage() {
 									<ArrowClockwiseIcon className="h-6 w-6 animate-spin mx-auto mb-2" />
 									<p className="text-sm text-muted-foreground">Loading...</p>
 								</div>
-							) : !(allowedReceivers.data as any)?.people ||
-								(allowedReceivers.data as any).people.length === 0 ? (
+							) : !allowedReceivers.data || allowedReceivers.data.length === 0 ? (
 								<div className="text-center py-8 text-muted-foreground">
 									<CheckCircleIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
 									<p className="text-sm">No one can send to you yet</p>
 								</div>
 							) : (
 								<div className="space-y-3">
-									{((allowedReceivers.data as any).people as any[]).map(
-										(person: any, i: number) => (
+									{allowedReceivers.data
+										.filter((approval: any) => approval.active)
+										.map((approval: any, i: number) => (
 											<div
 												key={i}
 												className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
@@ -407,22 +388,16 @@ export default function PermissionsPage() {
 													<div className="flex-shrink-0">
 														<div className="w-8 h-8 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
 															<span className="text-xs font-medium text-purple-700 dark:text-purple-300">
-																{person.username?.[0]?.toUpperCase() ||
-																	person.displayName?.[0]?.toUpperCase() ||
-																	formatAddress(
-																		person.walletAddress,
-																	)[2].toUpperCase()}
+																{formatAddress(approval.senderWallet)[2].toUpperCase()}
 															</span>
 														</div>
 													</div>
 													<div>
 														<div className="font-medium text-sm">
-															{person.displayName ||
-																person.username ||
-																formatAddress(person.walletAddress)}
+															{formatAddress(approval.senderWallet)}
 														</div>
 														<div className="text-xs text-muted-foreground">
-															{formatAddress(person.walletAddress)}
+															Approved {new Date(approval.createdAt).toLocaleDateString()}
 														</div>
 													</div>
 												</div>
@@ -430,8 +405,7 @@ export default function PermissionsPage() {
 													Active
 												</Badge>
 											</div>
-										),
-									)}
+										))}
 								</div>
 							)}
 						</CardContent>

@@ -26,7 +26,7 @@ export default function DashboardNav() {
 							weight="bold"
 							className="group-hover:rotate-90 transition-transform duration-200"
 						/>
-						<p className="hidden sm:inline">New Envelope</p>
+						<p className="hidden sm:inline">New Document</p>
 					</Button>
 				</Link>
 				<NotificationsPopover />

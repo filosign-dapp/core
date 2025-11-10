@@ -10,3 +10,4 @@ export { useRequestApproval } from "./useRequestApproval";
 export { useRevokeSender } from "./useRevokeSender";
 export { useAcceptedPeople } from "./useAcceptedPeople";
 export { useAcceptedRecipients, useSendableTo } from "./useSendableTo";
+export { useSentRequests } from "./useSentRequests";

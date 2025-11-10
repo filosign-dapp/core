@@ -1,4 +1,3 @@
-import { useFilosignQuery } from "@filosign/react";
 import {
 	FileTextIcon,
 	FunnelIcon,
@@ -7,6 +6,7 @@ import {
 	MagnifyingGlassIcon,
 	PlusIcon,
 } from "@phosphor-icons/react";
+import { useSentFiles, useReceivedFiles } from "@filosign/react/hooks";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { useState } from "react";
@@ -33,11 +33,8 @@ export default function DocumentAllPage() {
 	const [isFilterOpen, setIsFilterOpen] = useState(false);
 
 	// File queries
-	const sentFiles = useFilosignQuery(["files", "getSentFiles"], undefined);
-	const receivedFiles = useFilosignQuery(
-		["files", "getReceivedFiles"],
-		undefined,
-	);
+	const sentFiles = useSentFiles();
+	const receivedFiles = useReceivedFiles();
 
 	const allFiles = [
 		...(Array.isArray(sentFiles.data)
@@ -242,12 +239,12 @@ export default function DocumentAllPage() {
 									</h2>
 									<p className="max-w-md px-4 text-muted-foreground">
 										You have not yet created or received any documents. Get
-										started by creating a new envelope.
+										started by creating a new document.
 									</p>
 									<Link to="/dashboard/envelope/create">
 										<Button variant="primary" className="gap-2">
 											<PlusIcon className="size-4" weight="bold" />
-											Create New Envelope
+											Create New Document
 										</Button>
 									</Link>
 								</motion.div>
