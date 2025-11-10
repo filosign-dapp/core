@@ -16,13 +16,10 @@ export function useSignFile() {
 	const { action: cryptoAction } = useCryptoSeed();
 
 	return useMutation({
-		mutationFn: async (args: {
-			pieceCid: string;
-			signatureVisualBytes: Uint8Array;
-		}) => {
+		mutationFn: async (args: { pieceCid: string }) => {
 			let success = false;
 
-			const { pieceCid, signatureVisualBytes } = args;
+			const { pieceCid } = args;
 			const timestamp = Math.floor(Date.now() / 1000);
 			const textEncoder = new TextEncoder();
 
@@ -58,12 +55,10 @@ export function useSignFile() {
 					wallet.account.address,
 				]);
 
-				const signatureVisualHash = fsHash.digest(signatureVisualBytes);
 				const dl3SignatureMessage = jsonStringify({
 					sender,
 					pieceCid,
 					recipient,
-					signatureVisualHash,
 					timestamp: timestamp,
 					nonce: nonce,
 				});
@@ -87,7 +82,6 @@ export function useSignFile() {
 							{ name: "cidIdentifier", type: "bytes32" },
 							{ name: "sender", type: "address" },
 							{ name: "recipient", type: "address" },
-							{ name: "signatureVisualHash", type: "bytes32" },
 							{ name: "dl3SignatureCommitment", type: "bytes20" },
 							{ name: "timestamp", type: "uint256" },
 							{ name: "nonce", type: "uint256" },
@@ -98,7 +92,6 @@ export function useSignFile() {
 						cidIdentifier,
 						sender,
 						recipient,
-						signatureVisualHash,
 						dl3SignatureCommitment,
 						timestamp: BigInt(timestamp),
 						nonce: BigInt(nonce),
@@ -111,7 +104,6 @@ export function useSignFile() {
 					{
 						signature,
 						timestamp: timestamp,
-						signatureVisualBytes: toHex(signatureVisualBytes),
 						dl3Signature: toHex(dl3Signature),
 					},
 				);

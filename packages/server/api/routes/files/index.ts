@@ -302,7 +302,6 @@ export default new Hono()
 		const fileSignaturesRecord = await db
 			.select({
 				signer: fileSignatures.signer,
-				signatureVisualHash: fileSignatures.signatureVisualHash,
 				evmSignature: fileSignatures.evmSignature,
 				dl3Signature: fileSignatures.dl3Signature,
 				timestamp: fileSignatures.timestamp,
@@ -392,8 +391,7 @@ export default new Hono()
 	.post("/:pieceCid/sign", async (ctx) => {
 		const pieceCid = ctx.req.param("pieceCid");
 		const encoder = new TextEncoder();
-		const { signature, timestamp, signatureVisualBytes, dl3Signature } =
-			await ctx.req.json();
+		const { signature, timestamp, dl3Signature } = await ctx.req.json();
 
 		if (!pieceCid || typeof pieceCid !== "string") {
 			return respond.err(ctx, "Invalid pieceCid", 400);
@@ -403,13 +401,6 @@ export default new Hono()
 		}
 		if (typeof timestamp !== "number" || timestamp <= 0) {
 			return respond.err(ctx, "Invalid timestamp", 400);
-		}
-		if (
-			!signatureVisualBytes ||
-			typeof signatureVisualBytes !== "string" ||
-			!isHex(signatureVisualBytes)
-		) {
-			return respond.err(ctx, "Invalid signatureVisualBytes", 400);
 		}
 		if (
 			!dl3Signature ||
@@ -441,12 +432,10 @@ export default new Hono()
 
 		const userNonce = await FSFileRegistry.read.nonce([recipientRecord.wallet]);
 
-		const signatureVisualHash = fsHash.digest(toBytes(signatureVisualBytes));
 		const dl3SignatureMessage = jsonStringify({
 			sender: fileRecord.sender,
 			pieceCid,
 			recipient: recipientRecord.wallet,
-			signatureVisualHash,
 			timestamp: timestamp,
 			nonce: userNonce,
 		});
@@ -470,7 +459,6 @@ export default new Hono()
 			fileRecord.sender,
 			pieceCid,
 			recipientRecord.wallet,
-			signatureVisualHash,
 			dl3SignatureCommitment,
 			BigInt(timestamp),
 			BigInt(userNonce),
@@ -484,7 +472,6 @@ export default new Hono()
 			fileRecord.sender,
 			pieceCid,
 			recipientRecord.wallet,
-			signatureVisualHash,
 			dl3SignatureCommitment,
 			BigInt(timestamp),
 			BigInt(userNonce),
@@ -494,7 +481,6 @@ export default new Hono()
 		await db.insert(fileSignatures).values({
 			filePieceCid: pieceCid,
 			signer: recipientRecord.wallet,
-			signatureVisualHash: signatureVisualHash,
 			evmSignature: signature,
 			dl3Signature: dl3Signature,
 			timestamp: timestamp,

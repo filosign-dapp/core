@@ -49,12 +49,7 @@ export function rebuildPieceCid(options: {
 }
 
 export function computeCidIdentifier(pieceCid: string) {
-	return keccak256(
-		encodePacked(
-			["string"],
-			[pieceCid],
-		),
-	);
+	return keccak256(encodePacked(["string"], [pieceCid]));
 }
 
 export async function eip712signature(
@@ -80,55 +75,4 @@ export async function eip712signature(
 		domain,
 		...args,
 	});
-}
-
-export async function signFileSignature(options: {
-	walletClient: WalletClient<Transport, Chain, Account>;
-	contractAddress: Address;
-	pieceCid: string;
-	signatureVisualHash: Hex;
-}) {
-	const domain = {
-		name: "Filosign File Registry",
-		version: "1",
-		chainId: options.walletClient.chain.id,
-		verifyingContract: options.contractAddress,
-	};
-
-	const types = {
-		Signature: [
-			{ name: "pieceCidPrefix", type: "bytes32" },
-			{ name: "pieceCidBuffer", type: "bytes16" },
-			{ name: "pieceCidTail", type: "bytes32" },
-			{ name: "signatureVisualHash", type: "bytes32" },
-		],
-	};
-
-	const {
-		digestPrefix: pieceCidPrefix,
-		digestBuffer: pieceCidBuffer,
-		digestTail: pieceCidTail,
-	} = parsePieceCid(options.pieceCid);
-
-	const value = {
-		pieceCidPrefix: pieceCidPrefix,
-		pieceCidBuffer: pieceCidBuffer,
-		pieceCidTail: pieceCidTail,
-		signatureVisualHash: options.signatureVisualHash,
-	};
-
-	const flatSig = await options.walletClient.signTypedData({
-		types,
-		domain,
-		message: value,
-		primaryType: "Signature",
-	});
-
-	const sig = parseSignature(flatSig);
-	return {
-		v: sig.v,
-		r: sig.r,
-		s: sig.s,
-		flat: flatSig,
-	};
 }

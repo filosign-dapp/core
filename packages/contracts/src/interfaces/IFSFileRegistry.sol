@@ -18,9 +18,9 @@ interface IFSFileRegistry {
     event FileRegistered();
     event FileSigned();
     function registerFile(address sender_, string calldata pieceCid_, address recipient, uint256 timestamp_, uint256 nonce_, bytes calldata signature_) external;
-    function registerFileSignature(address sender_, string calldata pieceCid_, address recipient_, bytes32 signatureVisualHash_, bytes20 dl3SignatureCommitment_, uint256 timestamp_, uint256 nonce_, bytes calldata signature_) external;
+    function registerFileSignature(address sender_, string calldata pieceCid_, address recipient_, bytes20 dl3SignatureCommitment_, uint256 timestamp_, uint256 nonce_, bytes calldata signature_) external;
     function validateFileRegistrationSignature(address sender_, string calldata pieceCid_, address recipient_, uint256 timestamp_, uint256 nonce_, bytes calldata signature_) external view returns (bool);
-    function validateFileSigningSignature(address sender_, string calldata pieceCid_, address recipient_, bytes32 signatureVisualHash_, bytes20 dl3SignatureCommitment_, uint256 timestamp_, uint256 nonce_, bytes calldata signature_) external view returns (bool);
+    function validateFileSigningSignature(address sender_, string calldata pieceCid_, address recipient_, bytes20 dl3SignatureCommitment_, uint256 timestamp_, uint256 nonce_, bytes calldata signature_) external view returns (bool);
     function validateFileAckSignature(address recipient_, string calldata pieceCid_, address sender_, uint256 timestamp_, bytes calldata signature_) external view returns (bool);
     function cidIdentifier(string calldata pieceCid_) external pure returns (bytes32);
 }

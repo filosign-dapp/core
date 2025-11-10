@@ -26,7 +26,6 @@ export function useFileInfo(args: { pieceCid: string | undefined }) {
 					signatures: z
 						.object({
 							signer: z.string(),
-							signatureVisualHash: zHexString(),
 							evmSignature: zHexString(),
 							dl3Signature: zHexString(),
 							timestamp: z.number(),

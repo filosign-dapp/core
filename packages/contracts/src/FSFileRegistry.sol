@@ -57,7 +57,7 @@ contract FSFileRegistry is EIP712 {
         );
     bytes32 private constant SIGN_FILE_TYPEHASH =
         keccak256(
-            "SignFile(bytes32 cidIdentifier,address sender,address recipient,bytes32 signatureVisualHash,bytes20 dl3SignatureCommitment,uint256 timestamp,uint256 nonce)"
+            "SignFile(bytes32 cidIdentifier,address sender,address recipient,bytes20 dl3SignatureCommitment,uint256 timestamp,uint256 nonce)"
         );
 
     function registerFile(
@@ -100,7 +100,6 @@ contract FSFileRegistry is EIP712 {
         address sender_,
         string calldata pieceCid_,
         address recipient_,
-        bytes32 signatureVisualHash_,
         bytes20 dl3SignatureCommitment_,
         uint256 timestamp_,
         uint256 nonce_,
@@ -112,7 +111,6 @@ contract FSFileRegistry is EIP712 {
                 sender_,
                 pieceCid_,
                 recipient_,
-                signatureVisualHash_,
                 dl3SignatureCommitment_,
                 timestamp_,
                 nonce_,
@@ -165,7 +163,6 @@ contract FSFileRegistry is EIP712 {
         address sender_,
         string calldata pieceCid_,
         address recipient_,
-        bytes32 signatureVisualHash_,
         bytes20 dl3SignatureCommitment_,
         uint256 timestamp_,
         uint256 nonce_,
@@ -189,7 +186,6 @@ contract FSFileRegistry is EIP712 {
                 cidId,
                 sender_,
                 recipient_,
-                signatureVisualHash_,
                 dl3SignatureCommitment_,
                 timestamp_,
                 nonce_

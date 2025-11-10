@@ -370,7 +370,6 @@ function ReceivedFileItem(props: { pieceCid: string }) {
             {file.acked && file.signatures.length === 0 && (
                 <Button mutation={signFile} mutationArgs={{
                     pieceCid: file.pieceCid,
-                    signatureVisualBytes: new Uint8Array([1, 2, 3])
                 }}>
                     Sign File
                 </Button>

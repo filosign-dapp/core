@@ -498,11 +498,6 @@ export const definitions = {
               "type": "address"
             },
             {
-              "internalType": "bytes32",
-              "name": "signatureVisualHash_",
-              "type": "bytes32"
-            },
-            {
               "internalType": "bytes20",
               "name": "dl3SignatureCommitment_",
               "type": "bytes20"
@@ -646,11 +641,6 @@ export const definitions = {
               "internalType": "address",
               "name": "recipient_",
               "type": "address"
-            },
-            {
-              "internalType": "bytes32",
-              "name": "signatureVisualHash_",
-              "type": "bytes32"
             },
             {
               "internalType": "bytes20",

@@ -47,7 +47,6 @@ export const fileSignatures = t.pgTable(
 			.notNull()
 			.references(() => files.pieceCid, { onDelete: "cascade" }),
 		signer: t.text().notNull(),
-		signatureVisualHash: tBytes32().notNull(),
 		evmSignature: tHex().notNull(),
 		dl3Signature: tHex().notNull(),
 		timestamp: t.integer().notNull(),
