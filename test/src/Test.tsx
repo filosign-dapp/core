@@ -265,6 +265,8 @@ function TestFileSend(props: { notify: NotifierFn }) {
     });
     const { reload: otherReload } = useOtherReload();
     const sendFile = useSendFile();
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [fileBytes, setFileBytes] = useState<Uint8Array | null>(null);
 
     useEffectOnce(() => {
         if (sendFile.data) {
@@ -275,14 +277,56 @@ function TestFileSend(props: { notify: NotifierFn }) {
         }
     }, [sendFile.data]);
 
+    const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            if (file.type !== 'application/pdf') {
+                alert('Please select a PDF file');
+                return;
+            }
+            setSelectedFile(file);
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const arrayBuffer = e.target?.result as ArrayBuffer;
+                if (arrayBuffer) {
+                    setFileBytes(new Uint8Array(arrayBuffer));
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+    };
+
     if (!otherProfile) return <p>loading other person profile, wait</p>;
 
     return (
         <div className="p-4 space-y-2">
+            <div>
+                <label className="block text-sm font-medium mb-2">
+                    Select PDF File:
+                </label>
+                <input
+                    type="file"
+                    accept=".pdf"
+                    onChange={handleFileSelect}
+                    className="block w-full text-sm text-gray-500
+                        file:mr-4 file:py-2 file:px-4
+                        file:rounded-full file:border-0
+                        file:text-sm file:font-semibold
+                        file:bg-blue-50 file:text-blue-700
+                        hover:file:bg-blue-100"
+                />
+                {selectedFile && (
+                    <p className="mt-2 text-sm text-gray-600">
+                        Selected: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(2)} KB)
+                    </p>
+                )}
+            </div>
+
             <Button
                 mutation={sendFile}
                 mutationArgs={{
-                    bytes: dummyBytes,
+                    bytes: fileBytes || dummyBytes,
                     signaturePositionOffset: {
                         top: 11,
                         left: 12,
@@ -291,10 +335,13 @@ function TestFileSend(props: { notify: NotifierFn }) {
                         address: otherAddress,
                         encryptionPublicKey: otherProfile.encryptionPublicKey,
                     },
-                    metadata: { name: "Test File", mimeType: "text/plain" }
+                    metadata: {
+                        name: selectedFile ? selectedFile.name : "Test File",
+                        mimeType: selectedFile ? "application/pdf" : "text/plain"
+                    }
                 }}
             >
-                Send File
+                Send {selectedFile ? selectedFile.name : "Default Test File"}
             </Button>
         </div>
     );
