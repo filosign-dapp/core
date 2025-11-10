@@ -11,6 +11,7 @@ import { useAnalytics } from "../lib/hooks/use-analytics";
 import DashboardPage from "./dashboard";
 import DocumentAllPage from "./dashboard/document/all";
 import DocumentFolderPage from "./dashboard/document/folder/$folderId";
+import SignDocumentPage from "./dashboard/document/sign";
 import AddSignaturePage from "./dashboard/envelope/create/add-sign";
 import CreateEnvelopePage from "./dashboard/envelope/create/create";
 import FilesPage from "./dashboard/files";
@@ -129,6 +130,23 @@ const dashboardDocumentFolderRoute = createRoute({
 	},
 });
 
+const signDocumentRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: "/dashboard/document/sign",
+	validateSearch: (search: Record<string, unknown>) => {
+		return {
+			pieceCid: (search.pieceCid as string) || "",
+		} as { pieceCid: string };
+	},
+	component: function SignDocument() {
+		return (
+			<DashboardProtector>
+				{withPageErrorBoundary(SignDocumentPage)({})}
+			</DashboardProtector>
+		);
+	},
+});
+
 const createSignatureRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: "/dashboard/signature/create",
@@ -235,6 +253,7 @@ const routeTree = rootRoute.addChildren([
 	connectionsRoute,
 	dashboardDocumentAllRoute,
 	dashboardDocumentFolderRoute,
+	signDocumentRoute,
 	createEnvelopeRoute,
 	addSignatureRoute,
 	createSignatureRoute,
