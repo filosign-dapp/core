@@ -1,4 +1,4 @@
-import { useUserProfileByAddress } from "@filosign/react/hooks";
+import { useUserProfileByQuery } from "@filosign/react/hooks";
 import {
 	EyeIcon,
 	SpinnerIcon,
@@ -19,7 +19,7 @@ import { Label } from "../../../lib/components/ui/label";
 export function ProfileTest() {
 	const [profileAddress, setProfileAddress] = useState("");
 
-	const profile = useUserProfileByAddress(profileAddress as `0x${string}`);
+	const profile = useUserProfileByQuery({ address: profileAddress as `0x${string}` });
 
 	const handleGetProfile = () => {
 		if (!profileAddress.trim()) return;
