@@ -1,9 +1,42 @@
 #!/usr/bin/env bun
-import { type BuildConfig, build } from "bun";
+import { type BuildConfig, type BunPlugin, build } from "bun";
 import plugin from "bun-plugin-tailwind";
 import { existsSync } from "fs";
 import { cp, rm } from "fs/promises";
 import path from "path";
+
+// Plugin to fix dilithium-crystals-js import
+const dilithiumFixPlugin: BunPlugin = {
+	name: "dilithium-fix",
+	setup(build) {
+		build.onLoad({ filter: /\.([jt]sx?)$/ }, async (args) => {
+			const text = await Bun.file(args.path).text();
+
+			// Check if file imports dilithium-crystals-js as default
+			if (
+				text.includes('from "dilithium-crystals-js"') ||
+				text.includes("from 'dilithium-crystals-js'")
+			) {
+				// Replace default import with named import
+				const fixed = text.replace(
+					/import\s+(\w+)\s+from\s+["']dilithium-crystals-js["']/g,
+					'import { createDilithium } from "dilithium-crystals-js"; const $1 = createDilithium()',
+				);
+
+				return {
+					contents: fixed,
+					loader: args.path.endsWith(".tsx")
+						? "tsx"
+						: args.path.endsWith(".ts")
+							? "ts"
+							: args.path.endsWith(".jsx")
+								? "jsx"
+								: "js",
+				};
+			}
+		});
+	},
+};
 
 // Print help text if requested
 if (process.argv.includes("--help") || process.argv.includes("-h")) {
@@ -191,7 +224,7 @@ console.log("\n🚀 Starting build process...\n");
 	const result = await build({
 		entrypoints,
 		outdir,
-		plugins: [plugin],
+		plugins: [dilithiumFixPlugin, plugin],
 		minify: true,
 		target: "browser",
 		sourcemap: "linked",
