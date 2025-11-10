@@ -123,6 +123,7 @@ export default function AddRecipientDialog({
 					<Button
 						onClick={handleSendRequest}
 						disabled={sendShareRequest.isPending || !walletAddress.trim()}
+						variant="primary"
 					>
 						{sendShareRequest.isPending ? "Sending..." : "Send Request"}
 					</Button>
