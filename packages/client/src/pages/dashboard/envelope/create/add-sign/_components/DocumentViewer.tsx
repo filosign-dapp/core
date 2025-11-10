@@ -36,7 +36,8 @@ const useDocumentDimensions = () => {
 	return {
 		width: isMobile ? 300 : 600,
 		height: isMobile ? 400 : 800,
-		margin: 10,
+		margin: 0,
+		isMobile,
 	};
 };
 
@@ -74,6 +75,7 @@ export default function DocumentViewer({
 		width: documentWidth,
 		height: documentHeight,
 		margin,
+		isMobile,
 	} = useDocumentDimensions();
 	const containerRef = useRef<HTMLDivElement>(null);
 	const documentRef = useRef<HTMLDivElement>(null);
@@ -103,7 +105,7 @@ export default function DocumentViewer({
 
 			onFieldPlaced(boundedX, boundedY);
 		},
-		[isPlacingField, onFieldPlaced, zoom],
+		[isPlacingField, onFieldPlaced, zoom, documentWidth, documentHeight, margin],
 	);
 
 	const handleFieldClick = (fieldId: string, event: React.MouseEvent) => {
@@ -203,7 +205,7 @@ export default function DocumentViewer({
 	const getFieldIcon = (type: SignatureField["type"]) => {
 		const config = fieldConfig[type];
 		const IconComponent = config?.icon || FileIcon;
-		return <IconComponent className="size-6" weight="fill" />;
+		return <IconComponent className={cn(isMobile ? "size-4" : "size-6")} weight="fill" />;
 	};
 
 	const getFieldLabel = (type: SignatureField["type"]) => {
@@ -269,7 +271,7 @@ export default function DocumentViewer({
 						{/* Render uploaded PDF or image if provided */}
 						{document?.url ? (
 							document.url.startsWith("data:application/pdf") ||
-							document.name?.toLowerCase().endsWith(".pdf") ? (
+								document.name?.toLowerCase().endsWith(".pdf") ? (
 								<>
 									<object
 										data={document.url}
@@ -332,20 +334,25 @@ export default function DocumentViewer({
 
 						{/* Signature Fields */}
 						{signatureFields.map((field) => {
+							// Responsive signature box dimensions
+							const fieldWidth = isMobile ? 90 : 130;
+							const fieldHeight = isMobile ? 32 : 42;
+
 							const constrainedX = Math.max(
 								margin,
-								Math.min(field.x, documentWidth - margin),
+								Math.min(field.x, documentWidth - fieldWidth - margin),
 							);
 							const constrainedY = Math.max(
 								margin,
-								Math.min(field.y, documentHeight - margin),
+								Math.min(field.y, documentHeight - fieldHeight - margin),
 							);
 
 							return (
 								<div
 									key={field.id}
 									className={cn(
-										"absolute border-2 border-dashed rounded-md bg-primary/10 hover:bg-primary/10 cursor-move select-none group flex justify-center items-center gap-2 p-2 z-30",
+										"absolute border-2 border-dashed rounded-md bg-primary/10 hover:bg-primary/10 cursor-move select-none group flex justify-center items-center gap-1.5 z-30",
+										isMobile ? "p-1.5" : "p-2",
 										selectedField === field.id
 											? "border-primary bg-primary/10 shadow-lg "
 											: "border-primary/50 hover:border-primary/70 hover:bg-primary/80",
@@ -357,22 +364,25 @@ export default function DocumentViewer({
 									onClick={(e) => handleFieldClick(field.id, e)}
 									onMouseDown={(e) => handleFieldMouseDown(field.id, e)}
 								>
-									<div className="flex items-center gap-2">
+									<div className={cn("flex items-center", isMobile ? "gap-1" : "gap-2")}>
 										<span className="text-primary">
 											{getFieldIcon(field.type)}
 										</span>
-										<span className="text-xs font-medium text-primary whitespace-nowrap">
+										<span className={cn(
+											"font-medium text-primary whitespace-nowrap",
+											isMobile ? "text-[10px]" : "text-xs"
+										)}>
 											{getFieldLabel(field.type)}
 										</span>
 										<button
 											type="button"
-											className="p-0 w-4 h-4"
+											className={cn("p-0", isMobile ? "w-3 h-3" : "w-4 h-4")}
 											onClick={(e) => {
 												e.stopPropagation();
 												onFieldRemove(field.id);
 											}}
 										>
-											<XIcon className="w-3 h-3" />
+											<XIcon className={cn(isMobile ? "w-2.5 h-2.5" : "w-3 h-3")} />
 										</button>
 									</div>
 								</div>

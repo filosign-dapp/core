@@ -1,5 +1,7 @@
+import { useSendFile, useUserProfileByQuery } from "@filosign/react/hooks";
 import { useNavigate } from "@tanstack/react-router";
 import React, { useState } from "react";
+import { toast } from "sonner";
 import { useStorePersist } from "@/src/lib/hooks/use-store";
 import { cn } from "@/src/lib/utils/utils";
 import DocumentViewer from "./_components/DocumentViewer";
@@ -15,7 +17,14 @@ import {
 
 export default function AddSignaturePage() {
 	const navigate = useNavigate();
-	const { createForm } = useStorePersist();
+	const { createForm, clearCreateForm } = useStorePersist();
+	const sendFile = useSendFile();
+
+	// Get recipient profile for encryption key
+	const recipientProfile = useUserProfileByQuery({
+		address: createForm?.recipient?.walletAddress as `0x${string}` | undefined,
+	});
+
 	const [currentDocumentId, setCurrentDocumentId] = useState<string>("");
 	const [currentPage, setCurrentPage] = useState(1);
 	const [zoom, setZoom] = useState(100);
@@ -29,11 +38,11 @@ export default function AddSignaturePage() {
 	// Convert createForm documents to Document format
 	const documents: Document[] = createForm?.documents?.length
 		? createForm.documents.map((doc) => ({
-				id: doc.id,
-				name: doc.name,
-				url: doc.dataUrl || "",
-				pages: 1, // For now, assume 1 page per document
-			}))
+			id: doc.id,
+			name: doc.name,
+			url: doc.dataUrl || "",
+			pages: 1, // For now, assume 1 page per document
+		}))
 		: mockDocuments;
 
 	// Set initial document if not set
@@ -106,10 +115,85 @@ export default function AddSignaturePage() {
 		navigate({ to: "/dashboard/envelope/create" });
 	};
 
-	const handleSend = () => {
-		// Handle sending the envelope with signatures
-		console.log("Sending envelope with fields:", signatureFields);
-		navigate({ to: "/dashboard" });
+	const handleSend = async () => {
+		if (!createForm || !createForm.documents.length) {
+			toast.error("No documents to send");
+			return;
+		}
+
+		if (!createForm.recipient?.walletAddress) {
+			toast.error("No recipient selected");
+			return;
+		}
+
+		if (!recipientProfile.data) {
+			toast.error("Loading recipient information...");
+			return;
+		}
+
+		try {
+			toast.loading("Sending documents...", { id: "send-progress" });
+
+			// Send each document to the recipient
+			const sendPromises = [];
+			for (const doc of createForm.documents) {
+				// Convert data URL back to file
+				const response = await fetch(doc.dataUrl!);
+				const blob = await response.blob();
+				const file = new File([blob], doc.name, { type: doc.type });
+				const fileData = new Uint8Array(await file.arrayBuffer());
+
+				// Get signature positions for this document
+				const documentSignatures = signatureFields.filter(
+					field => field.documentId === doc.id && field.type === "signature"
+				);
+
+				// Use the first signature field position, or default if none
+				const signaturePosition = documentSignatures.length > 0
+					? { top: documentSignatures[0].y, left: documentSignatures[0].x }
+					: { top: 10, left: 10 }; // Default position
+
+				const sendData = {
+					bytes: fileData,
+					signaturePositionOffset: signaturePosition,
+					recipient: {
+						address: recipientProfile.data!.walletAddress as `0x${string}`,
+						encryptionPublicKey: recipientProfile.data!.encryptionPublicKey,
+					},
+					metadata: {
+						name: doc.name,
+						mimeType: doc.type,
+					}
+				};
+
+				console.log("Sending document:", {
+					documentName: doc.name,
+					documentSize: fileData.length,
+					signaturePosition,
+					recipientAddress: recipientProfile.data!.walletAddress,
+					sendData: { ...sendData, bytes: `[${fileData.length} bytes]` } // Don't log the actual bytes
+				});
+
+				sendPromises.push(sendFile.mutateAsync(sendData));
+			}
+
+			await Promise.all(sendPromises);
+
+			// Clear form data
+			clearCreateForm();
+
+			toast.success("Documents sent successfully!", {
+				id: "send-progress",
+			});
+
+			// Navigate back to dashboard
+			navigate({ to: "/dashboard" });
+		} catch (error) {
+			console.error("Failed to send documents:", error);
+			toast.error("Failed to send documents. Please try again.", {
+				id: "send-progress",
+			});
+		}
 	};
 
 	const currentPageFields = signatureFields.filter(
@@ -183,7 +267,7 @@ export default function AddSignaturePage() {
 									{/* Document preview */}
 									{doc.url ? (
 										doc.url.startsWith("data:application/pdf") ||
-										doc.name?.toLowerCase().endsWith(".pdf") ? (
+											doc.name?.toLowerCase().endsWith(".pdf") ? (
 											<div className="absolute inset-0 flex items-center justify-center bg-red-50">
 												<div className="text-xs text-destructive font-medium">
 													PDF

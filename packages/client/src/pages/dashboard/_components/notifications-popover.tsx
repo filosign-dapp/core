@@ -127,8 +127,13 @@ export function NotificationsPopover() {
 	return (
 		<Popover open={open} onOpenChange={setOpen}>
 			<PopoverTrigger asChild>
-				<Button variant="default" className="relative">
-					<BellIcon className="h-5 w-5" />
+				<Button
+					variant="ghost"
+					className="relative h-10 w-10 rounded-full transition-all duration-150 hover:bg-accent/50"
+				>
+					<div className="flex aspect-square size-8 items-center justify-center bg-muted/10 rounded-full">
+						<BellIcon className="size-5 text-muted-foreground" weight="bold" />
+					</div>
 					{notificationCount > 0 && (
 						<Badge
 							variant="destructive"
@@ -295,13 +300,12 @@ function ReceivedFileNotification({ pieceCid, sender }: { pieceCid: string; send
 	const handleAcknowledge = async () => {
 		try {
 			await acknowledgeFile.mutateAsync({ pieceCid });
-			toast.success("File acknowledged!");
 			// Refresh the files list
 			await queryClient.invalidateQueries({
 				queryKey: ["received-files"],
 			});
 		} catch (error) {
-			toast.error("Failed to acknowledge file");
+			toast.error("Failed to accept file");
 		}
 	};
 
