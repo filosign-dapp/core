@@ -49,6 +49,13 @@ const app = <App />;
 
 window.Buffer = window.Buffer || BufferI;
 
+
+//@ts-expect-error
+BigInt.prototype.toJSON = function () {
+    return this.toString();
+};
+
+
 // Hot module replacement
 if (import.meta.hot) {
     const root = (import.meta.hot.data.root ??= createRoot(rootElement));
