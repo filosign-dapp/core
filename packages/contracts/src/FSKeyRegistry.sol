@@ -4,6 +4,7 @@ pragma solidity ^0.8.26;
 import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 
 import "./interfaces/IFSManager.sol";
+import "./errors/EFSKeyRegistry.sol";
 
 contract FSKeyRegistry {
     struct KeygenData {
@@ -34,17 +35,13 @@ contract FSKeyRegistry {
         bytes20 commitment_kyber_pk_,
         bytes20 commitment_dilithium_pk_
     ) external {
-        require(salt_pin_ != bytes16(0), "Invalid salt_pin");
-        require(salt_seed_ != bytes16(0), "Invalid salt_seed");
-        require(
-            commitment_kyber_pk_ != bytes20(0),
-            "Invalid commitment_kyber_pk"
-        );
-        require(
-            commitment_dilithium_pk_ != bytes20(0),
-            "Invalid commitment_dilithium_pk"
-        );
-        require(isRegistered(msg.sender) == false, "Data already registered");
+        if (salt_pin_ == bytes16(0)) revert InvalidSaltPin();
+        if (salt_seed_ == bytes16(0)) revert InvalidSaltSeed();
+        if (commitment_kyber_pk_ == bytes20(0))
+            revert InvalidCommitmentKyberPk();
+        if (commitment_dilithium_pk_ == bytes20(0))
+            revert InvalidCommitmentDilithiumPk();
+        if (isRegistered(msg.sender)) revert DataAlreadyRegistered();
 
         keygenData[msg.sender] = KeygenData({
             salt_pin: salt_pin_,
