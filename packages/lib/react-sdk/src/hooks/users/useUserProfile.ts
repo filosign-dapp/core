@@ -1,6 +1,6 @@
+import { zHexString } from "@filosign/shared/zod";
 import { useQuery } from "@tanstack/react-query";
 import z from "zod";
-import { zHexString } from "../../../utils/zod";
 import { DAY } from "../../constants";
 import { useAuthedApi } from "../auth";
 
