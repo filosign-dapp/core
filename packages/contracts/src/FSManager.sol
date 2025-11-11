@@ -3,6 +3,7 @@ pragma solidity ^0.8.26;
 
 import "./FSFileRegistry.sol";
 import "./FSKeyRegistry.sol";
+import "./errors/EFSManager.sol";
 
 contract FSManager {
     address public cidRegistry;
@@ -19,7 +20,7 @@ contract FSManager {
     event SenderRevoked(address indexed recipient, address indexed sender);
 
     modifier onlyServer() {
-        require(msg.sender == server, "Only server can call");
+        if (msg.sender != server) revert OnlyServer();
         _;
     }
 
@@ -38,18 +39,16 @@ contract FSManager {
     }
 
     function approveSender(address sender_) external {
-        require(isRegistered(sender_), "Sender not registered");
-        require(
-            !approvedSenders[msg.sender][sender_],
-            "Sender already approved"
-        );
-        require(msg.sender != sender_, "Cannot approve self");
+        if (!isRegistered(sender_)) revert SenderNotRegistered();
+        if (approvedSenders[msg.sender][sender_])
+            revert SenderAlreadyApproved();
+        if (msg.sender == sender_) revert CannotApproveSelf();
         approvedSenders[msg.sender][sender_] = true;
         emit SenderApproved(msg.sender, sender_);
     }
 
     function revokeSender(address sender_) external {
-        require(approvedSenders[msg.sender][sender_], "Sender not approved");
+        if (!approvedSenders[msg.sender][sender_]) revert SenderNotApproved();
         approvedSenders[msg.sender][sender_] = false;
         emit SenderRevoked(msg.sender, sender_);
     }
