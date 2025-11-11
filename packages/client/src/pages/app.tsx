@@ -27,6 +27,9 @@ import OnboardingWelcomeCompletePage from "./onboarding/welcome";
 import PitchPage from "./pitch";
 import TestPage from "./test";
 import { useIsLoggedIn } from "@filosign/react/hooks";
+import { usePrivy } from "@privy-io/react-auth";
+import { useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 
 const rootRoute = createRootRoute({
 	component: () => {
@@ -46,6 +49,24 @@ const indexRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: "/",
 	component: function Index() {
+		const navigate = useNavigate();
+		const isLoggedIn = useIsLoggedIn();
+		const { ready, authenticated } = usePrivy();
+
+		// Redirect authenticated and logged in users to the all documents page
+		useEffect(() => {
+			if (ready && authenticated && isLoggedIn.data) {
+				navigate({ to: "/dashboard/document/all", replace: true });
+			}
+		}, [ready, authenticated, isLoggedIn.data, navigate]);
+
+		// Show loading or landing page while checking auth status
+		if (!ready || isLoggedIn.isPending) {
+			return <div className="flex items-center justify-center min-h-screen">
+				<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+			</div>;
+		}
+
 		return withPageErrorBoundary(LandingPage)({});
 	},
 });
