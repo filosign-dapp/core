@@ -4,6 +4,7 @@ pragma solidity ^0.8.26;
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 
+import "./errors/EFSFileRegistry.sol";
 import "./interfaces/IFSManager.sol";
 
 contract FSFileRegistry is EIP712 {
@@ -73,12 +74,13 @@ contract FSFileRegistry is EIP712 {
             validateFileRegistrationSignature(
                 sender_,
                 pieceCid_,
-                recipient,
+                sender_,
+                signers_,
                 timestamp_,
                 nonce_,
                 signature_
             ),
-            "Invalid signature"
+            InvalidSignature()
         );
 
         fileRegistrations[cidIdentifier(pieceCid_)] = FileRegistration({
@@ -138,7 +140,7 @@ contract FSFileRegistry is EIP712 {
     ) public view returns (bool) {
         require(
             block.timestamp <= timestamp_ + SIGNATURE_VALIDITY_PERIOD,
-            "Signature expired"
+            SignatureExpired()
         );
         require(manager.isRegistered(sender_), "Sender not registered");
         require(
@@ -173,7 +175,7 @@ contract FSFileRegistry is EIP712 {
     ) public view returns (bool) {
         require(
             block.timestamp <= timestamp_ + SIGNATURE_VALIDITY_PERIOD,
-            "Signature expired"
+            SignatureExpired()
         );
 
         FileRegistration storage file = fileRegistrations[
@@ -208,7 +210,7 @@ contract FSFileRegistry is EIP712 {
     ) public view returns (bool) {
         require(
             block.timestamp <= timestamp_ + SIGNATURE_VALIDITY_PERIOD,
-            "Signature expired"
+            SignatureExpired()
         );
         FileRegistration storage file = fileRegistrations[
             cidIdentifier(pieceCid_)
