@@ -9,6 +9,31 @@ export const definitions = {
           "type": "constructor"
         },
         {
+          "inputs": [],
+          "name": "CannotApproveSelf",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "OnlyServer",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "SenderAlreadyApproved",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "SenderNotApproved",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "SenderNotRegistered",
+          "type": "error"
+        },
+        {
           "anonymous": false,
           "inputs": [
             {
@@ -205,6 +230,16 @@ export const definitions = {
         },
         {
           "inputs": [],
+          "name": "AlreadySigned",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "BadSignersLength",
+          "type": "error"
+        },
+        {
+          "inputs": [],
           "name": "ECDSAInvalidSignature",
           "type": "error"
         },
@@ -232,7 +267,63 @@ export const definitions = {
         },
         {
           "inputs": [],
+          "name": "FileAlreadyRegistered",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "FileNotRegistered",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "InvalidSender",
+          "type": "error"
+        },
+        {
+          "inputs": [],
           "name": "InvalidShortString",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "InvalidSignature",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "InvalidSigner",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "OnlyServer",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "SenderNotRegistered",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "SignatureExpired",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "signer",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "sender",
+              "type": "address"
+            }
+          ],
+          "name": "SignerNotApproved",
           "type": "error"
         },
         {
@@ -244,6 +335,16 @@ export const definitions = {
             }
           ],
           "name": "StringTooLong",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "UnsortedSigners",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "ZeroSigner",
           "type": "error"
         },
         {
@@ -265,12 +366,6 @@ export const definitions = {
               "indexed": true,
               "internalType": "address",
               "name": "sender",
-              "type": "address"
-            },
-            {
-              "indexed": true,
-              "internalType": "address",
-              "name": "recipient",
               "type": "address"
             },
             {
@@ -301,7 +396,7 @@ export const definitions = {
             {
               "indexed": true,
               "internalType": "address",
-              "name": "recipient",
+              "name": "signer",
               "type": "address"
             },
             {
@@ -328,6 +423,25 @@ export const definitions = {
               "internalType": "bytes32",
               "name": "",
               "type": "bytes32"
+            }
+          ],
+          "stateMutability": "pure",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address[]",
+              "name": "signers_",
+              "type": "address[]"
+            }
+          ],
+          "name": "computeSignersCommitment",
+          "outputs": [
+            {
+              "internalType": "bytes20",
+              "name": "",
+              "type": "bytes20"
             }
           ],
           "stateMutability": "pure",
@@ -380,31 +494,86 @@ export const definitions = {
           "inputs": [
             {
               "internalType": "bytes32",
-              "name": "",
+              "name": "cidId",
               "type": "bytes32"
             }
           ],
           "name": "fileRegistrations",
           "outputs": [
             {
+              "components": [
+                {
+                  "internalType": "bytes32",
+                  "name": "cidIdentifier",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "address",
+                  "name": "sender",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "signersCount",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "timestamp",
+                  "type": "uint256"
+                }
+              ],
+              "internalType": "struct FSFileRegistry.FileRegistrationView",
+              "name": "",
+              "type": "tuple"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
               "internalType": "bytes32",
-              "name": "cidIdentifier",
+              "name": "cidId",
               "type": "bytes32"
             },
             {
               "internalType": "address",
-              "name": "sender",
+              "name": "who",
               "type": "address"
+            }
+          ],
+          "name": "hasSigned",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "cidId",
+              "type": "bytes32"
             },
             {
               "internalType": "address",
-              "name": "recipient",
+              "name": "who",
               "type": "address"
-            },
+            }
+          ],
+          "name": "isSigner",
+          "outputs": [
             {
-              "internalType": "uint256",
-              "name": "timestamp",
-              "type": "uint256"
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
             }
           ],
           "stateMutability": "view",
@@ -445,28 +614,23 @@ export const definitions = {
         {
           "inputs": [
             {
-              "internalType": "address",
-              "name": "sender_",
-              "type": "address"
-            },
-            {
               "internalType": "string",
               "name": "pieceCid_",
               "type": "string"
             },
             {
               "internalType": "address",
-              "name": "recipient",
+              "name": "sender_",
               "type": "address"
+            },
+            {
+              "internalType": "address[]",
+              "name": "signers_",
+              "type": "address[]"
             },
             {
               "internalType": "uint256",
               "name": "timestamp_",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "nonce_",
               "type": "uint256"
             },
             {
@@ -483,24 +647,19 @@ export const definitions = {
         {
           "inputs": [
             {
-              "internalType": "address",
-              "name": "sender_",
-              "type": "address"
-            },
-            {
               "internalType": "string",
               "name": "pieceCid_",
               "type": "string"
             },
             {
               "internalType": "address",
-              "name": "recipient_",
+              "name": "sender_",
               "type": "address"
             },
             {
-              "internalType": "bytes32",
-              "name": "signatureVisualHash_",
-              "type": "bytes32"
+              "internalType": "address",
+              "name": "signer_",
+              "type": "address"
             },
             {
               "internalType": "bytes20",
@@ -510,11 +669,6 @@ export const definitions = {
             {
               "internalType": "uint256",
               "name": "timestamp_",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "nonce_",
               "type": "uint256"
             },
             {
@@ -531,30 +685,6 @@ export const definitions = {
         {
           "inputs": [
             {
-              "internalType": "bytes32",
-              "name": "",
-              "type": "bytes32"
-            }
-          ],
-          "name": "signatures",
-          "outputs": [
-            {
-              "internalType": "bytes",
-              "name": "",
-              "type": "bytes"
-            }
-          ],
-          "stateMutability": "view",
-          "type": "function"
-        },
-        {
-          "inputs": [
-            {
-              "internalType": "address",
-              "name": "recipient_",
-              "type": "address"
-            },
-            {
               "internalType": "string",
               "name": "pieceCid_",
               "type": "string"
@@ -562,6 +692,11 @@ export const definitions = {
             {
               "internalType": "address",
               "name": "sender_",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "viewer_",
               "type": "address"
             },
             {
@@ -589,28 +724,23 @@ export const definitions = {
         {
           "inputs": [
             {
-              "internalType": "address",
-              "name": "sender_",
-              "type": "address"
-            },
-            {
               "internalType": "string",
               "name": "pieceCid_",
               "type": "string"
             },
             {
               "internalType": "address",
-              "name": "recipient_",
+              "name": "sender_",
               "type": "address"
+            },
+            {
+              "internalType": "address[]",
+              "name": "signers_",
+              "type": "address[]"
             },
             {
               "internalType": "uint256",
               "name": "timestamp_",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "nonce_",
               "type": "uint256"
             },
             {
@@ -633,24 +763,19 @@ export const definitions = {
         {
           "inputs": [
             {
-              "internalType": "address",
-              "name": "sender_",
-              "type": "address"
-            },
-            {
               "internalType": "string",
               "name": "pieceCid_",
               "type": "string"
             },
             {
               "internalType": "address",
-              "name": "recipient_",
+              "name": "sender_",
               "type": "address"
             },
             {
-              "internalType": "bytes32",
-              "name": "signatureVisualHash_",
-              "type": "bytes32"
+              "internalType": "address",
+              "name": "signer_",
+              "type": "address"
             },
             {
               "internalType": "bytes20",
@@ -660,11 +785,6 @@ export const definitions = {
             {
               "internalType": "uint256",
               "name": "timestamp_",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "nonce_",
               "type": "uint256"
             },
             {
@@ -693,6 +813,31 @@ export const definitions = {
           "inputs": [],
           "stateMutability": "nonpayable",
           "type": "constructor"
+        },
+        {
+          "inputs": [],
+          "name": "DataAlreadyRegistered",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "InvalidCommitmentDilithiumPk",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "InvalidCommitmentKyberPk",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "InvalidSaltPin",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "InvalidSaltSeed",
+          "type": "error"
         },
         {
           "anonymous": false,
@@ -822,12 +967,37 @@ export const definitions = {
   },
   "0x4cb2f": {
     "FSManager": {
-      "address": "0x21f30677505b2fa1fd43884b62e31e2e86541f45",
+      "address": "0x6c7e54120dad8be16b367d2b4f5141765848eb21",
       "abi": [
         {
           "inputs": [],
           "stateMutability": "nonpayable",
           "type": "constructor"
+        },
+        {
+          "inputs": [],
+          "name": "CannotApproveSelf",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "OnlyServer",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "SenderAlreadyApproved",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "SenderNotApproved",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "SenderNotRegistered",
+          "type": "error"
         },
         {
           "anonymous": false,
@@ -1017,12 +1187,22 @@ export const definitions = {
       ]
     },
     "FSFileRegistry": {
-      "address": "0x5D12Ed1FFe0b71b2A95Aa6c3577CB6e7cfD6eFB5",
+      "address": "0xFe8730de748691a7A31E5b489BF88Fe3BDEf3C25",
       "abi": [
         {
           "inputs": [],
           "stateMutability": "nonpayable",
           "type": "constructor"
+        },
+        {
+          "inputs": [],
+          "name": "AlreadySigned",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "BadSignersLength",
+          "type": "error"
         },
         {
           "inputs": [],
@@ -1053,7 +1233,63 @@ export const definitions = {
         },
         {
           "inputs": [],
+          "name": "FileAlreadyRegistered",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "FileNotRegistered",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "InvalidSender",
+          "type": "error"
+        },
+        {
+          "inputs": [],
           "name": "InvalidShortString",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "InvalidSignature",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "InvalidSigner",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "OnlyServer",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "SenderNotRegistered",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "SignatureExpired",
+          "type": "error"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address",
+              "name": "signer",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "sender",
+              "type": "address"
+            }
+          ],
+          "name": "SignerNotApproved",
           "type": "error"
         },
         {
@@ -1065,6 +1301,16 @@ export const definitions = {
             }
           ],
           "name": "StringTooLong",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "UnsortedSigners",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "ZeroSigner",
           "type": "error"
         },
         {
@@ -1086,12 +1332,6 @@ export const definitions = {
               "indexed": true,
               "internalType": "address",
               "name": "sender",
-              "type": "address"
-            },
-            {
-              "indexed": true,
-              "internalType": "address",
-              "name": "recipient",
               "type": "address"
             },
             {
@@ -1122,7 +1362,7 @@ export const definitions = {
             {
               "indexed": true,
               "internalType": "address",
-              "name": "recipient",
+              "name": "signer",
               "type": "address"
             },
             {
@@ -1149,6 +1389,25 @@ export const definitions = {
               "internalType": "bytes32",
               "name": "",
               "type": "bytes32"
+            }
+          ],
+          "stateMutability": "pure",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "address[]",
+              "name": "signers_",
+              "type": "address[]"
+            }
+          ],
+          "name": "computeSignersCommitment",
+          "outputs": [
+            {
+              "internalType": "bytes20",
+              "name": "",
+              "type": "bytes20"
             }
           ],
           "stateMutability": "pure",
@@ -1201,31 +1460,86 @@ export const definitions = {
           "inputs": [
             {
               "internalType": "bytes32",
-              "name": "",
+              "name": "cidId",
               "type": "bytes32"
             }
           ],
           "name": "fileRegistrations",
           "outputs": [
             {
+              "components": [
+                {
+                  "internalType": "bytes32",
+                  "name": "cidIdentifier",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "address",
+                  "name": "sender",
+                  "type": "address"
+                },
+                {
+                  "internalType": "uint8",
+                  "name": "signersCount",
+                  "type": "uint8"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "timestamp",
+                  "type": "uint256"
+                }
+              ],
+              "internalType": "struct FSFileRegistry.FileRegistrationView",
+              "name": "",
+              "type": "tuple"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
               "internalType": "bytes32",
-              "name": "cidIdentifier",
+              "name": "cidId",
               "type": "bytes32"
             },
             {
               "internalType": "address",
-              "name": "sender",
+              "name": "who",
               "type": "address"
+            }
+          ],
+          "name": "hasSigned",
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
+          "stateMutability": "view",
+          "type": "function"
+        },
+        {
+          "inputs": [
+            {
+              "internalType": "bytes32",
+              "name": "cidId",
+              "type": "bytes32"
             },
             {
               "internalType": "address",
-              "name": "recipient",
+              "name": "who",
               "type": "address"
-            },
+            }
+          ],
+          "name": "isSigner",
+          "outputs": [
             {
-              "internalType": "uint256",
-              "name": "timestamp",
-              "type": "uint256"
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
             }
           ],
           "stateMutability": "view",
@@ -1266,28 +1580,23 @@ export const definitions = {
         {
           "inputs": [
             {
-              "internalType": "address",
-              "name": "sender_",
-              "type": "address"
-            },
-            {
               "internalType": "string",
               "name": "pieceCid_",
               "type": "string"
             },
             {
               "internalType": "address",
-              "name": "recipient",
+              "name": "sender_",
               "type": "address"
+            },
+            {
+              "internalType": "address[]",
+              "name": "signers_",
+              "type": "address[]"
             },
             {
               "internalType": "uint256",
               "name": "timestamp_",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "nonce_",
               "type": "uint256"
             },
             {
@@ -1304,24 +1613,19 @@ export const definitions = {
         {
           "inputs": [
             {
-              "internalType": "address",
-              "name": "sender_",
-              "type": "address"
-            },
-            {
               "internalType": "string",
               "name": "pieceCid_",
               "type": "string"
             },
             {
               "internalType": "address",
-              "name": "recipient_",
+              "name": "sender_",
               "type": "address"
             },
             {
-              "internalType": "bytes32",
-              "name": "signatureVisualHash_",
-              "type": "bytes32"
+              "internalType": "address",
+              "name": "signer_",
+              "type": "address"
             },
             {
               "internalType": "bytes20",
@@ -1331,11 +1635,6 @@ export const definitions = {
             {
               "internalType": "uint256",
               "name": "timestamp_",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "nonce_",
               "type": "uint256"
             },
             {
@@ -1352,30 +1651,6 @@ export const definitions = {
         {
           "inputs": [
             {
-              "internalType": "bytes32",
-              "name": "",
-              "type": "bytes32"
-            }
-          ],
-          "name": "signatures",
-          "outputs": [
-            {
-              "internalType": "bytes",
-              "name": "",
-              "type": "bytes"
-            }
-          ],
-          "stateMutability": "view",
-          "type": "function"
-        },
-        {
-          "inputs": [
-            {
-              "internalType": "address",
-              "name": "recipient_",
-              "type": "address"
-            },
-            {
               "internalType": "string",
               "name": "pieceCid_",
               "type": "string"
@@ -1383,6 +1658,11 @@ export const definitions = {
             {
               "internalType": "address",
               "name": "sender_",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "viewer_",
               "type": "address"
             },
             {
@@ -1397,23 +1677,12 @@ export const definitions = {
             }
           ],
           "name": "validateFileAckSignature",
-          "outputs": [
-            {
-              "internalType": "bool",
-              "name": "",
-              "type": "bool"
-            }
-          ],
+          "outputs": [],
           "stateMutability": "view",
           "type": "function"
         },
         {
           "inputs": [
-            {
-              "internalType": "address",
-              "name": "sender_",
-              "type": "address"
-            },
             {
               "internalType": "string",
               "name": "pieceCid_",
@@ -1421,17 +1690,17 @@ export const definitions = {
             },
             {
               "internalType": "address",
-              "name": "recipient_",
+              "name": "sender_",
               "type": "address"
+            },
+            {
+              "internalType": "address[]",
+              "name": "signers_",
+              "type": "address[]"
             },
             {
               "internalType": "uint256",
               "name": "timestamp_",
-              "type": "uint256"
-            },
-            {
-              "internalType": "uint256",
-              "name": "nonce_",
               "type": "uint256"
             },
             {
@@ -1441,23 +1710,12 @@ export const definitions = {
             }
           ],
           "name": "validateFileRegistrationSignature",
-          "outputs": [
-            {
-              "internalType": "bool",
-              "name": "",
-              "type": "bool"
-            }
-          ],
+          "outputs": [],
           "stateMutability": "view",
           "type": "function"
         },
         {
           "inputs": [
-            {
-              "internalType": "address",
-              "name": "sender_",
-              "type": "address"
-            },
             {
               "internalType": "string",
               "name": "pieceCid_",
@@ -1465,13 +1723,13 @@ export const definitions = {
             },
             {
               "internalType": "address",
-              "name": "recipient_",
+              "name": "sender_",
               "type": "address"
             },
             {
-              "internalType": "bytes32",
-              "name": "signatureVisualHash_",
-              "type": "bytes32"
+              "internalType": "address",
+              "name": "signer_",
+              "type": "address"
             },
             {
               "internalType": "bytes20",
@@ -1484,36 +1742,50 @@ export const definitions = {
               "type": "uint256"
             },
             {
-              "internalType": "uint256",
-              "name": "nonce_",
-              "type": "uint256"
-            },
-            {
               "internalType": "bytes",
               "name": "signature_",
               "type": "bytes"
             }
           ],
           "name": "validateFileSigningSignature",
-          "outputs": [
-            {
-              "internalType": "bool",
-              "name": "",
-              "type": "bool"
-            }
-          ],
+          "outputs": [],
           "stateMutability": "view",
           "type": "function"
         }
       ]
     },
     "FSKeyRegistry": {
-      "address": "0xF84Fea36a06eB99b3029e8CbE10Ba84Cb5FF8f7E",
+      "address": "0xdFd00cd59E8E4225e62d94e2001a0D5D16F23d74",
       "abi": [
         {
           "inputs": [],
           "stateMutability": "nonpayable",
           "type": "constructor"
+        },
+        {
+          "inputs": [],
+          "name": "DataAlreadyRegistered",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "InvalidCommitmentDilithiumPk",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "InvalidCommitmentKyberPk",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "InvalidSaltPin",
+          "type": "error"
+        },
+        {
+          "inputs": [],
+          "name": "InvalidSaltSeed",
+          "type": "error"
         },
         {
           "anonymous": false,
