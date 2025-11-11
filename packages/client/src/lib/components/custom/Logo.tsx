@@ -39,7 +39,7 @@ export default function Logo({
 			)}
 			onClick={() => {
 				onIconClick?.();
-				navigate({ to: "/dashboard/document/all", replace: true });
+				navigate({ to: "/dashboard", replace: true });
 			}}
 		>
 			<motion.div

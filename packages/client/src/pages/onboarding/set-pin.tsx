@@ -33,7 +33,7 @@ export default function OnboardingSetPinPage() {
 		try {
 			if (isRegistered.data) {
 				toast.success("You are already registered!");
-				navigate({ to: "/dashboard/document/all" });
+				navigate({ to: "/dashboard" });
 				return;
 			}
 

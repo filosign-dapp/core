@@ -187,7 +187,7 @@ export default function AddSignaturePage() {
 			});
 
 			// Navigate back to dashboard
-			navigate({ to: "/dashboard/document/all" });
+			navigate({ to: "/dashboard" });
 		} catch (error) {
 			console.error("Failed to send documents:", error);
 			toast.error("Failed to send documents. Please try again.", {

@@ -32,7 +32,7 @@ export default function SignDocumentPage() {
                 <p className="text-muted-foreground mb-4">
                     No document specified for signing.
                 </p>
-                <Button onClick={() => navigate({ to: "/dashboard/document/all" })}>
+                <Button onClick={() => navigate({ to: "/dashboard" })}>
                     <ArrowLeftIcon className="h-4 w-4 mr-2" />
                     Back to Dashboard
                 </Button>
@@ -142,7 +142,7 @@ export default function SignDocumentPage() {
                 pieceCid: file.pieceCid,
             });
             toast.success("Document signed successfully!");
-            navigate({ to: "/dashboard/document/all" });
+            navigate({ to: "/dashboard" });
         } catch (error) {
             console.error("Failed to sign file:", error);
             toast.error("Failed to sign document");
@@ -383,7 +383,7 @@ export default function SignDocumentPage() {
                         Error: {fileError instanceof Error ? fileError.message : "Unknown error"}
                     </p>
                 )}
-                <Button onClick={() => navigate({ to: "/dashboard/document/all" })}>
+                <Button onClick={() => navigate({ to: "/dashboard" })}>
                     <ArrowLeftIcon className="h-4 w-4 mr-2" />
                     Back to Dashboard
                 </Button>
@@ -401,7 +401,7 @@ export default function SignDocumentPage() {
                     This document must be acknowledged before it can be viewed and signed.
                     Please acknowledge it from your dashboard first.
                 </p>
-                <Button onClick={() => navigate({ to: "/dashboard/document/all" })}>
+                <Button onClick={() => navigate({ to: "/dashboard" })}>
                     <ArrowLeftIcon className="h-4 w-4 mr-2" />
                     Back to Dashboard
                 </Button>
@@ -420,7 +420,7 @@ export default function SignDocumentPage() {
                         <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => navigate({ to: "/dashboard/document/all" })}
+                            onClick={() => navigate({ to: "/dashboard" })}
                             className="text-muted-foreground hover:text-foreground hover:bg-accent/50 -ml-2"
                         >
                             <ArrowLeftIcon className="size-4 mr-1.5" />
@@ -494,7 +494,7 @@ export default function SignDocumentPage() {
                         <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => navigate({ to: "/dashboard/document/all" })}
+                            onClick={() => navigate({ to: "/dashboard" })}
                             className="text-muted-foreground hover:text-foreground hover:bg-accent/50"
                         >
                             <ArrowLeftIcon className="size-4 mr-2" />
