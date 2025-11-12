@@ -1,18 +1,23 @@
 import { computeCidIdentifier, eip712signature } from "@filosign/contracts";
 import {
+	computeSignersCommitment,
 	encryption,
-	jsonStringify,
 	KEM,
 	randomBytes,
 	toBytes,
 	toHex,
 } from "@filosign/crypto-utils";
+import { encodeFileData } from "@filosign/shared";
+import type { zFileData } from "@filosign/shared/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { Address } from "viem";
+import type { Address, Hex } from "viem";
+import { getAddress } from "viem";
 import z from "zod";
 import { calculatePieceCid } from "../../../utils/piece";
 import { useFilosignContext } from "../../context/FilosignProvider";
 import { useUserProfileByQuery } from "../users";
+
+type FileData = z.infer<ReturnType<typeof zFileData>>;
 
 export function useSendFile() {
 	const { contracts, wallet, api } = useFilosignContext();
@@ -24,39 +29,32 @@ export function useSendFile() {
 
 	return useMutation({
 		mutationFn: async (args: {
-			recipient: { address: Address; encryptionPublicKey: string };
+			signers: {
+				address: Address;
+				encryptionPublicKey: Hex;
+				signaturePosition: [number, number, number, number];
+			}[];
+			viewers: { address: Address; encryptionPublicKey: string }[];
 			bytes: Uint8Array;
-			signaturePositionOffset: {
-				top: number;
-				left: number;
-			};
-			metadata: {
-				name: string;
-				mimeType: string;
-			};
+			metadata: FileData["metadata"];
 		}) => {
-			const { recipient, bytes, signaturePositionOffset, metadata } = args;
+			const { signers, viewers, bytes, metadata } = args;
 			const timestamp = Math.floor(Date.now() / 1000);
-			const encoder = new TextEncoder();
 
 			if (!contracts || !wallet || !user) {
 				throw new Error("not conected iido");
 			}
 
-			const data = encoder.encode(
-				jsonStringify({
-					fileBytes: bytes,
-					sender: wallet.account.address,
-					timestamp,
-					signaturePositionOffset,
-					metadata,
-				}),
-			);
+			const data = encodeFileData({
+				bytes: bytes,
+				sender: wallet.account.address,
+				signers: signers,
+				timestamp,
+				metadata,
+			});
 
 			const encryptionKey = randomBytes(32);
-
 			const encryptionInfo = "ignore-encryption-info";
-
 			const encryptedData = await encryption.encrypt({
 				message: data,
 				secretKey: encryptionKey,
@@ -65,15 +63,13 @@ export function useSendFile() {
 
 			const pieceCid = calculatePieceCid(encryptedData);
 
-			const { ciphertext: recipientKemCiphertext, sharedSecret: ssKEM } =
-				await KEM.encapsulate({
-					publicKeyOther: toBytes(recipient.encryptionPublicKey),
-				});
-			const recipientEncryptedEncryptionKey = await encryption.encrypt({
-				message: encryptionKey,
-				secretKey: ssKEM,
-				info: `${pieceCid.toString()}:${recipient.address}`,
-			});
+			const viewedParticipants: Record<Address, boolean> = {};
+			const participants: {
+				address: Address;
+				kemCiphertext: Hex;
+				encryptedEncryptionKey: Hex;
+				isSigner: boolean;
+			}[] = [];
 
 			const { ciphertext: selfKemCiphertext, sharedSecret: sKEM } =
 				await KEM.encapsulate({
@@ -84,6 +80,51 @@ export function useSendFile() {
 				secretKey: sKEM,
 				info: `${pieceCid.toString()}:${wallet.account.address}`,
 			});
+			viewedParticipants[wallet.account.address] = true;
+
+			for (const signer of signers) {
+				if (viewedParticipants[signer.address]) continue;
+				viewedParticipants[signer.address] = true;
+
+				const { ciphertext: recipientKemCiphertext, sharedSecret: ssKEM } =
+					await KEM.encapsulate({
+						publicKeyOther: toBytes(signer.encryptionPublicKey),
+					});
+				const recipientEncryptedEncryptionKey = await encryption.encrypt({
+					message: encryptionKey,
+					secretKey: ssKEM,
+					info: `${pieceCid.toString()}:${signer.address}`,
+				});
+
+				participants.push({
+					address: signer.address,
+					kemCiphertext: toHex(recipientKemCiphertext),
+					encryptedEncryptionKey: toHex(recipientEncryptedEncryptionKey),
+					isSigner: true,
+				});
+			}
+			for (const viewer of viewers) {
+				if (viewedParticipants[viewer.address])
+					throw new Error(`Duplicate viewer address ${viewer.address}`);
+				viewedParticipants[viewer.address] = true;
+
+				const { ciphertext: recipientKemCiphertext, sharedSecret: ssKEM } =
+					await KEM.encapsulate({
+						publicKeyOther: toBytes(viewer.encryptionPublicKey),
+					});
+				const recipientEncryptedEncryptionKey = await encryption.encrypt({
+					message: encryptionKey,
+					secretKey: ssKEM,
+					info: `${pieceCid.toString()}:${viewer.address}`,
+				});
+
+				participants.push({
+					address: viewer.address,
+					kemCiphertext: toHex(recipientKemCiphertext),
+					encryptedEncryptionKey: toHex(recipientEncryptedEncryptionKey),
+					isSigner: false,
+				});
+			}
 
 			const uploadStartResponse = await api.rpc.postSafe(
 				{
@@ -118,7 +159,7 @@ export function useSendFile() {
 					RegisterFile: [
 						{ name: "cidIdentifier", type: "bytes32" },
 						{ name: "sender", type: "address" },
-						{ name: "recipient", type: "address" },
+						{ name: "signersCommitment", type: "bytes20" },
 						{ name: "timestamp", type: "uint256" },
 						{ name: "nonce", type: "uint256" },
 					],
@@ -127,23 +168,21 @@ export function useSendFile() {
 				message: {
 					cidIdentifier: cidIdentifier,
 					sender: wallet.account.address,
-					recipient: recipient.address,
+					signersCommitment: computeSignersCommitment(
+						signers.map((s) => getAddress(s.address)),
+					),
 					timestamp: BigInt(timestamp),
 					nonce: BigInt(nonce),
 				},
 			});
 
 			const requestPayload = {
-				sender: wallet.account.address,
-				recipient: recipient.address,
 				pieceCid: pieceCid.toString(),
-				signature,
-				encryptedEncryptionKey: toHex(recipientEncryptedEncryptionKey),
+				participants: participants,
+				signature: signature,
 				senderEncryptedEncryptionKey: toHex(selfEncryptedEncryptionKey),
-				kemCiphertext: toHex(recipientKemCiphertext),
 				senderKemCiphertext: toHex(selfKemCiphertext),
 				timestamp: timestamp,
-				nonce: Number(nonce),
 			};
 
 			const registerResponse = await api.rpc.postSafe(
@@ -152,7 +191,7 @@ export function useSendFile() {
 				requestPayload,
 			);
 
-			queryClient.invalidateQueries({ queryKey: ["sent-files"] });
+			queryClient.refetchQueries({ queryKey: ["sent-files"] });
 
 			return registerResponse.success;
 		},
