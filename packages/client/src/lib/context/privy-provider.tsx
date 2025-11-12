@@ -1,13 +1,14 @@
 import { PrivyProvider as PrivyProviderBase } from "@privy-io/react-auth";
-import { hardhat } from "viem/chains";
+import { useRuntimeChain } from "@filosign/react/hooks";
 
 export function PrivyProvider({ children }: { children: React.ReactNode }) {
+	const runtimeChain = useRuntimeChain();
 	return (
 		<PrivyProviderBase
 			appId={process.env.BUN_PUBLIC_PRIVY_APP_ID!}
 			config={{
-				defaultChain: hardhat,
-				supportedChains: [hardhat],
+				defaultChain: runtimeChain,
+				supportedChains: [runtimeChain],
 				loginMethods: ["wallet", "google", "twitter", "github", "discord"],
 				appearance: {
 					theme: "light",

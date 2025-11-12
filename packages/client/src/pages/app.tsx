@@ -27,12 +27,15 @@ import OnboardingWelcomeCompletePage from "./onboarding/welcome";
 import PitchPage from "./pitch";
 import TestPage from "./test";
 import { useIsLoggedIn } from "@filosign/react/hooks";
+import { usePrivy } from "@privy-io/react-auth";
 
 const rootRoute = createRootRoute({
 	component: () => {
 		useAnalytics();
 		const isLoggedIn = useIsLoggedIn();
 		console.log({ isLoggedIn: isLoggedIn.data, status: isLoggedIn.status });
+		const { user } = usePrivy();
+		console.log({ user: user?.wallet?.address });
 
 		return (
 			<>
