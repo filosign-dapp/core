@@ -1,3 +1,4 @@
+import { zHexString } from "@filosign/shared/zod";
 import { useQuery } from "@tanstack/react-query";
 import z from "zod";
 import { useFilosignContext } from "../../context/FilosignProvider";
@@ -15,6 +16,8 @@ export function useReceivedFiles() {
 							pieceCid: z.string(),
 							sender: z.string(),
 							status: z.string(),
+							encryptedEncryptionKey: zHexString(),
+							kemCiphertext: zHexString(),
 						}),
 					),
 				},

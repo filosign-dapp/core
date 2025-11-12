@@ -1,6 +1,6 @@
+import { zHexString } from "@filosign/shared/zod";
 import { useQuery } from "@tanstack/react-query";
 import z from "zod";
-import { zHexString } from "../../../utils/zod";
 import { useFilosignContext } from "../../context/FilosignProvider";
 
 export function useFileInfo(args: { pieceCid: string | undefined }) {
@@ -14,25 +14,19 @@ export function useFileInfo(args: { pieceCid: string | undefined }) {
 					pieceCid: z.string(),
 					sender: z.string(),
 					status: z.string(),
-					acked: z.boolean(),
-					ackedAt: z.string().nullable(),
 					onchainTxHash: zHexString(),
-					senderEncryptedEncryptionKey: z.string().nullable(),
 					createdAt: z.string(),
-					recipient: z.string(),
-					kemCiphertext: z.string().nullable(),
-					senderKemCiphertext: z.string().nullable(),
-					encryptedEncryptionKey: z.string().nullable(),
-					signatures: z
-						.object({
+					signers: z.array(z.string()),
+					viewers: z.array(z.string()),
+					signatures: z.array(
+						z.object({
 							signer: z.string(),
-							signatureVisualHash: zHexString(),
-							evmSignature: zHexString(),
-							dl3Signature: zHexString(),
 							timestamp: z.number(),
 							onchainTxHash: zHexString(),
-						})
-						.array(),
+						}),
+					),
+					kemCiphertext: zHexString().nullable(),
+					encryptedEncryptionKey: zHexString().nullable(),
 				},
 				`/files/${args.pieceCid}`,
 			);
