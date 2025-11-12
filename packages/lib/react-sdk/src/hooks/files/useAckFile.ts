@@ -21,7 +21,8 @@ export function useAckFile() {
 					sender: z.string(),
 					status: z.string(),
 					createdAt: z.string(),
-					recipient: z.string(),
+					signers: z.array(z.string()),
+					viewers: z.array(z.string()),
 				},
 				`/files/${pieceCid}`,
 			);
@@ -30,11 +31,7 @@ export function useAckFile() {
 				throw new Error("Failed to fetch file info");
 			}
 
-			const { sender, recipient } = fileResponse.data;
-
-			if (recipient !== wallet.account.address) {
-				throw new Error("You are not the recipient of this file");
-			}
+			const { sender } = fileResponse.data;
 
 			const cidIdentifier = computeCidIdentifier(pieceCid);
 
@@ -45,7 +42,7 @@ export function useAckFile() {
 					AckFile: [
 						{ name: "cidIdentifier", type: "bytes32" },
 						{ name: "sender", type: "address" },
-						{ name: "recipient", type: "address" },
+						{ name: "viewer", type: "address" },
 						{ name: "timestamp", type: "uint256" },
 					],
 				},
@@ -53,7 +50,7 @@ export function useAckFile() {
 				message: {
 					cidIdentifier,
 					sender,
-					recipient,
+					viewer: wallet.account.address,
 					timestamp: BigInt(timestamp),
 				},
 			});
