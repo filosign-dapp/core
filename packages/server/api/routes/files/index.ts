@@ -308,28 +308,41 @@ export default new Hono()
 			.from(fileSignatures)
 			.where(eq(fileSignatures.filePieceCid, pieceCid));
 
-		const response = {
-			...fileRecord,
-			recipient: fileRecipient.recipientWallet,
-			acked: !!fileRecipient.ack,
-			kemCiphertext: fileRecipient.ack ? fileRecipient.kemCiphertext : null,
+		const signers = participants
+			.filter((p) => p.role === "signer")
+			.map((p) => getAddress(p.wallet))
+			.sort();
 
-			ackedAt: fileRecipient.ackedAt,
+		const viewers = participants
+			.filter((p) => p.role === "viewer")
+			.map((p) => getAddress(p.wallet))
+			.sort();
+
+		const [acked] = await db
+			.select()
+			.from(fileAcknowledgements)
+			.where(
+				and(
+					eq(fileAcknowledgements.filePieceCid, pieceCid),
+					eq(fileAcknowledgements.wallet, userWallet),
+				),
+			);
+		const canRead = !!acked || fileRecord.sender === userWallet;
+
+		const response = {
+			pieceCid: fileRecord.pieceCid,
+			sender: fileRecord.sender,
+			status: fileRecord.status,
+			onchainTxHash: fileRecord.onchainTxHash,
+			createdAt: fileRecord.createdAt,
+			signers,
+			viewers,
 			signatures: fileSignaturesRecord,
 
-			senderEncryptedEncryptionKey:
-				userWallet === fileRecord.sender
-					? fileRecord.senderEncryptedEncryptionKey
-					: null,
-			senderKemCiphertext:
-				userWallet === fileRecord.sender
-					? fileRecord.senderKemCiphertext
-					: null,
-
-			encryptedEncryptionKey:
-				fileRecipient.ack && userWallet === fileRecipient.recipientWallet
-					? fileRecipient.encryptedEncryptionKey
-					: null,
+			kemCiphertext: canRead ? participantUser.kemCiphertext : null,
+			encryptedEncryptionKey: canRead
+				? participantUser.encryptedEncryptionKey
+				: null,
 		};
 
 		return respond.ok(ctx, response, "File retrieved", 200);
