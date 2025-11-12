@@ -4,8 +4,10 @@ import {
 	type Address,
 	type Chain,
 	encodePacked,
+	getAddress,
 	type Hex,
 	isAddress,
+	keccak256,
 	ripemd160,
 	type Transport,
 	toBytes,
@@ -73,7 +75,10 @@ export function computeCommitment(
 ) {
 	function determineType(
 		value: string | number | bigint,
-	): "string" | "uint256" {
+	): "string" | "uint256" | "address" {
+		if (typeof value === "string" && isAddress(value)) {
+			return "address";
+		}
 		if (typeof value === "string") {
 			return "string";
 		}
