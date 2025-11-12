@@ -5,19 +5,23 @@ import {
 	signatures,
 	toBytes,
 } from "@filosign/crypto-utils/node";
-import { eq } from "drizzle-orm";
+import { zEvmAddress, zHexString } from "@filosign/shared/zod";
+import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
-import { isAddress, isHex } from "viem";
+import { getAddress } from "viem";
+import z from "zod";
 import db from "../../../lib/db";
 import { fsContracts } from "../../../lib/evm";
 import { bucket } from "../../../lib/s3/client";
 import { getOrCreateUserDataset } from "../../../lib/synapse";
 import { respond } from "../../../lib/utils/respond";
+import { tryCatch } from "../../../lib/utils/tryCatch";
 import { authenticated } from "../../middleware/auth";
 
 const { FSFileRegistry } = fsContracts;
 
-const { files, fileRecipients, users, fileSignatures } = db.schema;
+const { files, fileParticipants, users, fileSignatures, fileAcknowledgements } =
+	db.schema;
 const MAX_FILE_SIZE = 30 * 1024 * 1024;
 
 export default new Hono()
@@ -75,8 +79,6 @@ export default new Hono()
 			pieceCid,
 			participants,
 			signature,
-			kemCiphertext,
-			encryptedEncryptionKey,
 			senderEncryptedEncryptionKey,
 			senderKemCiphertext,
 			timestamp,
@@ -92,7 +94,6 @@ export default new Hono()
 				sender,
 				signers,
 				BigInt(timestamp),
-				BigInt(nonce),
 				signature,
 			]),
 		);
@@ -117,28 +118,21 @@ export default new Hono()
 		}
 
 		const bytes = await file.arrayBuffer();
-
 		if (bytes.byteLength === 0) {
 			file.delete();
 			return respond.err(ctx, "Uploaded file is empty", 400);
 		}
 
 		const txHash = await FSFileRegistry.write.registerFile([
-			sender,
 			pieceCid,
 			sender,
 			signers,
 			BigInt(timestamp),
-			BigInt(nonce),
 			signature,
 		]);
-
-		const actualSize = bytes.byteLength;
-
 		const ds = await getOrCreateUserDataset(sender);
 		const actualSize = bytes.byteLength;
 		const preflight = await ds.preflightUpload(Math.ceil(actualSize));
-
 		if (!preflight.allowanceCheck.sufficient) {
 			return respond.err(
 				ctx,
@@ -195,29 +189,6 @@ export default new Hono()
 				});
 		});
 
-		await db.transaction(async (tx) => {
-			const [insertResult] = await tx
-				.insert(files)
-				.values({
-					pieceCid,
-					status: "s3",
-					sender,
-					senderEncryptedEncryptionKey,
-					senderKemCiphertext,
-					onchainTxHash: txHash,
-				})
-				.returning();
-			// TODO : Chcek using db if valid recipient
-			await tx.insert(fileRecipients).values({
-				filePieceCid: pieceCid,
-				recipientWallet: recipient,
-				kemCiphertext: kemCiphertext,
-				encryptedEncryptionKey: encryptedEncryptionKey,
-			});
-
-			return insertResult;
-		});
-
 		return respond.ok(ctx, {}, "File uploaded to filecoin warmstorage", 201);
 	})
 
@@ -244,13 +215,15 @@ export default new Hono()
 				pieceCid: files.pieceCid,
 				sender: files.sender,
 				status: files.status,
+				encryptedEncryptionKey: fileParticipants.encryptedEncryptionKey,
+				kemCiphertext: fileParticipants.kemCiphertext,
 			})
 			.from(files)
 			.innerJoin(
-				fileRecipients,
-				eq(files.pieceCid, fileRecipients.filePieceCid),
+				fileParticipants,
+				eq(files.pieceCid, fileParticipants.filePieceCid),
 			)
-			.where(eq(fileRecipients.recipientWallet, userWallet));
+			.where(eq(fileParticipants.wallet, userWallet));
 
 		return respond.ok(
 			ctx,
@@ -264,9 +237,6 @@ export default new Hono()
 		const userWallet = ctx.var.userWallet;
 
 		const pieceCid = ctx.req.param("pieceCid");
-		if (!pieceCid || typeof pieceCid !== "string") {
-			return respond.err(ctx, "Invalid pieceCid", 400);
-		}
 
 		const [fileRecord] = await db
 			.select({
@@ -274,8 +244,6 @@ export default new Hono()
 				sender: files.sender,
 				status: files.status,
 				onchainTxHash: files.onchainTxHash,
-				senderEncryptedEncryptionKey: files.senderEncryptedEncryptionKey,
-				senderKemCiphertext: files.senderKemCiphertext,
 				createdAt: files.createdAt,
 			})
 			.from(files)
@@ -348,128 +316,142 @@ export default new Hono()
 		return respond.ok(ctx, response, "File retrieved", 200);
 	})
 
-	.post("/:pieceCid/ack", async (ctx) => {
+	.post("/:pieceCid/ack", authenticated, async (ctx) => {
+		const userWallet = ctx.var.userWallet;
 		const pieceCid = ctx.req.param("pieceCid");
-		const { signature, timestamp } = await ctx.req.json();
 
-		if (!pieceCid || typeof pieceCid !== "string") {
-			return respond.err(ctx, "Invalid pieceCid", 400);
+		const rawBody = await ctx.req.json();
+		const parsedBody = z
+			.object({
+				signature: zHexString(),
+				timestamp: z.number("timestamp must be a number"),
+			})
+			.safeParse(rawBody);
+		if (parsedBody.error) {
+			return respond.err(ctx, parsedBody.error.message, 400);
 		}
-		if (!signature || typeof signature !== "string" || !isHex(signature)) {
-			return respond.err(ctx, "Invalid signature", 400);
-		}
-		if (typeof timestamp !== "number" || timestamp <= 0) {
-			return respond.err(ctx, "Invalid timestamp", 400);
-		}
+		const { signature, timestamp } = parsedBody.data;
 
 		const [fileRecord] = await db
 			.select({
+				pieceCid: files.pieceCid,
 				sender: files.sender,
 			})
 			.from(files)
 			.where(eq(files.pieceCid, pieceCid));
 
-		const [recipientRecord] = await db
+		const [participantRecord] = await db
 			.select({
-				wallet: fileRecipients.recipientWallet,
+				wallet: fileParticipants.wallet,
 			})
-			.from(fileRecipients)
-			.where(eq(fileRecipients.filePieceCid, pieceCid));
+			.from(fileParticipants)
+			.where(
+				and(
+					eq(fileParticipants.filePieceCid, fileRecord.pieceCid),
+					eq(fileParticipants.wallet, userWallet),
+				),
+			);
+		if (!participantRecord) {
+			return respond.err(ctx, "you are nto Participant in thies file", 404);
+		}
 
-		if (!recipientRecord) {
-			return respond.err(ctx, "Recipient not found", 404);
+		const [existingAck] = await db
+			.select()
+			.from(fileAcknowledgements)
+			.where(
+				and(
+					eq(fileAcknowledgements.filePieceCid, pieceCid),
+					eq(fileAcknowledgements.wallet, userWallet),
+				),
+			);
+		if (existingAck) {
+			return respond.err(ctx, "File already acked", 409);
 		}
 
 		const valid = await FSFileRegistry.read.validateFileAckSignature([
-			recipientRecord.wallet,
 			pieceCid,
 			fileRecord.sender,
+			participantRecord.wallet,
 			BigInt(timestamp),
 			signature,
 		]);
 
 		if (valid) {
-			await db
-				.update(fileRecipients)
-				.set({ ack: signature, ackedAt: new Date() })
-				.where(eq(fileRecipients.filePieceCid, pieceCid));
+			await db.insert(fileAcknowledgements).values({
+				filePieceCid: fileRecord.pieceCid,
+				wallet: participantRecord.wallet,
+				ack: signature,
+				createdAt: new Date(timestamp * 1000),
+			});
 			return respond.ok(ctx, {}, "File acknowledged successfully", 200);
 		} else {
 			return respond.err(ctx, "Invalid signature", 400);
 		}
 	})
 
-	.post("/:pieceCid/sign", async (ctx) => {
+	.post("/:pieceCid/sign", authenticated, async (ctx) => {
+		const userWallet = ctx.var.userWallet;
 		const pieceCid = ctx.req.param("pieceCid");
 		const encoder = new TextEncoder();
-		const { signature, timestamp, signatureVisualBytes, dl3Signature } =
-			await ctx.req.json();
+		const dilithium = await signatures.dilithiumInstance();
 
-		if (!pieceCid || typeof pieceCid !== "string") {
-			return respond.err(ctx, "Invalid pieceCid", 400);
+		const rawBody = await ctx.req.json();
+		const parsedBody = z
+			.object({
+				signature: zHexString(),
+				timestamp: z.number("timestamp must be a number"),
+				dl3Signature: zHexString(),
+			})
+			.safeParse(rawBody);
+		if (parsedBody.error) {
+			return respond.err(ctx, parsedBody.error.message, 400);
 		}
-		if (!signature || typeof signature !== "string" || !isHex(signature)) {
-			return respond.err(ctx, "Invalid signature format", 400);
-		}
-		if (typeof timestamp !== "number" || timestamp <= 0) {
-			return respond.err(ctx, "Invalid timestamp", 400);
-		}
-		if (
-			!signatureVisualBytes ||
-			typeof signatureVisualBytes !== "string" ||
-			!isHex(signatureVisualBytes)
-		) {
-			return respond.err(ctx, "Invalid signatureVisualBytes", 400);
-		}
-		if (
-			!dl3Signature ||
-			typeof dl3Signature !== "string" ||
-			!isHex(dl3Signature)
-		) {
-			return respond.err(ctx, "Invalid dl3Signature", 400);
-		}
+		const { signature, timestamp, dl3Signature } = parsedBody.data;
 
 		const [fileRecord] = await db
 			.select({
+				pieceCid: files.pieceCid,
 				sender: files.sender,
 			})
 			.from(files)
 			.where(eq(files.pieceCid, pieceCid));
 
-		const [recipientRecord] = await db
+		const [participantRecord] = await db
 			.select({
-				wallet: fileRecipients.recipientWallet,
+				wallet: fileParticipants.wallet,
 			})
-			.from(fileRecipients)
-			.where(eq(fileRecipients.filePieceCid, pieceCid));
-		const [recipientUserRecord] = await db
+			.from(fileParticipants)
+			.where(
+				and(
+					eq(fileParticipants.filePieceCid, pieceCid),
+					eq(fileParticipants.role, "signer"),
+					eq(fileParticipants.wallet, userWallet),
+				),
+			);
+		if (!participantRecord) {
+			return respond.err(ctx, "You are not required to sign this file", 403);
+		}
+
+		const [{ signaturePublicKey: signerDl3PubKey }] = await db
 			.select({
 				signaturePublicKey: users.signaturePublicKey,
 			})
 			.from(users)
-			.where(eq(users.walletAddress, recipientRecord.wallet));
+			.where(eq(users.walletAddress, participantRecord.wallet));
 
-		const userNonce = await FSFileRegistry.read.nonce([recipientRecord.wallet]);
-
-		const signatureVisualHash = fsHash.digest(toBytes(signatureVisualBytes));
 		const dl3SignatureMessage = jsonStringify({
-			sender: fileRecord.sender,
 			pieceCid,
-			recipient: recipientRecord.wallet,
-			signatureVisualHash,
+			sender: fileRecord.sender,
+			signer: participantRecord.wallet,
 			timestamp: timestamp,
-			nonce: userNonce,
 		});
-
 		const dl3SignatureCommitment = computeCommitment([dl3Signature]);
-
-		const dilithium = await signatures.dilithiumInstance();
 
 		const isDl3SignatureValid = await signatures.verify({
 			dl: dilithium,
 			message: encoder.encode(dl3SignatureMessage),
 			signature: toBytes(dl3Signature),
-			publicKey: toBytes(recipientUserRecord.signaturePublicKey),
+			publicKey: toBytes(signerDl3PubKey),
 		});
 
 		if (!isDl3SignatureValid) {
@@ -477,13 +459,11 @@ export default new Hono()
 		}
 
 		const valid = await FSFileRegistry.read.validateFileSigningSignature([
-			fileRecord.sender,
 			pieceCid,
-			recipientRecord.wallet,
-			signatureVisualHash,
+			fileRecord.sender,
+			participantRecord.wallet,
 			dl3SignatureCommitment,
 			BigInt(timestamp),
-			BigInt(userNonce),
 			signature,
 		]);
 
@@ -491,24 +471,21 @@ export default new Hono()
 			return respond.err(ctx, "Invalid signature", 400);
 		}
 		const txHash = await FSFileRegistry.write.registerFileSignature([
-			fileRecord.sender,
 			pieceCid,
-			recipientRecord.wallet,
-			signatureVisualHash,
+			fileRecord.sender,
+			participantRecord.wallet,
 			dl3SignatureCommitment,
 			BigInt(timestamp),
-			BigInt(userNonce),
 			signature,
 		]);
 
 		await db.insert(fileSignatures).values({
 			filePieceCid: pieceCid,
-			signer: recipientRecord.wallet,
-			signatureVisualHash: signatureVisualHash,
+			signer: participantRecord.wallet,
 			evmSignature: signature,
 			dl3Signature: dl3Signature,
-			timestamp: timestamp,
 			onchainTxHash: txHash,
+			createdAt: new Date(timestamp * 1000),
 		});
 
 		return respond.ok(ctx, {}, "File signed successfully", 200);
@@ -525,30 +502,29 @@ export default new Hono()
 		// Check if user is authorized to access this file (sender or recipient)
 		const [fileRecord] = await db
 			.select({
+				pieceCid: files.pieceCid,
 				sender: files.sender,
 			})
 			.from(files)
 			.where(eq(files.pieceCid, pieceCid));
 
-		const [recipientRecord] = await db
+		const [participantRecord] = await db
 			.select({
-				recipientWallet: fileRecipients.recipientWallet,
+				wallet: fileParticipants.wallet,
 			})
-			.from(fileRecipients)
-			.where(eq(fileRecipients.filePieceCid, pieceCid));
+			.from(fileParticipants)
+			.where(
+				and(
+					eq(fileParticipants.filePieceCid, fileRecord.pieceCid),
+					eq(fileParticipants.wallet, userWallet),
+				),
+			);
 
-		if (!fileRecord || !recipientRecord) {
-			return respond.err(ctx, "File not found", 404);
+		if (!participantRecord) {
+			return respond.err(ctx, "File not found or not allowed to access", 404);
 		}
 
-		if (
-			fileRecord.sender !== userWallet &&
-			recipientRecord.recipientWallet !== userWallet
-		) {
-			return respond.err(ctx, "Unauthorized to access this file", 403);
-		}
-
-		const fileExists = bucket.exists(`uploads/${pieceCid}`);
+		const fileExists = await bucket.exists(`uploads/${pieceCid}`);
 
 		if (!fileExists) {
 			return respond.err(ctx, "File not found on S3", 404);
