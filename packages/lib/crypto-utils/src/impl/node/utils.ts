@@ -7,7 +7,6 @@ import {
 	getAddress,
 	type Hex,
 	isAddress,
-	keccak256,
 	ripemd160,
 	type Transport,
 	toBytes,

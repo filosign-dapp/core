@@ -9,7 +9,8 @@
 		"packages/server",
 		"packages/contracts",
 		"packages/lib/react-sdk",
-		"packages/lib/crypto-utils"
+		"packages/lib/crypto-utils",
+		"packages/lib/shared"
 	],
 	"scripts": {
 		"client:dev": "bun run --cwd packages/client dev",
@@ -35,6 +36,7 @@
 		"typescript": "5.9.3"
 	},
 	"dependencies": {
+		"@hono/zod-validator": "0.7.4",
 		"@privy-io/wagmi": "2.0.2",
 		"dotenv": "17.2.3",
 		"viem": "2.38.5"
