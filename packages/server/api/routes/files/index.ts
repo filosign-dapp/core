@@ -47,90 +47,61 @@ export default new Hono()
 
 	.post("/", authenticated, async (ctx) => {
 		const sender = ctx.var.userWallet;
+		const rawBody = await ctx.req.json();
+		const parsedBody = z
+			.object({
+				pieceCid: z.string("pieceCid invalid"),
+				participants: z.array(
+					z.object({
+						address: zEvmAddress(),
+						kemCiphertext: zHexString(),
+						encryptedEncryptionKey: zHexString(),
+						isSigner: z
+							.boolean("participants[n].isSigner must be boolean")
+							.optional(),
+					}),
+				),
+				signature: zHexString(),
+				senderEncryptedEncryptionKey: zHexString(),
+				senderKemCiphertext: zHexString(),
+				timestamp: z.number("timestamp must be a number"),
+			})
+			.safeParse(rawBody);
+
+		if (parsedBody.error) {
+			return respond.err(ctx, parsedBody.error.message, 400);
+		}
 		const {
 			pieceCid,
-			recipient,
+			participants,
 			signature,
 			kemCiphertext,
 			encryptedEncryptionKey,
 			senderEncryptedEncryptionKey,
 			senderKemCiphertext,
 			timestamp,
-			nonce,
-		} = await ctx.req.json();
+		} = parsedBody.data;
+		const signers = participants
+			.filter((p) => p.isSigner)
+			.map((p) => getAddress(p.address))
+			.sort();
 
-		if (typeof timestamp !== "number" || timestamp <= 0) {
-			return respond.err(ctx, "Invalid timestamp", 400);
-		}
-		if (typeof nonce !== "number" || nonce < 0) {
-			return respond.err(ctx, "Invalid nonce", 400);
-		}
-		if (!sender || typeof sender !== "string" || !isAddress(sender)) {
-			return respond.err(ctx, "Invalid sender address", 400);
-		}
-		if (!signature || typeof signature !== "string" || !isHex(signature)) {
-			return respond.err(ctx, "Invalid signature", 400);
-		}
-		if (!pieceCid || typeof pieceCid !== "string") {
-			return respond.err(ctx, "Invalid pieceCid", 400);
-		}
-		if (typeof kemCiphertext !== "string" || !isHex(kemCiphertext)) {
-			return respond.err(ctx, "Invalid kemCiphertext", 400);
-		}
-		if (
-			!encryptedEncryptionKey ||
-			typeof encryptedEncryptionKey !== "string" ||
-			!isHex(encryptedEncryptionKey)
-		) {
-			return respond.err(ctx, "Invalid encryptedEncryptionKey", 400);
-		}
-		if (
-			!senderEncryptedEncryptionKey ||
-			typeof senderEncryptedEncryptionKey !== "string" ||
-			!isHex(senderEncryptedEncryptionKey)
-		) {
-			return respond.err(ctx, "Invalid senderEncryptedEncryptionKey", 400);
-		}
-		if (!recipient || typeof recipient !== "string" || !isAddress(recipient)) {
-			return respond.err(ctx, "Invalid recipient address", 400);
-		}
-		if (
-			typeof senderKemCiphertext !== "string" ||
-			!isHex(senderKemCiphertext)
-		) {
-			return respond.err(ctx, "Invalid senderKemCiphertext", 400);
-		}
-
-		let valid: boolean;
-		try {
-			valid = await FSFileRegistry.read.validateFileRegistrationSignature([
-				sender,
+		const valid = await tryCatch(
+			FSFileRegistry.read.validateFileRegistrationSignature([
 				pieceCid,
-				recipient,
+				sender,
+				signers,
 				BigInt(timestamp),
 				BigInt(nonce),
 				signature,
-			]);
-		} catch (error: unknown) {
-			// Catch contract revert messages
-			const errorMessage =
-				error instanceof Error ? error.message : String(error);
-			if (errorMessage.includes("Signature expired")) {
-				return respond.err(ctx, "Signature expired", 400);
-			} else if (errorMessage.includes("Sender not registered")) {
-				return respond.err(ctx, "Sender not registered", 400);
-			} else if (errorMessage.includes("Sender not approved by recipient")) {
-				return respond.err(ctx, "Sender not approved by recipient", 400);
-			} else {
-				return respond.err(
-					ctx,
-					`Signature validation failed: ${errorMessage}`,
-					400,
-				);
-			}
-		}
+			]),
+		);
 
-		if (!valid) {
+		if (valid.error) {
+			return respond.err(ctx, `Error validating signature ${valid.error}`, 500);
+		}
+		console.log("LAMO");
+		if (!valid.data) {
 			return respond.err(ctx, "Invalid signature", 400);
 		}
 
@@ -155,7 +126,8 @@ export default new Hono()
 		const txHash = await FSFileRegistry.write.registerFile([
 			sender,
 			pieceCid,
-			recipient,
+			sender,
+			signers,
 			BigInt(timestamp),
 			BigInt(nonce),
 			signature,
@@ -164,7 +136,7 @@ export default new Hono()
 		const actualSize = bytes.byteLength;
 
 		const ds = await getOrCreateUserDataset(sender);
-
+		const actualSize = bytes.byteLength;
 		const preflight = await ds.preflightUpload(Math.ceil(actualSize));
 
 		if (!preflight.allowanceCheck.sufficient) {
