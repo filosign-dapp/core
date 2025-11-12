@@ -11,38 +11,45 @@ contract FSFileRegistry is EIP712 {
     using ECDSA for bytes32;
 
     uint256 constant SIGNATURE_VALIDITY_PERIOD = 2 minutes;
+    uint256 constant SIGNATURE_MAX_DRIFT_PERIOD = 1 minutes;
 
     struct FileRegistration {
         bytes32 cidIdentifier;
         address sender;
-        address recipient;
+        mapping(address => bool) signers;
+        uint8 signersCount;
+        mapping(address => bytes) signatures;
         uint256 timestamp;
     }
 
-    mapping(bytes32 => bytes) public signatures;
-    mapping(address => uint256) public nonce;
-
-    mapping(bytes32 => FileRegistration) public fileRegistrations;
-
-    IFSManager public immutable manager;
-
-    modifier onlyServer() {
-        require(msg.sender == manager.server(), "Only server can call");
-        _;
+    struct FileRegistrationView {
+        bytes32 cidIdentifier;
+        address sender;
+        uint8 signersCount;
+        uint256 timestamp;
     }
 
     event FileRegistered(
         bytes32 indexed cidIdentifier,
         address indexed sender,
-        address indexed recipient,
         uint48 timestamp
     );
     event FileSigned(
         bytes32 indexed cidIdentifier,
         address indexed sender,
-        address indexed recipient,
+        address indexed signer,
         uint48 timestamp
     );
+
+    mapping(address => uint256) public nonce;
+    mapping(bytes32 => FileRegistration) private _fileRegistrations;
+
+    IFSManager public immutable manager;
+
+    modifier onlyServer() {
+        if (msg.sender != manager.server()) revert OnlyServer();
+        _;
+    }
 
     constructor() EIP712("FSFileRegistry", "1") {
         manager = IFSManager(msg.sender); // expect msg.sender to be fsmanager
@@ -50,103 +57,147 @@ contract FSFileRegistry is EIP712 {
 
     bytes32 private constant REGISTER_FILE_TYPEHASH =
         keccak256(
-            "RegisterFile(bytes32 cidIdentifier,address sender,address recipient,uint256 timestamp,uint256 nonce)"
+            "RegisterFile(bytes32 cidIdentifier,address sender,bytes20 signersCommitment,uint256 timestamp,uint256 nonce)"
         );
     bytes32 private constant ACK_FILE_TYPEHASH =
         keccak256(
-            "AckFile(bytes32 cidIdentifier,address sender,address recipient,uint256 timestamp)"
+            "AckFile(bytes32 cidIdentifier,address sender,address viewer,uint256 timestamp)"
         );
     bytes32 private constant SIGN_FILE_TYPEHASH =
         keccak256(
-            "SignFile(bytes32 cidIdentifier,address sender,address recipient,bytes32 signatureVisualHash,bytes20 dl3SignatureCommitment,uint256 timestamp,uint256 nonce)"
+            "SignFile(bytes32 cidIdentifier,address sender,address signer,bytes20 dl3SignatureCommitment,uint256 timestamp,uint256 nonce)"
         );
 
+    function computeSignersCommitment(
+        address[] calldata signers_ // Always expect inpu to be sorted to maintain unifrom output
+    ) public pure returns (bytes20) {
+        for (uint256 i = 0; i < signers_.length; ) {
+            address s = signers_[i];
+            if (s == address(0)) revert ZeroSigner();
+            if (i > 0) {
+                if (s <= signers_[i - 1]) revert UnsortedSigners(); // also catches dup
+            }
+            unchecked {
+                ++i;
+            }
+        }
+
+        bytes20 commitment = ripemd160(abi.encodePacked(signers_));
+        return commitment;
+    }
+
+    function fileRegistrations(
+        bytes32 cidId
+    ) external view returns (FileRegistrationView memory) {
+        FileRegistration storage file = _fileRegistrations[cidId];
+        return
+            FileRegistrationView({
+                cidIdentifier: file.cidIdentifier,
+                sender: file.sender,
+                signersCount: file.signersCount,
+                timestamp: file.timestamp
+            });
+    }
+
     function registerFile(
-        address sender_,
         string calldata pieceCid_,
-        address recipient,
+        address sender_,
+        address[] calldata signers_,
         uint256 timestamp_,
-        uint256 nonce_,
         bytes calldata signature_
     ) external onlyServer {
-        require(nonce_ == nonce[sender_]++, "Invalid nonce");
         require(
             validateFileRegistrationSignature(
-                sender_,
                 pieceCid_,
                 sender_,
                 signers_,
                 timestamp_,
-                nonce_,
+                signature_
+            ),
+            InvalidSignature()
+        );
+        require(
+            (signers_.length > 0 && signers_.length <= type(uint8).max),
+            BadSignersLength()
+        );
+
+        bytes32 cidId = cidIdentifier(pieceCid_);
+        FileRegistration storage file = _fileRegistrations[cidId];
+        if (file.timestamp != 0) revert FileAlreadyRegistered();
+
+        file.cidIdentifier = cidId;
+        file.sender = sender_;
+        file.signersCount = uint8(signers_.length);
+        file.timestamp = timestamp_;
+
+        for (uint256 i = 0; i < signers_.length; i++) {
+            file.signers[signers_[i]] = true;
+        }
+
+        nonce[sender_]++;
+        emit FileRegistered(cidId, sender_, uint48(timestamp_));
+    }
+
+    function registerFileSignature(
+        string calldata pieceCid_,
+        address sender_,
+        address signer_,
+        bytes20 dl3SignatureCommitment_,
+        uint256 timestamp_,
+        bytes calldata signature_
+    ) external onlyServer {
+        require(
+            validateFileSigningSignature(
+                pieceCid_,
+                sender_,
+                signer_,
+                dl3SignatureCommitment_,
+                timestamp_,
                 signature_
             ),
             InvalidSignature()
         );
 
-        fileRegistrations[cidIdentifier(pieceCid_)] = FileRegistration({
-            cidIdentifier: cidIdentifier(pieceCid_),
-            sender: sender_,
-            recipient: recipient,
-            timestamp: timestamp_
-        });
+        bytes32 cidId = cidIdentifier(pieceCid_);
+        FileRegistration storage file = _fileRegistrations[cidId];
+        if (file.timestamp == 0) revert FileNotRegistered();
+        if (file.signatures[signer_].length != 0) revert AlreadySigned();
+        file.signatures[signer_] = signature_;
 
-        emit FileRegistered(
-            cidIdentifier(pieceCid_),
-            sender_,
-            recipient,
-            uint48(timestamp_)
-        );
+        nonce[signer_]++;
+        emit FileSigned(cidId, sender_, signer_, uint48(timestamp_));
     }
 
-    function registerFileSignature(
-        address sender_,
-        string calldata pieceCid_,
-        address recipient_,
-        bytes32 signatureVisualHash_,
-        bytes20 dl3SignatureCommitment_,
-        uint256 timestamp_,
-        uint256 nonce_,
-        bytes calldata signature_
-    ) external onlyServer {
-        require(nonce_ == nonce[recipient_]++, "Invalid nonce");
-        require(
-            validateFileSigningSignature(
-                sender_,
-                pieceCid_,
-                recipient_,
-                signatureVisualHash_,
-                dl3SignatureCommitment_,
-                timestamp_,
-                nonce_,
-                signature_
-            ),
-            "Invalid signature"
-        );
+    function isSigner(bytes32 cidId, address who) external view returns (bool) {
+        return _fileRegistrations[cidId].signers[who];
+    }
 
-        bytes32 cidId = cidIdentifier(pieceCid_);
-
-        signatures[cidId] = signature_;
-
-        emit FileSigned(cidId, sender_, recipient_, uint48(timestamp_));
+    function hasSigned(
+        bytes32 cidId,
+        address who
+    ) external view returns (bool) {
+        return _fileRegistrations[cidId].signatures[who].length != 0;
     }
 
     function validateFileRegistrationSignature(
-        address sender_,
         string calldata pieceCid_,
-        address recipient_,
+        address sender_,
+        address[] calldata signers_,
         uint256 timestamp_,
-        uint256 nonce_,
         bytes calldata signature_
     ) public view returns (bool) {
         require(
             block.timestamp <= timestamp_ + SIGNATURE_VALIDITY_PERIOD,
             SignatureExpired()
         );
-        require(manager.isRegistered(sender_), "Sender not registered");
-        require(
-            manager.approvedSenders(recipient_, sender_),
-            "Sender not approved by recipient"
-        );
+
+        if (!manager.isRegistered(sender_)) revert SenderNotRegistered();
+        for (uint256 i = 0; i < signers_.length; i++) {
+            if (!manager.approvedSenders(signers_[i], sender_))
+                revert SignerNotApproved(signers_[i], sender_);
+        }
+
+        bytes20 signersCommitment = computeSignersCommitment(signers_);
 
         bytes32 cidId = cidIdentifier(pieceCid_);
         bytes32 structHash = keccak256(
@@ -154,23 +205,22 @@ contract FSFileRegistry is EIP712 {
                 REGISTER_FILE_TYPEHASH,
                 cidId,
                 sender_,
-                recipient_,
+                signersCommitment,
                 timestamp_,
-                nonce_
+                nonce[sender_]
             )
         );
         bytes32 digest = _hashTypedDataV4(structHash);
-        return ECDSA.recover(digest, signature_) == sender_;
+        address recovered = ECDSA.recover(digest, signature_);
+        return recovered == sender_;
     }
 
     function validateFileSigningSignature(
-        address sender_,
         string calldata pieceCid_,
-        address recipient_,
-        bytes32 signatureVisualHash_,
+        address sender_,
+        address signer_,
         bytes20 dl3SignatureCommitment_,
         uint256 timestamp_,
-        uint256 nonce_,
         bytes calldata signature_
     ) public view returns (bool) {
         require(
@@ -178,11 +228,11 @@ contract FSFileRegistry is EIP712 {
             SignatureExpired()
         );
 
-        FileRegistration storage file = fileRegistrations[
+        FileRegistration storage file = _fileRegistrations[
             cidIdentifier(pieceCid_)
         ];
-        require(file.recipient == recipient_, "Invalid recipient");
-        require(file.sender == sender_, "Invalid sender");
+        if (!file.signers[signer_]) revert InvalidSigner();
+        if (file.sender != sender_) revert InvalidSender();
 
         bytes32 cidId = cidIdentifier(pieceCid_);
         bytes32 structHash = keccak256(
@@ -190,21 +240,21 @@ contract FSFileRegistry is EIP712 {
                 SIGN_FILE_TYPEHASH,
                 cidId,
                 sender_,
-                recipient_,
-                signatureVisualHash_,
+                signer_,
                 dl3SignatureCommitment_,
                 timestamp_,
-                nonce_
+                nonce[signer_]
             )
         );
         bytes32 digest = _hashTypedDataV4(structHash);
-        return ECDSA.recover(digest, signature_) == recipient_;
+        address recovered = ECDSA.recover(digest, signature_);
+        return recovered == signer_;
     }
 
     function validateFileAckSignature(
-        address recipient_,
         string calldata pieceCid_,
         address sender_,
+        address viewer_,
         uint256 timestamp_,
         bytes calldata signature_
     ) public view returns (bool) {
@@ -212,24 +262,19 @@ contract FSFileRegistry is EIP712 {
             block.timestamp <= timestamp_ + SIGNATURE_VALIDITY_PERIOD,
             SignatureExpired()
         );
-        FileRegistration storage file = fileRegistrations[
+        FileRegistration storage file = _fileRegistrations[
             cidIdentifier(pieceCid_)
         ];
-        require(file.recipient == recipient_, "Invalid recipient");
-        require(file.sender == sender_, "Invalid sender");
+        if (!file.signers[viewer_]) revert InvalidSigner();
+        if (file.sender != sender_) revert InvalidSender();
 
         bytes32 cidId = cidIdentifier(pieceCid_);
         bytes32 structHash = keccak256(
-            abi.encode(
-                ACK_FILE_TYPEHASH,
-                cidId,
-                sender_,
-                recipient_,
-                timestamp_
-            )
+            abi.encode(ACK_FILE_TYPEHASH, cidId, sender_, viewer_, timestamp_)
         );
         bytes32 digest = _hashTypedDataV4(structHash);
-        return ECDSA.recover(digest, signature_) == recipient_;
+        address recovered = ECDSA.recover(digest, signature_);
+        return recovered == viewer_;
     }
 
     function cidIdentifier(
