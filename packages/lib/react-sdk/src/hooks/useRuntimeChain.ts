@@ -1,13 +1,13 @@
+import { useMemo } from "react";
 import { useFilosignContext } from "../context/FilosignProvider";
 
 export function useRuntimeChain() {
-	const { contracts } = useFilosignContext();
+	const { contracts, ready } = useFilosignContext();
 
-	if (!contracts) {
-		throw new Error(
-			"Filosign runtime are not initialized yet. did you forget to add FilosignProvider? did you forget to wait for ready?",
-		);
-	}
+	const chain = useMemo(() => {
+		if (!ready || !contracts) return null;
+		return contracts.$client.chain;
+	}, [ready, contracts]);
 
-	return contracts.$client.chain;
+	return chain;
 }

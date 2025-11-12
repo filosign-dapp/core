@@ -1,8 +1,9 @@
 import { PrivyProvider as PrivyProviderBase } from "@privy-io/react-auth";
-import { useRuntimeChain } from "@filosign/react/hooks";
+import { useStorePersist } from "../hooks/use-store";
 
 export function PrivyProvider({ children }: { children: React.ReactNode }) {
-	const runtimeChain = useRuntimeChain();
+	const { runtimeChain } = useStorePersist();
+
 	return (
 		<PrivyProviderBase
 			appId={process.env.BUN_PUBLIC_PRIVY_APP_ID!}

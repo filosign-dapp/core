@@ -26,16 +26,22 @@ import OnboardingSetPinPage from "./onboarding/set-pin";
 import OnboardingWelcomeCompletePage from "./onboarding/welcome";
 import PitchPage from "./pitch";
 import TestPage from "./test";
-import { useIsLoggedIn } from "@filosign/react/hooks";
-import { usePrivy } from "@privy-io/react-auth";
+import { useRuntimeChain } from "@filosign/react/hooks";
+import { useStorePersist } from "../lib/hooks/use-store";
+import { useEffect } from "react";
 
 const rootRoute = createRootRoute({
 	component: () => {
 		useAnalytics();
-		const isLoggedIn = useIsLoggedIn();
-		console.log({ isLoggedIn: isLoggedIn.data, status: isLoggedIn.status });
-		const { user } = usePrivy();
-		console.log({ user: user?.wallet?.address });
+		const runtimeChainFromSDK = useRuntimeChain();
+		console.log({ runtimeChainFromSDK });
+		const { runtimeChain, setRuntimeChain } = useStorePersist();
+
+		useEffect(() => {
+			if (runtimeChainFromSDK && runtimeChainFromSDK !== runtimeChain) {
+				setRuntimeChain(runtimeChainFromSDK);
+			}
+		}, [runtimeChainFromSDK]);
 
 		return (
 			<>

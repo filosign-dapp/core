@@ -96,6 +96,7 @@ export function FilosignProvider(props: FilosignConfig) {
     );
 
     if (!runtime.data) return <>Runtime Loading...</>;
+    if (!contracts) return <>Filosign not ready</>;
 
     return (
         <FilosignContext.Provider value={value}>

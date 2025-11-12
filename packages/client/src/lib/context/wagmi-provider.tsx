@@ -2,8 +2,8 @@ import {
 	createConfig,
 	WagmiProvider as WagmiProviderBase,
 } from "@privy-io/wagmi";
-import { useRuntimeChain } from "@filosign/react/hooks";
 import { http } from "wagmi";
+import { useStorePersist } from "../hooks/use-store";
 
 declare module "wagmi" {
 	interface Register {
@@ -12,7 +12,7 @@ declare module "wagmi" {
 }
 
 export function WagmiProvider({ children }: { children: React.ReactNode }) {
-	const runtimeChain = useRuntimeChain();
+	const { runtimeChain } = useStorePersist();
 
 	const config = createConfig({
 		chains: [runtimeChain],
@@ -20,5 +20,6 @@ export function WagmiProvider({ children }: { children: React.ReactNode }) {
 			[runtimeChain.id]: http(),
 		},
 	});
+
 	return <WagmiProviderBase config={config}>{children}</WagmiProviderBase>;
 }
