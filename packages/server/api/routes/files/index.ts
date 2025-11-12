@@ -147,6 +147,38 @@ export default new Hono()
 			);
 		}
 
+		await db.transaction(async (tx) => {
+			const [insertResult] = await tx
+				.insert(files)
+				.values({
+					pieceCid,
+					status: "s3",
+					sender,
+					onchainTxHash: txHash,
+					createdAt: new Date(timestamp * 1000),
+				})
+				.returning();
+			// TODO : Chcek using db if valid recipient
+			await tx.insert(fileParticipants).values([
+				{
+					filePieceCid: pieceCid,
+					wallet: sender,
+					role: "sender",
+					kemCiphertext: senderKemCiphertext,
+					encryptedEncryptionKey: senderEncryptedEncryptionKey,
+				},
+				...participants.map((p) => ({
+					filePieceCid: pieceCid,
+					wallet: p.address,
+					role: p.isSigner ? ("signer" as const) : ("viewer" as const),
+					kemCiphertext: p.kemCiphertext,
+					encryptedEncryptionKey: p.encryptedEncryptionKey,
+				})),
+			]);
+
+			return insertResult;
+		});
+
 		ds.upload(bytes).then(async (uploadResult) => {
 			await file.delete();
 
