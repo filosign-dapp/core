@@ -5,7 +5,7 @@ import {
 	type Chain,
 	encodePacked,
 	type Hex,
-	keccak256,
+	isAddress,
 	ripemd160,
 	type Transport,
 	toBytes,
@@ -83,7 +83,7 @@ export function computeCommitment(
 
 	const types = args.map((i) => determineType(i));
 	//@ts-expect-error <- this is very important here and I don't think there is a way to fix this
-	return ripemd160(keccak256(encodePacked(types, args)));
+	return ripemd160(encodePacked(types, args));
 }
 
 export async function walletKeyGen(
