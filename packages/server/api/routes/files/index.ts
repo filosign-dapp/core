@@ -280,36 +280,29 @@ export default new Hono()
 			})
 			.from(files)
 			.where(eq(files.pieceCid, pieceCid));
-		const [fileRecipient] = await db
-			.select({
-				filePieceCid: fileRecipients.filePieceCid,
-				recipientWallet: fileRecipients.recipientWallet,
-				ack: fileRecipients.ack,
-				ackedAt: fileRecipients.ackedAt,
-				kemCiphertext: fileRecipients.kemCiphertext,
-				encryptedEncryptionKey: fileRecipients.encryptedEncryptionKey,
-			})
-			.from(fileRecipients)
-			.where(eq(fileRecipients.filePieceCid, pieceCid));
 
-		if (!fileRecord || !fileRecipient) {
+		const participants = await db
+			.select({
+				wallet: fileParticipants.wallet,
+				role: fileParticipants.role,
+				kemCiphertext: fileParticipants.kemCiphertext,
+				encryptedEncryptionKey: fileParticipants.encryptedEncryptionKey,
+			})
+			.from(fileParticipants)
+			.where(eq(fileParticipants.filePieceCid, pieceCid));
+
+		if (!fileRecord) {
 			return respond.err(ctx, "File not found", 404);
 		}
-
-		if (
-			userWallet !== fileRecord.sender &&
-			userWallet !== fileRecipient.recipientWallet
-		) {
+		const participantUser = participants.find((p) => p.wallet === userWallet);
+		if (!participantUser) {
 			return respond.err(ctx, "You dont need to access this fle :D", 403);
 		}
 
 		const fileSignaturesRecord = await db
 			.select({
 				signer: fileSignatures.signer,
-				signatureVisualHash: fileSignatures.signatureVisualHash,
-				evmSignature: fileSignatures.evmSignature,
-				dl3Signature: fileSignatures.dl3Signature,
-				timestamp: fileSignatures.timestamp,
+				timestamp: fileSignatures.createdAt,
 				onchainTxHash: fileSignatures.onchainTxHash,
 			})
 			.from(fileSignatures)
