@@ -5,58 +5,57 @@ import env from "../../env";
 import db from "../db";
 import { tryCatch } from "../utils/tryCatch";
 
+// because filbeam links are very useful
 const WITH_CDN = true;
 
 export const synapse = await Synapse.create({
-	privateKey: env.EVM_PRIVATE_KEY_SYNAPSE,
-	rpcURL: RPC_URLS.calibration.websocket,
-	withCDN: WITH_CDN,
+    privateKey: env.EVM_PRIVATE_KEY_SYNAPSE,
+    rpcURL: RPC_URLS.calibration.websocket,
+    withCDN: WITH_CDN,
 });
 
 export async function getOrCreateUserDataset(walletAddress: Address) {
-	const [existing] = await db
-		.select()
-		.from(db.schema.usersDatasets)
-		.where(eq(db.schema.usersDatasets.walletAddress, walletAddress));
+    const [existing] = await db
+        .select()
+        .from(db.schema.usersDatasets)
+        .where(eq(db.schema.usersDatasets.walletAddress, walletAddress));
 
-	if (existing) {
-		const ctx = await tryCatch(
-			synapse.storage.createContext({
-				dataSetId: existing.dataSetId,
-				providerAddress: existing.providerAddress,
-				metadata: { filosign_user: walletAddress },
-			}),
-		);
+    if (existing) {
+        const ctx = await tryCatch(
+            synapse.storage.createContext({
+                dataSetId: existing.dataSetId,
+                providerAddress: existing.providerAddress,
+                metadata: { filosign_user: walletAddress },
+            }),
+        );
 
-		if (ctx.error) {
-			throw new Error(
-				"Fail to create synapse context for existing user dataset",
-				ctx.error,
-			);
-		}
+        if (ctx.error) {
+            throw new Error(
+                "Fail to create synapse context for existing user dataset",
+                ctx.error,
+            );
+        }
 
-		return ctx.data;
-	}
+        return ctx.data;
+    }
 
-	const ctx = await tryCatch(
-		synapse.storage.createContext({
-			metadata: { filosign_user: walletAddress },
-		}),
-	);
+    const ctx = await tryCatch(
+        synapse.storage.createContext({
+            metadata: { filosign_user: walletAddress },
+        }),
+    );
 
-	if (ctx.error) {
-		throw new Error("Fail to create synapse context for new user dataset");
-	}
-	// if (!ctx.data.dataSetId) {
-	// 	console.error("ctx.data:", ctx.data);
-	// 	throw new Error("No dataSetId returned from synapse fo some reason");
-	// }
+    if (ctx.error) {
+        throw new Error("Fail to create synapse context for new user dataset");
+    }
 
-	// await db.insert(db.schema.usersDatasets).values({
-	// 	walletAddress,
-	// 	dataSetId: ctx.data.dataSetId,
-	// 	providerAddress: ctx.data.provider.serviceProvider,
-	// });
+    if (ctx.data.dataSetId !== undefined) {
+        await db.insert(db.schema.usersDatasets).values({
+            walletAddress,
+            dataSetId: ctx.data.dataSetId,
+            providerAddress: ctx.data.provider.serviceProvider,
+        });
+    }
 
-	return ctx.data;
+    return ctx.data;
 }
