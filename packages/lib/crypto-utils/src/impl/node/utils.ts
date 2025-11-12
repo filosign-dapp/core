@@ -63,6 +63,11 @@ export function generateRegisterChallenge(
 	return challenge;
 }
 
+export function computeSignersCommitment(signers: Address[]) {
+	const sortedSigners = signers.map((s) => getAddress(s)).sort();
+	return ripemd160(encodePacked(["address[]"], [sortedSigners]));
+}
+
 export function computeCommitment(
 	args: (string | number | bigint)[] | readonly (string | number | bigint)[],
 ) {
