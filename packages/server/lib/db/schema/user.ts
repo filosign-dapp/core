@@ -49,3 +49,11 @@ export const userInvites = t.pgTable("user_invites", {
 
 	...timestamps,
 });
+
+export const userSignatures = t.pgTable("user_signatures", {
+	id: t.uuid().primaryKey().defaultRandom(),
+	walletAddress: tEvmAddress().notNull(),
+	data: t.jsonb().notNull(),
+
+	...timestamps,
+});
