@@ -3,7 +3,6 @@ import { SignOutIcon } from "@phosphor-icons/react";
 import { usePrivy } from "@privy-io/react-auth";
 import { Link } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
-import { useWalletClient } from "wagmi";
 import { Button } from "@/src/lib/components/ui/button";
 
 export default function ConnectButton() {
@@ -14,7 +13,6 @@ export default function ConnectButton() {
 		logout: logoutPrivy,
 	} = usePrivy();
 	const isRegistered = useIsRegistered();
-	const { data: walletClient } = useWalletClient();
 	const logoutFilosign = useLogout();
 
 	// Determine button state for smooth transitions
