@@ -486,6 +486,7 @@ export const definitions = {
                             "name": "extensions",
                             "type": "uint256[]"
                         }
+
                     ],
                     "stateMutability": "view",
                     "type": "function"
