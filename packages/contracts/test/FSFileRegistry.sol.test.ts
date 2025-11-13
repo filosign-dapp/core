@@ -1,43 +1,43 @@
-import { loadFixture } from "@nomicfoundation/hardhat-toolbox-viem/network-helpers";
-import { expect } from "chai";
-import hre from "hardhat";
-import { describe, it } from "mocha";
-import { keccak256, parseSignature, publicActions, toBytes } from "viem";
-import { computeCidIdentifier, parsePieceCid } from "../services/utils";
+// import { loadFixture } from "@nomicfoundation/hardhat-toolbox-viem/network-helpers";
+// import { expect } from "chai";
+// import hre from "hardhat";
+// import { describe, it } from "mocha";
+// import { keccak256, parseSignature, publicActions, toBytes } from "viem";
+// import { computeCidIdentifier, parsePieceCid } from "../services/utils";
 
-const samplePieceCid =
-	"bafkzcibcbub2cd46abwvhoohwhmmjugyjibda32vn4a4qlcrv5dc76s24s67qai";
+// const samplePieceCid =
+// 	"bafkzcibcbub2cd46abwvhoohwhmmjugyjibda32vn4a4qlcrv5dc76s24s67qai";
 
-async function setupFixture() {
-	const [deployer, sender, signer1, signer2, other] =
-		await hre.viem.getWalletClients();
-	const admin = (await hre.viem.getTestClient()).extend(publicActions);
+// async function setupFixture() {
+// 	const [deployer, sender, signer1, signer2, other] =
+// 		await hre.viem.getWalletClients();
+// 	const admin = (await hre.viem.getTestClient()).extend(publicActions);
 
-	const manager = await hre.viem.deployContract("FSManager");
-	const fileRegistryAddress = await manager.read.fileRegistry();
-	const fileRegistry = await hre.viem.getContractAt(
-		"FSFileRegistry",
-		fileRegistryAddress,
-	);
+// 	const manager = await hre.viem.deployContract("FSManager");
+// 	const fileRegistryAddress = await manager.read.fileRegistry();
+// 	const fileRegistry = await hre.viem.getContractAt(
+// 		"FSFileRegistry",
+// 		fileRegistryAddress,
+// 	);
 
-	await manager.write.approveSender([sender.account.address], {
-		account: signer1.account,
-	});
-	await manager.write.approveSender([sender.account.address], {
-		account: signer2.account,
-	});
+// 	await manager.write.approveSender([sender.account.address], {
+// 		account: signer1.account,
+// 	});
+// 	await manager.write.approveSender([sender.account.address], {
+// 		account: signer2.account,
+// 	});
 
-	return {
-		deployer,
-		sender,
-		signer1,
-		signer2,
-		other,
-		manager,
-		fileRegistry,
-		admin,
-	};
-}
+// 	return {
+// 		deployer,
+// 		sender,
+// 		signer1,
+// 		signer2,
+// 		other,
+// 		manager,
+// 		fileRegistry,
+// 		admin,
+// 	};
+// }
 
 describe("FSFileRegistry", () => {
 	//     it("registers a file successfully when sender is approved", async () => {
