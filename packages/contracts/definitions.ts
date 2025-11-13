@@ -967,7 +967,7 @@ export const definitions = {
   },
   "0x4cb2f": {
     "FSManager": {
-      "address": "0x6c7e54120dad8be16b367d2b4f5141765848eb21",
+      "address": "0xe5833ffc6fbfa7932bcc2d48ab543904f9e30fbc",
       "abi": [
         {
           "inputs": [],
@@ -1187,7 +1187,7 @@ export const definitions = {
       ]
     },
     "FSFileRegistry": {
-      "address": "0xFe8730de748691a7A31E5b489BF88Fe3BDEf3C25",
+      "address": "0x18841Cd5240612017056Abc7dC0621FACA94Bf6D",
       "abi": [
         {
           "inputs": [],
@@ -1677,7 +1677,13 @@ export const definitions = {
             }
           ],
           "name": "validateFileAckSignature",
-          "outputs": [],
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
           "stateMutability": "view",
           "type": "function"
         },
@@ -1710,7 +1716,13 @@ export const definitions = {
             }
           ],
           "name": "validateFileRegistrationSignature",
-          "outputs": [],
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
           "stateMutability": "view",
           "type": "function"
         },
@@ -1748,14 +1760,20 @@ export const definitions = {
             }
           ],
           "name": "validateFileSigningSignature",
-          "outputs": [],
+          "outputs": [
+            {
+              "internalType": "bool",
+              "name": "",
+              "type": "bool"
+            }
+          ],
           "stateMutability": "view",
           "type": "function"
         }
       ]
     },
     "FSKeyRegistry": {
-      "address": "0xdFd00cd59E8E4225e62d94e2001a0D5D16F23d74",
+      "address": "0x2377DEAaf9462557B9C4E1d9F51bb9aEF27F1436",
       "abi": [
         {
           "inputs": [],
