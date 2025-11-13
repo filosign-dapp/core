@@ -105,10 +105,13 @@ function TestLogin(props: { notify: NotifierFn }) {
     }, [isLoggedIn.data]);
 
     useEffectOnce(() => {
+        notify("login");
+    }, [login.isSuccess]);
+    useEffectOnce(() => {
         if (isLoggedIn.data === true) {
             notify("login");
         }
-    }, [login.isSuccess || isLoggedIn.data]);
+    }, [isLoggedIn.data]);
 
     return (
         <div className="p-4 space-y-2">
