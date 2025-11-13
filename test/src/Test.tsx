@@ -155,10 +155,14 @@ function TestApproveSender(props: { notify: NotifierFn }) {
     }, [canReceiveFrom.data]);
 
     useEffectOnce(() => {
-        if (canReceiveFrom.data || approveSender.isSuccess) {
+        if (canReceiveFrom.data) {
             notify("approve-sender");
         }
-    }, [canReceiveFrom.data, approveSender.isSuccess]);
+    }, [canReceiveFrom.data]);
+
+    useEffectOnce(() => {
+        notify("approve-sender");
+    }, [approveSender.isSuccess])
 
     return (
         <div className="p-4 space-y-2">
@@ -189,6 +193,9 @@ function TestCheckCanSendTo(props: { notify: NotifierFn }) {
             notify("check-send");
         }
     }, [canSendTo.data]);
+    useEffectOnce(() => {
+        notify("check-send");
+    }, [canSendTo.isSuccess]);
 
     return (
         <div className="p-4 space-y-2">
