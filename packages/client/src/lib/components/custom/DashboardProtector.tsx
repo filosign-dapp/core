@@ -1,5 +1,9 @@
-import { useLogin, useIsRegistered, useIsLoggedIn } from "@filosign/react/hooks";
 import { useFilosignContext } from "@filosign/react";
+import {
+	useIsLoggedIn,
+	useIsRegistered,
+	useLogin,
+} from "@filosign/react/hooks";
 import { CaretRightIcon } from "@phosphor-icons/react";
 import { usePrivy } from "@privy-io/react-auth";
 import { useQueryClient } from "@tanstack/react-query";
@@ -55,12 +59,7 @@ export default function DashboardProtector({
 		) {
 			navigate({ to: "/" });
 		}
-	}, [
-		ready,
-		authenticated,
-		isRegistered.data,
-		isLoggedIn.data,
-	]);
+	}, [ready, authenticated, isRegistered.data, isLoggedIn.data]);
 
 	const handlePinSubmit = async () => {
 		if (pin.length !== 6) return;
@@ -94,7 +93,8 @@ export default function DashboardProtector({
 
 	// Show loading while checking auth status
 	// Allow proceeding if user is registered and login check isn't actively failing
-	const shouldShowLoader = !ready ||
+	const shouldShowLoader =
+		!ready ||
 		isRegistered.isPending ||
 		(!isLoggedIn.data && isLoggedIn.isPending && !isLoggedIn.isError);
 

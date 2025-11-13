@@ -28,7 +28,8 @@ export function NotificationItemCard({
 }: NotificationItemCardProps) {
 	const variantStyles = {
 		default: "bg-card border-border",
-		warning: "bg-orange-50 dark:bg-orange-950/20 border-orange-200 dark:border-orange-800",
+		warning:
+			"bg-orange-50 dark:bg-orange-950/20 border-orange-200 dark:border-orange-800",
 		info: "bg-accent/50 border-accent/20",
 	};
 

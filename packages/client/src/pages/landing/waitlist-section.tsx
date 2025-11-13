@@ -251,13 +251,13 @@ export default function WaitlistSection() {
 						animate={
 							waitlistInView
 								? {
-									y: 0,
-									opacity: 1,
-								}
+										y: 0,
+										opacity: 1,
+									}
 								: {
-									y: 100,
-									opacity: 0,
-								}
+										y: 100,
+										opacity: 0,
+									}
 						}
 						exit={{
 							y: -100,

@@ -1,4 +1,11 @@
 import {
+	useIsLoggedIn,
+	useIsRegistered,
+	useLogin,
+	useLogout,
+	useStoredKeygenData,
+} from "@filosign/react/hooks";
+import {
 	CheckCircleIcon,
 	KeyIcon,
 	SpinnerIcon,
@@ -15,7 +22,6 @@ import {
 	CardHeader,
 	CardTitle,
 } from "../../../lib/components/ui/card";
-import { useIsLoggedIn, useIsRegistered, useLogout, useLogin, useStoredKeygenData } from "@filosign/react/hooks";
 
 export function AuthenticationTest() {
 	const { user, login: loginPrivy, logout: logoutPrivy } = usePrivy();
@@ -198,7 +204,8 @@ export function AuthenticationTest() {
 							</pre>
 						) : (
 							<div className="text-muted-foreground">
-								No keygen data found. Register with Filosign to generate cryptographic keys.
+								No keygen data found. Register with Filosign to generate
+								cryptographic keys.
 							</div>
 						)}
 					</div>

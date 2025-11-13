@@ -86,7 +86,11 @@ export default function SignatureChoose({
 	const [selectedId, setSelectedId] = useState<string | null>(
 		selectedSignatureId || null,
 	);
-	const signatureOptions = generateSignatureStyles(firstName, lastName, initials);
+	const signatureOptions = generateSignatureStyles(
+		firstName,
+		lastName,
+		initials,
+	);
 
 	const handleSelect = (option: SignatureOption) => {
 		setSelectedId(option.id);

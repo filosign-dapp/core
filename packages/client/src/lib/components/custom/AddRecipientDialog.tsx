@@ -1,9 +1,5 @@
 import { useRequestApproval } from "@filosign/react/hooks";
-import {
-	ChatCircleIcon,
-	PlusIcon,
-	WalletIcon,
-} from "@phosphor-icons/react";
+import { ChatCircleIcon, PlusIcon, WalletIcon } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { isAddress } from "viem";
@@ -113,7 +109,6 @@ export default function AddRecipientDialog({
 							rows={3}
 						/>
 					</div>
-
 				</div>
 
 				<div className="flex justify-end gap-3">

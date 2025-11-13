@@ -14,52 +14,50 @@ import { PrivyProvider } from "./lib/context/privy-provider";
 import { WagmiProvider } from "./lib/context/wagmi-provider";
 
 // Root element
-const rootElement = document.getElementById("root")!;
+const rootElement = document.getElementById("root");
 if (!rootElement) throw new Error("Failed to find the root element");
 
 // App
 const App = () => {
-    return (
-        <StrictMode>
-            <ErrorBoundary>
-                <ThemeProvider defaultTheme="dark" storageKey="theme">
-                    <QueryClientProvider>
-                        <PrivyProvider>
-                            <WagmiProvider>
-                                <FilosignProvider>
-                                    <IconContext.Provider
-                                        value={{
-                                            mirrored: false,
-                                            weight: "regular",
-                                        }}
-                                    >
-                                        <RouterProvider router={router} />
-                                        <Toaster position="bottom-right" />
-                                    </IconContext.Provider>
-                                </FilosignProvider>
-                            </WagmiProvider>
-                        </PrivyProvider>
-                    </QueryClientProvider>
-                </ThemeProvider>
-            </ErrorBoundary>
-        </StrictMode>
-    );
+	return (
+		<StrictMode>
+			<ErrorBoundary>
+				<ThemeProvider defaultTheme="dark" storageKey="theme">
+					<QueryClientProvider>
+						<PrivyProvider>
+							<WagmiProvider>
+								<FilosignProvider>
+									<IconContext.Provider
+										value={{
+											mirrored: false,
+											weight: "regular",
+										}}
+									>
+										<RouterProvider router={router} />
+										<Toaster position="bottom-right" />
+									</IconContext.Provider>
+								</FilosignProvider>
+							</WagmiProvider>
+						</PrivyProvider>
+					</QueryClientProvider>
+				</ThemeProvider>
+			</ErrorBoundary>
+		</StrictMode>
+	);
 };
 const app = <App />;
 
 window.Buffer = window.Buffer || BufferI;
 
-
 //@ts-expect-error
 BigInt.prototype.toJSON = function () {
-    return this.toString();
+	return this.toString();
 };
-
 
 // Hot module replacement
 if (import.meta.hot) {
-    const root = (import.meta.hot.data.root ??= createRoot(rootElement));
-    root.render(app);
+	const root = import.meta.hot.data.root ?? createRoot(rootElement);
+	root.render(app);
 } else {
-    createRoot(rootElement).render(app);
+	createRoot(rootElement).render(app);
 }

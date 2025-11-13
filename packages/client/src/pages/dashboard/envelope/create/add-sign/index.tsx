@@ -38,11 +38,11 @@ export default function AddSignaturePage() {
 	// Convert createForm documents to Document format
 	const documents: Document[] = createForm?.documents?.length
 		? createForm.documents.map((doc) => ({
-			id: doc.id,
-			name: doc.name,
-			url: doc.dataUrl || "",
-			pages: 1, // For now, assume 1 page per document
-		}))
+				id: doc.id,
+				name: doc.name,
+				url: doc.dataUrl || "",
+				pages: 1, // For now, assume 1 page per document
+			}))
 		: mockDocuments;
 
 	// Set initial document if not set
@@ -145,13 +145,14 @@ export default function AddSignaturePage() {
 
 				// Get signature positions for this document
 				const documentSignatures = signatureFields.filter(
-					field => field.documentId === doc.id && field.type === "signature"
+					(field) => field.documentId === doc.id && field.type === "signature",
 				);
 
 				// Use the first signature field position, or default if none
-				const signaturePosition = documentSignatures.length > 0
-					? { top: documentSignatures[0].y, left: documentSignatures[0].x }
-					: { top: 10, left: 10 }; // Default position
+				const signaturePosition =
+					documentSignatures.length > 0
+						? { top: documentSignatures[0].y, left: documentSignatures[0].x }
+						: { top: 10, left: 10 }; // Default position
 
 				const sendData = {
 					bytes: fileData,
@@ -163,7 +164,7 @@ export default function AddSignaturePage() {
 					metadata: {
 						name: doc.name,
 						mimeType: doc.type,
-					}
+					},
 				};
 
 				console.log("Sending document:", {
@@ -171,7 +172,7 @@ export default function AddSignaturePage() {
 					documentSize: fileData.length,
 					signaturePosition,
 					recipientAddress: recipientProfile.data!.walletAddress,
-					sendData: { ...sendData, bytes: `[${fileData.length} bytes]` } // Don't log the actual bytes
+					sendData: { ...sendData, bytes: `[${fileData.length} bytes]` }, // Don't log the actual bytes
 				});
 
 				sendPromises.push(sendFile.mutateAsync(sendData));
@@ -267,7 +268,7 @@ export default function AddSignaturePage() {
 									{/* Document preview */}
 									{doc.url ? (
 										doc.url.startsWith("data:application/pdf") ||
-											doc.name?.toLowerCase().endsWith(".pdf") ? (
+										doc.name?.toLowerCase().endsWith(".pdf") ? (
 											<div className="absolute inset-0 flex items-center justify-center bg-red-50">
 												<div className="text-xs text-destructive font-medium">
 													PDF

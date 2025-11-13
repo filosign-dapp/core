@@ -47,7 +47,12 @@ export default new Hono()
 
 	.put("/", authenticated, async (ctx) => {
 		const wallet = ctx.var.userWallet;
-		const { email: emailRaw, username: usernameRaw, firstName: firstNameRaw, lastName: lastNameRaw } = await ctx.req.json();
+		const {
+			email: emailRaw,
+			username: usernameRaw,
+			firstName: firstNameRaw,
+			lastName: lastNameRaw,
+		} = await ctx.req.json();
 
 		if (emailRaw !== undefined) {
 			if (typeof emailRaw !== "string" || !emailRaw.includes("@")) {
@@ -68,13 +73,29 @@ export default new Hono()
 			}
 		}
 		if (firstNameRaw !== undefined) {
-			if (typeof firstNameRaw !== "string" || firstNameRaw.trim().length < 1 || firstNameRaw.length > 50) {
-				return respond.err(ctx, "First name must be between 1 and 50 characters", 400);
+			if (
+				typeof firstNameRaw !== "string" ||
+				firstNameRaw.trim().length < 1 ||
+				firstNameRaw.length > 50
+			) {
+				return respond.err(
+					ctx,
+					"First name must be between 1 and 50 characters",
+					400,
+				);
 			}
 		}
 		if (lastNameRaw !== undefined) {
-			if (typeof lastNameRaw !== "string" || lastNameRaw.trim().length < 1 || lastNameRaw.length > 50) {
-				return respond.err(ctx, "Last name must be between 1 and 50 characters", 400);
+			if (
+				typeof lastNameRaw !== "string" ||
+				lastNameRaw.trim().length < 1 ||
+				lastNameRaw.length > 50
+			) {
+				return respond.err(
+					ctx,
+					"Last name must be between 1 and 50 characters",
+					400,
+				);
 			}
 		}
 

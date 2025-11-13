@@ -1,4 +1,10 @@
-import { useAckFile, useFileInfo, useSendFile, useSignFile, useViewFile } from "@filosign/react/hooks";
+import {
+	useAckFile,
+	useFileInfo,
+	useSendFile,
+	useSignFile,
+	useViewFile,
+} from "@filosign/react/hooks";
 import {
 	CheckCircleIcon,
 	DownloadIcon,
@@ -23,7 +29,9 @@ import { Label } from "../../../lib/components/ui/label";
 export function FileTest() {
 	// New file hooks
 	const sendFile = useSendFile();
-	const [pieceCidForInfo, setPieceCidForInfo] = useState<string | undefined>(undefined);
+	const [pieceCidForInfo, setPieceCidForInfo] = useState<string | undefined>(
+		undefined,
+	);
 	const fileInfo = useFileInfo({ pieceCid: pieceCidForInfo });
 	const viewFile = useViewFile();
 	const ackFile = useAckFile();
@@ -40,7 +48,10 @@ export function FileTest() {
 	const [pieceCidToSign, setPieceCidToSign] = useState("");
 	const [signatureBytes, setSignatureBytes] = useState("");
 	const [encryptedEncryptionKey, setEncryptedEncryptionKey] = useState("");
-	const [signaturePosition, setSignaturePosition] = useState({ top: 10, left: 20 });
+	const [signaturePosition, setSignaturePosition] = useState({
+		top: 10,
+		left: 20,
+	});
 
 	// File metadata states
 	const [fileTags, setFileTags] = useState("");
@@ -57,7 +68,12 @@ export function FileTest() {
 	} | null>(null);
 
 	const handleFileUpload = async () => {
-		if (!fileToUpload || !recipientAddress.trim() || !recipientEncryptionKey.trim()) return;
+		if (
+			!fileToUpload ||
+			!recipientAddress.trim() ||
+			!recipientEncryptionKey.trim()
+		)
+			return;
 
 		try {
 			const fileData = new Uint8Array(await fileToUpload.arrayBuffer());
@@ -108,7 +124,12 @@ export function FileTest() {
 	}, [fileInfo.data]);
 
 	const handleDownloadFile = async () => {
-		if (!pieceCidToView.trim() || !kemCiphertext.trim() || !encryptedEncryptionKey.trim()) return;
+		if (
+			!pieceCidToView.trim() ||
+			!kemCiphertext.trim() ||
+			!encryptedEncryptionKey.trim()
+		)
+			return;
 
 		try {
 			const fileData = await viewFile.mutateAsync({
@@ -143,7 +164,10 @@ export function FileTest() {
 
 		try {
 			// Convert hex string to Uint8Array for signing
-			const signatureBytesArray = new Uint8Array(signatureBytes.match(/.{1,2}/g)?.map(byte => parseInt(byte, 16)) || []);
+			const signatureBytesArray = new Uint8Array(
+				signatureBytes.match(/.{1,2}/g)?.map((byte) => parseInt(byte, 16)) ||
+					[],
+			);
 
 			await signFile.mutateAsync({
 				pieceCid: pieceCidToSign,
@@ -156,7 +180,6 @@ export function FileTest() {
 			console.error("Failed to sign file", error);
 		}
 	};
-
 
 	const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const file = event.target.files?.[0];
@@ -206,7 +229,9 @@ export function FileTest() {
 							/>
 						</div>
 						<div>
-							<Label htmlFor="recipient-encryption-key">Recipient Encryption Public Key</Label>
+							<Label htmlFor="recipient-encryption-key">
+								Recipient Encryption Public Key
+							</Label>
 							<Input
 								id="recipient-encryption-key"
 								placeholder="Enter recipient's encryption public key..."
@@ -292,7 +317,8 @@ export function FileTest() {
 						3. Get File Info
 					</CardTitle>
 					<CardDescription>
-						Get metadata and information about a file by its piece CID (populates download fields)
+						Get metadata and information about a file by its piece CID
+						(populates download fields)
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="space-y-4">
@@ -327,7 +353,8 @@ export function FileTest() {
 						4. Download File
 					</CardTitle>
 					<CardDescription>
-						Download and decrypt file content using the piece CID and KEM ciphertext
+						Download and decrypt file content using the piece CID and KEM
+						ciphertext
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="space-y-4">
@@ -351,7 +378,9 @@ export function FileTest() {
 							/>
 						</div>
 						<div>
-							<Label htmlFor="encrypted-encryption-key">Encrypted Encryption Key</Label>
+							<Label htmlFor="encrypted-encryption-key">
+								Encrypted Encryption Key
+							</Label>
 							<Input
 								id="encrypted-encryption-key"
 								placeholder="Enter encrypted encryption key..."
@@ -423,12 +452,17 @@ export function FileTest() {
 								onChange={(e) => setSignatureBytes(e.target.value)}
 							/>
 							<p className="text-xs text-muted-foreground mt-1">
-								Enter your visual signature as hex bytes (e.g., from drawing or text)
+								Enter your visual signature as hex bytes (e.g., from drawing or
+								text)
 							</p>
 						</div>
 						<Button
 							onClick={handleSignFile}
-							disabled={!pieceCidToSign.trim() || !signatureBytes.trim() || signFile.isPending}
+							disabled={
+								!pieceCidToSign.trim() ||
+								!signatureBytes.trim() ||
+								signFile.isPending
+							}
 							className="w-full"
 							size="lg"
 						>
@@ -442,7 +476,6 @@ export function FileTest() {
 					</div>
 				</CardContent>
 			</Card>
-
 
 			{/* File Info Display */}
 			{fileInfo.data && (
@@ -488,20 +521,27 @@ export function FileTest() {
 							<div className="grid grid-cols-2 gap-4">
 								<div>
 									<Label className="text-sm font-medium">File Name</Label>
-									<p className="text-sm text-muted-foreground">{downloadedFile.fileName}</p>
+									<p className="text-sm text-muted-foreground">
+										{downloadedFile.fileName}
+									</p>
 								</div>
 								<div>
 									<Label className="text-sm font-medium">MIME Type</Label>
-									<p className="text-sm text-muted-foreground">{downloadedFile.fileMIME}</p>
+									<p className="text-sm text-muted-foreground">
+										{downloadedFile.fileMIME}
+									</p>
 								</div>
 								<div>
 									<Label className="text-sm font-medium">File Size</Label>
-									<p className="text-sm text-muted-foreground">{downloadedFile.fileBytes.length} bytes</p>
+									<p className="text-sm text-muted-foreground">
+										{downloadedFile.fileBytes.length} bytes
+									</p>
 								</div>
 								<div>
 									<Label className="text-sm font-medium">Tags</Label>
 									<p className="text-sm text-muted-foreground">
-										{downloadedFile.fileTags && downloadedFile.fileTags.length > 0
+										{downloadedFile.fileTags &&
+										downloadedFile.fileTags.length > 0
 											? downloadedFile.fileTags.join(", ")
 											: "No tags"}
 									</p>
@@ -510,9 +550,13 @@ export function FileTest() {
 							<div className="pt-2">
 								<Button
 									onClick={() => {
-										const arrayBuffer = new ArrayBuffer(downloadedFile.fileBytes.length);
+										const arrayBuffer = new ArrayBuffer(
+											downloadedFile.fileBytes.length,
+										);
 										new Uint8Array(arrayBuffer).set(downloadedFile.fileBytes);
-										const blob = new Blob([arrayBuffer], { type: downloadedFile.fileMIME });
+										const blob = new Blob([arrayBuffer], {
+											type: downloadedFile.fileMIME,
+										});
 										const url = URL.createObjectURL(blob);
 										const a = document.createElement("a");
 										a.href = url;

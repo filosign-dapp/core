@@ -99,15 +99,17 @@ export default function PricingSection() {
 					/>
 					<button
 						onClick={() => setBilledYearly(false)}
-						className={`relative z-10 flex-1 rounded-full py-2 text-center text-sm font-medium transition-colors ${!billedYearly ? "text-foreground" : "text-background"
-							}`}
+						className={`relative z-10 flex-1 rounded-full py-2 text-center text-sm font-medium transition-colors ${
+							!billedYearly ? "text-foreground" : "text-background"
+						}`}
 					>
 						Monthly
 					</button>
 					<button
 						onClick={() => setBilledYearly(true)}
-						className={`relative z-10 flex-1 rounded-full py-2 text-center text-sm font-medium transition-colors ${billedYearly ? "text-foreground" : "text-background"
-							}`}
+						className={`relative z-10 flex-1 rounded-full py-2 text-center text-sm font-medium transition-colors ${
+							billedYearly ? "text-foreground" : "text-background"
+						}`}
 					>
 						Yearly
 					</button>

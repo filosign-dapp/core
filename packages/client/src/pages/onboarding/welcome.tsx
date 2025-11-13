@@ -1,7 +1,8 @@
+import { useIsLoggedIn, useUpdateUserProfile } from "@filosign/react/hooks";
 import { CaretRightIcon, SpinnerIcon } from "@phosphor-icons/react";
 import { useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
 import { motion } from "motion/react";
+import { useEffect, useState } from "react";
 import Logo from "@/src/lib/components/custom/Logo";
 import { Button } from "@/src/lib/components/ui/button";
 import {
@@ -12,7 +13,6 @@ import {
 	CardTitle,
 } from "@/src/lib/components/ui/card";
 import { useStorePersist } from "@/src/lib/hooks/use-store";
-import { useIsLoggedIn, useUpdateUserProfile } from "@filosign/react/hooks";
 
 export default function OnboardingWelcomeCompletePage() {
 	const [userName, setUserName] = useState("");
@@ -60,9 +60,7 @@ export default function OnboardingWelcomeCompletePage() {
 				<Card className="w-full">
 					<CardHeader>
 						<CardTitle>All Set, {userName.split(" ")[0]}!</CardTitle>
-						<CardDescription>
-							Your Filosign account is ready.
-						</CardDescription>
+						<CardDescription>Your Filosign account is ready.</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-4">
 						<Button

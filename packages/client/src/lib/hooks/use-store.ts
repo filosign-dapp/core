@@ -1,8 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { CreateForm } from "@/src/pages/dashboard/envelope/create/types";
-import type { Chain } from "viem";
-import { hardhat } from "viem/chains";
 
 interface OnboardingForm {
 	firstName: string;
@@ -30,15 +28,11 @@ interface StorePersist {
 
 	sidebar: SidebarState;
 	setSidebar: (sidebar: Partial<SidebarState>) => void;
-
-	runtimeChain: Chain;
-	setRuntimeChain: (chain: Chain) => void;
-	clearRuntimeChain: () => void;
 }
 
 export const useStorePersist = create<StorePersist>()(
 	persist(
-		(set, get) => ({
+		(set) => ({
 			createForm: null,
 			setCreateForm: (form: CreateForm) => set({ createForm: form }),
 			clearCreateForm: () => set({ createForm: null }),
@@ -76,10 +70,6 @@ export const useStorePersist = create<StorePersist>()(
 				set((state) => ({
 					sidebar: { ...state.sidebar, ...updates },
 				})),
-
-			runtimeChain: hardhat,
-			setRuntimeChain: (chain: Chain) => set({ runtimeChain: chain }),
-			clearRuntimeChain: () => set({ runtimeChain: hardhat }),
 		}),
 		{ name: "zustand" },
 	),

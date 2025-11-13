@@ -1,7 +1,7 @@
 {
-  "drips": {
-    "filecoin": {
-      "ownedBy": "0x7Fd1BF064534336Cf7eEB652a2bBAbc52dE1aCb3"
-    }
-  }
+	"drips": {
+		"filecoin": {
+			"ownedBy": "0x7Fd1BF064534336Cf7eEB652a2bBAbc52dE1aCb3"
+		}
+	}
 }

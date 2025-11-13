@@ -1,3 +1,4 @@
+import { useReceivedFiles, useSentFiles } from "@filosign/react/hooks";
 import {
 	FileTextIcon,
 	FunnelIcon,
@@ -6,7 +7,6 @@ import {
 	MagnifyingGlassIcon,
 	PlusIcon,
 } from "@phosphor-icons/react";
-import { useSentFiles, useReceivedFiles } from "@filosign/react/hooks";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { useState } from "react";

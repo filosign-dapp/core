@@ -12,7 +12,6 @@ import { motion } from "motion/react";
 import * as React from "react";
 import { Image } from "@/src/lib/components/custom/Image";
 import { Button } from "@/src/lib/components/ui/button";
-import { copyToClipboard } from "@/src/lib/utils/utils";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -21,6 +20,7 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/src/lib/components/ui/dropdown-menu";
+import { copyToClipboard } from "@/src/lib/utils/utils";
 
 export function UserDropdown() {
 	const [isOpen, setIsOpen] = React.useState(false);
@@ -43,11 +43,11 @@ export function UserDropdown() {
 	// Use userProfile data for display name, fallback to Privy data
 	const displayName = userProfile
 		? userProfile.username ||
-		(userProfile.firstName && userProfile.lastName
-			? `${userProfile.firstName} ${userProfile.lastName}`
-			: userProfile.firstName || userProfile.lastName) ||
-		userProfile.email ||
-		"User"
+			(userProfile.firstName && userProfile.lastName
+				? `${userProfile.firstName} ${userProfile.lastName}`
+				: userProfile.firstName || userProfile.lastName) ||
+			userProfile.email ||
+			"User"
 		: user?.google?.name || user?.email?.address || "User";
 
 	const walletAddress = user?.wallet?.address;

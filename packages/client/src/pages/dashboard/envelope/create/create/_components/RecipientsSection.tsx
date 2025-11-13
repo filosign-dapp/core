@@ -33,7 +33,6 @@ import { Textarea } from "@/src/lib/components/ui/textarea";
 import { cn } from "@/src/lib/utils/utils";
 import type { EnvelopeForm } from "../../types";
 
-
 interface RecipientsSectionProps {
 	control: Control<EnvelopeForm>;
 }
@@ -120,12 +119,14 @@ export default function RecipientsSection({ control }: RecipientsSectionProps) {
 														No recipients available yet
 													</p>
 													<p className="text-xs text-muted-foreground">
-														Send sharing requests to add people you can send documents to.
+														Send sharing requests to add people you can send
+														documents to.
 													</p>
 												</div>
 											}
 										>
-											{acceptedPeople?.people && acceptedPeople.people.length > 0 ? (
+											{acceptedPeople?.people &&
+											acceptedPeople.people.length > 0 ? (
 												acceptedPeople.people.map((person) => (
 													<SelectItem
 														key={person.walletAddress}
@@ -144,8 +145,13 @@ export default function RecipientsSection({ control }: RecipientsSectionProps) {
 												))
 											) : (
 												<div className="flex flex-col items-center justify-center py-6 px-4 text-muted-foreground">
-													<UsersThree className="w-8 h-8 mb-2 opacity-50" weight="duotone" />
-													<p className="text-sm font-medium">No recipients added</p>
+													<UsersThree
+														className="w-8 h-8 mb-2 opacity-50"
+														weight="duotone"
+													/>
+													<p className="text-sm font-medium">
+														No recipients added
+													</p>
 													<p className="text-xs mt-1 text-center">
 														Add a recipient below to get started
 													</p>

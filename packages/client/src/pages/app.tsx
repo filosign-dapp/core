@@ -9,6 +9,7 @@ import DashboardProtector from "../lib/components/custom/DashboardProtector";
 import { NotFound } from "../lib/components/custom/NotFound";
 import { useAnalytics } from "../lib/hooks/use-analytics";
 import DashboardPage from "./dashboard";
+import ConnectionsPage from "./dashboard/connections";
 import DocumentAllPage from "./dashboard/document/all";
 import DocumentFolderPage from "./dashboard/document/folder/$folderId";
 import SignDocumentPage from "./dashboard/document/sign";
@@ -17,7 +18,6 @@ import CreateEnvelopePage from "./dashboard/envelope/create/create";
 import FilesPage from "./dashboard/files";
 import PermissionsPage from "./dashboard/permissions";
 import ProfilePage from "./dashboard/profile";
-import ConnectionsPage from "./dashboard/connections";
 import CreateNewSignaturePage from "./dashboard/signature/create";
 import LandingPage from "./landing";
 import OnboardingWelcomePage from "./onboarding";
@@ -26,28 +26,11 @@ import OnboardingSetPinPage from "./onboarding/set-pin";
 import OnboardingWelcomeCompletePage from "./onboarding/welcome";
 import PitchPage from "./pitch";
 import TestPage from "./test";
-import { useRuntimeChain } from "@filosign/react/hooks";
-import { useStorePersist } from "../lib/hooks/use-store";
-import { useEffect } from "react";
 
 const rootRoute = createRootRoute({
 	component: () => {
 		useAnalytics();
-		const runtimeChainFromSDK = useRuntimeChain();
-		console.log({ runtimeChainFromSDK });
-		const { runtimeChain, setRuntimeChain } = useStorePersist();
-
-		useEffect(() => {
-			if (runtimeChainFromSDK && runtimeChainFromSDK !== runtimeChain) {
-				setRuntimeChain(runtimeChainFromSDK);
-			}
-		}, [runtimeChainFromSDK]);
-
-		return (
-			<>
-				<Outlet />
-			</>
-		);
+		return <Outlet />;
 	},
 });
 

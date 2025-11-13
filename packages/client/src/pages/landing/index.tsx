@@ -7,8 +7,8 @@ import { Separator } from "@/src/lib/components/ui/separator";
 import FooterSection from "./footer-section";
 import HeroSection from "./hero-section";
 import LandingNavbar from "./landing-nav";
-import WaitlistSection from "./waitlist-section";
 import PricingSection from "./pricing-section";
+import WaitlistSection from "./waitlist-section";
 
 export default function LandingPage() {
 	const { user } = usePrivy();
@@ -17,7 +17,6 @@ export default function LandingPage() {
 	});
 
 	console.log({ balance });
-
 
 	return (
 		<div className="[--section-gap:4rem]">

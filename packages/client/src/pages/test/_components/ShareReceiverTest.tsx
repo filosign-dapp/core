@@ -53,7 +53,9 @@ export function ShareReceiverTest() {
 					<CardContent className="space-y-4">
 						<div className="space-y-3">
 							<div>
-								<Label htmlFor="check-sender-address">Sender Wallet Address</Label>
+								<Label htmlFor="check-sender-address">
+									Sender Wallet Address
+								</Label>
 								<Input
 									id="check-sender-address"
 									placeholder="0x..."
@@ -63,7 +65,9 @@ export function ShareReceiverTest() {
 							</div>
 							<Button
 								onClick={handleCheckCanReceive}
-								disabled={!checkSenderAddress.trim() || canReceiveFrom.isFetching}
+								disabled={
+									!checkSenderAddress.trim() || canReceiveFrom.isFetching
+								}
 								className="w-full"
 								size="lg"
 							>
@@ -78,7 +82,11 @@ export function ShareReceiverTest() {
 								<div className="p-3 bg-muted rounded-lg">
 									<p className="text-sm">
 										Can receive from {checkSenderAddress}:{" "}
-										<span className={canReceiveFrom.data ? "text-green-600" : "text-red-600"}>
+										<span
+											className={
+												canReceiveFrom.data ? "text-green-600" : "text-red-600"
+											}
+										>
 											{canReceiveFrom.data ? "Yes" : "No"}
 										</span>
 									</p>
@@ -101,7 +109,9 @@ export function ShareReceiverTest() {
 					</CardHeader>
 					<CardContent className="space-y-4">
 						<div>
-							<Label htmlFor="revoke-sender-address">Sender Wallet Address</Label>
+							<Label htmlFor="revoke-sender-address">
+								Sender Wallet Address
+							</Label>
 							<Input
 								id="revoke-sender-address"
 								placeholder="0x..."
@@ -126,7 +136,6 @@ export function ShareReceiverTest() {
 					</CardContent>
 				</Card>
 			</div>
-
 		</div>
 	);
 }

@@ -50,7 +50,7 @@ export function useAcceptedRecipients() {
 				"/sharing/sent", // This would need to be added to show sent requests
 			);
 			// Filter for accepted requests
-			return response.data.requests.filter(req => req.status === "ACCEPTED");
+			return response.data.requests.filter((req) => req.status === "ACCEPTED");
 		},
 		enabled: !!api,
 	});

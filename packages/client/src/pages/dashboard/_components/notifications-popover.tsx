@@ -1,4 +1,13 @@
 import {
+	useAcceptRequest,
+	useAckFile,
+	useApproveSender,
+	useFileInfo,
+	useReceivedFiles,
+	useReceivedRequests,
+	useViewFile,
+} from "@filosign/react/hooks";
+import {
 	ArrowClockwiseIcon,
 	BellIcon,
 	CheckCircleIcon,
@@ -6,7 +15,6 @@ import {
 	SignatureIcon,
 	UserCheckIcon,
 } from "@phosphor-icons/react";
-import { useAcceptRequest, useAckFile, useApproveSender, useFileInfo, useReceivedFiles, useReceivedRequests, useViewFile } from "@filosign/react/hooks";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
@@ -34,9 +42,9 @@ import { NotificationItemCard } from "./notification-item-card";
 export function NotificationsPopover() {
 	const [open, setOpen] = useState(false);
 	const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
-	const [pendingAcceptRequestId, setPendingAcceptRequestId] = useState<string | null>(
-		null,
-	);
+	const [pendingAcceptRequestId, setPendingAcceptRequestId] = useState<
+		string | null
+	>(null);
 	const [pendingAcceptWallet, setPendingAcceptWallet] = useState<string | null>(
 		null,
 	);
@@ -74,7 +82,6 @@ export function NotificationsPopover() {
 		return `${address.slice(0, 6)}...${address.slice(-4)}`;
 	};
 
-
 	const handleAllowSharing = (requestId: string, senderWallet: string) => {
 		setPendingAcceptRequestId(requestId);
 		setPendingAcceptWallet(senderWallet);
@@ -84,7 +91,10 @@ export function NotificationsPopover() {
 	const confirmAllowSharing = async () => {
 		if (!pendingAcceptRequestId || !pendingAcceptWallet) return;
 
-		console.log("Attempting to accept sharing request:", pendingAcceptRequestId);
+		console.log(
+			"Attempting to accept sharing request:",
+			pendingAcceptRequestId,
+		);
 		try {
 			// First accept the share request in the database
 			await acceptRequest.mutateAsync({
@@ -117,8 +127,8 @@ export function NotificationsPopover() {
 	const pendingRequests = (() => {
 		return receivedRequests.data && Array.isArray(receivedRequests.data)
 			? receivedRequests.data.filter(
-				(req: any) => req.status === "PENDING" || req.status === "pending",
-			)
+					(req: any) => req.status === "PENDING" || req.status === "pending",
+				)
 			: [];
 	})();
 
@@ -191,10 +201,7 @@ export function NotificationsPopover() {
 							<div className="flex items-center gap-2 mb-4">
 								<UserCheckIcon className="h-4 w-4 text-primary" />
 								<h4 className="text-sm font-semibold">Sharing Requests</h4>
-								<Badge
-									variant="secondary"
-									className="text-xs"
-								>
+								<Badge variant="secondary" className="text-xs">
 									{pendingRequests.length}
 								</Badge>
 							</div>
@@ -208,9 +215,14 @@ export function NotificationsPopover() {
 										subtitle={req.message || "No message provided"}
 										variant="default"
 										actionButton={{
-											label: acceptRequest.isPending || allowSharing.isPending ? "Accepting..." : "Accept",
-											onClick: () => handleAllowSharing(req.id, req.senderWallet),
-											loading: acceptRequest.isPending || allowSharing.isPending,
+											label:
+												acceptRequest.isPending || allowSharing.isPending
+													? "Accepting..."
+													: "Accept",
+											onClick: () =>
+												handleAllowSharing(req.id, req.senderWallet),
+											loading:
+												acceptRequest.isPending || allowSharing.isPending,
 											variant: "default",
 										}}
 									/>
@@ -284,7 +296,9 @@ export function NotificationsPopover() {
 							onClick={confirmAllowSharing}
 							disabled={acceptRequest.isPending || allowSharing.isPending}
 						>
-							{acceptRequest.isPending || allowSharing.isPending ? "Accepting..." : "Accept Request"}
+							{acceptRequest.isPending || allowSharing.isPending
+								? "Accepting..."
+								: "Accept Request"}
 						</AlertDialogAction>
 					</AlertDialogFooter>
 				</AlertDialogContent>
@@ -294,7 +308,17 @@ export function NotificationsPopover() {
 }
 
 // Component to handle individual received file notifications
-function ReceivedFileNotification({ pieceCid, sender, navigate, setOpen }: { pieceCid: string; sender: string; navigate: any; setOpen: (open: boolean) => void }) {
+function ReceivedFileNotification({
+	pieceCid,
+	sender,
+	navigate,
+	setOpen,
+}: {
+	pieceCid: string;
+	sender: string;
+	navigate: any;
+	setOpen: (open: boolean) => void;
+}) {
 	const queryClient = useQueryClient();
 	const { data: file } = useFileInfo({ pieceCid });
 	const acknowledgeFile = useAckFile();
@@ -320,14 +344,16 @@ function ReceivedFileNotification({ pieceCid, sender, navigate, setOpen }: { pie
 				pieceCid: file.pieceCid,
 				kemCiphertext: file.kemCiphertext,
 				encryptedEncryptionKey: file.encryptedEncryptionKey,
-				status: file.status as "s3" | "foc"
+				status: file.status as "s3" | "foc",
 			});
 			console.log("File data received:", fileData);
 
 			// Save file to computer using metadata
 			const arrayBuffer = new ArrayBuffer(fileData.fileBytes.length);
 			new Uint8Array(arrayBuffer).set(fileData.fileBytes);
-			const blob = new Blob([arrayBuffer], { type: fileData.metadata.mimeType });
+			const blob = new Blob([arrayBuffer], {
+				type: fileData.metadata.mimeType,
+			});
 			const url = URL.createObjectURL(blob);
 			const a = document.createElement("a");
 			a.href = url;
@@ -364,7 +390,7 @@ function ReceivedFileNotification({ pieceCid, sender, navigate, setOpen }: { pie
 	const handleSignDocument = () => {
 		navigate({
 			to: "/dashboard/document/sign",
-			search: { pieceCid }
+			search: { pieceCid },
 		});
 		setOpen(false); // Close the popover
 	};

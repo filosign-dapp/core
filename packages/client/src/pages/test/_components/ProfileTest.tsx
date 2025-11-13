@@ -1,9 +1,5 @@
 import { useUserProfileByQuery } from "@filosign/react/hooks";
-import {
-	EyeIcon,
-	SpinnerIcon,
-	UserIcon,
-} from "@phosphor-icons/react";
+import { EyeIcon, SpinnerIcon, UserIcon } from "@phosphor-icons/react";
 import { useState } from "react";
 import { Button } from "../../../lib/components/ui/button";
 import {
@@ -19,7 +15,9 @@ import { Label } from "../../../lib/components/ui/label";
 export function ProfileTest() {
 	const [profileAddress, setProfileAddress] = useState("");
 
-	const profile = useUserProfileByQuery({ address: profileAddress as `0x${string}` });
+	const profile = useUserProfileByQuery({
+		address: profileAddress as `0x${string}`,
+	});
 
 	const handleGetProfile = () => {
 		if (!profileAddress.trim()) return;
@@ -96,7 +94,8 @@ export function ProfileTest() {
 								</pre>
 							) : (
 								<div className="text-muted-foreground">
-									Enter a wallet address and click "Get Profile" to fetch user information
+									Enter a wallet address and click "Get Profile" to fetch user
+									information
 								</div>
 							)}
 						</div>

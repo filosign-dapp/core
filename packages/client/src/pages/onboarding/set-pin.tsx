@@ -1,4 +1,4 @@
-import { useLogin, useIsRegistered } from "@filosign/react/hooks";
+import { useIsRegistered, useLogin } from "@filosign/react/hooks";
 import { CaretRightIcon } from "@phosphor-icons/react";
 import { useNavigate } from "@tanstack/react-router";
 import { motion } from "motion/react";
@@ -14,8 +14,8 @@ import {
 	CardTitle,
 } from "@/src/lib/components/ui/card";
 import { useStorePersist } from "@/src/lib/hooks/use-store";
-import OtpInput from "./_components/OtpInput";
 import OnboardingProtector from "./_components/OnboardingProtector";
+import OtpInput from "./_components/OtpInput";
 
 export default function OnboardingSetPinPage() {
 	const [pin, setPin] = useState("");
@@ -86,7 +86,10 @@ export default function OnboardingSetPinPage() {
 					transition={{ duration: 0.3, delay: 0.2 }}
 					className="flex flex-col justify-center items-center px-8 mx-auto w-full max-w-lg"
 				>
-					<Logo className="mb-4" textClassName="text-foreground font-semibold" />
+					<Logo
+						className="mb-4"
+						textClassName="text-foreground font-semibold"
+					/>
 					<motion.div
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
@@ -122,7 +125,11 @@ export default function OnboardingSetPinPage() {
 								)}
 
 								<div className="flex gap-3">
-									<Button variant="ghost" onClick={handleBack} className="flex-1">
+									<Button
+										variant="ghost"
+										onClick={handleBack}
+										className="flex-1"
+									>
 										Back
 									</Button>
 
