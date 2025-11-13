@@ -1,5 +1,4 @@
 import hre from "hardhat";
-import { getContracts } from "../exports";
 
 async function main() {
 	const chainId = hre.network.config.chainId;
@@ -8,7 +7,7 @@ async function main() {
 		process.exit(1);
 	}
 
-	const [u1, u2] = await hre.viem.getWalletClients();
+	const [u1, _u2] = await hre.viem.getWalletClients();
 
 	for (const x of ["0xB8dd3786942057d4Bc78Fc894B80E8745151FE70"] as const) {
 		u1.sendTransaction({

@@ -11,7 +11,6 @@ import {
 	type WalletClient,
 } from "viem";
 import { definitions } from "../definitions";
-import { eip712signature } from "./utils";
 
 function getKeyedClient<T extends Client | WalletClient>(client: T) {
 	return {

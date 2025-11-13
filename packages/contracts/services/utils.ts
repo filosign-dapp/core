@@ -1,15 +1,4 @@
-import {
-	type Account,
-	type Address,
-	type Chain,
-	encodePacked,
-	type Hex,
-	keccak256,
-	pad,
-	parseSignature,
-	type Transport,
-	type WalletClient,
-} from "viem";
+import { encodePacked, type Hex, keccak256, pad } from "viem";
 import type { SignTypedDataParameters } from "viem/accounts";
 import type { FilosignContracts } from "./contracts";
 
