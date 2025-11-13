@@ -17,7 +17,7 @@ import {
     useUserProfileByQuery,
     useViewFile,
 } from "@filosign/react/hooks";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useOtherAddress, useOtherReload } from "./App";
 import Button from "./Button";
 import { dummyBytes } from "./dumy";
@@ -265,6 +265,9 @@ function TestFileSend(props: { notify: NotifierFn }) {
     });
     const { reload: otherReload } = useOtherReload();
     const sendFile = useSendFile();
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [fileBytes, setFileBytes] = useState<Uint8Array | null>(null);
+    const inputId = useId();
 
     useEffectOnce(() => {
         if (sendFile.data) {
@@ -275,23 +278,66 @@ function TestFileSend(props: { notify: NotifierFn }) {
         }
     }, [sendFile.data]);
 
+    const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            if (file.type !== 'application/pdf') {
+                alert('Please select a PDF file');
+                return;
+            }
+            setSelectedFile(file);
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const arrayBuffer = e.target?.result as ArrayBuffer;
+                if (arrayBuffer) {
+                    setFileBytes(new Uint8Array(arrayBuffer));
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+    };
+
     if (!otherProfile) return <p>loading other person profile, wait</p>;
 
     return (
         <div className="p-4 space-y-2">
+            <div>
+                <label htmlFor="pdf-file" className="block text-sm font-medium mb-2">
+                    Select PDF File:
+                </label>
+                <input
+                    id={inputId}
+                    type="file"
+                    accept=".pdf"
+                    onChange={handleFileSelect}
+                    className="block w-full text-sm text-gray-500
+                        file:mr-4 file:py-2 file:px-4
+                        file:rounded-full file:border-0
+                        file:text-sm file:font-semibold
+                        file:bg-blue-50 file:text-blue-700
+                        hover:file:bg-blue-100"
+                />
+                {selectedFile && (
+                    <p className="mt-2 text-sm text-gray-600">
+                        Selected: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(2)} KB)
+                    </p>
+                )}
+            </div>
+
             <Button
                 mutation={sendFile}
                 mutationArgs={{
-                    bytes: dummyBytes,
-                    signaturePositionOffset: {
-                        top: 11,
-                        left: 12,
-                    },
-                    recipient: {
+                    bytes: fileBytes || dummyBytes,
+                    signers: [{
                         address: otherAddress,
                         encryptionPublicKey: otherProfile.encryptionPublicKey,
-                    },
-                    metadata: { name: "Test File", mimeType: "text/plain" }
+                        signaturePosition: [10, 20, 30, 40],
+                    }],
+                    viewers: [],
+                    metadata: {
+                        name: selectedFile ? selectedFile.name : "Test File",
+                    }
                 }}
             >
                 Send File
@@ -346,16 +392,17 @@ function ReceivedFileItem(props: { pieceCid: string }) {
     }, [signFile.data]);
 
     if (!file) return <p>Loading file info...</p>;
+    const canView = file.kemCiphertext !== null && file.encryptedEncryptionKey !== null;
     return <div className="bg-gray-100 p-2 rounded">
         <p>File CID: {file.pieceCid.toString()}</p>
         <p>Sender: {file.sender}</p>
         <p>Status: {file.status}</p>
-        {file.acked ?
+        {canView ?
             <Button mutation={viewFile} mutationArgs={{
                 pieceCid: file.pieceCid,
-                kemCiphertext: file.kemCiphertext,
-                encryptedEncryptionKey: file.encryptedEncryptionKey,
-                status: file.status
+                kemCiphertext: file.kemCiphertext as string,
+                encryptedEncryptionKey: file.encryptedEncryptionKey as string,
+                status: file.status as "s3" | "foc"
             }}>
                 View File
             </Button>
@@ -367,7 +414,7 @@ function ReceivedFileItem(props: { pieceCid: string }) {
                 {decoder.decode(viewFile.data.fileBytes)}
             </p>}
 
-            {file.acked && file.signatures.length === 0 && (
+            {canView && file.signatures.length === 0 && (
                 <Button mutation={signFile} mutationArgs={{
                     pieceCid: file.pieceCid,
                     signatureVisualBytes: new Uint8Array([1, 2, 3])
@@ -416,9 +463,9 @@ function SentFileItem(props: { pieceCid: string }) {
         <p>File signatures : {file.signatures.length}</p>
         <Button mutation={viewFile} mutationArgs={{
             pieceCid: file.pieceCid,
-            kemCiphertext: file.senderKemCiphertext,
-            encryptedEncryptionKey: file.senderEncryptedEncryptionKey,
-            status: file.status
+            kemCiphertext: file.kemCiphertext as string,
+            encryptedEncryptionKey: file.encryptedEncryptionKey as string,
+            status: file.status as "s3" | "foc"
         }}>
             View File
         </Button>

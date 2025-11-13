@@ -1,30 +1,36 @@
 import type React from "react";
 import { twMerge } from "tailwind-merge";
 
-interface ButtonProps {
-    mutation: {
-        mutate: (args?: any) => void;
-        isPending: boolean;
-        isError: boolean;
-        isSuccess: boolean;
-        error?: any;
-    };
-    mutationArgs?: any;
+interface Mutation<TArgs = void> {
+    mutate: TArgs extends void ? () => void : (args: TArgs) => void;
+    isPending: boolean;
+    isError: boolean;
+    isSuccess: boolean;
+    error: Error | null;
+}
+
+interface ButtonProps<TArgs = void> {
+    mutation: Mutation<TArgs>;
+    mutationArgs?: TArgs extends void ? never : TArgs;
     children: React.ReactNode;
     className?: string;
 }
 
-const Button = ({
+const Button = <TArgs = void>({
     mutation,
     mutationArgs,
     children,
     className = "",
-}: ButtonProps) => {
+}: ButtonProps<TArgs>) => {
     const { mutate, isPending, isError, isSuccess, error } = mutation;
 
     const handleClick = () => {
         if (!isPending) {
-            mutate(mutationArgs);
+            if (mutationArgs !== undefined) {
+                (mutate as (args: TArgs) => void)(mutationArgs);
+            } else {
+                (mutate as () => void)();
+            }
         }
     };
 
