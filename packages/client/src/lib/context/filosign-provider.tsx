@@ -2,6 +2,7 @@
 import { FilosignProvider as FilosignProviderBase } from "@filosign/react";
 import { useEffect, useState } from "react";
 import { useWalletClient } from "wagmi";
+import { Loader } from "../components/ui/loader";
 
 export function FilosignProvider({ children }: { children: React.ReactNode }) {
 	const { data: wallet } = useWalletClient();
@@ -27,7 +28,7 @@ export function FilosignProvider({ children }: { children: React.ReactNode }) {
 				if (typeof module === "function") {
 					dil = await (module as any)();
 				}
-				//  else if (module.default && typeof module.default === "function") {1
+				//  else if (module.default && typeof module.default === "function") {
 				//     dil = await module.default();
 				// }
 				else if (
@@ -59,6 +60,7 @@ export function FilosignProvider({ children }: { children: React.ReactNode }) {
 				dilithium,
 			}}
 			wallet={wallet}
+			loader={Loader}
 		>
 			{!!dilithium?.generateKeys && children}
 		</FilosignProviderBase>

@@ -33,21 +33,7 @@ import TestPage from "./test";
 const rootRoute = createRootRoute({
 	component: () => {
 		useAnalytics();
-		const runtimeChainFromSDK = useRuntimeChain();
-		console.log({ runtimeChainFromSDK });
-		const { runtimeChain, setRuntimeChain } = useStorePersist();
-
-		useEffect(() => {
-			if (runtimeChainFromSDK && runtimeChainFromSDK !== runtimeChain) {
-				setRuntimeChain(runtimeChainFromSDK);
-			}
-		}, [runtimeChainFromSDK]);
-
-		return (
-			<>
-				<Outlet />
-			</>
-		);
+		return <Outlet />;
 	},
 });
 

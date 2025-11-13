@@ -14,7 +14,7 @@ import { PrivyProvider } from "./lib/context/privy-provider";
 import { WagmiProvider } from "./lib/context/wagmi-provider";
 
 // Root element
-const rootElement = document.getElementById("root")!;
+const rootElement = document.getElementById("root");
 if (!rootElement) throw new Error("Failed to find the root element");
 
 // App
@@ -56,7 +56,7 @@ BigInt.prototype.toJSON = function () {
 
 // Hot module replacement
 if (import.meta.hot) {
-	const root = (import.meta.hot.data.root ??= createRoot(rootElement));
+	const root = import.meta.hot.data.root ?? createRoot(rootElement);
 	root.render(app);
 } else {
 	createRoot(rootElement).render(app);

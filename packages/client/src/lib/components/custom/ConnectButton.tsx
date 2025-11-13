@@ -1,12 +1,21 @@
-import { useIsRegistered } from "@filosign/react/hooks";
+import { useIsRegistered, useLogout } from "@filosign/react/hooks";
+import { SignOutIcon } from "@phosphor-icons/react";
 import { usePrivy } from "@privy-io/react-auth";
 import { Link } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
+import { useWalletClient } from "wagmi";
 import { Button } from "@/src/lib/components/ui/button";
 
 export default function ConnectButton() {
-	const { ready, authenticated, login: loginPrivy } = usePrivy();
+	const {
+		ready,
+		authenticated,
+		login: loginPrivy,
+		logout: logoutPrivy,
+	} = usePrivy();
 	const isRegistered = useIsRegistered();
+	const { data: walletClient } = useWalletClient();
+	const logoutFilosign = useLogout();
 
 	// Determine button state for smooth transitions
 	const getButtonState = () => {
@@ -16,9 +25,22 @@ export default function ConnectButton() {
 		return "dashboard";
 	};
 
+	const handleLogout = async () => {
+		try {
+			await logoutFilosign.mutateAsync();
+			await logoutPrivy();
+		} catch (error) {
+			console.error("Logout failed:", error);
+		}
+	};
+
+	const showLogout =
+		authenticated &&
+		(getButtonState() === "get-started" || getButtonState() === "dashboard");
+
 	return (
 		<motion.div
-			className=""
+			className="flex items-center gap-2"
 			initial={{ opacity: 0, x: 30 }}
 			animate={{ opacity: 1, x: 0 }}
 			transition={{
@@ -78,6 +100,28 @@ export default function ConnectButton() {
 					</AnimatePresence>
 				)}
 			</Button>
+			{showLogout && (
+				<AnimatePresence>
+					<motion.div
+						initial={{ opacity: 0, x: -10 }}
+						animate={{ opacity: 1, x: 0 }}
+						exit={{ opacity: 0, x: -10 }}
+						transition={{
+							duration: 0.2,
+							ease: "easeInOut",
+						}}
+					>
+						<Button
+							variant="secondary"
+							onClick={handleLogout}
+							disabled={logoutFilosign.isPending}
+							className=""
+						>
+							<SignOutIcon className="size-5" weight="fill" />
+						</Button>
+					</motion.div>
+				</AnimatePresence>
+			)}
 		</motion.div>
 	);
 }

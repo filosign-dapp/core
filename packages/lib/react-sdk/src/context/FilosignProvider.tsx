@@ -46,10 +46,11 @@ type FilosignConfig = {
 	wasm: {
 		dilithium: unknown;
 	};
+	loader?: React.ComponentType<{ text?: string }>;
 };
 
 export function FilosignProvider(props: FilosignConfig) {
-	const { children, apiBaseUrl, wallet, wasm } = props;
+	const { children, apiBaseUrl, wallet, wasm, loader: LoaderComponent } = props;
 
 	const [contracts, setContracts] = useState<FilosignContracts | null>(null);
 
@@ -93,8 +94,19 @@ export function FilosignProvider(props: FilosignConfig) {
 		[api, wallet, contracts, wasm, runtime.data],
 	);
 
-	if (!runtime.data) return <>Runtime Loading...</>;
-	if (!contracts) return <>Filosign not ready</>;
+	if (!runtime.data) {
+		if (LoaderComponent) {
+			return <LoaderComponent text="Loading Runtime..." />;
+		}
+		return <>Runtime Loading...</>;
+	}
+
+	if (!contracts) {
+		if (LoaderComponent) {
+			return <LoaderComponent text="Loading Contracts..." />;
+		}
+		return <>Not Ready...</>;
+	}
 
 	return (
 		<FilosignContext.Provider value={value}>
