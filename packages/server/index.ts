@@ -7,22 +7,22 @@ import env from "./env";
 
 //@ts-expect-error
 BigInt.prototype.toJSON = function () {
-    return this.toString();
+	return this.toString();
 };
 
 export const app = new Hono()
-    .use(logger())
-    .use(
-        cors({
-            origin: [env.FRONTEND_URL],
-            allowHeaders: ["Content-Type", "Authorization"],
-            allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-            credentials: true,
-        }),
-    )
-    .route("/api", apiRouter);
+	.use(logger())
+	.use(
+		cors({
+			origin: [env.FRONTEND_URL],
+			allowHeaders: ["Content-Type", "Authorization"],
+			allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+			credentials: true,
+		}),
+	)
+	.route("/api", apiRouter);
 
 export default {
-    port: Bun.env.PORT ? parseInt(Bun.env.PORT, 10) : 30011,
-    fetch: app.fetch,
+	port: Bun.env.PORT ? parseInt(Bun.env.PORT, 10) : 30011,
+	fetch: app.fetch,
 };
