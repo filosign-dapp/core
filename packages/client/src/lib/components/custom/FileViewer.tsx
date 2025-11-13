@@ -14,10 +14,8 @@ import {
 import type * as React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { cn } from "../../utils";
 import { Button } from "../ui/button";
 import { Loader } from "../ui/loader";
-import { Image } from "./Image";
 
 interface FileObject {
 	pieceCid: string;
@@ -43,23 +41,17 @@ export function FileViewer({ file, open, onOpenChange }: FileViewerProps) {
 		signaturePositionOffset: { top: number; left: number };
 	} | null>(null);
 	const containerRef = useRef<HTMLDivElement>(null);
-	const documentRef = useRef<HTMLDivElement>(null);
 	const [documentDimensions, setDocumentDimensions] = useState({
 		width: 600,
 		height: 800,
 	});
-	const [isMobile, setIsMobile] = useState(false);
 
 	// Ensure API is authenticated before making requests
 	const { data: authedApi, isLoading: authLoading } = useAuthedApi();
 	const { wallet } = useFilosignContext();
 
 	// Get detailed file info including decryption keys
-	const {
-		data: fileInfo,
-		isLoading: fileLoading,
-		error: fileError,
-	} = useFileInfo({
+	const { data: fileInfo, isLoading: fileLoading } = useFileInfo({
 		pieceCid: authedApi && file ? file.pieceCid : undefined,
 	});
 
@@ -73,7 +65,6 @@ export function FileViewer({ file, open, onOpenChange }: FileViewerProps) {
 	useEffect(() => {
 		const checkMobile = () => {
 			const mobile = window.innerWidth < 768;
-			setIsMobile(mobile);
 			setDocumentDimensions(
 				mobile ? { width: 300, height: 400 } : { width: 600, height: 800 },
 			);

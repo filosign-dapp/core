@@ -20,8 +20,6 @@ export function NotFound({
 	description = "Oops! The page you're looking for doesn't exist.",
 	showBackButton = true,
 	showHomeButton = true,
-	onBack,
-	onHome,
 }: NotFoundProps) {
 	return (
 		<div className="flex flex-col flex-1 gap-4 justify-center items-center px-4 text-center h-screen w-screen">

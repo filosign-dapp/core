@@ -9,6 +9,7 @@ const envKeys = [
 
 type ENV = Record<(typeof envKeys)[number], string>;
 
+// biome-ignore lint/suspicious/noExplicitAny: <>
 let env: ENV = {} as any;
 
 export function ensureEnv() {
@@ -20,9 +21,7 @@ export function ensureEnv() {
 
 	env = Object.fromEntries(envKeys.map((key) => [key, Bun.env[key]])) as ENV;
 }
-const isProd =
-	process.env["NODE_ENV"] === "production" ||
-	process.env["NODE_ENV"] === "prod";
+const isProd = Bun.env.NODE_ENV === "production" || Bun.env.NODE_ENV === "prod";
 ensureEnv();
 
 export { env, isProd };

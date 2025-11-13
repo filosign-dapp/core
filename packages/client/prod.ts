@@ -1,6 +1,6 @@
+import { existsSync, statSync } from "node:fs";
+import path from "node:path";
 import { serve } from "bun";
-import { existsSync, statSync } from "fs";
-import path from "path";
 import hono from "./api";
 import { closeDatabase } from "./api/lib/db";
 import { env } from "./env";
@@ -8,7 +8,7 @@ import { getMimeType } from "./utils";
 
 const server = serve({
 	development: false,
-	port: parseInt(env.PORT),
+	port: parseInt(env.PORT, 10),
 
 	routes: {
 		"/api": new Response(
@@ -120,8 +120,6 @@ const server = serve({
 					"Cache-Control": "no-cache",
 				},
 			});
-
-			return new Response("Not Found", { status: 404 });
 		},
 	},
 

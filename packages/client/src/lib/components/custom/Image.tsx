@@ -8,7 +8,6 @@ type Props = {
 	className?: string;
 	fallback?: string;
 	children?: ReactNode;
-	[key: string]: any;
 };
 
 export function Image({

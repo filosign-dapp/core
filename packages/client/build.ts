@@ -1,9 +1,9 @@
 #!/usr/bin/env bun
+import { existsSync } from "node:fs";
+import { cp, rm } from "node:fs/promises";
+import path from "node:path";
 import { type BuildConfig, type BunPlugin, build } from "bun";
 import plugin from "bun-plugin-tailwind";
-import { existsSync } from "fs";
-import { cp, rm } from "fs/promises";
-import path from "path";
 
 // Plugin to fix dilithium-crystals-js import
 const dilithiumFixPlugin: BunPlugin = {
@@ -74,7 +74,7 @@ const toCamelCase = (str: string): string => {
 };
 
 // Helper function to parse a value into appropriate type
-const parseValue = (value: string): any => {
+const parseValue = (value: string) => {
 	// Handle true/false strings
 	if (value === "true") return true;
 	if (value === "false") return false;
@@ -96,7 +96,7 @@ async function getEnvKeys(): Promise<string[]> {
 	try {
 		const content = await Bun.file(envFilePath).text();
 		const match = content.match(/const envKeys = \[([\s\S]*?)\] as const;/);
-		if (match && match[1]) {
+		if (match?.[1]) {
 			const keys = match[1]
 				.split("\n")
 				.map((line) => line.trim().replace(/[",]/g, ""))
@@ -111,6 +111,7 @@ async function getEnvKeys(): Promise<string[]> {
 
 // Magical argument parser that converts CLI args to BuildConfig
 function parseArgs(): Partial<BuildConfig> {
+	// biome-ignore lint/suspicious/noExplicitAny: pata nahi jrurt hai
 	const config: Record<string, any> = {};
 	const args = process.argv.slice(2);
 

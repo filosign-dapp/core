@@ -1,5 +1,4 @@
 import * as CollapsiblePrimitive from "@radix-ui/react-collapsible";
-import { AnimatePresence, motion } from "motion/react";
 import { cn } from "../../utils";
 
 function Collapsible({

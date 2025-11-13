@@ -1,7 +1,6 @@
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { PageCrashed } from "../custom/PageCrashed";
-import ThemeSwitch from "../custom/ThemeSwitch";
 import { ErrorBoundary } from "./ErrorBoundary";
 
 interface PageErrorBoundaryProps {

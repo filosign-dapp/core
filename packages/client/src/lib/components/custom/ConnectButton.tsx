@@ -2,13 +2,11 @@ import { useIsRegistered } from "@filosign/react/hooks";
 import { usePrivy } from "@privy-io/react-auth";
 import { Link } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
-import { useWalletClient } from "wagmi";
 import { Button } from "@/src/lib/components/ui/button";
 
 export default function ConnectButton() {
-	const { ready, authenticated, login: loginPrivy, user } = usePrivy();
+	const { ready, authenticated, login: loginPrivy } = usePrivy();
 	const isRegistered = useIsRegistered();
-	const { data: walletClient } = useWalletClient();
 
 	// Determine button state for smooth transitions
 	const getButtonState = () => {

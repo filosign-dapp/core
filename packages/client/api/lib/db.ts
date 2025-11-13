@@ -1,5 +1,5 @@
 import { Database } from "bun:sqlite";
-import { existsSync, mkdirSync } from "fs";
+import { existsSync, mkdirSync } from "node:fs";
 
 // Create data directory if it doesn't exist
 if (!existsSync("db")) {
@@ -24,7 +24,7 @@ db.run("CREATE INDEX IF NOT EXISTS idx_waitlist_email ON waitlist(email)");
 export function closeDatabase() {
 	try {
 		db.close(false);
-	} catch (error) {
+	} catch (_) {
 		try {
 			db.close(true);
 		} catch {}

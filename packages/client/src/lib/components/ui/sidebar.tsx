@@ -1,4 +1,4 @@
-import { ListIcon, SidebarSimpleIcon } from "@phosphor-icons/react";
+import { ListIcon } from "@phosphor-icons/react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import * as React from "react";
@@ -20,6 +20,7 @@ import {
 	TooltipTrigger,
 } from "@/src/lib/components/ui/tooltip";
 import { useIsMobile } from "@/src/lib/hooks/use-mobile";
+import { setCookie } from "@/src/lib/utils/cookies";
 import { cn } from "@/src/lib/utils/index";
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
@@ -80,7 +81,10 @@ function SidebarProvider({
 			}
 
 			// This sets the cookie to keep the sidebar state.
-			document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`;
+			setCookie(SIDEBAR_COOKIE_NAME, String(openState), {
+				path: "/",
+				maxAge: SIDEBAR_COOKIE_MAX_AGE,
+			});
 		},
 		[setOpenProp, open],
 	);
@@ -88,7 +92,7 @@ function SidebarProvider({
 	// Helper to toggle the sidebar.
 	const toggleSidebar = React.useCallback(() => {
 		return isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open);
-	}, [isMobile, setOpen, setOpenMobile]);
+	}, [isMobile, setOpen]);
 
 	// Adds a keyboard shortcut to toggle the sidebar.
 	React.useEffect(() => {
@@ -120,7 +124,7 @@ function SidebarProvider({
 			setOpenMobile,
 			toggleSidebar,
 		}),
-		[state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar],
+		[state, open, setOpen, isMobile, openMobile, toggleSidebar],
 	);
 
 	return (

@@ -1,8 +1,6 @@
 import {
 	type Account,
-	type Address,
 	type Chain,
-	type Hex,
 	parseSignature,
 	type Transport,
 	type WalletClient,

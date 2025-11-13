@@ -27,7 +27,7 @@ export function FilosignProvider({ children }: { children: React.ReactNode }) {
 				if (typeof module === "function") {
 					dil = await (module as any)();
 				}
-				//  else if (module.default && typeof module.default === "function") {
+				//  else if (module.default && typeof module.default === "function") {1
 				//     dil = await module.default();
 				// }
 				else if (
@@ -54,7 +54,7 @@ export function FilosignProvider({ children }: { children: React.ReactNode }) {
 
 	return (
 		<FilosignProviderBase
-			apiBaseUrl={process.env.BUN_PUBLIC_PLATFORM_URL!}
+			apiBaseUrl={process.env.BUN_PUBLIC_PLATFORM_URL || "localhost:30011"}
 			wasm={{
 				dilithium,
 			}}

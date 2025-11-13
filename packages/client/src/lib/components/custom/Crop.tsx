@@ -82,15 +82,12 @@ export default function Crop({
 	}, [allowedAspectRatios]);
 
 	const onCropComplete = useCallback(
-		(
-			croppedArea: { x: number; y: number; width: number; height: number },
-			croppedAreaPixels: {
-				x: number;
-				y: number;
-				width: number;
-				height: number;
-			},
-		) => {
+		(croppedAreaPixels: {
+			x: number;
+			y: number;
+			width: number;
+			height: number;
+		}) => {
 			setCroppedAreaPixels(croppedAreaPixels);
 		},
 		[],
@@ -259,10 +256,13 @@ export default function Crop({
 				)}
 
 				<div className="flex flex-col gap-2 py-2">
-					<label className="text-sm font-medium">Zoom</label>
+					<label htmlFor="zoom-input" className="text-sm font-medium">
+						Zoom
+					</label>
 					<div className="flex items-center gap-2">
 						<MinusIcon />
 						<input
+							id="zoom-input"
 							type="range"
 							value={zoom}
 							min={1}

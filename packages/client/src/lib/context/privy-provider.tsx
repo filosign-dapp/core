@@ -6,7 +6,7 @@ export function PrivyProvider({ children }: { children: React.ReactNode }) {
 
 	return (
 		<PrivyProviderBase
-			appId={process.env.BUN_PUBLIC_PRIVY_APP_ID!}
+			appId={process.env.BUN_PUBLIC_PRIVY_APP_ID ?? ""}
 			config={{
 				defaultChain: runtimeChain,
 				supportedChains: [runtimeChain],
