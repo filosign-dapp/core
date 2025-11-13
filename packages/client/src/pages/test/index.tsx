@@ -1,4 +1,9 @@
 import {
+	useIsLoggedIn,
+	useIsRegistered,
+	useUserProfileByQuery,
+} from "@filosign/react/hooks";
+import {
 	ClockIcon,
 	CopyIcon,
 	EyeIcon,
@@ -12,6 +17,8 @@ import {
 import { usePrivy } from "@privy-io/react-auth";
 import { formatEther } from "viem";
 import { useBalance, useWalletClient } from "wagmi";
+import { Button } from "@/src/lib/components/ui/button";
+import { copyToClipboard, truncateAddress } from "@/src/lib/utils";
 import { Badge } from "../../lib/components/ui/badge";
 import {
 	Card,
@@ -33,9 +40,6 @@ import { ProfileTest } from "./_components/ProfileTest";
 import { ShareReceiverTest } from "./_components/ShareReceiverTest";
 import { ShareSenderTest } from "./_components/ShareSenderTest";
 import { StatusBadge } from "./_components/StatusBadge";
-import { useIsLoggedIn, useIsRegistered, useUserProfileByQuery } from "@filosign/react/hooks";
-import { copyToClipboard, truncateAddress } from "@/src/lib/utils";
-import { Button } from "@/src/lib/components/ui/button";
 
 export default function TestPage() {
 	const { user } = usePrivy();
@@ -48,7 +52,9 @@ export default function TestPage() {
 	const isRegistered = useIsRegistered();
 	const isLoggedIn = useIsLoggedIn();
 
-	const { data: userProfile } = useUserProfileByQuery({ address: walletClient?.account.address as `0x${string}` });
+	const { data: userProfile } = useUserProfileByQuery({
+		address: walletClient?.account.address as `0x${string}`,
+	});
 
 	return (
 		<div className="min-h-screen bg-gradient-to-br from-background to-muted/20 p-6">
@@ -130,23 +136,33 @@ export default function TestPage() {
 										<code className="text-xs bg-muted px-2 py-1 rounded">
 											{user.wallet?.address}
 										</code>
-										<Button variant="ghost" size="icon" onClick={() => {
-											if (!user.wallet?.address) return;
-											copyToClipboard(user.wallet?.address);
-										}}>
+										<Button
+											variant="ghost"
+											size="icon"
+											onClick={() => {
+												if (!user.wallet?.address) return;
+												copyToClipboard(user.wallet?.address);
+											}}
+										>
 											<CopyIcon className="w-4 h-4" />
 										</Button>
 									</div>
 									<div className="flex items-center gap-2">
 										<KeyIcon className="w-4 h-4 text-muted-foreground" />
-										<span className="text-sm font-medium">Encryption Public Key:</span>
+										<span className="text-sm font-medium">
+											Encryption Public Key:
+										</span>
 										<p className="text-xs">
 											{truncateAddress(userProfile?.encryptionPublicKey)}
 										</p>
-										<Button variant="ghost" size="icon" onClick={() => {
-											if (!userProfile?.encryptionPublicKey) return;
-											copyToClipboard(userProfile?.encryptionPublicKey);
-										}}>
+										<Button
+											variant="ghost"
+											size="icon"
+											onClick={() => {
+												if (!userProfile?.encryptionPublicKey) return;
+												copyToClipboard(userProfile?.encryptionPublicKey);
+											}}
+										>
 											<CopyIcon className="w-4 h-4" />
 										</Button>
 									</div>
@@ -172,10 +188,7 @@ export default function TestPage() {
 							<KeyIcon className="w-4 h-4" />
 							Auth
 						</TabsTrigger>
-						<TabsTrigger
-							value="approve"
-							className="flex items-center gap-2"
-						>
+						<TabsTrigger value="approve" className="flex items-center gap-2">
 							<UserCheckIcon className="w-4 h-4" />
 							Approve
 						</TabsTrigger>

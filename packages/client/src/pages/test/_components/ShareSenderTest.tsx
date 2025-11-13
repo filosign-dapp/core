@@ -1,9 +1,5 @@
-import { useCanSendTo, useApproveSender } from "@filosign/react/hooks";
-import {
-	EyeIcon,
-	UserCheckIcon,
-	SpinnerIcon,
-} from "@phosphor-icons/react";
+import { useApproveSender, useCanSendTo } from "@filosign/react/hooks";
+import { EyeIcon, SpinnerIcon, UserCheckIcon } from "@phosphor-icons/react";
 import { useState } from "react";
 import { Button } from "../../../lib/components/ui/button";
 import {
@@ -82,7 +78,11 @@ export function ShareSenderTest() {
 								<div className="p-3 bg-muted rounded-lg">
 									<p className="text-sm">
 										Can send to {checkAddress}:{" "}
-										<span className={canSendTo.data ? "text-green-600" : "text-red-600"}>
+										<span
+											className={
+												canSendTo.data ? "text-green-600" : "text-red-600"
+											}
+										>
 											{canSendTo.data ? "Yes" : "No"}
 										</span>
 									</p>
@@ -129,7 +129,6 @@ export function ShareSenderTest() {
 					</CardContent>
 				</Card>
 			</div>
-
 		</div>
 	);
 }

@@ -1,18 +1,18 @@
 import {
+	useApproveSender,
+	useCancelRequest,
+	useReceivableFrom,
+	useReceivedRequests,
+	useSendableTo,
+	useSentRequests,
+} from "@filosign/react/hooks";
+import {
 	ArrowClockwiseIcon,
 	CaretLeftIcon,
 	CheckCircleIcon,
 	ClockIcon,
 	XCircleIcon,
 } from "@phosphor-icons/react";
-import {
-	useSentRequests,
-	useReceivedRequests,
-	useSendableTo,
-	useReceivableFrom,
-	useApproveSender,
-	useCancelRequest,
-} from "@filosign/react/hooks";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
@@ -107,26 +107,26 @@ export default function PermissionsPage() {
 	const receivedRequestsData = receivedRequests.data || [];
 	const pendingRequests = Array.isArray(receivedRequestsData)
 		? receivedRequestsData.filter(
-			(req: any) => req.status === "PENDING" || req.status === "pending",
-		)
+				(req: any) => req.status === "PENDING" || req.status === "pending",
+			)
 		: [];
 	const allowedRequests = Array.isArray(receivedRequestsData)
 		? receivedRequestsData.filter(
-			(req: any) =>
-				req.status === "ACCEPTED" ||
-				req.status === "ALLOWED" ||
-				req.status === "accepted" ||
-				req.status === "allowed",
-		)
+				(req: any) =>
+					req.status === "ACCEPTED" ||
+					req.status === "ALLOWED" ||
+					req.status === "accepted" ||
+					req.status === "allowed",
+			)
 		: [];
 	const rejectedRequests = Array.isArray(receivedRequestsData)
 		? receivedRequestsData.filter(
-			(req: any) =>
-				req.status === "REJECTED" ||
-				req.status === "DENIED" ||
-				req.status === "rejected" ||
-				req.status === "denied",
-		)
+				(req: any) =>
+					req.status === "REJECTED" ||
+					req.status === "DENIED" ||
+					req.status === "rejected" ||
+					req.status === "denied",
+			)
 		: [];
 
 	return (
@@ -269,7 +269,9 @@ export default function PermissionsPage() {
 													<div className="flex-shrink-0">
 														<div className="w-8 h-8 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
 															<span className="text-xs font-medium text-green-700 dark:text-green-300">
-																{formatAddress(approval.recipientWallet)[2].toUpperCase()}
+																{formatAddress(
+																	approval.recipientWallet,
+																)[2].toUpperCase()}
 															</span>
 														</div>
 													</div>
@@ -278,7 +280,10 @@ export default function PermissionsPage() {
 															{formatAddress(approval.recipientWallet)}
 														</div>
 														<div className="text-xs text-muted-foreground">
-															Approved {new Date(approval.createdAt).toLocaleDateString()}
+															Approved{" "}
+															{new Date(
+																approval.createdAt,
+															).toLocaleDateString()}
 														</div>
 													</div>
 												</div>
@@ -370,7 +375,8 @@ export default function PermissionsPage() {
 									<ArrowClockwiseIcon className="h-6 w-6 animate-spin mx-auto mb-2" />
 									<p className="text-sm text-muted-foreground">Loading...</p>
 								</div>
-							) : !allowedReceivers.data || allowedReceivers.data.length === 0 ? (
+							) : !allowedReceivers.data ||
+								allowedReceivers.data.length === 0 ? (
 								<div className="text-center py-8 text-muted-foreground">
 									<CheckCircleIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
 									<p className="text-sm">No one can send to you yet</p>
@@ -388,7 +394,9 @@ export default function PermissionsPage() {
 													<div className="flex-shrink-0">
 														<div className="w-8 h-8 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
 															<span className="text-xs font-medium text-purple-700 dark:text-purple-300">
-																{formatAddress(approval.senderWallet)[2].toUpperCase()}
+																{formatAddress(
+																	approval.senderWallet,
+																)[2].toUpperCase()}
 															</span>
 														</div>
 													</div>
@@ -397,7 +405,10 @@ export default function PermissionsPage() {
 															{formatAddress(approval.senderWallet)}
 														</div>
 														<div className="text-xs text-muted-foreground">
-															Approved {new Date(approval.createdAt).toLocaleDateString()}
+															Approved{" "}
+															{new Date(
+																approval.createdAt,
+															).toLocaleDateString()}
 														</div>
 													</div>
 												</div>

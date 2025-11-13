@@ -105,7 +105,14 @@ export default function DocumentViewer({
 
 			onFieldPlaced(boundedX, boundedY);
 		},
-		[isPlacingField, onFieldPlaced, zoom, documentWidth, documentHeight, margin],
+		[
+			isPlacingField,
+			onFieldPlaced,
+			zoom,
+			documentWidth,
+			documentHeight,
+			margin,
+		],
 	);
 
 	const handleFieldClick = (fieldId: string, event: React.MouseEvent) => {
@@ -205,7 +212,12 @@ export default function DocumentViewer({
 	const getFieldIcon = (type: SignatureField["type"]) => {
 		const config = fieldConfig[type];
 		const IconComponent = config?.icon || FileIcon;
-		return <IconComponent className={cn(isMobile ? "size-4" : "size-6")} weight="fill" />;
+		return (
+			<IconComponent
+				className={cn(isMobile ? "size-4" : "size-6")}
+				weight="fill"
+			/>
+		);
 	};
 
 	const getFieldLabel = (type: SignatureField["type"]) => {
@@ -271,7 +283,7 @@ export default function DocumentViewer({
 						{/* Render uploaded PDF or image if provided */}
 						{document?.url ? (
 							document.url.startsWith("data:application/pdf") ||
-								document.name?.toLowerCase().endsWith(".pdf") ? (
+							document.name?.toLowerCase().endsWith(".pdf") ? (
 								<>
 									<object
 										data={document.url}
@@ -364,14 +376,21 @@ export default function DocumentViewer({
 									onClick={(e) => handleFieldClick(field.id, e)}
 									onMouseDown={(e) => handleFieldMouseDown(field.id, e)}
 								>
-									<div className={cn("flex items-center", isMobile ? "gap-1" : "gap-2")}>
+									<div
+										className={cn(
+											"flex items-center",
+											isMobile ? "gap-1" : "gap-2",
+										)}
+									>
 										<span className="text-primary">
 											{getFieldIcon(field.type)}
 										</span>
-										<span className={cn(
-											"font-medium text-primary whitespace-nowrap",
-											isMobile ? "text-[10px]" : "text-xs"
-										)}>
+										<span
+											className={cn(
+												"font-medium text-primary whitespace-nowrap",
+												isMobile ? "text-[10px]" : "text-xs",
+											)}
+										>
 											{getFieldLabel(field.type)}
 										</span>
 										<button
@@ -382,7 +401,9 @@ export default function DocumentViewer({
 												onFieldRemove(field.id);
 											}}
 										>
-											<XIcon className={cn(isMobile ? "w-2.5 h-2.5" : "w-3 h-3")} />
+											<XIcon
+												className={cn(isMobile ? "w-2.5 h-2.5" : "w-3 h-3")}
+											/>
 										</button>
 									</div>
 								</div>

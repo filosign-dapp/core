@@ -23,12 +23,17 @@ export default function OnboardingWelcomePage() {
 	const navigate = useNavigate();
 
 	const handleContinue = () => {
-		setOnboardingForm({ firstName: firstName.trim(), lastName: lastName.trim(), pin: "", hasOnboarded: false });
+		setOnboardingForm({
+			firstName: firstName.trim(),
+			lastName: lastName.trim(),
+			pin: "",
+			hasOnboarded: false,
+		});
 		navigate({ to: "/onboarding/set-pin" });
 	};
 
 	const handleKeyPress = (e: React.KeyboardEvent) => {
-		if (e.key === "Enter" && (firstName.trim())) {
+		if (e.key === "Enter" && firstName.trim()) {
 			handleContinue();
 		}
 	};
@@ -42,7 +47,10 @@ export default function OnboardingWelcomePage() {
 					transition={{ duration: 0.3, delay: 0.2 }}
 					className="flex flex-col justify-center items-center px-8 mx-auto w-full max-w-lg"
 				>
-					<Logo className="mb-4" textClassName="text-foreground font-semibold" />
+					<Logo
+						className="mb-4"
+						textClassName="text-foreground font-semibold"
+					/>
 					<Card className="w-full">
 						<CardHeader>
 							<CardTitle>Welcome aboard!</CardTitle>

@@ -12,9 +12,7 @@ import {
 import { jsonParse, jsonStringify } from "../utils/json";
 
 export const timestamps = {
-	createdAt: timestamp({ withTimezone: true })
-		.notNull()
-		.defaultNow(),
+	createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
 	updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
 	deletedAt: timestamp({ withTimezone: true }),
 };
@@ -93,7 +91,6 @@ export const tHex = customType<{
 		}
 		return value;
 	},
-
 });
 
 // TODO please reconsider

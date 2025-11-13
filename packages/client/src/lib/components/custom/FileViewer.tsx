@@ -1,3 +1,5 @@
+import { useFilosignContext } from "@filosign/react";
+import { useAuthedApi, useFileInfo, useViewFile } from "@filosign/react/hooks";
 import {
 	ArrowClockwiseIcon,
 	ArrowCounterClockwiseIcon,
@@ -9,8 +11,6 @@ import {
 	PrinterIcon,
 	XIcon,
 } from "@phosphor-icons/react";
-import { useAuthedApi, useFileInfo, useViewFile } from "@filosign/react/hooks";
-import { useFilosignContext } from "@filosign/react";
 import type * as React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -32,11 +32,7 @@ interface FileViewerProps {
 	onOpenChange: (open: boolean) => void;
 }
 
-export function FileViewer({
-	file,
-	open,
-	onOpenChange,
-}: FileViewerProps) {
+export function FileViewer({ file, open, onOpenChange }: FileViewerProps) {
 	const [zoom, setZoom] = useState(100);
 	const [viewError, setViewError] = useState<string | null>(null);
 	const [fileData, setFileData] = useState<{
@@ -48,7 +44,10 @@ export function FileViewer({
 	} | null>(null);
 	const containerRef = useRef<HTMLDivElement>(null);
 	const documentRef = useRef<HTMLDivElement>(null);
-	const [documentDimensions, setDocumentDimensions] = useState({ width: 600, height: 800 });
+	const [documentDimensions, setDocumentDimensions] = useState({
+		width: 600,
+		height: 800,
+	});
 	const [isMobile, setIsMobile] = useState(false);
 
 	// Ensure API is authenticated before making requests
@@ -56,26 +55,33 @@ export function FileViewer({
 	const { wallet } = useFilosignContext();
 
 	// Get detailed file info including decryption keys
-	const { data: fileInfo, isLoading: fileLoading, error: fileError } = useFileInfo({
-		pieceCid: authedApi && file ? file.pieceCid : undefined
+	const {
+		data: fileInfo,
+		isLoading: fileLoading,
+		error: fileError,
+	} = useFileInfo({
+		pieceCid: authedApi && file ? file.pieceCid : undefined,
 	});
 
 	const viewFile = useViewFile();
 
 	// Determine if current user is the sender or receiver
-	const isSender = wallet?.account?.address?.toLowerCase() === fileInfo?.sender?.toLowerCase();
+	const isSender =
+		wallet?.account?.address?.toLowerCase() === fileInfo?.sender?.toLowerCase();
 
 	// Detect mobile/desktop and set responsive dimensions
 	useEffect(() => {
 		const checkMobile = () => {
 			const mobile = window.innerWidth < 768;
 			setIsMobile(mobile);
-			setDocumentDimensions(mobile ? { width: 300, height: 400 } : { width: 600, height: 800 });
+			setDocumentDimensions(
+				mobile ? { width: 300, height: 400 } : { width: 600, height: 800 },
+			);
 		};
 
 		checkMobile();
-		window.addEventListener('resize', checkMobile);
-		return () => window.removeEventListener('resize', checkMobile);
+		window.addEventListener("resize", checkMobile);
+		return () => window.removeEventListener("resize", checkMobile);
 	}, []);
 
 	// Memoize the handleViewFile function
@@ -88,7 +94,7 @@ export function FileViewer({
 			hasSenderKemCiphertext: !!fileInfo?.senderKemCiphertext,
 			hasEncryptedKey: !!fileInfo?.encryptedEncryptionKey,
 			hasSenderEncryptedKey: !!fileInfo?.senderEncryptedEncryptionKey,
-			status: fileInfo?.status
+			status: fileInfo?.status,
 		});
 
 		if (!fileInfo) {
@@ -99,15 +105,19 @@ export function FileViewer({
 		}
 
 		// Use appropriate keys based on whether user is sender or receiver
-		const kemCiphertext = isSender ? fileInfo.senderKemCiphertext : fileInfo.kemCiphertext;
-		const encryptedEncryptionKey = isSender ? fileInfo.senderEncryptedEncryptionKey : fileInfo.encryptedEncryptionKey;
+		const kemCiphertext = isSender
+			? fileInfo.senderKemCiphertext
+			: fileInfo.kemCiphertext;
+		const encryptedEncryptionKey = isSender
+			? fileInfo.senderEncryptedEncryptionKey
+			: fileInfo.encryptedEncryptionKey;
 
 		if (!kemCiphertext || !encryptedEncryptionKey) {
-			const error = `Missing decryption keys for ${isSender ? 'sender' : 'receiver'}`;
+			const error = `Missing decryption keys for ${isSender ? "sender" : "receiver"}`;
 			console.error(error, {
 				isSender,
 				hasKemCiphertext: !!kemCiphertext,
-				hasEncryptedKey: !!encryptedEncryptionKey
+				hasEncryptedKey: !!encryptedEncryptionKey,
 			});
 			setViewError(error);
 			return;
@@ -128,19 +138,22 @@ export function FileViewer({
 				pieceCid: fileInfo.pieceCid,
 				kemCiphertext,
 				encryptedEncryptionKey,
-				status: fileInfo.status as "s3" | "foc"
+				status: fileInfo.status as "s3" | "foc",
 			});
 			console.log("File decryption successful:", {
 				hasFileBytes: !!result?.fileBytes,
 				bytesLength: result?.fileBytes?.length,
-				metadata: result?.metadata
+				metadata: result?.metadata,
 			});
 
 			// Store the decrypted file data in state
 			setFileData(result);
 		} catch (error) {
 			console.error("Failed to load file:", error);
-			const errorMessage = error instanceof Error ? error.message : "Failed to load file for viewing";
+			const errorMessage =
+				error instanceof Error
+					? error.message
+					: "Failed to load file for viewing";
 			setViewError(errorMessage);
 			toast.error(errorMessage);
 		}
@@ -152,8 +165,10 @@ export function FileViewer({
 
 		// Check if we have the required keys based on whether user is sender or receiver
 		const hasRequiredKeys = isSender
-			? (fileInfo.senderKemCiphertext && fileInfo.senderEncryptedEncryptionKey)
-			: (fileInfo.kemCiphertext && fileInfo.encryptedEncryptionKey && fileInfo.acked);
+			? fileInfo.senderKemCiphertext && fileInfo.senderEncryptedEncryptionKey
+			: fileInfo.kemCiphertext &&
+				fileInfo.encryptedEncryptionKey &&
+				fileInfo.acked;
 
 		if (hasRequiredKeys) {
 			handleViewFile();
@@ -172,11 +187,14 @@ export function FileViewer({
 		if (fileData) {
 			const arrayBuffer = new ArrayBuffer(fileData.fileBytes.length);
 			new Uint8Array(arrayBuffer).set(fileData.fileBytes);
-			const blob = new Blob([arrayBuffer], { type: fileData.metadata.mimeType });
+			const blob = new Blob([arrayBuffer], {
+				type: fileData.metadata.mimeType,
+			});
 			const url = URL.createObjectURL(blob);
 			const a = document.createElement("a");
 			a.href = url;
-			a.download = fileData.metadata.name || `document-${file?.pieceCid.slice(0, 8)}`;
+			a.download =
+				fileData.metadata.name || `document-${file?.pieceCid.slice(0, 8)}`;
 			document.body.appendChild(a);
 			a.click();
 			document.body.removeChild(a);
@@ -224,8 +242,12 @@ export function FileViewer({
 				<div className="flex items-center justify-center w-full h-full text-sm text-muted-foreground p-4 text-center">
 					<div className="flex flex-col items-center gap-3 md:gap-4">
 						<FileIcon className="size-12 md:size-16 text-destructive/50" />
-						<div className="text-xs md:text-sm text-destructive font-medium">Failed to decrypt file</div>
-						<div className="text-xs text-muted-foreground max-w-md">{viewError}</div>
+						<div className="text-xs md:text-sm text-destructive font-medium">
+							Failed to decrypt file
+						</div>
+						<div className="text-xs text-muted-foreground max-w-md">
+							{viewError}
+						</div>
 						<Button
 							size="sm"
 							variant="outline"
@@ -256,7 +278,10 @@ export function FileViewer({
 		const fileName = metadata.name;
 
 		// Handle image files
-		if (mimeType?.startsWith('image/') || fileName?.toLowerCase().match(/\.(jpg|jpeg|png|gif|bmp|webp)$/)) {
+		if (
+			mimeType?.startsWith("image/") ||
+			fileName?.toLowerCase().match(/\.(jpg|jpeg|png|gif|bmp|webp)$/)
+		) {
 			const arrayBuffer = new ArrayBuffer(fileBytes.length);
 			new Uint8Array(arrayBuffer).set(fileBytes);
 			const blob = new Blob([arrayBuffer], { type: mimeType });
@@ -285,10 +310,13 @@ export function FileViewer({
 		}
 
 		// Handle PDF files
-		if (mimeType === 'application/pdf' || fileName?.toLowerCase().endsWith('.pdf')) {
+		if (
+			mimeType === "application/pdf" ||
+			fileName?.toLowerCase().endsWith(".pdf")
+		) {
 			const arrayBuffer = new ArrayBuffer(fileBytes.length);
 			new Uint8Array(arrayBuffer).set(fileBytes);
-			const blob = new Blob([arrayBuffer], { type: 'application/pdf' });
+			const blob = new Blob([arrayBuffer], { type: "application/pdf" });
 			const pdfUrl = URL.createObjectURL(blob);
 
 			return (
@@ -316,7 +344,10 @@ export function FileViewer({
 		}
 
 		// Handle text files
-		if (mimeType?.startsWith('text/') || fileName?.toLowerCase().match(/\.(txt|md|json|xml|html|css|js|ts)$/)) {
+		if (
+			mimeType?.startsWith("text/") ||
+			fileName?.toLowerCase().match(/\.(txt|md|json|xml|html|css|js|ts)$/)
+		) {
 			try {
 				const textContent = new TextDecoder().decode(fileBytes);
 				return (
@@ -344,8 +375,12 @@ export function FileViewer({
 			<div className="flex items-center justify-center w-full h-full text-sm text-muted-foreground p-4 text-center">
 				<div className="flex flex-col items-center gap-3 md:gap-4">
 					<FileIcon className="size-12 md:size-16 text-muted-foreground/50" />
-					<div className="text-xs md:text-sm">Preview not available for this file type</div>
-					<div className="text-xs text-muted-foreground/70">{mimeType || fileName}</div>
+					<div className="text-xs md:text-sm">
+						Preview not available for this file type
+					</div>
+					<div className="text-xs text-muted-foreground/70">
+						{mimeType || fileName}
+					</div>
 					<Button
 						size="sm"
 						variant="outline"
@@ -373,7 +408,8 @@ export function FileViewer({
 					{/* File name and close button row on mobile */}
 					<div className="flex items-center justify-between @md:hidden">
 						<h2 className="text-base font-semibold truncate text-primary-foreground max-w-[60%]">
-							{fileData?.metadata.name || `Document - ${file?.pieceCid.slice(0, 8)}...`}
+							{fileData?.metadata.name ||
+								`Document - ${file?.pieceCid.slice(0, 8)}...`}
 						</h2>
 						<Button
 							variant="ghost"
@@ -388,7 +424,8 @@ export function FileViewer({
 					{/* Desktop header row */}
 					<div className="hidden @md:block">
 						<h2 className="text-lg font-semibold truncate text-primary-foreground">
-							{fileData?.metadata.name || `Document - ${file?.pieceCid.slice(0, 8)}...`}
+							{fileData?.metadata.name ||
+								`Document - ${file?.pieceCid.slice(0, 8)}...`}
 						</h2>
 					</div>
 
@@ -511,14 +548,22 @@ export function FileViewer({
 				>
 					{(authLoading || fileLoading || viewFile.isPending) && (
 						<div className="flex items-center justify-center w-full h-full">
-							<Loader text={
-								authLoading ? "Authenticating..." :
-									fileLoading ? "Preparing document..." :
-										"Loading document..."
-							} />
+							<Loader
+								text={
+									authLoading
+										? "Authenticating..."
+										: fileLoading
+											? "Preparing document..."
+											: "Loading document..."
+								}
+							/>
 						</div>
 					)}
-					{!authLoading && !fileLoading && !viewFile.isPending && fileInfo && renderFileContent()}
+					{!authLoading &&
+						!fileLoading &&
+						!viewFile.isPending &&
+						fileInfo &&
+						renderFileContent()}
 				</div>
 			</div>
 		</div>

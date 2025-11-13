@@ -12,7 +12,7 @@ export function useAcceptRequest() {
 			const response = await api.rpc.postSafe(
 				{},
 				`/sharing/${requestId}/accept`,
-				{}
+				{},
 			);
 
 			return response.success;

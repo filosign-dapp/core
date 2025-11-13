@@ -3,10 +3,10 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { useStorePersist } from "@/src/lib/hooks/use-store";
 import Logo from "@/src/lib/components/custom/Logo";
 import { Button } from "@/src/lib/components/ui/button";
 import { Form } from "@/src/lib/components/ui/form";
+import { useStorePersist } from "@/src/lib/hooks/use-store";
 import type { EnvelopeForm, StoredDocument } from "../types";
 import DocumentsSection from "./_components/DocumentUpload";
 import RecipientsSection from "./_components/RecipientsSection";
@@ -37,7 +37,7 @@ export default function CreateEnvelopePage() {
 
 	// Get recipient profile data for encryption key
 	const recipientProfile = useUserProfileByQuery({
-		address: selectedRecipient?.walletAddress as `0x${string}` | undefined
+		address: selectedRecipient?.walletAddress as `0x${string}` | undefined,
 	});
 
 	const onSubmit = async (data: EnvelopeForm) => {
@@ -74,7 +74,7 @@ export default function CreateEnvelopePage() {
 						type: doc.type,
 						dataUrl,
 					};
-				})
+				}),
 			);
 
 			// Store form data in persistent store

@@ -50,7 +50,8 @@ export default function CreateNewSignaturePage({
 	// Auto-generate initials from first and last names
 	useEffect(() => {
 		if (firstName.trim() && lastName.trim()) {
-			const generatedInitials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+			const generatedInitials =
+				`${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
 			setInitials(generatedInitials);
 		} else {
 			setInitials("");
@@ -119,7 +120,10 @@ export default function CreateNewSignaturePage({
 
 	// Calculate if save button should be disabled for each tab
 	const isChooseDisabled =
-		!selectedSignatureId || !firstName.trim() || !lastName.trim() || !initials.trim();
+		!selectedSignatureId ||
+		!firstName.trim() ||
+		!lastName.trim() ||
+		!initials.trim();
 	const isDrawDisabled = !signatureData || !initialsData;
 	const isUploadDisabled = !signatureData || !initialsData;
 
@@ -138,7 +142,7 @@ export default function CreateNewSignaturePage({
 				...onboardingForm,
 				firstName,
 				lastName,
-				hasOnboarded: true
+				hasOnboarded: true,
 			});
 			navigate({ to: "/onboarding/set-pin" });
 		}

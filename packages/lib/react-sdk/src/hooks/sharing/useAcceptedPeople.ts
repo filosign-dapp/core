@@ -32,12 +32,17 @@ export function useAcceptedPeople() {
 						const profile = response.data;
 						return {
 							walletAddress: profile.walletAddress,
-							displayName: profile.firstName ? `${profile.firstName} ${profile.lastName || ''}`.trim() : null,
+							displayName: profile.firstName
+								? `${profile.firstName} ${profile.lastName || ""}`.trim()
+								: null,
 							username: null, // This endpoint doesn't return username
 							avatarUrl: profile.avatarUrl,
 						};
 					} catch (error) {
-						console.error(`Failed to fetch profile for ${request.recipientWallet}:`, error);
+						console.error(
+							`Failed to fetch profile for ${request.recipientWallet}:`,
+							error,
+						);
 						// Return basic info if profile fetch fails
 						return {
 							walletAddress: request.recipientWallet,
@@ -46,7 +51,7 @@ export function useAcceptedPeople() {
 							avatarUrl: null,
 						};
 					}
-				})
+				}),
 			);
 
 			return { people };
