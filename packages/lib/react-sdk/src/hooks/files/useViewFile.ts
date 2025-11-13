@@ -1,4 +1,5 @@
-import { encryption, jsonParse, KEM, toBytes } from "@filosign/crypto-utils";
+import { encryption, KEM, toBytes } from "@filosign/crypto-utils";
+import { decodeFileData } from "@filosign/shared";
 import { useMutation } from "@tanstack/react-query";
 import z from "zod";
 import { idb } from "../../../utils/idb";
@@ -98,26 +99,14 @@ export function useViewFile() {
 				info: encryptionInfo,
 			});
 
-			const decoder = new TextDecoder();
-			const jsonString = decoder.decode(decryptedData);
+			const parsedData = await decodeFileData(decryptedData);
 
-			const parsedData = z
-				.object({
-					fileBytes: z.instanceof(Uint8Array),
-					sender: z.string(),
-					timestamp: z.number(),
-					signaturePositionOffset: z.object({
-						top: z.number(),
-						left: z.number(),
-					}),
-					metadata: z.object({
-						name: z.string(),
-						mimeType: z.string(),
-					}),
-				})
-				.parse(jsonParse(jsonString));
-
-			return parsedData;
+			return {
+				fileBytes: parsedData.bytes,
+				sender: parsedData.sender,
+				timestamp: parsedData.timestamp,
+				metadata: parsedData.metadata,
+			};
 		},
 	});
 }

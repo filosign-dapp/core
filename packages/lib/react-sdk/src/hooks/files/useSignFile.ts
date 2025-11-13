@@ -1,7 +1,6 @@
 import { computeCidIdentifier, eip712signature } from "@filosign/contracts";
 import {
 	computeCommitment,
-	hash as fsHash,
 	jsonStringify,
 	signatures,
 	toHex,
@@ -37,7 +36,8 @@ export function useSignFile() {
 						sender: z.string(),
 						status: z.string(),
 						createdAt: z.string(),
-						recipient: z.string(),
+						signers: z.array(z.string()),
+						viewers: z.array(z.string()),
 					},
 					`/files/${pieceCid}`,
 				);
@@ -46,11 +46,7 @@ export function useSignFile() {
 					throw new Error("Failed to fetch file info");
 				}
 
-				const { sender, recipient } = fileResponse.data;
-
-				if (recipient !== wallet.account.address) {
-					throw new Error("You are not the recipient of this file");
-				}
+				const { sender } = fileResponse.data;
 
 				const cidIdentifier = computeCidIdentifier(pieceCid);
 
@@ -58,14 +54,11 @@ export function useSignFile() {
 					wallet.account.address,
 				]);
 
-				const signatureVisualHash = fsHash.digest(signatureVisualBytes);
 				const dl3SignatureMessage = jsonStringify({
-					sender,
 					pieceCid,
-					recipient,
-					signatureVisualHash,
+					sender,
+					signer: wallet.account.address,
 					timestamp: timestamp,
-					nonce: nonce,
 				});
 
 				const dl3Keypair = await signatures.keyGen({
@@ -86,8 +79,7 @@ export function useSignFile() {
 						SignFile: [
 							{ name: "cidIdentifier", type: "bytes32" },
 							{ name: "sender", type: "address" },
-							{ name: "recipient", type: "address" },
-							{ name: "signatureVisualHash", type: "bytes32" },
+							{ name: "signer", type: "address" },
 							{ name: "dl3SignatureCommitment", type: "bytes20" },
 							{ name: "timestamp", type: "uint256" },
 							{ name: "nonce", type: "uint256" },
@@ -97,8 +89,7 @@ export function useSignFile() {
 					message: {
 						cidIdentifier,
 						sender,
-						recipient,
-						signatureVisualHash,
+						signer: wallet.account.address,
 						dl3SignatureCommitment,
 						timestamp: BigInt(timestamp),
 						nonce: BigInt(nonce),
