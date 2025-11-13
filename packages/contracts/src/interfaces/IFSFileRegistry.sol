@@ -24,14 +24,52 @@ interface IFSFileRegistry {
     event FileSigned();
     function nonce(address key) external view returns (uint256);
     function manager() external view returns (address);
-    function computeSignersCommitment(address[] calldata signers_) external pure returns (bytes20);
-    function fileRegistrations(bytes32 cidId) external view returns (FileRegistrationView memory);
-    function registerFile(string calldata pieceCid_, address sender_, address[] calldata signers_, uint256 timestamp_, bytes calldata signature_) external;
-    function registerFileSignature(string calldata pieceCid_, address sender_, address signer_, bytes20 dl3SignatureCommitment_, uint256 timestamp_, bytes calldata signature_) external;
+    function computeSignersCommitment(
+        address[] calldata signers_
+    ) external pure returns (bytes20);
+    function fileRegistrations(
+        bytes32 cidId
+    ) external view returns (FileRegistrationView memory);
+    function registerFile(
+        string calldata pieceCid_,
+        address sender_,
+        address[] calldata signers_,
+        uint256 timestamp_,
+        bytes calldata signature_
+    ) external;
+    function registerFileSignature(
+        string calldata pieceCid_,
+        address sender_,
+        address signer_,
+        bytes20 dl3SignatureCommitment_,
+        uint256 timestamp_,
+        bytes calldata signature_
+    ) external;
     function isSigner(bytes32 cidId, address who) external view returns (bool);
     function hasSigned(bytes32 cidId, address who) external view returns (bool);
-    function validateFileRegistrationSignature(string calldata pieceCid_, address sender_, address[] calldata signers_, uint256 timestamp_, bytes calldata signature_) external view returns (bool);
-    function validateFileSigningSignature(string calldata pieceCid_, address sender_, address signer_, bytes20 dl3SignatureCommitment_, uint256 timestamp_, bytes calldata signature_) external view returns (bool);
-    function validateFileAckSignature(string calldata pieceCid_, address sender_, address viewer_, uint256 timestamp_, bytes calldata signature_) external view returns (bool);
-    function cidIdentifier(string calldata pieceCid_) external pure returns (bytes32);
+    function validateFileRegistrationSignature(
+        string calldata pieceCid_,
+        address sender_,
+        address[] calldata signers_,
+        uint256 timestamp_,
+        bytes calldata signature_
+    ) external view returns (bool);
+    function validateFileSigningSignature(
+        string calldata pieceCid_,
+        address sender_,
+        address signer_,
+        bytes20 dl3SignatureCommitment_,
+        uint256 timestamp_,
+        bytes calldata signature_
+    ) external view returns (bool);
+    function validateFileAckSignature(
+        string calldata pieceCid_,
+        address sender_,
+        address viewer_,
+        uint256 timestamp_,
+        bytes calldata signature_
+    ) external view returns (bool);
+    function cidIdentifier(
+        string calldata pieceCid_
+    ) external pure returns (bytes32);
 }

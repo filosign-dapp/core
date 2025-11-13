@@ -1,6 +1,7 @@
 import { useLogout, useUserProfile } from "@filosign/react/hooks";
 import {
 	BellIcon,
+	CopySimpleIcon,
 	GearIcon,
 	SignOutIcon,
 	UserIcon,
@@ -11,6 +12,7 @@ import { motion } from "motion/react";
 import * as React from "react";
 import { Image } from "@/src/lib/components/custom/Image";
 import { Button } from "@/src/lib/components/ui/button";
+import { copyToClipboard } from "@/src/lib/utils/utils";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -94,9 +96,21 @@ export function UserDropdown() {
 						</Image>
 						<div className="flex flex-col">
 							<p className="font-medium text-sm">{displayName}</p>
-							<p className="text-xs text-muted-foreground">
-								{walletAddress ? formatAddress(walletAddress) : "No wallet"}
-							</p>
+							<div className="flex items-center gap-1">
+								<p className="text-xs text-muted-foreground">
+									{walletAddress ? formatAddress(walletAddress) : "No wallet"}
+								</p>
+								{walletAddress && (
+									<Button
+										variant="ghost"
+										size="sm"
+										className="h-4 w-4 p-0 hover:bg-accent/50"
+										onClick={() => copyToClipboard(walletAddress)}
+									>
+										<CopySimpleIcon className="h-3 w-3" />
+									</Button>
+								)}
+							</div>
 							{userProfile?.email && (
 								<p className="text-xs text-muted-foreground">
 									{userProfile.email}

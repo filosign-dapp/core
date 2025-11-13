@@ -9,33 +9,156 @@ import {
 	PrinterIcon,
 	XIcon,
 } from "@phosphor-icons/react";
+import { useAuthedApi, useFileInfo, useViewFile } from "@filosign/react/hooks";
+import { useFilosignContext } from "@filosign/react";
 import type * as React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { cn } from "../../utils";
 import { Button } from "../ui/button";
+import { Loader } from "../ui/loader";
 import { Image } from "./Image";
 
+interface FileObject {
+	pieceCid: string;
+	sender: string;
+	status: string;
+	type?: "sent" | "received";
+}
+
 interface FileViewerProps {
-	fileId: string;
-	fileName?: string;
-	fileUrl?: string;
-	fileType?: string;
+	file: FileObject | null;
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 }
 
 export function FileViewer({
-	fileId,
-	fileName,
-	fileUrl,
-	fileType,
+	file,
 	open,
 	onOpenChange,
 }: FileViewerProps) {
 	const [zoom, setZoom] = useState(100);
-	const [isLoading, setIsLoading] = useState(false);
+	const [viewError, setViewError] = useState<string | null>(null);
+	const [fileData, setFileData] = useState<{
+		fileBytes: Uint8Array;
+		metadata: { name: string; mimeType: string };
+		sender: string;
+		timestamp: number;
+		signaturePositionOffset: { top: number; left: number };
+	} | null>(null);
 	const containerRef = useRef<HTMLDivElement>(null);
 	const documentRef = useRef<HTMLDivElement>(null);
+	const [documentDimensions, setDocumentDimensions] = useState({ width: 600, height: 800 });
+	const [isMobile, setIsMobile] = useState(false);
+
+	// Ensure API is authenticated before making requests
+	const { data: authedApi, isLoading: authLoading } = useAuthedApi();
+	const { wallet } = useFilosignContext();
+
+	// Get detailed file info including decryption keys
+	const { data: fileInfo, isLoading: fileLoading, error: fileError } = useFileInfo({
+		pieceCid: authedApi && file ? file.pieceCid : undefined
+	});
+
+	const viewFile = useViewFile();
+
+	// Determine if current user is the sender or receiver
+	const isSender = wallet?.account?.address?.toLowerCase() === fileInfo?.sender?.toLowerCase();
+
+	// Detect mobile/desktop and set responsive dimensions
+	useEffect(() => {
+		const checkMobile = () => {
+			const mobile = window.innerWidth < 768;
+			setIsMobile(mobile);
+			setDocumentDimensions(mobile ? { width: 300, height: 400 } : { width: 600, height: 800 });
+		};
+
+		checkMobile();
+		window.addEventListener('resize', checkMobile);
+		return () => window.removeEventListener('resize', checkMobile);
+	}, []);
+
+	// Memoize the handleViewFile function
+	const handleViewFile = useCallback(async () => {
+		console.log("handleViewFile called with fileInfo:", {
+			pieceCid: fileInfo?.pieceCid,
+			acked: fileInfo?.acked,
+			isSender,
+			hasKemCiphertext: !!fileInfo?.kemCiphertext,
+			hasSenderKemCiphertext: !!fileInfo?.senderKemCiphertext,
+			hasEncryptedKey: !!fileInfo?.encryptedEncryptionKey,
+			hasSenderEncryptedKey: !!fileInfo?.senderEncryptedEncryptionKey,
+			status: fileInfo?.status
+		});
+
+		if (!fileInfo) {
+			const error = "File information not available";
+			console.error(error);
+			setViewError(error);
+			return;
+		}
+
+		// Use appropriate keys based on whether user is sender or receiver
+		const kemCiphertext = isSender ? fileInfo.senderKemCiphertext : fileInfo.kemCiphertext;
+		const encryptedEncryptionKey = isSender ? fileInfo.senderEncryptedEncryptionKey : fileInfo.encryptedEncryptionKey;
+
+		if (!kemCiphertext || !encryptedEncryptionKey) {
+			const error = `Missing decryption keys for ${isSender ? 'sender' : 'receiver'}`;
+			console.error(error, {
+				isSender,
+				hasKemCiphertext: !!kemCiphertext,
+				hasEncryptedKey: !!encryptedEncryptionKey
+			});
+			setViewError(error);
+			return;
+		}
+
+		// For received files, check if acknowledged
+		if (!isSender && !fileInfo.acked) {
+			const error = "File must be acknowledged before viewing";
+			console.error(error);
+			setViewError(error);
+			return;
+		}
+
+		try {
+			setViewError(null);
+			console.log("Starting file decryption...");
+			const result = await viewFile.mutateAsync({
+				pieceCid: fileInfo.pieceCid,
+				kemCiphertext,
+				encryptedEncryptionKey,
+				status: fileInfo.status as "s3" | "foc"
+			});
+			console.log("File decryption successful:", {
+				hasFileBytes: !!result?.fileBytes,
+				bytesLength: result?.fileBytes?.length,
+				metadata: result?.metadata
+			});
+
+			// Store the decrypted file data in state
+			setFileData(result);
+		} catch (error) {
+			console.error("Failed to load file:", error);
+			const errorMessage = error instanceof Error ? error.message : "Failed to load file for viewing";
+			setViewError(errorMessage);
+			toast.error(errorMessage);
+		}
+	}, [fileInfo, viewFile, isSender]);
+
+	// Load file data when component mounts or file changes
+	useEffect(() => {
+		if (!fileInfo || fileData || viewFile.isPending) return;
+
+		// Check if we have the required keys based on whether user is sender or receiver
+		const hasRequiredKeys = isSender
+			? (fileInfo.senderKemCiphertext && fileInfo.senderEncryptedEncryptionKey)
+			: (fileInfo.kemCiphertext && fileInfo.encryptedEncryptionKey && fileInfo.acked);
+
+		if (hasRequiredKeys) {
+			handleViewFile();
+		}
+	}, [fileInfo, fileData, viewFile.isPending, handleViewFile, isSender]);
 
 	const handleZoomIn = useCallback(() => {
 		setZoom((prev) => Math.min(prev + 25, 200));
@@ -46,15 +169,21 @@ export function FileViewer({
 	}, []);
 
 	const handleDownload = useCallback(() => {
-		if (fileUrl) {
-			const link = document.createElement("a");
-			link.href = fileUrl;
-			link.download = fileName || fileId;
-			document.body.appendChild(link);
-			link.click();
-			document.body.removeChild(link);
+		if (fileData) {
+			const arrayBuffer = new ArrayBuffer(fileData.fileBytes.length);
+			new Uint8Array(arrayBuffer).set(fileData.fileBytes);
+			const blob = new Blob([arrayBuffer], { type: fileData.metadata.mimeType });
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement("a");
+			a.href = url;
+			a.download = fileData.metadata.name || `document-${file?.pieceCid.slice(0, 8)}`;
+			document.body.appendChild(a);
+			a.click();
+			document.body.removeChild(a);
+			URL.revokeObjectURL(url);
+			toast.success("File downloaded!");
 		}
-	}, [fileUrl, fileName, fileId]);
+	}, [fileData, file]);
 
 	const handlePrint = useCallback(() => {
 		window.print();
@@ -89,82 +218,141 @@ export function FileViewer({
 	);
 
 	const renderFileContent = () => {
-		if (!fileUrl) {
+		// Show error if decryption failed
+		if (viewError) {
 			return (
-				<div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground px-4 @md:px-6 text-center">
-					<div className="flex flex-col items-center gap-3 @md:gap-4">
-						<FileIcon className="size-12 @md:size-16 text-muted-foreground/50" />
-						<div className="text-xs @md:text-sm">No file preview available</div>
+				<div className="flex items-center justify-center w-full h-full text-sm text-muted-foreground p-4 text-center">
+					<div className="flex flex-col items-center gap-3 md:gap-4">
+						<FileIcon className="size-12 md:size-16 text-destructive/50" />
+						<div className="text-xs md:text-sm text-destructive font-medium">Failed to decrypt file</div>
+						<div className="text-xs text-muted-foreground max-w-md">{viewError}</div>
+						<Button
+							size="sm"
+							variant="outline"
+							onClick={handleViewFile}
+							disabled={viewFile.isPending}
+						>
+							Retry
+						</Button>
+					</div>
+				</div>
+			);
+		}
+
+		// Check if we have the decrypted file data
+		if (!fileData) {
+			return (
+				<div className="flex items-center justify-center w-full h-full text-sm text-muted-foreground p-4 text-center">
+					<div className="flex flex-col items-center gap-3 md:gap-4">
+						<FileIcon className="size-12 md:size-16 text-muted-foreground/50" />
+						<div className="text-xs md:text-sm">No file preview available</div>
+					</div>
+				</div>
+			);
+		}
+
+		const { fileBytes, metadata } = fileData;
+		const mimeType = metadata.mimeType;
+		const fileName = metadata.name;
+
+		// Handle image files
+		if (mimeType?.startsWith('image/') || fileName?.toLowerCase().match(/\.(jpg|jpeg|png|gif|bmp|webp)$/)) {
+			const arrayBuffer = new ArrayBuffer(fileBytes.length);
+			new Uint8Array(arrayBuffer).set(fileBytes);
+			const blob = new Blob([arrayBuffer], { type: mimeType });
+			const imageUrl = URL.createObjectURL(blob);
+
+			return (
+				<div className="flex items-center justify-center w-full h-full p-4 md:p-8 bg-muted/5">
+					<div
+						className="relative bg-white border shadow-lg border-border"
+						style={{
+							width: documentDimensions.width,
+							height: documentDimensions.height,
+							transform: `scale(${zoom / 100})`,
+							transformOrigin: "center",
+						}}
+					>
+						<img
+							src={imageUrl}
+							alt={fileName || "Document"}
+							className="absolute inset-0 w-full h-full object-contain"
+							onLoad={() => URL.revokeObjectURL(imageUrl)}
+						/>
 					</div>
 				</div>
 			);
 		}
 
 		// Handle PDF files
-		if (
-			fileType?.toLowerCase().includes("pdf") ||
-			fileName?.toLowerCase().endsWith(".pdf") ||
-			fileUrl.includes("pdf")
-		) {
+		if (mimeType === 'application/pdf' || fileName?.toLowerCase().endsWith('.pdf')) {
+			const arrayBuffer = new ArrayBuffer(fileBytes.length);
+			new Uint8Array(arrayBuffer).set(fileBytes);
+			const blob = new Blob([arrayBuffer], { type: 'application/pdf' });
+			const pdfUrl = URL.createObjectURL(blob);
+
 			return (
-				<>
-					<object
-						data={fileUrl}
-						type="application/pdf"
-						className="absolute inset-0 w-full h-full z-10"
+				<div className="flex items-center justify-center w-full h-full p-4 md:p-8 bg-muted/5">
+					<div
+						className="relative bg-white border shadow-lg border-border"
+						style={{
+							width: documentDimensions.width,
+							height: documentDimensions.height,
+							transform: `scale(${zoom / 100})`,
+							transformOrigin: "center",
+						}}
 					>
-						<div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground px-4 @md:px-6 text-center">
-							<div className="flex flex-col items-center gap-3 @md:gap-4">
-								<FileIcon className="size-12 @md:size-16 text-muted-foreground/50" />
-								<div className="text-xs @md:text-sm">
-									PDF preview not supported in this browser.
-								</div>
-								<Button
-									onClick={handleDownload}
-									variant="outline"
-									size="sm"
-									className="text-xs @md:text-sm"
-								>
-									<DownloadIcon className="size-3 @md:size-4 mr-2" />
-									Download PDF
-								</Button>
-							</div>
-						</div>
-					</object>
-				</>
-			);
-		}
-
-		// Handle image files
-		if (
-			fileType?.startsWith("image/") ||
-			/\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(fileName || "")
-		) {
-			return (
-				<Image
-					src={fileUrl}
-					alt={fileName || fileId}
-					className="absolute inset-0 w-full h-full object-contain bg-card z-10"
-					draggable={false}
-				/>
-			);
-		}
-
-		// Handle other file types or fallback
-		return (
-			<div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground px-4 @md:px-6 text-center">
-				<div className="flex flex-col items-center gap-3 @md:gap-4">
-					<FileIcon className="size-12 @md:size-16 text-muted-foreground/50" />
-					<div className="text-xs @md:text-sm">
-						Preview not available for this file type
+						<iframe
+							src={pdfUrl}
+							className="absolute inset-0 w-full h-full border-0"
+							title={fileName || "PDF Document"}
+							onLoad={() => {
+								setTimeout(() => URL.revokeObjectURL(pdfUrl), 1000);
+							}}
+						/>
 					</div>
+				</div>
+			);
+		}
+
+		// Handle text files
+		if (mimeType?.startsWith('text/') || fileName?.toLowerCase().match(/\.(txt|md|json|xml|html|css|js|ts)$/)) {
+			try {
+				const textContent = new TextDecoder().decode(fileBytes);
+				return (
+					<div className="w-full h-full p-4 md:p-8 overflow-auto">
+						<pre className="text-sm whitespace-pre-wrap font-mono leading-relaxed">
+							{textContent}
+						</pre>
+					</div>
+				);
+			} catch (error) {
+				console.error("Error decoding text file:", error);
+				return (
+					<div className="flex items-center justify-center w-full h-full text-sm text-muted-foreground p-4 text-center">
+						<div className="flex flex-col items-center gap-3 md:gap-4">
+							<FileIcon className="size-12 md:size-16 text-muted-foreground/50" />
+							<div className="text-xs md:text-sm">Cannot display text file</div>
+						</div>
+					</div>
+				);
+			}
+		}
+
+		// Fallback for other file types
+		return (
+			<div className="flex items-center justify-center w-full h-full text-sm text-muted-foreground p-4 text-center">
+				<div className="flex flex-col items-center gap-3 md:gap-4">
+					<FileIcon className="size-12 md:size-16 text-muted-foreground/50" />
+					<div className="text-xs md:text-sm">Preview not available for this file type</div>
+					<div className="text-xs text-muted-foreground/70">{mimeType || fileName}</div>
 					<Button
-						onClick={handleDownload}
-						variant="outline"
 						size="sm"
-						className="text-xs @md:text-sm"
+						variant="outline"
+						onClick={handleDownload}
+						className="mt-2"
 					>
-						<DownloadIcon className="size-3 @md:size-4 mr-2" />
+						<DownloadIcon className="size-4 mr-2" />
 						Download File
 					</Button>
 				</div>
@@ -185,7 +373,7 @@ export function FileViewer({
 					{/* File name and close button row on mobile */}
 					<div className="flex items-center justify-between @md:hidden">
 						<h2 className="text-base font-semibold truncate text-primary-foreground max-w-[60%]">
-							{fileName || `File Preview - ${fileId}`}
+							{fileData?.metadata.name || `Document - ${file?.pieceCid.slice(0, 8)}...`}
 						</h2>
 						<Button
 							variant="ghost"
@@ -200,7 +388,7 @@ export function FileViewer({
 					{/* Desktop header row */}
 					<div className="hidden @md:block">
 						<h2 className="text-lg font-semibold truncate text-primary-foreground">
-							{fileName || `File Preview - ${fileId}`}
+							{fileData?.metadata.name || `Document - ${file?.pieceCid.slice(0, 8)}...`}
 						</h2>
 					</div>
 
@@ -321,41 +509,16 @@ export function FileViewer({
 					ref={containerRef}
 					className="overflow-auto bg-transparent flex items-center justify-center px-4 py-4 @md:px-8 @md:py-8 flex-1"
 				>
-					<div
-						ref={documentRef}
-						className="w-fit bg-card border shadow-2xl border-border
-                       min-w-[320px] min-h-[480px]
-                       @sm:min-w-[400px] @sm:min-h-[600px]
-                       @md:min-w-[500px] @md:min-h-[700px]
-                       @lg:min-w-[600px] @lg:min-h-[800px]
-                       max-w-[95vw] max-h-[80vh]
-                       rounded-lg overflow-hidden"
-						style={{
-							transform: `scale(${zoom / 100})`,
-							transformOrigin: "center center",
-						}}
-					>
-						{/* Document Page */}
-						<div
-							className="bg-card relative w-full h-full
-                          min-w-[320px] min-h-[480px]
-                          @sm:min-w-[400px] @sm:min-h-[600px]
-                          @md:min-w-[500px] @md:min-h-[700px]
-                          @lg:min-w-[600px] @lg:min-h-[800px]"
-						>
-							{isLoading && (
-								<div className="absolute inset-0 flex items-center justify-center bg-card/80 z-20">
-									<div className="flex flex-col items-center gap-2">
-										<div className="animate-spin rounded-full h-6 w-6 @md:h-8 @md:w-8 border-b-2 border-primary"></div>
-										<span className="text-sm text-muted-foreground">
-											Loading...
-										</span>
-									</div>
-								</div>
-							)}
-							{renderFileContent()}
+					{(authLoading || fileLoading || viewFile.isPending) && (
+						<div className="flex items-center justify-center w-full h-full">
+							<Loader text={
+								authLoading ? "Authenticating..." :
+									fileLoading ? "Preparing document..." :
+										"Loading document..."
+							} />
 						</div>
-					</div>
+					)}
+					{!authLoading && !fileLoading && !viewFile.isPending && fileInfo && renderFileContent()}
 				</div>
 			</div>
 		</div>

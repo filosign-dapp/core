@@ -340,7 +340,7 @@ function TestFileSend(props: { notify: NotifierFn }) {
                     }
                 }}
             >
-                Send File
+                Send {selectedFile ? selectedFile.name : "Default Test File"}
             </Button>
         </div>
     );
@@ -417,7 +417,6 @@ function ReceivedFileItem(props: { pieceCid: string }) {
             {canView && file.signatures.length === 0 && (
                 <Button mutation={signFile} mutationArgs={{
                     pieceCid: file.pieceCid,
-                    signatureVisualBytes: new Uint8Array([1, 2, 3])
                 }}>
                     Sign File
                 </Button>

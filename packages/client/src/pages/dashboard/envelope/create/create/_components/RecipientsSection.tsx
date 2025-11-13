@@ -3,11 +3,11 @@ import {
 	CaretDownIcon,
 	MagnifyingGlassIcon,
 	PlusIcon,
+	UsersThree,
 } from "@phosphor-icons/react";
 import { motion } from "motion/react";
 import { useState } from "react";
 import type { Control } from "react-hook-form";
-import { useWatch } from "react-hook-form";
 import AddRecipientDialog from "@/src/lib/components/custom/AddRecipientDialog";
 import { Button } from "@/src/lib/components/ui/button";
 import {
@@ -125,22 +125,32 @@ export default function RecipientsSection({ control }: RecipientsSectionProps) {
 												</div>
 											}
 										>
-											{acceptedPeople?.people.map((person) => (
-												<SelectItem
-													key={person.walletAddress}
-													value={person.walletAddress}
-												>
-													<div className="flex items-center gap-2">
-														{person.displayName ||
-															person.username ||
-															person.walletAddress}
-														<span className="text-muted-foreground text-sm">
-															({person.walletAddress.slice(0, 6)}...
-															{person.walletAddress.slice(-4)})
-														</span>
-													</div>
-												</SelectItem>
-											))}
+											{acceptedPeople?.people && acceptedPeople.people.length > 0 ? (
+												acceptedPeople.people.map((person) => (
+													<SelectItem
+														key={person.walletAddress}
+														value={person.walletAddress}
+													>
+														<div className="flex items-center gap-2">
+															{person.displayName ||
+																person.username ||
+																person.walletAddress}
+															<span className="text-muted-foreground text-sm">
+																({person.walletAddress.slice(0, 6)}...
+																{person.walletAddress.slice(-4)})
+															</span>
+														</div>
+													</SelectItem>
+												))
+											) : (
+												<div className="flex flex-col items-center justify-center py-6 px-4 text-muted-foreground">
+													<UsersThree className="w-8 h-8 mb-2 opacity-50" weight="duotone" />
+													<p className="text-sm font-medium">No recipients added</p>
+													<p className="text-xs mt-1 text-center">
+														Add a recipient below to get started
+													</p>
+												</div>
+											)}
 											<div className="border-t mt-2 pt-2">
 												<AddRecipientDialog
 													onSuccess={() => refetch()}

@@ -3,10 +3,12 @@ import {
 	BellIcon,
 	CheckCircleIcon,
 	FileTextIcon,
+	SignatureIcon,
 	UserCheckIcon,
 } from "@phosphor-icons/react";
 import { useAcceptRequest, useAckFile, useApproveSender, useFileInfo, useReceivedFiles, useReceivedRequests, useViewFile } from "@filosign/react/hooks";
 import { useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
@@ -39,6 +41,7 @@ export function NotificationsPopover() {
 		null,
 	);
 	const queryClient = useQueryClient();
+	const navigate = useNavigate();
 
 	// Only get the actionable data - pending requests and unacknowledged files
 	const receivedRequests = useReceivedRequests();
@@ -235,6 +238,8 @@ export function NotificationsPopover() {
 										key={file.pieceCid}
 										pieceCid={file.pieceCid}
 										sender={file.sender}
+										navigate={navigate}
+										setOpen={setOpen}
 									/>
 								))}
 							</div>
@@ -289,13 +294,11 @@ export function NotificationsPopover() {
 }
 
 // Component to handle individual received file notifications
-function ReceivedFileNotification({ pieceCid, sender }: { pieceCid: string; sender: string }) {
+function ReceivedFileNotification({ pieceCid, sender, navigate, setOpen }: { pieceCid: string; sender: string; navigate: any; setOpen: (open: boolean) => void }) {
 	const queryClient = useQueryClient();
 	const { data: file } = useFileInfo({ pieceCid });
 	const acknowledgeFile = useAckFile();
 	const viewFile = useViewFile();
-
-	console.log("error:", viewFile.error);
 
 	const handleAcknowledge = async () => {
 		try {
@@ -356,21 +359,77 @@ function ReceivedFileNotification({ pieceCid, sender }: { pieceCid: string; send
 	}
 
 	const isAcknowledged = file.acked;
+	const hasSignatures = file.signatures && file.signatures.length > 0;
 
+	const handleSignDocument = () => {
+		navigate({
+			to: "/dashboard/document/sign",
+			search: { pieceCid }
+		});
+		setOpen(false); // Close the popover
+	};
+
+	if (!isAcknowledged) {
+		// For unacknowledged files, show single Accept button
+		return (
+			<NotificationItemCard
+				icon={<FileTextIcon className="h-4 w-4 text-primary" />}
+				title={`File ${pieceCid.slice(0, 8)}...`}
+				subtitle={`From: ${formatAddress(sender)}`}
+				variant="info"
+				actionButton={{
+					label: acknowledgeFile.isPending ? "Accepting..." : "Accept",
+					onClick: handleAcknowledge,
+					loading: acknowledgeFile.isPending,
+					variant: "outline",
+				}}
+			/>
+		);
+	}
+
+	// For acknowledged files, show Download and Sign buttons inline
 	return (
-		<NotificationItemCard
-			icon={<FileTextIcon className="h-4 w-4 text-primary" />}
-			title={`File ${pieceCid.slice(0, 8)}...`}
-			subtitle={`From: ${formatAddress(sender)}`}
-			variant={isAcknowledged ? "default" : "info"}
-			actionButton={{
-				label: isAcknowledged
-					? (viewFile.isPending ? "Downloading..." : "Download")
-					: (acknowledgeFile.isPending ? "Accepting..." : "Accept"),
-				onClick: isAcknowledged ? handleViewFile : handleAcknowledge,
-				loading: viewFile.isPending || acknowledgeFile.isPending,
-				variant: isAcknowledged ? "default" : "outline",
-			}}
-		/>
+		<div className="p-4 rounded-lg border bg-card">
+			<div className="flex items-center justify-between gap-3">
+				<div className="flex items-center gap-3 flex-1 min-w-0">
+					<div className="flex-shrink-0 mt-0.5">
+						<FileTextIcon className="h-4 w-4 text-primary" />
+					</div>
+					<div className="flex-1 min-w-0">
+						<div className="flex items-center gap-2 mb-1">
+							<h4 className="text-sm font-medium text-foreground truncate">
+								File {pieceCid.slice(0, 8)}...
+							</h4>
+						</div>
+						<p className="text-xs text-muted-foreground line-clamp-2">
+							From: {formatAddress(sender)}
+						</p>
+					</div>
+				</div>
+				<div className="flex items-center gap-2 flex-shrink-0">
+					<Button
+						size="sm"
+						variant="default"
+						onClick={handleViewFile}
+						disabled={viewFile.isPending}
+						className="text-xs px-3 py-1 h-7"
+						title="Download File"
+					>
+						{viewFile.isPending ? "..." : "⬇"}
+					</Button>
+					{!hasSignatures && (
+						<Button
+							size="sm"
+							variant="outline"
+							onClick={handleSignDocument}
+							className="text-xs px-3 py-1 h-7"
+							title="Sign Document"
+						>
+							<SignatureIcon className="h-3 w-3" />
+						</Button>
+					)}
+				</div>
+			</div>
+		</div>
 	);
 }

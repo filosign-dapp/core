@@ -11,6 +11,7 @@ import { useAnalytics } from "../lib/hooks/use-analytics";
 import DashboardPage from "./dashboard";
 import DocumentAllPage from "./dashboard/document/all";
 import DocumentFolderPage from "./dashboard/document/folder/$folderId";
+import SignDocumentPage from "./dashboard/document/sign";
 import AddSignaturePage from "./dashboard/envelope/create/add-sign";
 import CreateEnvelopePage from "./dashboard/envelope/create/create";
 import FilesPage from "./dashboard/files";
@@ -25,13 +26,22 @@ import OnboardingSetPinPage from "./onboarding/set-pin";
 import OnboardingWelcomeCompletePage from "./onboarding/welcome";
 import PitchPage from "./pitch";
 import TestPage from "./test";
-import { useIsLoggedIn } from "@filosign/react/hooks";
+import { useRuntimeChain } from "@filosign/react/hooks";
+import { useStorePersist } from "../lib/hooks/use-store";
+import { useEffect } from "react";
 
 const rootRoute = createRootRoute({
 	component: () => {
 		useAnalytics();
-		const isLoggedIn = useIsLoggedIn();
-		console.log({ isLoggedIn: isLoggedIn.data, status: isLoggedIn.status });
+		const runtimeChainFromSDK = useRuntimeChain();
+		console.log({ runtimeChainFromSDK });
+		const { runtimeChain, setRuntimeChain } = useStorePersist();
+
+		useEffect(() => {
+			if (runtimeChainFromSDK && runtimeChainFromSDK !== runtimeChain) {
+				setRuntimeChain(runtimeChainFromSDK);
+			}
+		}, [runtimeChainFromSDK]);
 
 		return (
 			<>
@@ -124,6 +134,23 @@ const dashboardDocumentFolderRoute = createRoute({
 		return (
 			<DashboardProtector>
 				{withPageErrorBoundary(DocumentFolderPage)({})}
+			</DashboardProtector>
+		);
+	},
+});
+
+const signDocumentRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: "/dashboard/document/sign",
+	validateSearch: (search: Record<string, unknown>) => {
+		return {
+			pieceCid: (search.pieceCid as string) || "",
+		} as { pieceCid: string };
+	},
+	component: function SignDocument() {
+		return (
+			<DashboardProtector>
+				{withPageErrorBoundary(SignDocumentPage)({})}
 			</DashboardProtector>
 		);
 	},
@@ -235,6 +262,7 @@ const routeTree = rootRoute.addChildren([
 	connectionsRoute,
 	dashboardDocumentAllRoute,
 	dashboardDocumentFolderRoute,
+	signDocumentRoute,
 	createEnvelopeRoute,
 	addSignatureRoute,
 	createSignatureRoute,

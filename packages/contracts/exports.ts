@@ -4,5 +4,4 @@ export {
 	eip712signature,
 	parsePieceCid,
 	rebuildPieceCid,
-	signFileSignature,
 } from "./services/utils";

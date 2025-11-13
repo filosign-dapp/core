@@ -29,7 +29,7 @@ export default function DocumentAllPage() {
 	const [viewMode, setViewMode] = useState<"list" | "grid">("grid");
 	const [isViewSwitching, setIsViewSwitching] = useState(false);
 	const [viewerOpen, setViewerOpen] = useState(false);
-	const [selectedFileId, setSelectedFileId] = useState<string | null>(null);
+	const [selectedFile, setSelectedFile] = useState<any | null>(null);
 	const [isFilterOpen, setIsFilterOpen] = useState(false);
 
 	// File queries
@@ -57,8 +57,8 @@ export default function DocumentAllPage() {
 	};
 
 	const handleItemClick = (file: any) => {
-		// Open file viewer with piece CID
-		setSelectedFileId(file.pieceCid);
+		// Open file viewer with full file object
+		setSelectedFile(file);
 		setViewerOpen(true);
 	};
 
@@ -333,7 +333,7 @@ export default function DocumentAllPage() {
 			<FileViewer
 				open={viewerOpen}
 				onOpenChange={setViewerOpen}
-				fileId={selectedFileId || ""}
+				file={selectedFile}
 			/>
 		</DashboardLayout>
 	);

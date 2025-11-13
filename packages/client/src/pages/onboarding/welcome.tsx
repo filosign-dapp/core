@@ -74,7 +74,6 @@ export default function OnboardingWelcomeCompletePage() {
 									handleSubmit();
 								}
 							}}
-							disabled={isLoggedIn.isPending || !isLoggedIn.data}
 						>
 							Go to Dashboard
 							<CaretRightIcon
