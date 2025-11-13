@@ -7,13 +7,8 @@ export function PrivyProvider({ children }: { children: React.ReactNode }) {
 			? filecoinCalibration
 			: hardhat;
 
-	if (
-		!process.env.BUN_PUBLIC_PRIVY_APP_ID ||
-		!process.env.BUN_PUBLIC_PRIVY_APP_SECRET
-	) {
-		throw new Error(
-			"BUN_PUBLIC_PRIVY_APP_ID or BUN_PUBLIC_PRIVY_APP_SECRET are not set",
-		);
+	if (!process.env.BUN_PUBLIC_PRIVY_APP_ID) {
+		throw new Error("BUN_PUBLIC_PRIVY_APP_ID is not set");
 	}
 
 	return (

@@ -7,7 +7,7 @@ import {
 	MagnifyingGlassIcon,
 	PlusIcon,
 } from "@phosphor-icons/react";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { useState } from "react";
 import { FileViewer } from "@/src/lib/components/custom/FileViewer";
@@ -25,40 +25,49 @@ import DashboardLayout from "../../layout";
 import FileCard from "./_components/FileCard";
 
 export default function DocumentAllPage() {
-	const navigate = useNavigate();
 	const [viewMode, setViewMode] = useState<"list" | "grid">("grid");
-	const [isViewSwitching, setIsViewSwitching] = useState(false);
 	const [viewerOpen, setViewerOpen] = useState(false);
-	const [selectedFile, setSelectedFile] = useState<any | null>(null);
+	const [selectedFile, setSelectedFile] = useState<{
+		pieceCid: string;
+		sender: string;
+		status: string;
+		type?: "sent" | "received";
+	} | null>(null);
 	const [isFilterOpen, setIsFilterOpen] = useState(false);
 
 	// File queries
 	const sentFiles = useSentFiles();
 	const receivedFiles = useReceivedFiles();
 
-	const allFiles = [
-		...(Array.isArray(sentFiles.data)
-			? sentFiles.data.map((file) => ({ ...file, type: "sent" }))
-			: []),
-		...(Array.isArray(receivedFiles.data)
-			? receivedFiles.data.map((file) => ({ ...file, type: "received" }))
-			: []),
-	];
+	const sentFilesData = Array.isArray(sentFiles.data)
+		? sentFiles.data.map((file) => ({ ...file, type: "sent" as const }))
+		: [];
+
+	const receivedFilesData = Array.isArray(receivedFiles.data)
+		? receivedFiles.data.map((file) => ({ ...file, type: "received" as const }))
+		: [];
+
+	const allFiles = [...sentFilesData, ...receivedFilesData];
 
 	const handleViewModeChange = (newViewMode: "list" | "grid") => {
 		if (newViewMode !== viewMode) {
-			setIsViewSwitching(true);
 			setViewMode(newViewMode);
-			// Reset the switching state after animation completes
-			setTimeout(() => {
-				setIsViewSwitching(false);
-			}, 300);
 		}
 	};
 
-	const handleItemClick = (file: any) => {
+	const handleItemClick = (file: {
+		pieceCid: string;
+		[key: string]: unknown;
+	}) => {
 		// Open file viewer with full file object
-		setSelectedFile(file);
+		setSelectedFile(
+			file as {
+				pieceCid: string;
+				sender: string;
+				status: string;
+				type?: "sent" | "received";
+			},
+		);
 		setViewerOpen(true);
 	};
 
@@ -151,6 +160,13 @@ export default function DocumentAllPage() {
 									<ListIcon className="h-4 w-4" />
 								</Button>
 							</div>
+
+							<Link to="/dashboard/envelope/create">
+								<Button variant="primary" size="sm" className="gap-2 group">
+									<PlusIcon className="size-4" weight="bold" />
+									<p className="hidden sm:inline">New Document</p>
+								</Button>
+							</Link>
 						</div>
 					</motion.div>
 
@@ -219,7 +235,7 @@ export default function DocumentAllPage() {
 						transition={{ duration: 0.2, delay: 0.3 }}
 					>
 						{sentFiles.isLoading || receivedFiles.isLoading ? (
-							<Loader text="Loading documents..." />
+							<Loader text="Loading documents..." className="min-h-full" />
 						) : allFiles.length === 0 ? (
 							<div className="flex flex-col items-center justify-center h-full">
 								<motion.div
@@ -252,7 +268,7 @@ export default function DocumentAllPage() {
 						) : (
 							<>
 								{/* Sent Files Section */}
-								{Array.isArray(sentFiles.data) && sentFiles.data.length > 0 && (
+								{sentFilesData.length > 0 && (
 									<motion.div
 										className="space-y-4"
 										initial={{ opacity: 0, y: 10 }}
@@ -260,14 +276,14 @@ export default function DocumentAllPage() {
 										transition={{ duration: 0.2, delay: 0.4 }}
 									>
 										<h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-											Sent Files ({sentFiles.data.length})
+											Sent Files ({sentFilesData.length})
 										</h3>
 										{viewMode === "list" ? (
 											<div className="space-y-2">
-												{sentFiles.data.map((file) => (
+												{sentFilesData.map((file) => (
 													<FileCard
 														key={`sent-${file.pieceCid}`}
-														file={{ ...file, type: "sent" }}
+														file={file}
 														onClick={handleItemClick}
 														variant="list"
 													/>
@@ -275,10 +291,10 @@ export default function DocumentAllPage() {
 											</div>
 										) : (
 											<div className="grid grid-cols-2 @xl:grid-cols-3 @2xl:grid-cols-4 @3xl:grid-cols-5 @5xl:grid-cols-5 gap-4">
-												{sentFiles.data.map((file) => (
+												{sentFilesData.map((file) => (
 													<FileCard
 														key={`sent-${file.pieceCid}`}
-														file={{ ...file, type: "sent" }}
+														file={file}
 														onClick={handleItemClick}
 														variant="grid"
 													/>
@@ -289,42 +305,41 @@ export default function DocumentAllPage() {
 								)}
 
 								{/* Received Files Section */}
-								{Array.isArray(receivedFiles.data) &&
-									receivedFiles.data.length > 0 && (
-										<motion.div
-											className="space-y-4"
-											initial={{ opacity: 0, y: 10 }}
-											animate={{ opacity: 1, y: 0 }}
-											transition={{ duration: 0.2, delay: 0.5 }}
-										>
-											<h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-												Received Files ({receivedFiles.data.length})
-											</h3>
-											{viewMode === "list" ? (
-												<div className="space-y-2">
-													{receivedFiles.data.map((file) => (
-														<FileCard
-															key={`received-${file.pieceCid}`}
-															file={{ ...file, type: "received" }}
-															onClick={handleItemClick}
-															variant="list"
-														/>
-													))}
-												</div>
-											) : (
-												<div className="grid grid-cols-2 @xl:grid-cols-3 @2xl:grid-cols-4 @3xl:grid-cols-5 @5xl:grid-cols-5 gap-4">
-													{receivedFiles.data.map((file) => (
-														<FileCard
-															key={`received-${file.pieceCid}`}
-															file={{ ...file, type: "received" }}
-															onClick={handleItemClick}
-															variant="grid"
-														/>
-													))}
-												</div>
-											)}
-										</motion.div>
-									)}
+								{receivedFilesData.length > 0 && (
+									<motion.div
+										className="space-y-4"
+										initial={{ opacity: 0, y: 10 }}
+										animate={{ opacity: 1, y: 0 }}
+										transition={{ duration: 0.2, delay: 0.5 }}
+									>
+										<h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+											Received Files ({receivedFilesData.length})
+										</h3>
+										{viewMode === "list" ? (
+											<div className="space-y-2">
+												{receivedFilesData.map((file) => (
+													<FileCard
+														key={`received-${file.pieceCid}`}
+														file={file}
+														onClick={handleItemClick}
+														variant="list"
+													/>
+												))}
+											</div>
+										) : (
+											<div className="grid grid-cols-2 @xl:grid-cols-3 @2xl:grid-cols-4 @3xl:grid-cols-5 @5xl:grid-cols-5 gap-4">
+												{receivedFilesData.map((file) => (
+													<FileCard
+														key={`received-${file.pieceCid}`}
+														file={file}
+														onClick={handleItemClick}
+														variant="grid"
+													/>
+												))}
+											</div>
+										)}
+									</motion.div>
+								)}
 							</>
 						)}
 					</motion.div>

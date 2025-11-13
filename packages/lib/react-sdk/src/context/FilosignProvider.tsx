@@ -96,14 +96,14 @@ export function FilosignProvider(props: FilosignConfig) {
 
 	if (!runtime.data) {
 		if (LoaderComponent) {
-			return <LoaderComponent text="Loading Runtime..." />;
+			return <LoaderComponent />;
 		}
 		return <>Runtime Loading...</>;
 	}
 
 	if (!contracts) {
 		if (LoaderComponent) {
-			return <LoaderComponent text="Loading Contracts..." />;
+			return <LoaderComponent />;
 		}
 		return <>Not Ready...</>;
 	}

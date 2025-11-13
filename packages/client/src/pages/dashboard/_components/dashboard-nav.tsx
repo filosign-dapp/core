@@ -20,11 +20,6 @@ export default function DashboardNav() {
 			</div>
 
 			<div className="flex gap-4 items-center">
-				<Link to="/dashboard/envelope/create">
-					<Button variant="primary" className="gap-2 group">
-						<p className="hidden sm:inline">New Document</p>
-					</Button>
-				</Link>
 				<NotificationsPopover />
 				<UserDropdown />
 				<SidebarTrigger className="-ml-1 md:hidden" />

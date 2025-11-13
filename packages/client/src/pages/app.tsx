@@ -59,7 +59,7 @@ const dashboardRoute = createRoute({
 	component: function Dashboard() {
 		return (
 			<DashboardProtector>
-				{withPageErrorBoundary(DashboardPage)({})}
+				{withPageErrorBoundary(DocumentAllPage)({})}
 			</DashboardProtector>
 		);
 	},
