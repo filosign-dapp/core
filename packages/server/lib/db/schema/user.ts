@@ -2,58 +2,58 @@ import * as t from "drizzle-orm/pg-core";
 import { tEvmAddress, timestamps } from "../helpers";
 
 export const users = t.pgTable("users", {
-	walletAddress: tEvmAddress().primaryKey(),
-	keygenDataJson: t.jsonb(),
-	// email: t.text(),
-	encryptionPublicKey: t.text().notNull(),
-	signaturePublicKey: t.text().notNull(),
+    walletAddress: tEvmAddress().primaryKey(),
+    keygenDataJson: t.jsonb(),
+    // email: t.text(),
+    encryptionPublicKey: t.text().notNull(),
+    signaturePublicKey: t.text().notNull(),
 
-	/**non core here */
-	lastActiveAt: t.timestamp({ withTimezone: true }),
-	email: t.text(),
-	username: t.text().unique(),
-	firstName: t.text(),
-	lastName: t.text(),
-	avatarKey: t.text(),
-	invitedBy: tEvmAddress(),
+    /**non core here */
+    lastActiveAt: t.timestamp({ withTimezone: true }),
+    email: t.text(),
+    username: t.text().unique(),
+    firstName: t.text(),
+    lastName: t.text(),
+    avatarKey: t.text(),
+    invitedBy: tEvmAddress(),
 
-	...timestamps,
+    ...timestamps,
 });
 
 export const usersDatasets = t.pgTable("users_datasets", {
-	walletAddress: tEvmAddress()
-		.references(() => users.walletAddress, {
-			onDelete: "cascade",
-		})
-		.primaryKey(),
-	dataSetId: t.integer().notNull(),
-	providerAddress: t.text().notNull(),
-	totalDepositedBaseUnits: t
-		.bigint({ mode: "bigint" })
-		.notNull()
-		.default(BigInt(0)),
+    walletAddress: tEvmAddress()
+        .references(() => users.walletAddress, {
+            onDelete: "cascade",
+        })
+        .primaryKey(),
+    dataSetId: t.integer().notNull(),
+    providerAddress: t.text().notNull(),
+    totalDepositedBaseUnits: t
+        .bigint({ mode: "bigint" })
+        .notNull()
+        .default(BigInt(0)),
 
-	...timestamps,
+    ...timestamps,
 });
 
 export const userInvites = t.pgTable("user_invites", {
-	id: t.uuid().primaryKey().defaultRandom(),
-	sender: tEvmAddress()
-		.references(() => users.walletAddress, {
-			onDelete: "cascade",
-		})
-		.notNull(),
-	inviteeEmail: t.text().notNull(),
-	accepted: t.boolean().notNull().default(false),
-	message: t.text(),
+    id: t.uuid().primaryKey().defaultRandom(),
+    sender: tEvmAddress()
+        .references(() => users.walletAddress, {
+            onDelete: "cascade",
+        })
+        .notNull(),
+    inviteeEmail: t.text().notNull(),
+    accepted: t.boolean().notNull().default(false),
+    message: t.text(),
 
-	...timestamps,
+    ...timestamps,
 });
 
 export const userSignatures = t.pgTable("user_signatures", {
-	id: t.uuid().primaryKey().defaultRandom(),
-	walletAddress: tEvmAddress().notNull(),
-	data: t.jsonb().notNull(),
+    id: t.uuid().primaryKey().defaultRandom(),
+    walletAddress: tEvmAddress().notNull(),
+    data: t.text().notNull(),
 
-	...timestamps,
+    ...timestamps,
 });
