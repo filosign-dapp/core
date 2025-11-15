@@ -1,4 +1,5 @@
 import dbClient from "./client";
+import { dbExtensionHelpers } from "./extensions";
 import schema from "./schema";
 
 const db = {
@@ -9,7 +10,7 @@ const db = {
 	delete: dbClient.delete.bind(dbClient),
 	transaction: dbClient.transaction.bind(dbClient),
 	query: dbClient.query,
-	//   ...dbExtensionHelpers,
+	...dbExtensionHelpers(dbClient),
 	schema,
 };
 
