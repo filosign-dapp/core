@@ -1,8 +1,9 @@
+import { useFilosignContext } from "@filosign/react";
 import { useRequestApproval } from "@filosign/react/hooks";
 import { ChatCircleIcon, PlusIcon, WalletIcon } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { isAddress } from "viem";
+import { getAddress, isAddress } from "viem";
 import { Button } from "@/src/lib/components/ui/button";
 import {
 	Dialog,
@@ -29,6 +30,7 @@ export default function AddRecipientDialog({
 	const [walletAddress, setWalletAddress] = useState("");
 	const [message, setMessage] = useState("");
 
+	const { wallet } = useFilosignContext();
 	const sendShareRequest = useRequestApproval();
 
 	const handleSendRequest = async () => {
@@ -37,23 +39,45 @@ export default function AddRecipientDialog({
 			return;
 		}
 
-		await sendShareRequest.mutateAsync({
-			recipientWallet: walletAddress,
-			message: message.trim() || undefined,
-		});
+		// Normalize addresses for comparison
+		const normalizedRecipient = getAddress(walletAddress);
+		const normalizedSender = wallet?.account?.address
+			? getAddress(wallet.account.address)
+			: null;
 
-		toast.success("Share request sent successfully!");
-		setWalletAddress("");
-		setMessage("");
-		setOpen(false);
-		onSuccess?.();
+		if (normalizedSender && normalizedRecipient === normalizedSender) {
+			toast.error("You cannot add yourself as a recipient");
+			return;
+		}
+
+		try {
+			await sendShareRequest.mutateAsync({
+				recipientWallet: walletAddress,
+				message: message.trim() || undefined,
+			});
+
+			toast.success("Share request sent successfully!");
+			setWalletAddress("");
+			setMessage("");
+			setOpen(false);
+			onSuccess?.();
+		} catch (error: unknown) {
+			// Error handling is done in useEffect below
+		}
 	};
 
 	useEffect(() => {
-		if (sendShareRequest.isError) {
-			toast.error("Failed to send share request. Please try again.");
+		if (sendShareRequest.isError && sendShareRequest.error) {
+			// The error from postSafe is thrown as an Error with the message
+			const errorMessage =
+				sendShareRequest.error instanceof Error
+					? sendShareRequest.error.message
+					: typeof sendShareRequest.error === "string"
+						? sendShareRequest.error
+						: "Failed to send share request. Please try again.";
+			toast.error(errorMessage);
 		}
-	}, [sendShareRequest.isError]);
+	}, [sendShareRequest.isError, sendShareRequest.error]);
 
 	const handleClose = () => {
 		setWalletAddress("");
