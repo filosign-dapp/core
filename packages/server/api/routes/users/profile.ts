@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, desc, eq, or } from "drizzle-orm";
 import { Hono } from "hono";
 import { isAddress } from "viem";
 import db from "../../../lib/db";
@@ -203,6 +203,7 @@ export default new Hono()
 
 	.get("/:q", authenticated, async (ctx) => {
 		const q = ctx.req.param("q");
+		const user = ctx.var.userWallet;
 
 		const returns = {
 			walletAddress: users.walletAddress,
@@ -213,25 +214,26 @@ export default new Hono()
 			lastName: users.lastName,
 			avatarKey: users.avatarKey,
 		};
-		let userData: Record<string, unknown> | null = null;
 
-		if (isAddress(q)) {
-			const [dbResp] = await db
+		let [userData] = await db
+			.select(returns)
+			.from(users)
+			.where(eq(users.email, q));
+		if (!userData && isAddress(q)) {
+			[userData] = await db
 				.select(returns)
 				.from(users)
 				.where(eq(users.walletAddress, q));
-			userData = dbResp;
-		} else {
-			const [dbResp] = await db
-				.select(returns)
-				.from(users)
-				.where(eq(users.username, q));
-			userData = dbResp;
 		}
 
 		if (!userData) {
 			return respond.err(ctx, "User not found", 404);
 		}
+
+		const isApproved = await db.canSendTo({
+			sender: user,
+			recipient: userData.walletAddress,
+		});
 
 		let avatarUrl: string | null = null;
 		if (userData.avatarKey) {
@@ -243,7 +245,7 @@ export default new Hono()
 
 		return respond.ok(
 			ctx,
-			{ ...userData, avatarUrl },
+			{ ...userData, avatarUrl, isApproved },
 			"User data retrieved",
 			200,
 		);
