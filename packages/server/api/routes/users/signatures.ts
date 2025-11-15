@@ -1,103 +1,81 @@
-// import { eq } from "drizzle-orm";
-// import { Hono } from "hono";
-// import { bodyLimit } from "hono/body-limit";
-// import { keccak256 } from "viem";
-// import { KB } from "../../../constants";
-// import db from "../../../lib/db";
-// import { bucket } from "../../../lib/s3/client";
-// import { respond } from "../../../lib/utils/respond";
-// import { authenticated } from "../../middleware/auth";
+import { and, eq } from "drizzle-orm";
+import { Hono } from "hono";
+import { bodyLimit } from "hono/body-limit";
+import z from "zod";
+import { KB } from "../../../constants";
+import db from "../../../lib/db";
+import { respond } from "../../../lib/utils/respond";
+import { authenticated } from "../../middleware/auth";
 
-// const { userSignatures } = db.schema;
+const { userSignatures } = db.schema;
 
-// export default new Hono()
-// 	.post(
-// 		"/",
-// 		authenticated,
-// 		bodyLimit({
-// 			maxSize: 100 * KB,
-// 			onError: (ctx) => respond.err(ctx, "Request body too large", 413),
-// 		}),
-// 		async (ctx) => {
-// 			const body = await ctx.req.parseBody();
-// 			const uploaded = body.file;
-// 			const name = body.name;
+export default new Hono()
 
-// 			if (!uploaded) {
-// 				return respond.err(ctx, "no file provided", 400);
-// 			}
-// 			if (!(uploaded instanceof File)) {
-// 				return respond.err(ctx, "invalid file", 400);
-// 			}
-// 			if (uploaded.size > 50 * KB) {
-// 				return respond.err(ctx, "file too large [<50KB]", 413);
-// 			}
-// 			if (typeof name !== "string" || name.length < 3 || name.length > 32) {
-// 				return respond.err(ctx, "invalid name [3<len<32]", 400);
-// 			}
+	.post(
+		"/",
+		authenticated,
+		bodyLimit({
+			maxSize: 30 * KB,
+			onError: (ctx) => respond.err(ctx, "Request body too large", 413),
+		}),
+		async (ctx) => {
+			const wallet = ctx.var.userWallet;
+			const rawBody = await ctx.req.json();
+			const parsedBody = z
+				.object({
+					data: z.string(),
+				})
+				.safeParse(rawBody);
 
-// 			const bytes = await uploaded.bytes();
+			if (parsedBody.error) {
+				return respond.err(ctx, parsedBody.error.message, 400);
+			}
 
-// 			const signatureVisualHash = keccak256(bytes);
+			try {
+				await db.insert(userSignatures).values({
+					walletAddress: wallet,
+					data: parsedBody.data.data,
+				});
+			} catch (error) {
+				return respond.err(ctx, `Failed to upload signature ${error}`, 500);
+			}
 
-// 			const key = `signatures/${signatureVisualHash}.png`;
-// 			const file = bucket.file(key);
-// 			await file.write(bytes);
+			return respond.ok(ctx, {}, "Signature uploaded successfully", 201);
+		},
+	)
 
-// 			const dbEntry = db
-// 				.insert(userSignatures)
-// 				.values({
-// 					name,
-// 					visualHash: signatureVisualHash,
-// 					storageBucketPath: key,
-// 					walletAddress: ctx.var.userWallet,
-// 				})
-// 				.returning()
-// 				.get();
+	.get("/", authenticated, async (ctx) => {
+		const wallet = ctx.var.userWallet;
+		const dbEntries = await db
+			.select()
+			.from(userSignatures)
+			.where(eq(userSignatures.walletAddress, wallet));
 
-// 			return respond.ok(ctx, dbEntry, "Signature uploaded successfully", 201);
-// 		},
-// 	)
+		return respond.ok(
+			ctx,
+			{ signatures: dbEntries },
+			"User signatures retrieved successfully",
+			200,
+		);
+	})
 
-// 	.get("/", authenticated, async (ctx) => {
-// 		const wallet = ctx.var.userWallet;
+	.get("/:id", authenticated, async (ctx) => {
+		const wallet = ctx.var.userWallet;
+		const signatureId = ctx.req.param("id");
 
-// 		const signatures = db
-// 			.select()
-// 			.from(userSignatures)
-// 			.where(eq(userSignatures.walletAddress, wallet))
-// 			.all();
+		const [dbEntry] = await db
+			.select()
+			.from(userSignatures)
+			.where(
+				and(
+					eq(userSignatures.id, signatureId),
+					eq(userSignatures.walletAddress, wallet),
+				),
+			);
 
-// 		return respond.ok(
-// 			ctx,
-// 			{ signatures },
-// 			"Signatures retrieved successfully",
-// 			200,
-// 		);
-// 	})
+		if (!dbEntry) {
+			return respond.err(ctx, "Signature not found", 404);
+		}
 
-// 	.delete("/:id", authenticated, async (ctx) => {
-// 		const { id } = ctx.req.param();
-// 		const wallet = ctx.var.userWallet;
-
-// 		const signature = db
-// 			.select()
-// 			.from(userSignatures)
-// 			.where(eq(userSignatures.id, id))
-// 			.get();
-
-// 		if (!signature) {
-// 			return respond.err(ctx, "Signature not found", 404);
-// 		}
-
-// 		if (signature.walletAddress !== wallet) {
-// 			return respond.err(ctx, "Unauthorized", 403);
-// 		}
-
-// 		const file = bucket.file(signature.storageBucketPath);
-// 		await file.delete();
-
-// 		db.delete(userSignatures).where(eq(userSignatures.id, id)).run();
-
-// 		return respond.ok(ctx, {}, "Signature deleted successfully", 200);
-// 	});
+		return respond.ok(ctx, dbEntry, "Signature retrieved successfully", 200);
+	});
