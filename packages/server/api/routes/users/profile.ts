@@ -1,4 +1,4 @@
-import { and, desc, eq, or } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { isAddress } from "viem";
 import db from "../../../lib/db";
