@@ -10,11 +10,16 @@ BigInt.prototype.toJSON = function () {
 	return this.toString();
 };
 
+const allowedOrigins = [
+	env.FRONTEND_URL,
+	"https://app.filosign.xyz",
+].filter(Boolean);
+
 export const app = new Hono()
 	.use(logger())
 	.use(
 		cors({
-			origin: [env.FRONTEND_URL],
+			origin: allowedOrigins,
 			allowHeaders: ["Content-Type", "Authorization"],
 			allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
 			credentials: true,
