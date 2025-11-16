@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { isAddress } from "viem";
+import z from "zod";
 import db from "../../../lib/db";
 import { bucket } from "../../../lib/s3/client";
 import { respond } from "../../../lib/utils/respond";
@@ -47,57 +48,39 @@ export default new Hono()
 
 	.put("/", authenticated, async (ctx) => {
 		const wallet = ctx.var.userWallet;
+		const rawBody = await ctx.req.json();
+
+		const parsedBody = z
+			.object({
+				email: z.string().email("Invalid email format").optional(),
+				username: z
+					.string()
+					.min(3, "Username must be at least 3 characters")
+					.max(16, "Username must be at most 16 characters")
+					.optional(),
+				firstName: z
+					.string()
+					.min(1, "First name must be at least 1 character")
+					.max(50, "First name must be at most 50 characters")
+					.optional(),
+				lastName: z
+					.string()
+					.min(1, "Last name must be at least 1 character")
+					.max(50, "Last name must be at most 50 characters")
+					.optional(),
+			})
+			.safeParse(rawBody);
+
+		if (parsedBody.error) {
+			return respond.err(ctx, parsedBody.error.message, 400);
+		}
+
 		const {
 			email: emailRaw,
 			username: usernameRaw,
 			firstName: firstNameRaw,
 			lastName: lastNameRaw,
-		} = await ctx.req.json();
-
-		if (emailRaw !== undefined) {
-			if (typeof emailRaw !== "string" || !emailRaw.includes("@")) {
-				return respond.err(ctx, "Invalid email format", 400);
-			}
-		}
-		if (usernameRaw !== undefined) {
-			if (
-				typeof usernameRaw !== "string" ||
-				usernameRaw.trim().length < 3 ||
-				usernameRaw.length > 16
-			) {
-				return respond.err(
-					ctx,
-					"Username must be between 3 and 16 characters",
-					400,
-				);
-			}
-		}
-		if (firstNameRaw !== undefined) {
-			if (
-				typeof firstNameRaw !== "string" ||
-				firstNameRaw.trim().length < 1 ||
-				firstNameRaw.length > 50
-			) {
-				return respond.err(
-					ctx,
-					"First name must be between 1 and 50 characters",
-					400,
-				);
-			}
-		}
-		if (lastNameRaw !== undefined) {
-			if (
-				typeof lastNameRaw !== "string" ||
-				lastNameRaw.trim().length < 1 ||
-				lastNameRaw.length > 50
-			) {
-				return respond.err(
-					ctx,
-					"Last name must be between 1 and 50 characters",
-					400,
-				);
-			}
-		}
+		} = parsedBody.data;
 
 		const email = emailRaw?.trim();
 		const username = usernameRaw?.trim();
@@ -140,12 +123,20 @@ export default new Hono()
 			return respond.err(ctx, "No avatar file provided", 400);
 		}
 
-		if (file.size > 32 * 1024) {
-			return respond.err(ctx, "Avatar file must be 32KB or smaller", 400);
-		}
+		const parsedFile = z
+			.object({
+				size: z.number().max(32 * 1024, "Avatar file must be 32KB or smaller"),
+				type: z.literal("image/webp", {
+					message: "Avatar must be a WebP image",
+				}),
+			})
+			.safeParse({
+				size: file.size,
+				type: file.type,
+			});
 
-		if (file.type !== "image/webp") {
-			return respond.err(ctx, "Avatar must be a WebP image", 400);
+		if (parsedFile.error) {
+			return respond.err(ctx, parsedFile.error.message, 400);
 		}
 
 		const buffer = await file.arrayBuffer();
