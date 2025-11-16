@@ -24,5 +24,36 @@ export function dbExtensionHelpers(db: DbClient) {
 		return latestApproval ? latestApproval.active : false;
 	}
 
-	return { canSendTo };
+	async function updateUserFieldWithLog(args: {
+		walletAddress: Address;
+		fieldName: "username" | "email" | "firstName" | "lastName";
+		newValue: string;
+	}) {
+		const { walletAddress, fieldName, newValue } = args;
+
+		const [previous] = await db
+			.select()
+			.from(schema.users)
+			.where(eq(schema.users.walletAddress, walletAddress));
+
+		if (!previous) {
+			throw new Error("User not found");
+		}
+
+		const oldValue = previous[fieldName];
+
+		await db
+			.update(schema.users)
+			.set({ [fieldName]: newValue })
+			.where(eq(schema.users.walletAddress, walletAddress));
+
+		await db.insert(schema.userHistory).values({
+			walletAddress,
+			fieldName,
+			oldValue: oldValue ?? "",
+			newValue,
+		});
+	}
+
+	return { canSendTo, updateUserFieldWithLog };
 }
