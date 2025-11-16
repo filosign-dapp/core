@@ -8,7 +8,6 @@ import { withPageErrorBoundary } from "@/src/lib/components/errors/PageErrorBoun
 import DashboardProtector from "../lib/components/custom/DashboardProtector";
 import { NotFound } from "../lib/components/custom/NotFound";
 import { useAnalytics } from "../lib/hooks/use-analytics";
-import DashboardPage from "./dashboard";
 import ConnectionsPage from "./dashboard/connections";
 import DocumentAllPage from "./dashboard/document/all";
 import DocumentFolderPage from "./dashboard/document/folder/$folderId";
