@@ -22,7 +22,7 @@ const plans = [
 	},
 	{
 		name: "Standard",
-		price: 25,
+		price: 20,
 		priceSuffix: "per/month",
 		billedYearly: {
 			price: 20,
@@ -41,10 +41,10 @@ const plans = [
 	},
 	{
 		name: "Enterprise",
-		price: "50",
+		price: 30,
 		priceSuffix: "per user, per month",
 		billedYearly: {
-			price: 40,
+			price: 30,
 			save: 10 * 12,
 		},
 		description:
@@ -116,7 +116,7 @@ export default function PricingSection() {
 				</div>
 			</motion.div>
 
-			<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-6 xl:gap-8">
+			<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 xl:gap-8">
 				{plans.map((plan, index) => (
 					<motion.div
 						key={plan.name}

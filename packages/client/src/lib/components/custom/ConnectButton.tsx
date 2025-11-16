@@ -1,19 +1,13 @@
-import { useIsRegistered, useLogout } from "@filosign/react/hooks";
-import { SignOutIcon } from "@phosphor-icons/react";
+import { useIsRegistered } from "@filosign/react/hooks";
 import { usePrivy } from "@privy-io/react-auth";
 import { Link } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { Button } from "@/src/lib/components/ui/button";
+import { UserDropdownButton } from "./UserDropdownButton";
 
 export default function ConnectButton() {
-	const {
-		ready,
-		authenticated,
-		login: loginPrivy,
-		logout: logoutPrivy,
-	} = usePrivy();
+	const { ready, authenticated, login: loginPrivy } = usePrivy();
 	const isRegistered = useIsRegistered();
-	const logoutFilosign = useLogout();
 
 	// Determine button state for smooth transitions
 	const getButtonState = () => {
@@ -23,16 +17,7 @@ export default function ConnectButton() {
 		return "dashboard";
 	};
 
-	const handleLogout = async () => {
-		try {
-			await logoutFilosign.mutateAsync();
-			await logoutPrivy();
-		} catch (error) {
-			console.error("Logout failed:", error);
-		}
-	};
-
-	const showLogout =
+	const showUserDropdown =
 		authenticated &&
 		(getButtonState() === "get-started" || getButtonState() === "dashboard");
 
@@ -98,28 +83,7 @@ export default function ConnectButton() {
 					</AnimatePresence>
 				)}
 			</Button>
-			{showLogout && (
-				<AnimatePresence>
-					<motion.div
-						initial={{ opacity: 0, x: -10 }}
-						animate={{ opacity: 1, x: 0 }}
-						exit={{ opacity: 0, x: -10 }}
-						transition={{
-							duration: 0.2,
-							ease: "easeInOut",
-						}}
-					>
-						<Button
-							variant="secondary"
-							onClick={handleLogout}
-							disabled={logoutFilosign.isPending}
-							className=""
-						>
-							<SignOutIcon className="size-5" weight="fill" />
-						</Button>
-					</motion.div>
-				</AnimatePresence>
-			)}
+			{showUserDropdown && <UserDropdownButton />}
 		</motion.div>
 	);
 }

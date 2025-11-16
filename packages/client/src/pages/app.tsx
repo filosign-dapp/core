@@ -1,17 +1,13 @@
-import { useRuntimeChain } from "@filosign/react/hooks";
 import {
 	createRootRoute,
 	createRoute,
 	createRouter,
 	Outlet,
 } from "@tanstack/react-router";
-import { useEffect } from "react";
 import { withPageErrorBoundary } from "@/src/lib/components/errors/PageErrorBoundary";
 import DashboardProtector from "../lib/components/custom/DashboardProtector";
 import { NotFound } from "../lib/components/custom/NotFound";
 import { useAnalytics } from "../lib/hooks/use-analytics";
-import { useStorePersist } from "../lib/hooks/use-store";
-import DashboardPage from "./dashboard";
 import ConnectionsPage from "./dashboard/connections";
 import DocumentAllPage from "./dashboard/document/all";
 import DocumentFolderPage from "./dashboard/document/folder/$folderId";
