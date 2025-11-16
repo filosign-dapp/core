@@ -11,7 +11,7 @@ export PATH="/root/.bun/bin:$PATH"
 echo "✅ Environment loaded."
 
 echo "👉 Pulling latest code..."
-git pull origin main
+git pull origin backup
 
 echo "📦 Installing dependencies..."
 bun install
