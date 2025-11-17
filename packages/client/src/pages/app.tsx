@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-router";
 import { withPageErrorBoundary } from "@/src/lib/components/errors/PageErrorBoundary";
 import DashboardProtector from "../lib/components/custom/DashboardProtector";
+import ClosedBetaGuard from "../lib/components/custom/ClosedBetaGuard";
 import { NotFound } from "../lib/components/custom/NotFound";
 import { useAnalytics } from "../lib/hooks/use-analytics";
 import ConnectionsPage from "./dashboard/connections";
@@ -30,7 +31,12 @@ import LogoPage from "./logo";
 const rootRoute = createRootRoute({
 	component: () => {
 		useAnalytics();
-		return <Outlet />;
+		return (
+			<>
+				<ClosedBetaGuard />
+				<Outlet />
+			</>
+		);
 	},
 });
 
