@@ -4,7 +4,6 @@ import { tEvmAddress, timestamps } from "../helpers";
 export const users = t.pgTable("users", {
 	walletAddress: tEvmAddress().primaryKey(),
 	keygenDataJson: t.jsonb(),
-	// email: t.text(),
 	encryptionPublicKey: t.text().notNull(),
 	signaturePublicKey: t.text().notNull(),
 
@@ -46,6 +45,21 @@ export const userInvites = t.pgTable("user_invites", {
 	inviteeEmail: t.text().notNull(),
 	accepted: t.boolean().notNull().default(false),
 	message: t.text(),
+
+	...timestamps,
+});
+
+export const userHistory = t.pgTable("user_history", {
+	id: t.uuid().primaryKey().defaultRandom(),
+	walletAddress: tEvmAddress()
+		.references(() => users.walletAddress, {
+			onDelete: "cascade",
+		})
+		.notNull(),
+	fieldName: t.text().notNull(), // 'email' or 'username'
+	oldValue: t.text().notNull(),
+	newValue: t.text().notNull(),
+	changedAt: t.timestamp({ withTimezone: true }).notNull().defaultNow(),
 
 	...timestamps,
 });
