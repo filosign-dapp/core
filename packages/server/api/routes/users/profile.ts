@@ -216,6 +216,12 @@ export default new Hono()
 				.from(users)
 				.where(eq(users.walletAddress, q));
 		}
+		if (!userData) {
+			[userData] = await db
+				.select(returns)
+				.from(users)
+				.where(eq(users.username, q));
+		}
 
 		if (!userData) {
 			return respond.err(ctx, "User not found", 404);
