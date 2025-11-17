@@ -21,7 +21,7 @@ export function useFileInfo(args: { pieceCid: string | undefined }) {
 					signatures: z.array(
 						z.object({
 							signer: z.string(),
-							timestamp: z.number(),
+							timestamp: z.string(),
 							onchainTxHash: zHexString(),
 						}),
 					),

@@ -1,23 +1,29 @@
 import { useQuery } from "@tanstack/react-query";
 import type { Address } from "viem";
+import z from "zod";
 import { MINUTE } from "../../constants";
 import { useFilosignContext } from "../../context/FilosignProvider";
 
 export function useCanSendTo(args: { recipient: Address }) {
 	const { recipient } = args;
-	const { contracts, wallet } = useFilosignContext();
+	const { api, wallet } = useFilosignContext();
 
 	return useQuery({
 		queryKey: ["fsQ-is-approved", recipient, wallet?.account.address],
 		queryFn: async () => {
-			if (!contracts || !wallet) return false;
-			const isApproved = await contracts.FSManager.read.approvedSenders([
-				recipient,
-				wallet.account.address,
-			]);
-			return isApproved;
+			if (!api || !wallet) return false;
+
+			const response = await api.rpc.getSafe(
+				{
+					canSend: z.boolean(),
+					reason: z.string().nullable(),
+				},
+				`/sharing/can-send-to?recipient=${recipient}`,
+			);
+
+			return response.data.canSend;
 		},
-		enabled: !!wallet && !!contracts,
+		enabled: !!wallet && !!api,
 		staleTime: 5 * MINUTE,
 	});
 }
