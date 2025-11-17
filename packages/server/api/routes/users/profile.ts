@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { isAddress } from "viem";
-import z from "zod";
+import z, { email } from "zod";
 import db from "../../../lib/db";
 import { bucket } from "../../../lib/s3/client";
 import { respond } from "../../../lib/utils/respond";
@@ -202,6 +202,8 @@ export default new Hono()
 			firstName: users.firstName,
 			lastName: users.lastName,
 			avatarKey: users.avatarKey,
+			email: users.email,
+			mobile: users.mobile,
 		};
 
 		let [userData] = await db
@@ -224,6 +226,10 @@ export default new Hono()
 			recipient: userData.walletAddress,
 		});
 
+		if (!isApproved) {
+			return respond.err(ctx, "You are not approved by this user", 401);
+		}
+
 		let avatarUrl: string | null = null;
 		if (userData.avatarKey) {
 			avatarUrl = bucket.presign(userData.avatarKey as string, {
@@ -234,7 +240,19 @@ export default new Hono()
 
 		return respond.ok(
 			ctx,
-			{ ...userData, avatarUrl, isApproved },
+			{
+				walletAddress: userData.walletAddress,
+				encryptionPublicKey: userData.encryptionPublicKey,
+				lastActiveAt: userData.lastActiveAt,
+				createdAt: userData.createdAt,
+				firstName: userData.firstName,
+				lastName: userData.lastName,
+				avatarUrl,
+				has: {
+					email: !!userData.email,
+					mobile: !!userData.mobile,
+				},
+			},
 			"User data retrieved",
 			200,
 		);
