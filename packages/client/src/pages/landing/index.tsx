@@ -33,7 +33,7 @@ export default function LandingPage() {
 
 			<div className="h-[var(--section-gap)]" />
 
-			<PricingSection />
+			{/* <PricingSection /> */}
 
 			<Separator className="mt-16 md:mt-56" />
 
