@@ -87,28 +87,26 @@ export default new Hono()
 		const firstName = firstNameRaw?.trim();
 		const lastName = lastNameRaw?.trim();
 
-		const [previous] = await db
-			.select()
-			.from(users)
-			.where(eq(users.walletAddress, wallet));
-
-		if (!previous) {
-			return respond.err(ctx, "User not found", 404);
-		}
-
-		await db
-			.update(users)
-			.set({
-				email: email ?? users.email,
-				username: username ?? users.username,
-				firstName: firstName ?? users.firstName,
-				lastName: lastName ?? users.lastName,
-			})
-			.where(eq(users.walletAddress, wallet));
-
-		if (previous.email !== email) {
-			``;
-		}
+		await db.updateUserFieldWithLog({
+			walletAddress: wallet,
+			fieldName: "email",
+			newValue: email,
+		});
+		await db.updateUserFieldWithLog({
+			walletAddress: wallet,
+			fieldName: "username",
+			newValue: username,
+		});
+		await db.updateUserFieldWithLog({
+			walletAddress: wallet,
+			fieldName: "firstName",
+			newValue: firstName,
+		});
+		await db.updateUserFieldWithLog({
+			walletAddress: wallet,
+			fieldName: "lastName",
+			newValue: lastName,
+		});
 
 		return respond.ok(ctx, {}, "Profile updated successfully", 200);
 	})
