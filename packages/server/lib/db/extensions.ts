@@ -27,7 +27,7 @@ export function dbExtensionHelpers(db: DbClient) {
 	async function updateUserFieldWithLog(args: {
 		walletAddress: Address;
 		fieldName: "username" | "email" | "firstName" | "lastName";
-		newValue: string;
+		newValue: string | undefined | null;
 	}) {
 		const { walletAddress, fieldName, newValue } = args;
 
@@ -35,6 +35,14 @@ export function dbExtensionHelpers(db: DbClient) {
 			.select()
 			.from(schema.users)
 			.where(eq(schema.users.walletAddress, walletAddress));
+
+		if (
+			!newValue ||
+			newValue.trim() === "" ||
+			newValue === previous[fieldName]
+		) {
+			return;
+		}
 
 		if (!previous) {
 			throw new Error("User not found");
