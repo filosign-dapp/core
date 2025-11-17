@@ -43,6 +43,12 @@ export default function DashboardProtector({
 	const [error, setError] = useState("");
 
 	useEffect(() => {
+		// App is in closed beta - redirect all authenticated users back to landing
+		if (ready && authenticated) {
+			navigate({ to: "/" });
+			return;
+		}
+
 		if (
 			ready &&
 			authenticated &&
@@ -59,7 +65,7 @@ export default function DashboardProtector({
 		) {
 			navigate({ to: "/" });
 		}
-	}, [ready, authenticated, isRegistered.data, isLoggedIn.data]);
+	}, [ready, authenticated, isRegistered.data, isLoggedIn.data, navigate]);
 
 	const handlePinSubmit = async () => {
 		if (pin.length !== 6) return;

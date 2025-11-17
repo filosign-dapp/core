@@ -1,9 +1,10 @@
-import { CaretRightIcon, CircleIcon, PlayIcon } from "@phosphor-icons/react";
-import { Link } from "@tanstack/react-router";
+import { CircleIcon } from "@phosphor-icons/react";
+// import { CaretRightIcon, PlayIcon } from "@phosphor-icons/react"; // Commented out for closed beta
+// import { Link } from "@tanstack/react-router"; // Commented out for closed beta
 import { motion } from "motion/react";
 import { Image } from "@/src/lib/components/custom/Image";
 import { Badge } from "@/src/lib/components/ui/badge";
-import { Button } from "@/src/lib/components/ui/button";
+// import { Button } from "@/src/lib/components/ui/button"; // Commented out for closed beta
 
 export default function HeroSection() {
 	return (
@@ -68,8 +69,8 @@ export default function HeroSection() {
 					Secure, fast, and easy-to-use document signing on filecoin.
 				</motion.p>
 
-				{/* Action Buttons */}
-				<motion.div
+				{/* Action Buttons - Commented out for closed beta */}
+				{/* <motion.div
 					initial={{ opacity: 0, y: 20 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{
@@ -109,7 +110,7 @@ export default function HeroSection() {
 							See it in action
 						</Link>
 					</Button>
-				</motion.div>
+				</motion.div> */}
 			</motion.div>
 
 			{/* Hero Image */}
