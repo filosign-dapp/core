@@ -25,6 +25,7 @@ import OnboardingSetPinPage from "./onboarding/set-pin";
 import OnboardingWelcomeCompletePage from "./onboarding/welcome";
 import PitchPage from "./pitch";
 import TestPage from "./test";
+import LogoPage from "./logo";
 
 const rootRoute = createRootRoute({
 	component: () => {
@@ -235,6 +236,14 @@ const testRoute = createRoute({
 	},
 });
 
+const logoRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: "/logo",
+	component: function Logo() {
+		return withPageErrorBoundary(LogoPage)({});
+	},
+});
+
 const routeTree = rootRoute.addChildren([
 	indexRoute,
 	pitchRoute,
@@ -255,6 +264,7 @@ const routeTree = rootRoute.addChildren([
 	onboardingWelcomeCompleteRoute,
 	notFoundRoute,
 	testRoute,
+	logoRoute,
 ]);
 const router = createRouter({
 	routeTree,

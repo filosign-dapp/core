@@ -100,12 +100,14 @@ export function FilosignProvider(props: FilosignConfig) {
 		}
 		return <>Runtime Loading...</>;
 	}
-	if (!contracts) {
-		if (LoaderComponent) {
-			return <LoaderComponent />;
-		}
-		return <>Not Ready...</>;
-	}
+
+	// if (!contracts) {
+	// 	console.log("contracts", contracts);
+	// 	if (LoaderComponent) {
+	// 		return <LoaderComponent />;
+	// 	}
+	// 	return <>Not Ready...</>;
+	// }
 
 	return (
 		<FilosignContext.Provider value={value}>
