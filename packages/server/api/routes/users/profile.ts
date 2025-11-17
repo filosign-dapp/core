@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { isAddress } from "viem";
-import z, { email } from "zod";
+import z from "zod";
 import db from "../../../lib/db";
 import { bucket } from "../../../lib/s3/client";
 import { respond } from "../../../lib/utils/respond";

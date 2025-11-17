@@ -39,6 +39,7 @@
 		"@hono/zod-validator": "0.7.4",
 		"@privy-io/wagmi": "2.0.2",
 		"dotenv": "17.2.3",
+		"ipaddr.js": "2.2.0",
 		"viem": "2.38.5"
 	}
 }
