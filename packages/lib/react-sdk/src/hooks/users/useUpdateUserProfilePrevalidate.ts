@@ -19,7 +19,6 @@ export function useUpdateUserProfilePrevalidate(args: {
 			const prevalidateResponse = await api.rpc.getSafe(
 				{
 					valid: z.boolean(),
-					message: z.string(),
 				},
 				`/users/profile/prevalidate?${new URLSearchParams({
 					...(email ? { email } : {}),

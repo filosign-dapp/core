@@ -7,6 +7,7 @@ import { useAuthedApi } from "../auth";
 
 export function useUserProfileByQuery(query: {
 	address?: Address | undefined;
+	email?: string | undefined;
 	username?: string | undefined;
 }) {
 	const { data: api } = useAuthedApi();
@@ -14,14 +15,8 @@ export function useUserProfileByQuery(query: {
 	return useQuery({
 		queryKey: ["fsQ-user-info-by-address", query],
 		queryFn: async () => {
-			if ((!query.address && !query.username) || !api)
+			if ((!query.address && !query.username && !query.email) || !api)
 				throw new Error("Not unreachable");
-
-			if (!!query.address && !!query.username) {
-				console.warn(
-					"Both address and username provided to useUserProfileByQuery, using address",
-				);
-			}
 
 			const userInfo = await api.rpc.getSafe(
 				{
@@ -30,14 +25,20 @@ export function useUserProfileByQuery(query: {
 
 					lastActiveAt: z.string(),
 					createdAt: z.string(),
+					firstName: z.string().nullable(),
+					lastName: z.string().nullable(),
 					avatarUrl: z.string().nullable(),
+					has: z.object({
+						email: z.boolean(),
+						mobile: z.boolean(),
+					}),
 				},
-				`/users/profile/${query.address ?? query.username}`,
+				`/users/profile/${query.address ?? query.username ?? query.email}`,
 			);
 
 			return userInfo.data;
 		},
-		enabled: (!!query.address || !!query.username) && !!api,
+		enabled: (!!query.address || !!query.username || !!query.email) && !!api,
 		staleTime: 1 * DAY,
 	});
 }
