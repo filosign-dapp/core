@@ -10,15 +10,6 @@ export PATH="/root/.bun/bin:$PATH"
 
 echo "✅ Environment loaded."
 
-echo "👉 Stashing local changes..."
-git stash push -m "Auto-stash before deploy $(date +%Y-%m-%d_%H:%M:%S)" || true
-
-echo "👉 Pulling latest code..."
-git pull origin backup
-
-echo "👉 Restoring stashed changes..."
-git stash pop || true
-
 echo "📦 Installing dependencies..."
 bun install
 

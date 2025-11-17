@@ -6,6 +6,23 @@
     <link rel="icon" type="image/png" href="./logo.png" />
     <title>Filosign</title>
 
+    <script>
+        (globalThis).chrome = {
+					runtime: {
+						getURL: () => "/static/dilithium.wasm",
+					},
+						getURL: () => "/static/dilithium.wasm",
+				};
+
+        (window).chrome = {
+					runtime: {
+						getURL: () => "/static/dilithium.wasm",
+					},
+						getURL: () => "/static/dilithium.wasm",
+				};
+
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

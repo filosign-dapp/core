@@ -19,6 +19,7 @@ export function FilosignProvider({ children }: { children: React.ReactNode }) {
 					runtime: {
 						getURL: () => "/static/dilithium.wasm",
 					},
+						getURL: () => "/static/dilithium.wasm",
 				};
 
 				const module = await import(

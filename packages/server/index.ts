@@ -9,27 +9,27 @@ import env from "./env";
 
 //@ts-expect-error
 BigInt.prototype.toJSON = function () {
-	return this.toString();
+    return this.toString();
 };
 
 const allowedOrigins = [
-	env.FRONTEND_URL,
-	"https://app.filosign.xyz",
-].filter(Boolean);
+    env.FRONTEND_URL,
+    "https://app.filosign.xyz",
+];
 
 export const app = new Hono()
-	.use(logger())
-	.use(
-		cors({
-			origin: allowedOrigins,
-			allowHeaders: ["Content-Type", "Authorization"],
-			allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-			credentials: true,
-		}),
-	)
-	.route("/api", apiRouter);
+    .use(logger())
+    .use(
+        cors({
+            origin: allowedOrigins,
+            allowHeaders: ["Content-Type", "Authorization"],
+            allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            credentials: true,
+        }),
+    )
+    .route("/api", apiRouter);
 
 export default {
-	port: Bun.env.PORT ? parseInt(Bun.env.PORT, 10) : 30011,
-	fetch: app.fetch,
+    port: Bun.env.PORT ? parseInt(Bun.env.PORT, 10) : 30011,
+    fetch: app.fetch,
 };
