@@ -147,7 +147,7 @@ export default function FooterSection() {
 						<span className="text-sm text-muted-foreground">Follow us:</span>
 						<div className="flex items-center gap-3 sm:gap-4">
 							<motion.a
-								href="https://github.com"
+								href="https://github.com/filosign-dapp/core"
 								target="_blank"
 								rel="noopener noreferrer"
 								whileTap={{ scale: 0.95 }}
@@ -156,7 +156,7 @@ export default function FooterSection() {
 								<GithubLogoIcon className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground hover:text-foreground transition-colors duration-200" />
 							</motion.a>
 							<motion.a
-								href="https://twitter.com"
+								href="https://x.com/filosign"
 								target="_blank"
 								rel="noopener noreferrer"
 								whileTap={{ scale: 0.95 }}
@@ -165,16 +165,7 @@ export default function FooterSection() {
 								<TwitterLogoIcon className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground hover:text-foreground transition-colors duration-200" />
 							</motion.a>
 							<motion.a
-								href="https://linkedin.com"
-								target="_blank"
-								rel="noopener noreferrer"
-								whileTap={{ scale: 0.95 }}
-								className="p-2 rounded-lg bg-card hover:bg-secondary transition-colors duration-200"
-							>
-								<LinkedinLogoIcon className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground hover:text-foreground transition-colors duration-200" />
-							</motion.a>
-							<motion.a
-								href="mailto:hello@filosign.com"
+								href="mailto:contact@hetairoi.xyz"
 								whileTap={{ scale: 0.95 }}
 								className="p-2 rounded-lg bg-card hover:bg-secondary transition-colors duration-200"
 							>
