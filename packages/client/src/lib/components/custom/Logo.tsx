@@ -14,12 +14,14 @@ interface LogoProps {
 	showText?: boolean;
 	textDelay?: number;
 	iconDelay?: number;
+	redirectTo?: string;
 }
 
 export default function Logo({
 	className,
 	iconClassName,
 	textClassName,
+	redirectTo = "/dashboard",
 	animatedLogo = true,
 	iconOnly = false,
 	isCollapsed = false,
@@ -39,7 +41,7 @@ export default function Logo({
 			)}
 			onClick={() => {
 				onIconClick?.();
-				navigate({ to: "/dashboard", replace: true });
+				navigate({ to: redirectTo, replace: true });
 			}}
 		>
 			<motion.div

@@ -9,10 +9,10 @@ interface NavLink {
 }
 
 const navLinks: NavLink[] = [
-	{ label: "About", href: "#about" },
-	{ label: "Features", href: "#features" },
-	{ label: "Pricing", href: "#pricing" },
-	{ label: "Docs", href: "#docs" },
+	{ label: "About", href: "/about" },
+	{ label: "Pricing", href: "/pricing" },
+	{ label: "Blog", href: "/blog" },
+	{ label: "Changelog", href: "/changelog" },
 ];
 
 export default function LandingNavbar() {
@@ -55,7 +55,12 @@ export default function LandingNavbar() {
 				}}
 			>
 				{/* Logo */}
-				<Logo textDelay={0.35} iconDelay={0.26} className="px-0" />
+				<Logo
+					textDelay={0.35}
+					iconDelay={0.26}
+					className="px-0"
+					redirectTo="/"
+				/>
 
 				{/* Desktop Navigation Links */}
 				<motion.div
@@ -73,7 +78,7 @@ export default function LandingNavbar() {
 						<motion.a
 							key={link.label}
 							href={link.href}
-							className="font-medium transition-colors duration-200 hover:bg-foreground/50 rounded-md px-3 py-2"
+							className="font-medium transition-colors duration-200 hover:bg-foreground/50 rounded-md px-2 py-2"
 							initial={{ opacity: 0, y: -15 }}
 							animate={{ opacity: 1, y: 0 }}
 							transition={{

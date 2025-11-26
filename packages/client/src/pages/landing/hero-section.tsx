@@ -129,7 +129,7 @@ export default function HeroSection() {
 			>
 				{/* Background Stock Image */}
 				<Image
-					src="/static/images/stock_1.jpg"
+					src="/static/images/stock_1.webp"
 					alt="Background"
 					width={1200}
 					height={600}
@@ -138,7 +138,7 @@ export default function HeroSection() {
 				<div className="absolute inset-0" />
 
 				<Image
-					src="/static/hero_2.png"
+					src="/static/hero_2.webp"
 					alt="Filosign"
 					width={500}
 					height={500}

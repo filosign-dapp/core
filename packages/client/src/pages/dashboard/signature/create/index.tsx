@@ -199,7 +199,7 @@ export default function CreateNewSignaturePage({
 					}}
 				>
 					<Image
-						src="/static/sign-bg.png"
+						src="/static/sign-bg.webp"
 						alt="Signature Background"
 						className="w-full h-full rounded-xl"
 					/>

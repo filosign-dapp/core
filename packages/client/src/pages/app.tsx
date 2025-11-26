@@ -8,6 +8,9 @@ import { withPageErrorBoundary } from "@/src/lib/components/errors/PageErrorBoun
 import DashboardProtector from "../lib/components/custom/DashboardProtector";
 import { NotFound } from "../lib/components/custom/NotFound";
 import { useAnalytics } from "../lib/hooks/use-analytics";
+import AboutPage from "./about";
+import BlogPage from "./blog";
+import ChangelogPage from "./changelog";
 import ConnectionsPage from "./dashboard/connections";
 import DocumentAllPage from "./dashboard/document/all";
 import DocumentFolderPage from "./dashboard/document/folder/$folderId";
@@ -25,6 +28,7 @@ import OnboardingCreateSignaturePage from "./onboarding/create-signature";
 import OnboardingSetPinPage from "./onboarding/set-pin";
 import OnboardingWelcomeCompletePage from "./onboarding/welcome";
 import PitchPage from "./pitch";
+import PricingPage from "./pricing";
 import TestPage from "./test";
 
 const rootRoute = createRootRoute({
@@ -39,6 +43,38 @@ const indexRoute = createRoute({
 	path: "/",
 	component: function Index() {
 		return withPageErrorBoundary(LandingPage)({});
+	},
+});
+
+const aboutRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: "/about",
+	component: function About() {
+		return withPageErrorBoundary(AboutPage)({});
+	},
+});
+
+const pricingRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: "/pricing",
+	component: function Pricing() {
+		return withPageErrorBoundary(PricingPage)({});
+	},
+});
+
+const blogRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: "/blog",
+	component: function Blog() {
+		return withPageErrorBoundary(BlogPage)({});
+	},
+});
+
+const changelogRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: "/changelog",
+	component: function Changelog() {
+		return withPageErrorBoundary(ChangelogPage)({});
 	},
 });
 
@@ -246,6 +282,10 @@ const logoRoute = createRoute({
 
 const routeTree = rootRoute.addChildren([
 	indexRoute,
+	aboutRoute,
+	pricingRoute,
+	blogRoute,
+	changelogRoute,
 	pitchRoute,
 	dashboardRoute,
 	profileRoute,
