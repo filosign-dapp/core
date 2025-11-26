@@ -7,15 +7,10 @@ export default function OnboardingProtector({
 }: {
 	children: React.ReactNode;
 }) {
-	const { ready, authenticated } = usePrivy();
+	const { ready } = usePrivy();
 	const isRegistered = useIsRegistered();
 
-	// App is in closed beta - redirect authenticated users back to landing
-	if (ready && authenticated) {
-		return <Navigate to="/" replace />;
-	}
-
-	if (isRegistered.data) {
+	if (ready && isRegistered.data) {
 		return <Navigate to="/dashboard" replace />;
 	}
 

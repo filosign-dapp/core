@@ -1,7 +1,11 @@
-import { useSendFile, useUserProfileByQuery } from "@filosign/react/hooks";
+import { useAuthedApi, useSendFile } from "@filosign/react/hooks";
+import { useQueries } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { toast } from "sonner";
+import type { Address } from "viem";
+import z from "zod";
+
 import { useStorePersist } from "@/src/lib/hooks/use-store";
 import { cn } from "@/src/lib/utils/utils";
 import DocumentViewer from "./_components/DocumentViewer";
@@ -19,11 +23,95 @@ export default function AddSignaturePage() {
 	const navigate = useNavigate();
 	const { createForm, clearCreateForm } = useStorePersist();
 	const sendFile = useSendFile();
+	const { data: api } = useAuthedApi();
 
-	// Get recipient profile for encryption key
-	const recipientProfile = useUserProfileByQuery({
-		address: createForm?.recipient?.walletAddress as `0x${string}` | undefined,
+	// Fetch profiles for all recipients using SDK pattern (replicating useUserProfileByQuery)
+	const recipientProfileQueries = useQueries({
+		queries:
+			createForm?.recipients?.map((recipient) => ({
+				queryKey: [
+					"fsQ-user-info-by-address",
+					{ address: recipient.walletAddress },
+				],
+				queryFn: async (): Promise<{
+					recipient: typeof recipient;
+					profile: {
+						walletAddress: string;
+						encryptionPublicKey: string;
+						lastActiveAt: string;
+						createdAt: string;
+						firstName: string | null;
+						lastName: string | null;
+						avatarUrl: string | null;
+						has: { email: boolean; mobile: boolean };
+					};
+				} | null> => {
+					if (!api || !recipient.walletAddress) return null;
+					try {
+						// Replicate the SDK's useUserProfileByQuery query function
+						const userInfo = await api.rpc.getSafe(
+							{
+								walletAddress: z.string(),
+								encryptionPublicKey: z.string(),
+								lastActiveAt: z.string(),
+								createdAt: z.string(),
+								firstName: z.string().nullable(),
+								lastName: z.string().nullable(),
+								avatarUrl: z.string().nullable(),
+								has: z.object({
+									email: z.boolean(),
+									mobile: z.boolean(),
+								}),
+							},
+							`/users/profile/${recipient.walletAddress}`,
+						);
+						return {
+							recipient,
+							profile: userInfo.data,
+						};
+					} catch (error) {
+						console.error(
+							`Failed to fetch profile for ${recipient.walletAddress}:`,
+							error,
+						);
+						return null;
+					}
+				},
+				enabled: !!api && !!recipient.walletAddress,
+			})) || [],
 	});
+
+	// Map recipient profiles by wallet address
+	const recipientProfilesMap = useMemo(() => {
+		const map = new Map<
+			Address,
+			{
+				recipient: {
+					name: string;
+					email: string;
+					walletAddress: string;
+					role: string;
+				};
+				profile: {
+					walletAddress: string;
+					encryptionPublicKey: string;
+					lastActiveAt: string;
+					createdAt: string;
+					firstName: string | null;
+					lastName: string | null;
+					avatarUrl: string | null;
+					has: { email: boolean; mobile: boolean };
+				};
+			}
+		>();
+		createForm?.recipients?.forEach((recipient, index) => {
+			const profileQuery = recipientProfileQueries[index];
+			if (profileQuery?.data) {
+				map.set(recipient.walletAddress as Address, profileQuery.data);
+			}
+		});
+		return map;
+	}, [createForm?.recipients, recipientProfileQueries]);
 
 	const [currentDocumentId, setCurrentDocumentId] = useState<string>("");
 	const [currentPage, setCurrentPage] = useState(1);
@@ -121,12 +209,23 @@ export default function AddSignaturePage() {
 			return;
 		}
 
-		if (!createForm.recipient?.walletAddress) {
-			toast.error("No recipient selected");
+		if (!createForm.recipients || createForm.recipients.length === 0) {
+			toast.error("No recipients selected");
 			return;
 		}
 
-		if (!recipientProfile.data) {
+		// Check if all recipient profiles are loaded
+		const missingProfiles = createForm.recipients.filter(
+			(r) => !recipientProfilesMap.has(r.walletAddress as Address),
+		);
+		if (missingProfiles.length > 0) {
+			toast.error("Loading recipient information...");
+			return;
+		}
+
+		// Check if any queries are still loading
+		const isLoading = recipientProfileQueries.some((query) => query.isLoading);
+		if (isLoading) {
 			toast.error("Loading recipient information...");
 			return;
 		}
@@ -134,7 +233,7 @@ export default function AddSignaturePage() {
 		try {
 			toast.loading("Sending documents...", { id: "send-progress" });
 
-			// Send each document to the recipient
+			// Send each document to all recipients
 			const sendPromises = [];
 			for (const doc of createForm.documents) {
 				// Convert data URL back to file
@@ -143,24 +242,75 @@ export default function AddSignaturePage() {
 				const file = new File([blob], doc.name, { type: doc.type });
 				const fileData = new Uint8Array(await file.arrayBuffer());
 
-				// Get signature positions for this document
+				// Separate recipients into signers and viewers based on role
+				const signers: {
+					address: Address;
+					encryptionPublicKey: `0x${string}`;
+					signaturePosition: [number, number, number, number];
+				}[] = [];
+				const viewers: { address: Address; encryptionPublicKey: string }[] = [];
+
+				// Get signature positions for this document, grouped by recipient
 				const documentSignatures = signatureFields.filter(
 					(field) => field.documentId === doc.id && field.type === "signature",
 				);
 
-				// Use the first signature field position, or default if none
-				const signaturePosition =
-					documentSignatures.length > 0
-						? { top: documentSignatures[0].y, left: documentSignatures[0].x }
-						: { top: 10, left: 10 }; // Default position
+				// Process each recipient
+				for (const recipient of createForm.recipients) {
+					const recipientData = recipientProfilesMap.get(
+						recipient.walletAddress as Address,
+					);
+					if (!recipientData) continue;
+
+					const { profile } = recipientData;
+					const address = recipient.walletAddress as Address;
+					const encryptionPublicKey =
+						profile.encryptionPublicKey as `0x${string}`;
+
+					// Find signature fields for this recipient (if we had recipient-specific fields)
+					// For now, assign signature positions sequentially to signers
+					if (recipient.role === "signer") {
+						// Find the signature field index for this signer
+						const signerIndex = createForm.recipients
+							.filter((r) => r.role === "signer")
+							.findIndex((r) => r.walletAddress === recipient.walletAddress);
+
+						// Get signature position for this signer, or use default
+						const signatureField =
+							documentSignatures[signerIndex] || documentSignatures[0];
+						const signaturePosition: [number, number, number, number] =
+							signatureField
+								? [
+										signatureField.x,
+										signatureField.y,
+										200, // width
+										100, // height
+									]
+								: [10, 10, 200, 100]; // Default position
+
+						signers.push({
+							address,
+							encryptionPublicKey,
+							signaturePosition,
+						});
+					} else if (recipient.role === "cc" || recipient.role === "approver") {
+						viewers.push({
+							address,
+							encryptionPublicKey,
+						});
+					}
+				}
+
+				// Ensure we have at least one signer
+				if (signers.length === 0) {
+					toast.error("At least one signer is required");
+					return;
+				}
 
 				const sendData = {
+					signers,
+					viewers,
 					bytes: fileData,
-					signaturePositionOffset: signaturePosition,
-					recipient: {
-						address: recipientProfile.data!.walletAddress as `0x${string}`,
-						encryptionPublicKey: recipientProfile.data!.encryptionPublicKey,
-					},
 					metadata: {
 						name: doc.name,
 						mimeType: doc.type,
@@ -170,8 +320,8 @@ export default function AddSignaturePage() {
 				console.log("Sending document:", {
 					documentName: doc.name,
 					documentSize: fileData.length,
-					signaturePosition,
-					recipientAddress: recipientProfile.data!.walletAddress,
+					signersCount: signers.length,
+					viewersCount: viewers.length,
 					sendData: { ...sendData, bytes: `[${fileData.length} bytes]` }, // Don't log the actual bytes
 				});
 

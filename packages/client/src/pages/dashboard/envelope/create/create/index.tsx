@@ -1,4 +1,3 @@
-import { useUserProfileByQuery } from "@filosign/react/hooks";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -17,7 +16,7 @@ export default function CreateEnvelopePage() {
 
 	const form = useForm<EnvelopeForm>({
 		defaultValues: {
-			recipient: { name: "", email: "", walletAddress: "", role: "signer" },
+			recipients: [],
 			emailMessage: "",
 			documents: [],
 		},
@@ -32,12 +31,13 @@ export default function CreateEnvelopePage() {
 		name: "documents",
 	});
 
-	const { watch } = form;
-	const selectedRecipient = watch("recipient");
-
-	// Get recipient profile data for encryption key
-	const recipientProfile = useUserProfileByQuery({
-		address: selectedRecipient?.walletAddress as `0x${string}` | undefined,
+	const {
+		fields: recipientFields,
+		append: appendRecipient,
+		remove: removeRecipient,
+	} = useFieldArray({
+		control: form.control,
+		name: "recipients",
 	});
 
 	const onSubmit = async (data: EnvelopeForm) => {
@@ -46,13 +46,17 @@ export default function CreateEnvelopePage() {
 			return;
 		}
 
-		if (!data.recipient || !data.recipient.walletAddress) {
-			toast.error("Please select a recipient");
+		if (!data.recipients || data.recipients.length === 0) {
+			toast.error("Please add at least one recipient");
 			return;
 		}
 
-		if (!recipientProfile.data) {
-			toast.error("Loading recipient information...");
+		// Validate all recipients have wallet addresses
+		const invalidRecipients = data.recipients.filter(
+			(r) => !r.walletAddress || r.walletAddress.trim() === "",
+		);
+		if (invalidRecipients.length > 0) {
+			toast.error("All recipients must have a wallet address");
 			return;
 		}
 
@@ -79,7 +83,7 @@ export default function CreateEnvelopePage() {
 
 			// Store form data in persistent store
 			const createFormData = {
-				recipient: data.recipient,
+				recipients: data.recipients,
 				emailMessage: data.emailMessage,
 				documents: storedDocuments,
 			};
@@ -120,7 +124,12 @@ export default function CreateEnvelopePage() {
 							append={appendDocument}
 							remove={removeDocument}
 						/>
-						<RecipientsSection control={form.control} />
+						<RecipientsSection
+							control={form.control}
+							fields={recipientFields}
+							append={appendRecipient}
+							remove={removeRecipient}
+						/>
 					</main>
 					<motion.div
 						initial={{ opacity: 0, y: 20 }}

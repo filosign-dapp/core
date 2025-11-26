@@ -1,3 +1,5 @@
+// Closed beta guard - commented out, no longer needed
+/*
 import { usePrivy } from "@privy-io/react-auth";
 import { useEffect, useRef, useState } from "react";
 import ClosedBetaDialog from "@/src/pages/landing/closed-beta-dialog";
@@ -42,4 +44,4 @@ export default function ClosedBetaGuard() {
 		<ClosedBetaDialog open={showDialog} onOpenChange={setShowDialog} />
 	);
 }
-
+*/

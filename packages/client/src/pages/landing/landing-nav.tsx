@@ -40,7 +40,7 @@ export default function LandingNavbar() {
 	return (
 		<section className="sticky top-10 z-50 p-page">
 			<motion.nav
-				className="flex justify-between items-center mx-auto max-w-3xl p-rect rounded-large glass text-background"
+				className="flex justify-between items-center mx-auto max-w-3xl p-rect rounded-large glass text-background bg-foreground/90"
 				initial={{ opacity: 0, y: -50 }}
 				animate={{
 					opacity: 1,

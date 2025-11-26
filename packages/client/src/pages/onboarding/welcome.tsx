@@ -1,8 +1,8 @@
 import { useIsLoggedIn, useUpdateUserProfile } from "@filosign/react/hooks";
-import { CaretRightIcon, SpinnerIcon } from "@phosphor-icons/react";
-import { useNavigate } from "@tanstack/react-router";
+import { CaretRightIcon } from "@phosphor-icons/react";
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import Logo from "@/src/lib/components/custom/Logo";
 import { Button } from "@/src/lib/components/ui/button";
 import {
@@ -26,9 +26,12 @@ export default function OnboardingWelcomeCompletePage() {
 		}
 	}, [onboardingForm]);
 
+	console.log(isLoggedIn.data);
+
 	async function handleSubmit() {
-		if (isLoggedIn.isPending || !isLoggedIn.data) {
-			return window.location.reload();
+		if (!isLoggedIn.data) {
+			toast.error("Preparing your account...");
+			return;
 		}
 
 		if (onboardingForm?.firstName) {

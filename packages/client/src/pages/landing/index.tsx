@@ -1,14 +1,13 @@
-import { SignOutIcon } from "@phosphor-icons/react";
 import { usePrivy } from "@privy-io/react-auth";
-import { formatEther } from "viem";
 import { useBalance } from "wagmi";
-import { Button } from "@/src/lib/components/ui/button";
 import { Separator } from "@/src/lib/components/ui/separator";
+import BentoGridSection from "./bento-grid-section";
+import FeaturesBento from "./features-bento";
 import FooterSection from "./footer-section";
 import HeroSection from "./hero-section";
 import LandingNavbar from "./landing-nav";
-import PricingSection from "./pricing-section";
-import WaitlistSection from "./waitlist-section";
+import TestimonialSection from "./testimonial-section";
+import TrustedCompanies from "./trusted-companies";
 
 export default function LandingPage() {
 	const { user } = usePrivy();
@@ -28,14 +27,24 @@ export default function LandingPage() {
 			{/* Hero Section */}
 			<HeroSection />
 
+			{/* Trusted Companies */}
+			<TrustedCompanies />
+
+			{/* Features Bento Grid */}
+			<FeaturesBento />
+
+			{/* Bento Grid Section */}
+			<BentoGridSection />
+
+			{/* Testimonial Section */}
+			<TestimonialSection />
+
 			{/* Waitlist Section */}
-			<WaitlistSection />
+			{/* <WaitlistSection /> */}
 
 			<div className="h-[var(--section-gap)]" />
 
 			{/* <PricingSection /> */}
-
-			<Separator className="mt-16 md:mt-56" />
 
 			{/* Footer Section */}
 			<FooterSection />

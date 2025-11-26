@@ -1,218 +1,146 @@
 import {
-	EnvelopeIcon,
+	ArrowRightIcon,
 	GithubLogoIcon,
-	LightningIcon,
 	LinkedinLogoIcon,
+	SparkleIcon,
 	TwitterLogoIcon,
 } from "@phosphor-icons/react";
-import { Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import Logo from "@/src/lib/components/custom/Logo";
+import { Badge } from "@/src/lib/components/ui/badge";
+import { Button } from "@/src/lib/components/ui/button";
+
+const footerSections = [
+	{
+		title: "Product",
+		links: [
+			{ label: "Why Filosign", href: "#" },
+			{ label: "Platform", href: "#" },
+			{ label: "Pricing", href: "/pricing" },
+			{ label: "What's new", href: "#" },
+		],
+	},
+	{
+		title: "Solutions",
+		links: [
+			{ label: "By product", href: "#" },
+			{ label: "For founders", href: "#", badge: "New" },
+			{ label: "For startups", href: "#" },
+			{ label: "For enterprise", href: "#" },
+		],
+	},
+	{
+		title: "Company",
+		links: [
+			{ label: "About us", href: "#" },
+			{ label: "Contact", href: "#" },
+			{ label: "Newsroom", href: "#" },
+			{ label: "Privacy", href: "#" },
+		],
+	},
+	{
+		title: "Resources",
+		links: [
+			{ label: "Blog", href: "#" },
+			{ label: "Customer center", href: "#" },
+			{ label: "API", href: "#" },
+		],
+	},
+];
 
 export default function FooterSection() {
 	return (
-		<div className="bg-card">
-			<footer className="max-w-6xl mx-auto p-4 md:p-page py-8 md:py-12">
-				<motion.div
-					initial={{ opacity: 0, y: 20 }}
-					whileInView={{ opacity: 1, y: 0 }}
-					transition={{
-						type: "spring",
-						stiffness: 200,
-						damping: 25,
-						duration: 0.6,
-					}}
-					viewport={{ once: true, margin: "-50px" }}
-					className="flex flex-col gap-8 md:gap-12"
-				>
-					{/* Main Footer Content */}
-					<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
-						{/* Brand Section */}
-						<div className="col-span-1 sm:col-span-2 md:col-span-2 space-y-4">
-							<Logo
-								className="px-0"
-								textClassName="text-foreground font-bold"
-							/>
-							<motion.p
-								initial={{ opacity: 0, y: 10 }}
+		<footer className="bg-card rounded-t-[3rem] py-24 min-h-[80dvh] flex flex-col justify-between">
+			<div className="max-w-7xl mx-auto px-8 md:px-page w-full flex-1 flex flex-col justify-between">
+				<div>
+					<div className="flex flex-col lg:flex-row justify-between mb-4">
+						<div className="max-w-xl">
+							<motion.h2
+								initial={{ opacity: 0, y: 20 }}
 								whileInView={{ opacity: 1, y: 0 }}
-								transition={{ delay: 0.2 }}
 								viewport={{ once: true }}
-								className="text-sm sm:text-base text-muted-foreground leading-relaxed max-w-sm"
+								className="text-4xl md:text-5xl font-semibold tracking-tight mb-8 font-manrope"
 							>
-								Trustless document signing for the modern web. Secure, fast, and
-								easy-to-use document signing on Filecoin.
-							</motion.p>
+								Join the 12,000+
+								<br />
+								businesses using Filosign
+							</motion.h2>
 						</div>
-
-						{/* Quick Links */}
-						<div className="space-y-3 md:space-y-4">
-							<motion.h4
-								initial={{ opacity: 0, y: 10 }}
-								whileInView={{ opacity: 1, y: 0 }}
-								transition={{ delay: 0.2 }}
-								viewport={{ once: true }}
-								className="text-sm sm:text-base font-medium text-foreground"
+						<motion.div
+							initial={{ opacity: 0, y: 20 }}
+							whileInView={{ opacity: 1, y: 0 }}
+							viewport={{ once: true }}
+							transition={{ delay: 0.1 }}
+						>
+							<Button
+								variant={"primary"}
+								className="group bg-primary text-primary-foreground h-12 rounded-xl"
 							>
-								Product
-							</motion.h4>
-							<motion.nav
-								initial={{ opacity: 0, y: 10 }}
-								whileInView={{ opacity: 1, y: 0 }}
-								transition={{ delay: 0.3 }}
-								viewport={{ once: true }}
-								className="flex flex-col gap-2 md:gap-3"
-							>
-								<Link
-									to="/dashboard"
-									className="text-sm sm:text-base text-muted-foreground hover:text-foreground transition-colors duration-200 hover:underline hover:underline-offset-4"
-								>
-									Get Started
-								</Link>
-								<a
-									href="#"
-									className="text-sm sm:text-base text-muted-foreground hover:text-foreground transition-colors duration-200 hover:underline hover:underline-offset-4"
-								>
-									Features
-								</a>
-								<a
-									href="#"
-									className="text-sm sm:text-base text-muted-foreground hover:text-foreground transition-colors duration-200 hover:underline hover:underline-offset-4"
-								>
-									Pricing
-								</a>
-								<a
-									href="#"
-									className="text-sm sm:text-base text-muted-foreground hover:text-foreground transition-colors duration-200 hover:underline hover:underline-offset-4"
-								>
-									Documentation
-								</a>
-							</motion.nav>
-						</div>
-
-						{/* Company Links */}
-						<div className="space-y-3 md:space-y-4">
-							<motion.h4
-								initial={{ opacity: 0, y: 10 }}
-								whileInView={{ opacity: 1, y: 0 }}
-								transition={{ delay: 0.2 }}
-								viewport={{ once: true }}
-								className="text-sm sm:text-base font-medium text-foreground"
-							>
-								Company
-							</motion.h4>
-							<motion.nav
-								initial={{ opacity: 0, y: 10 }}
-								whileInView={{ opacity: 1, y: 0 }}
-								transition={{ delay: 0.3 }}
-								viewport={{ once: true }}
-								className="flex flex-col gap-2 md:gap-3"
-							>
-								<a
-									href="#"
-									className="text-sm sm:text-base text-muted-foreground hover:text-foreground transition-colors duration-200 hover:underline hover:underline-offset-4"
-								>
-									About
-								</a>
-								<a
-									href="#"
-									className="text-sm sm:text-base text-muted-foreground hover:text-foreground transition-colors duration-200 hover:underline hover:underline-offset-4"
-								>
-									Blog
-								</a>
-								<a
-									href="#"
-									className="text-sm sm:text-base text-muted-foreground hover:text-foreground transition-colors duration-200 hover:underline hover:underline-offset-4"
-								>
-									Careers
-								</a>
-								<a
-									href="#"
-									className="text-sm sm:text-base text-muted-foreground hover:text-foreground transition-colors duration-200 hover:underline hover:underline-offset-4"
-								>
-									Contact
-								</a>
-							</motion.nav>
-						</div>
+								<SparkleIcon className="size-4" weight="fill" />
+								Try Filosign today
+							</Button>
+						</motion.div>
 					</div>
 
-					{/* Social Links */}
-					<motion.div
-						initial={{ opacity: 0, y: 10 }}
-						whileInView={{ opacity: 1, y: 0 }}
-						transition={{ delay: 0.3 }}
-						viewport={{ once: true }}
-						className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-6"
-					>
-						<span className="text-sm text-muted-foreground">Follow us:</span>
-						<div className="flex items-center gap-3 sm:gap-4">
-							<motion.a
-								href="https://github.com"
-								target="_blank"
-								rel="noopener noreferrer"
-								whileTap={{ scale: 0.95 }}
-								className="p-2 rounded-lg bg-card hover:bg-secondary transition-colors duration-200"
-							>
-								<GithubLogoIcon className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground hover:text-foreground transition-colors duration-200" />
-							</motion.a>
-							<motion.a
-								href="https://twitter.com"
-								target="_blank"
-								rel="noopener noreferrer"
-								whileTap={{ scale: 0.95 }}
-								className="p-2 rounded-lg bg-card hover:bg-secondary transition-colors duration-200"
-							>
-								<TwitterLogoIcon className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground hover:text-foreground transition-colors duration-200" />
-							</motion.a>
-							<motion.a
-								href="https://linkedin.com"
-								target="_blank"
-								rel="noopener noreferrer"
-								whileTap={{ scale: 0.95 }}
-								className="p-2 rounded-lg bg-card hover:bg-secondary transition-colors duration-200"
-							>
-								<LinkedinLogoIcon className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground hover:text-foreground transition-colors duration-200" />
-							</motion.a>
-							<motion.a
-								href="mailto:hello@filosign.com"
-								whileTap={{ scale: 0.95 }}
-								className="p-2 rounded-lg bg-card hover:bg-secondary transition-colors duration-200"
-							>
-								<EnvelopeIcon className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground hover:text-foreground transition-colors duration-200" />
-							</motion.a>
-						</div>
-					</motion.div>
-
-					{/* Bottom Bar */}
-					<motion.div
-						initial={{ opacity: 0, y: 10 }}
-						whileInView={{ opacity: 1, y: 0 }}
-						transition={{ delay: 0.3 }}
-						viewport={{ once: true }}
-						className="pt-6 md:pt-8 border-t border-border"
-					>
-						<div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
-							<p className="text-xs sm:text-sm text-muted-foreground">
-								© 2025 Filosign. All rights reserved.
-							</p>
-							<div className="flex items-center gap-4 sm:gap-6">
-								<a
-									href="#"
-									className="text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors duration-200 hover:underline hover:underline-offset-4"
-								>
-									Privacy Policy
-								</a>
-								<a
-									href="#"
-									className="text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors duration-200 hover:underline hover:underline-offset-4"
-								>
-									Terms of Service
-								</a>
+					<div className="grid grid-cols-2 md:grid-cols-4 gap-12 mb-4 border-t border-border/50 pt-16">
+						{footerSections.map((section) => (
+							<div key={section.title} className="flex flex-col gap-6">
+								<h4 className="text-sm font-medium text-muted-foreground font-manrope">
+									{section.title}
+								</h4>
+								<ul className="flex flex-col gap-4">
+									{section.links.map((link) => (
+										<li key={link.label}>
+											<a
+												href={link.href}
+												className="text-sm font-medium hover:text-primary transition-colors font-manrope flex items-center gap-2 group"
+											>
+												{link.label}
+												{link.badge && (
+													<Badge
+														variant="secondary"
+														className="h-5 px-1.5 text-[10px] font-medium bg-lime-200 text-black hover:bg-lime-300"
+													>
+														{link.badge}
+													</Badge>
+												)}
+											</a>
+										</li>
+									))}
+								</ul>
 							</div>
-						</div>
-					</motion.div>
-				</motion.div>
-			</footer>
-		</div>
+						))}
+					</div>
+				</div>
+
+				<div className="flex flex-col md:flex-row justify-between items-end md:items-center gap-8 border-t border-border/50 pt-4">
+					<div className="space-y-2">
+						<Logo className="px-0" textClassName="text-4xl text-foreground" />
+						<p className="text-xs text-muted-foreground font-manrope">
+							© 2025 Filosign. All rights reserved.
+						</p>
+					</div>
+
+					<div className="flex items-center gap-4">
+						<a
+							href="https://x.com/filosign"
+							target="_blank"
+							rel="noreferrer"
+							className="p-2 rounded-full bg-background hover:bg-secondary/50 transition-colors text-muted-foreground hover:text-foreground"
+						>
+							<TwitterLogoIcon className="size-6" weight="fill" />
+						</a>
+						<a
+							href="https://github.com/filosign-dapp/core"
+							target="_blank"
+							rel="noreferrer"
+							className="p-2 rounded-full bg-background hover:bg-secondary/50 transition-colors text-muted-foreground hover:text-foreground"
+						>
+							<GithubLogoIcon className="size-6" weight="fill" />
+						</a>
+					</div>
+				</div>
+			</div>
+		</footer>
 	);
 }

@@ -8,6 +8,8 @@ type Props = {
 	className?: string;
 	fallback?: string;
 	children?: ReactNode;
+	width?: number;
+	height?: number;
 };
 
 export function Image({
@@ -16,6 +18,8 @@ export function Image({
 	className,
 	fallback = "/images/placeholder.png",
 	children,
+	width,
+	height,
 	...props
 }: Props) {
 	const [hasError, setHasError] = useState(false);
@@ -37,6 +41,8 @@ export function Image({
 
 	return (
 		<img
+			width={width}
+			height={height}
 			src={src}
 			alt={alt || "default"}
 			className={cn(className)}

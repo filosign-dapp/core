@@ -6,7 +6,6 @@ import {
 } from "@tanstack/react-router";
 import { withPageErrorBoundary } from "@/src/lib/components/errors/PageErrorBoundary";
 import DashboardProtector from "../lib/components/custom/DashboardProtector";
-import ClosedBetaGuard from "../lib/components/custom/ClosedBetaGuard";
 import { NotFound } from "../lib/components/custom/NotFound";
 import { useAnalytics } from "../lib/hooks/use-analytics";
 import ConnectionsPage from "./dashboard/connections";
@@ -20,23 +19,18 @@ import PermissionsPage from "./dashboard/permissions";
 import ProfilePage from "./dashboard/profile";
 import CreateNewSignaturePage from "./dashboard/signature/create";
 import LandingPage from "./landing";
+import LogoPage from "./logo";
 import OnboardingWelcomePage from "./onboarding";
 import OnboardingCreateSignaturePage from "./onboarding/create-signature";
 import OnboardingSetPinPage from "./onboarding/set-pin";
 import OnboardingWelcomeCompletePage from "./onboarding/welcome";
 import PitchPage from "./pitch";
 import TestPage from "./test";
-import LogoPage from "./logo";
 
 const rootRoute = createRootRoute({
 	component: () => {
 		useAnalytics();
-		return (
-			<>
-				<ClosedBetaGuard />
-				<Outlet />
-			</>
-		);
+		return <Outlet />;
 	},
 });
 

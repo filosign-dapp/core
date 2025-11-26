@@ -1,6 +1,6 @@
 import { useIsRegistered } from "@filosign/react/hooks";
 import { usePrivy } from "@privy-io/react-auth";
-// import { Link } from "@tanstack/react-router"; // Commented out for closed beta
+import { Link } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { Button } from "@/src/lib/components/ui/button";
 import { UserDropdownButton } from "./UserDropdownButton";
@@ -60,14 +60,10 @@ export default function ConnectButton() {
 				</Button>
 			)}
 
-			{/* Get started / Dashboard buttons - commented out for closed beta */}
-			{/* {getButtonState() === "get-started" ||
+			{/* Get started / Dashboard buttons */}
+			{getButtonState() === "get-started" ||
 			getButtonState() === "dashboard" ? (
-				<Button
-					variant="secondary"
-					asChild
-					className="min-w-28"
-				>
+				<Button variant="secondary" asChild className="min-w-28">
 					<Link
 						to={getButtonState() === "dashboard" ? "/dashboard" : "/onboarding"}
 					>
@@ -89,7 +85,7 @@ export default function ConnectButton() {
 						</AnimatePresence>
 					</Link>
 				</Button>
-			) : null} */}
+			) : null}
 
 			{/* User dropdown with logout - show when authenticated */}
 			{showUserDropdown && <UserDropdownButton />}

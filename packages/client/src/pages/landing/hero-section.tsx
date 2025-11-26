@@ -1,10 +1,9 @@
-import { CircleIcon } from "@phosphor-icons/react";
-// import { CaretRightIcon, PlayIcon } from "@phosphor-icons/react"; // Commented out for closed beta
-// import { Link } from "@tanstack/react-router"; // Commented out for closed beta
+import { CaretRightIcon, CircleIcon, PlayIcon } from "@phosphor-icons/react";
+import { Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { Image } from "@/src/lib/components/custom/Image";
 import { Badge } from "@/src/lib/components/ui/badge";
-// import { Button } from "@/src/lib/components/ui/button"; // Commented out for closed beta
+import { Button } from "@/src/lib/components/ui/button";
 
 export default function HeroSection() {
 	return (
@@ -33,9 +32,12 @@ export default function HeroSection() {
 					}}
 					className="self-start group"
 				>
-					<Badge>
-						<CircleIcon className="size-4 animate-pulse" weight="fill" />{" "}
-						Waitlist is live
+					<Badge variant="primary">
+						<CircleIcon
+							className="size-4 animate-pulse text-secondary"
+							weight="fill"
+						/>{" "}
+						Closed Beta
 					</Badge>
 				</motion.div>
 
@@ -64,13 +66,13 @@ export default function HeroSection() {
 						damping: 25,
 						delay: 1.5,
 					}}
-					className="text-base sm:text-lg md:text-xl text-muted-foreground leading-relaxed -mt-2"
+					className="text-base sm:text-lg md:text-xl text-muted-foreground leading-relaxed -mt-2 font-manrope font-light"
 				>
 					Secure, fast, and easy-to-use document signing on filecoin.
 				</motion.p>
 
-				{/* Action Buttons - Commented out for closed beta */}
-				{/* <motion.div
+				{/* Action Buttons */}
+				<motion.div
 					initial={{ opacity: 0, y: 20 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{
@@ -79,7 +81,7 @@ export default function HeroSection() {
 						damping: 25,
 						delay: 1.6,
 					}}
-					className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4"
+					className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2"
 				>
 					<Button
 						variant="primary"
@@ -97,20 +99,20 @@ export default function HeroSection() {
 					</Button>
 
 					<Button
-						variant="secondary"
+						variant="ghost"
 						size="lg"
 						asChild
 						className="w-full sm:w-auto"
 					>
 						<Link
 							to="/dashboard"
-							className="flex items-center justify-center gap-2 text-foreground group"
+							className="flex items-center justify-center gap-2 group"
 						>
 							<PlayIcon className="w-4 h-4 transition-transform duration-200 group-hover:rotate-120" />
 							See it in action
 						</Link>
 					</Button>
-				</motion.div> */}
+				</motion.div>
 			</motion.div>
 
 			{/* Hero Image */}
@@ -123,14 +125,24 @@ export default function HeroSection() {
 					damping: 50,
 					delay: 1.5,
 				}}
-				className="flex items-center justify-center bg-secondary p-4 md:p-6 rounded-3xl mt-4"
+				className="relative flex items-center justify-center p-4 md:p-6 rounded-3xl mt-4 overflow-hidden group"
 			>
+				{/* Background Stock Image */}
+				<Image
+					src="/static/images/stock_1.jpg"
+					alt="Background"
+					width={1200}
+					height={600}
+					className="absolute inset-0 w-full h-full object-cover bg-secondary opacity-90 scale-110 transition-transform duration-1000 group-hover:scale-150"
+				/>
+				<div className="absolute inset-0" />
+
 				<Image
 					src="/static/hero_2.png"
 					alt="Filosign"
 					width={500}
 					height={500}
-					className="size-full rounded-large"
+					className="size-full rounded-large relative z-10 shadow-sm"
 				/>
 			</motion.div>
 		</section>
