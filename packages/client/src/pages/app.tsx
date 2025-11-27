@@ -10,6 +10,7 @@ import { NotFound } from "../lib/components/custom/NotFound";
 import { useAnalytics } from "../lib/hooks/use-analytics";
 import AboutPage from "./about";
 import BlogPage from "./blog";
+import BlogPostPage from "./blog/post";
 import ChangelogPage from "./changelog";
 import ConnectionsPage from "./dashboard/connections";
 import DocumentAllPage from "./dashboard/document/all";
@@ -67,6 +68,14 @@ const blogRoute = createRoute({
 	path: "/blog",
 	component: function Blog() {
 		return withPageErrorBoundary(BlogPage)({});
+	},
+});
+
+const blogPostRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: "/blog/$postId",
+	component: function BlogPost() {
+		return withPageErrorBoundary(BlogPostPage)({});
 	},
 });
 
@@ -285,6 +294,7 @@ const routeTree = rootRoute.addChildren([
 	aboutRoute,
 	pricingRoute,
 	blogRoute,
+	blogPostRoute,
 	changelogRoute,
 	pitchRoute,
 	dashboardRoute,
