@@ -46,7 +46,7 @@ export default function Logo({
 		>
 			<motion.div
 				className={cn(
-					"p-2 rounded-xl bg-secondary transition-colors duration-200 ml-1",
+					"p-2 rounded-md bg-secondary transition-colors duration-200 ml-1",
 				)}
 				initial={animatedLogo ? { scale: 0, rotate: -180 } : {}}
 				animate={animatedLogo ? { scale: 1, rotate: 0 } : {}}

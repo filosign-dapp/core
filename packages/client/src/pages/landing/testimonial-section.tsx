@@ -13,7 +13,7 @@ export default function TestimonialSection() {
 			>
 				<blockquote className="text-xl md:text-3xl font-medium leading-tight tracking-tight font-manrope text-foreground">
 					"Moving our contract workflow to Filosign was seamless. It’s faster
-					than our previous tool, and the decentralized storage gives us 100%
+					than our previous tool, and the on-chain signatures give us 100%
 					confidence that our records are permanent and truly under our
 					control."
 				</blockquote>
@@ -21,7 +21,7 @@ export default function TestimonialSection() {
 				<div className="flex items-center justify-center gap-4">
 					<div className="relative size-14 rounded-full overflow-hidden bg-secondary">
 						<Image
-							src="https://media.licdn.com/dms/image/v2/D4D03AQH6htP4udwpVw/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1705944572806?e=1766016000&v=beta&t=2hO5wL4zgsvEiDUk7nAqWbidFGLeZJpxwlzpkUvRLWg"
+							src="/static/images/stock_1.webp"
 							alt="Ken"
 							width={64}
 							height={64}
@@ -29,9 +29,11 @@ export default function TestimonialSection() {
 						/>
 					</div>
 					<div className="text-left">
-						<div className="font-semibold text-lg font-manrope">Ken</div>
+						<div className="font-semibold text-lg font-manrope">
+							Sandeep Nailwal
+						</div>
 						<div className="text-muted-foreground text-sm font-manrope">
-							Founder & CEO @Toku
+							Founder & CEO @Polygon
 						</div>
 					</div>
 				</div>

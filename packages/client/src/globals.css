@@ -40,7 +40,7 @@
 	--white: hsl(0, 0%, 100%);
 	--off-white: hsl(90, 55%, 98%);
 
-	--radius: 0.4rem;
+	--radius: 0.65rem;
 }
 
 @theme {

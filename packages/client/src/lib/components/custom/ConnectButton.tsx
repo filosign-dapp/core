@@ -63,7 +63,7 @@ export default function ConnectButton() {
 			{/* Get started / Dashboard buttons */}
 			{getButtonState() === "get-started" ||
 			getButtonState() === "dashboard" ? (
-				<Button variant="secondary" asChild className="min-w-28">
+				<Button variant="secondary" asChild className="min-w-28 mr-2">
 					<Link
 						to={getButtonState() === "dashboard" ? "/dashboard" : "/onboarding"}
 					>

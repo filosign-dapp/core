@@ -152,7 +152,7 @@ export default function DocumentAllPage() {
 								<Button
 									variant={isFilterOpen ? "default" : "outline"}
 									size="sm"
-									className="size-8 p-0"
+									className="size-8 p-0 ml-4"
 									onClick={() => setIsFilterOpen(!isFilterOpen)}
 								>
 									<FunnelIcon className="size-4" />

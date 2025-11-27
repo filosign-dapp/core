@@ -69,7 +69,7 @@ export function NotificationsPopover() {
 		// Count pending received requests
 		if (receivedRequests.data && Array.isArray(receivedRequests.data)) {
 			count += receivedRequests.data.filter(
-				(req: any) => req.status === "PENDING" || req.status === "pending",
+				(req) => req.status === "PENDING" || req.status === "pending",
 			).length;
 		}
 
@@ -126,9 +126,7 @@ export function NotificationsPopover() {
 
 	const pendingRequests = (() => {
 		return receivedRequests.data && Array.isArray(receivedRequests.data)
-			? receivedRequests.data.filter(
-					(req: any) => req.status === "PENDING" || req.status === "pending",
-				)
+			? receivedRequests.data.filter((req) => req.status === "PENDING")
 			: [];
 	})();
 
@@ -162,8 +160,8 @@ export function NotificationsPopover() {
 				<div className="p-4 border-b">
 					<div className="flex items-center justify-between">
 						<div>
-							<h3 className="font-semibold">Notifications</h3>
-							<p className="text-sm text-muted-foreground">
+							<h3 className="font-manrope">Notifications</h3>
+							<p className="text-sm text-muted-foreground mt-1 font-manrope">
 								{notificationCount > 0
 									? `${notificationCount} pending action${notificationCount > 1 ? "s" : ""}`
 									: "You're all caught up!"}
@@ -207,7 +205,7 @@ export function NotificationsPopover() {
 							</div>
 
 							<div className="space-y-3">
-								{pendingRequests.map((req: any, i: number) => (
+								{pendingRequests.map((req, i) => (
 									<NotificationItemCard
 										key={i}
 										icon={<UserCheckIcon className="h-4 w-4 text-primary" />}
@@ -245,7 +243,7 @@ export function NotificationsPopover() {
 							</div>
 
 							<div className="space-y-3">
-								{allReceivedFiles.map((file: any, i: number) => (
+								{allReceivedFiles.map((file, i: number) => (
 									<ReceivedFileNotification
 										key={file.pieceCid}
 										pieceCid={file.pieceCid}
@@ -332,6 +330,7 @@ function ReceivedFileNotification({
 				queryKey: ["received-files"],
 			});
 		} catch (error) {
+			console.log(error);
 			toast.error("Failed to accept file");
 		}
 	};
@@ -384,7 +383,7 @@ function ReceivedFileNotification({
 		);
 	}
 
-	const isAcknowledged = file.acked;
+	const isAcknowledged = file.status === "ACCEPTED";
 	const hasSignatures = file.signatures && file.signatures.length > 0;
 
 	const handleSignDocument = () => {
