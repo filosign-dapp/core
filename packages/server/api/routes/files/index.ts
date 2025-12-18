@@ -9,18 +9,22 @@ import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { getAddress } from "viem";
 import z from "zod";
-import db from "../../../lib/db";
-import { fsContracts } from "../../../lib/evm";
-import { bucket } from "../../../lib/s3/client";
-import { getOrCreateUserDataset } from "../../../lib/synapse";
-import { respond } from "../../../lib/utils/respond";
-import { tryCatch } from "../../../lib/utils/tryCatch";
-import { authenticated } from "../../middleware/auth";
+import { authenticated } from "@/api/middleware/auth";
+import db from "@/lib/db";
+import {
+	fileAcknowledgements,
+	fileParticipants,
+	fileSignatures,
+	files,
+	users,
+} from "@/lib/db/schema";
+import { fsContracts } from "@/lib/evm";
+import { bucket } from "@/lib/s3/client";
+import { getOrCreateUserDataset } from "@/lib/synapse";
+import { respond } from "@/lib/utils/respond";
+import { tryCatch } from "@/lib/utils/tryCatch";
 
 const { FSFileRegistry } = fsContracts;
-
-const { files, fileParticipants, users, fileSignatures, fileAcknowledgements } =
-	db.schema;
 const MAX_FILE_SIZE = 30 * 1024 * 1024;
 
 export default new Hono()

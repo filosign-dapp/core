@@ -2,12 +2,11 @@ import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import z from "zod";
-import { KB } from "../../../constants";
-import db from "../../../lib/db";
-import { respond } from "../../../lib/utils/respond";
-import { authenticated } from "../../middleware/auth";
-
-const { userSignatures } = db.schema;
+import { authenticated } from "@/api/middleware/auth";
+import { KB } from "@/constants";
+import db from "@/lib/db";
+import { userSignatures } from "@/lib/db/schema";
+import { respond } from "@/lib/utils/respond";
 
 export default new Hono()
 

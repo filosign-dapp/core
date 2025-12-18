@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { isHash } from "viem";
-import { processTransaction } from "../../../lib/indexer/process";
-import { respond } from "../../../lib/utils/respond";
+import { processTransaction } from "@/lib/indexer/process";
+import { respond } from "@/lib/utils/respond";
 
 export default new Hono().post("/:hash", async (ctx) => {
 	const txHash = ctx.req.param("hash");

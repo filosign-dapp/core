@@ -10,10 +10,9 @@ BigInt.prototype.toJSON = function () {
 	return this.toString();
 };
 
-const allowedOrigins = [
-	env.FRONTEND_URL,
-	"https://app.filosign.xyz",
-].filter(Boolean);
+const allowedOrigins = [env.FRONTEND_URL, "https://app.filosign.xyz"].filter(
+	Boolean,
+);
 
 export const app = new Hono()
 	.use(logger())

@@ -2,12 +2,11 @@ import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { isAddress } from "viem";
 import z from "zod";
-import db from "../../../lib/db";
-import { bucket } from "../../../lib/s3/client";
-import { respond } from "../../../lib/utils/respond";
-import { authenticated } from "../../middleware/auth";
-
-const { users } = db.schema;
+import { authenticated } from "@/api/middleware/auth";
+import db from "@/lib/db";
+import { users } from "@/lib/db/schema";
+import { bucket } from "@/lib/s3/client";
+import { respond } from "@/lib/utils/respond";
 
 export default new Hono()
 	.get("/", authenticated, async (ctx) => {

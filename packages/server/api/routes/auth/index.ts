@@ -9,13 +9,12 @@ import {
 	keccak256,
 	numberToHex,
 } from "viem";
-import { MINUTE } from "../../../constants";
-import db from "../../../lib/db";
-import { issueJwtToken } from "../../../lib/utils/jwt";
-import { respond } from "../../../lib/utils/respond";
+import { MINUTE } from "@/constants";
+import db from "@/lib/db";
+import { issueJwtToken } from "@/lib/utils/jwt";
+import { respond } from "@/lib/utils/respond";
 
 const nonces: Record<Address, { nonce: Hash; validTill: number }> = {};
-const { users } = db.schema;
 
 export default new Hono()
 

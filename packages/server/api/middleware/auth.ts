@@ -1,9 +1,10 @@
 import { eq } from "drizzle-orm";
 import { createMiddleware } from "hono/factory";
 import type { Address } from "viem";
-import db from "../../lib/db";
-import { verifyJwt } from "../../lib/utils/jwt";
-import { respond } from "../../lib/utils/respond";
+import db from "@/lib/db";
+import { users } from "@/lib/db/schema";
+import { verifyJwt } from "@/lib/utils/jwt";
+import { respond } from "@/lib/utils/respond";
 
 export const authenticated = createMiddleware<{
 	Variables: {
@@ -28,7 +29,7 @@ export const authenticated = createMiddleware<{
 	await next();
 	//TODO see if this can be done without awaiting
 	await db
-		.update(db.schema.users)
+		.update(users)
 		.set({ lastActiveAt: new Date() })
-		.where(eq(db.schema.users.walletAddress, payload.sub));
+		.where(eq(users.walletAddress, payload.sub));
 });

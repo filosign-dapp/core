@@ -1,12 +1,16 @@
 import { and, desc, eq, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { getAddress, isAddress } from "viem";
-import db from "../../../lib/db";
-import { respond } from "../../../lib/utils/respond";
-import { tryCatch } from "../../../lib/utils/tryCatch";
-import { authenticated } from "../../middleware/auth";
-
-const { shareRequests, shareApprovals } = db.schema;
+import { authenticated } from "@/api/middleware/auth";
+import db from "@/lib/db";
+import {
+	shareApprovals,
+	shareRequests,
+	userInvites,
+	users,
+} from "@/lib/db/schema";
+import { respond } from "@/lib/utils/respond";
+import { tryCatch } from "@/lib/utils/tryCatch";
 
 // Base hours for spam prevention: wait this^(cancelled_count) hours after cancelling
 const REQUEST_SPAM_BASE_HOURS = 3;
@@ -123,8 +127,8 @@ export default new Hono()
 
 		const [self] = await db
 			.select()
-			.from(db.schema.users)
-			.where(eq(db.schema.users.walletAddress, ctx.var.userWallet));
+			.from(users)
+			.where(eq(users.walletAddress, ctx.var.userWallet));
 
 		if (!self.email) {
 			return respond.err(
@@ -144,8 +148,8 @@ export default new Hono()
 
 		const [existingUser] = await db
 			.select()
-			.from(db.schema.users)
-			.where(eq(db.schema.users.email, inviteeEmail));
+			.from(users)
+			.where(eq(users.email, inviteeEmail));
 
 		ctx.res.headers.set("Location", `/api/sharing/request`);
 
@@ -160,11 +164,11 @@ export default new Hono()
 
 		const [existingInvite] = await db
 			.select()
-			.from(db.schema.userInvites)
+			.from(userInvites)
 			.where(
 				and(
-					eq(db.schema.userInvites.sender, ctx.var.userWallet),
-					eq(db.schema.userInvites.inviteeEmail, inviteeEmail),
+					eq(userInvites.sender, ctx.var.userWallet),
+					eq(userInvites.inviteeEmail, inviteeEmail),
 				),
 			);
 
@@ -177,7 +181,7 @@ export default new Hono()
 		}
 
 		const [newInvite] = await db
-			.insert(db.schema.userInvites)
+			.insert(userInvites)
 			.values({
 				sender: ctx.var.userWallet,
 				inviteeEmail,
@@ -197,8 +201,8 @@ export default new Hono()
 			db.transaction(async (tx) => {
 				const [primaryInvite] = await tx
 					.select()
-					.from(db.schema.userInvites)
-					.where(eq(db.schema.userInvites.id, id));
+					.from(userInvites)
+					.where(eq(userInvites.id, id));
 
 				if (!primaryInvite) {
 					throw new Error("Invite not found");
@@ -206,15 +210,8 @@ export default new Hono()
 
 				const allInvites = await tx
 					.select()
-					.from(db.schema.userInvites)
-					.where(
-						and(
-							eq(
-								db.schema.userInvites.inviteeEmail,
-								primaryInvite.inviteeEmail,
-							),
-						),
-					);
+					.from(userInvites)
+					.where(and(eq(userInvites.inviteeEmail, primaryInvite.inviteeEmail)));
 
 				for (const invite of allInvites) {
 					await tx.insert(shareRequests).values({
@@ -225,9 +222,7 @@ export default new Hono()
 							`Auto-generated request from invite to ${invite.inviteeEmail}`,
 						createdAt: invite.createdAt,
 					});
-					await tx
-						.delete(db.schema.userInvites)
-						.where(eq(db.schema.userInvites.id, invite.id));
+					await tx.delete(userInvites).where(eq(userInvites.id, invite.id));
 				}
 
 				return primaryInvite;

@@ -9,6 +9,11 @@ const schema = {
 	...file,
 };
 
+// Re-export all named exports for direct imports
+export * from "./file";
+export * from "./sharing";
+export * from "./user";
+
 export default schema;
 
 // type DBSchema = typeof schema;

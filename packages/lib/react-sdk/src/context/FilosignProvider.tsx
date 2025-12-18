@@ -94,12 +94,12 @@ export function FilosignProvider(props: FilosignConfig) {
 		[api, wallet, contracts, wasm, runtime.data],
 	);
 
-	if (!runtime.data) {
-		if (LoaderComponent) {
-			return <LoaderComponent />;
-		}
-		return <>Runtime Loading...</>;
-	}
+	// if (!runtime.data) {
+	// 	if (LoaderComponent) {
+	// 		return <LoaderComponent />;
+	// 	}
+	// 	return <>Runtime Loading...</>;
+	// }
 
 	// if (!contracts) {
 	// 	console.log("contracts", contracts);
