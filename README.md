@@ -1,319 +1,162 @@
-# Filosign - Trustless On-Chain E-Signatures
+# Filosign
 
-Filosign is an **on-chain e-signature platform** designed for enterprises that require mathematical certainty for their agreements. We replace the inherent "platform risk" of centralized services like DocuSign with a **permanent, verifiable ledger** built on the Filecoin Onchain Cloud.
+**Trustless digital signatures** for the decentralized web. Filosign replaces fragile platform trust with permanent mathematical proof, ensuring your agreements are secure, verifiable, and immutable on the Filecoin network.
 
-Our mission is to become the **trusted standard for high-value digital agreements** by making cryptographic truth a practical and accessible business tool.
+[![Website](https://img.shields.io/badge/Website-app.filosign.xyz-blue)](https://app.filosign.xyz)
+[![GitHub](https://img.shields.io/badge/GitHub-filosign--dapp-black)](https://github.com/filosign-dapp)
 
-### **Key Features**
+## ✨ What Makes Filosign Different
 
-- **Irrevocable Signatures**: Every signature is a permanent blockchain transaction
-- **Filecoin-Powered**: Decentralized storage with content addressing
-- **Familiar UX**: Familiar e-signature interface with Web3 advantages
-- **USDFC Payments**: Native cryptocurrency subscriptions
-- **End-to-End Encryption**: ECDH-based secure document sharing
+Traditional e-signature platforms require you to trust a centralized provider. Filosign eliminates this risk by anchoring every signature to the blockchain, providing **mathematical certainty** that your documents cannot be altered, lost, or invalidated.
 
-## **The Problem We Solve**
+- 🔐 **Post-Quantum Security**: Future-proof cryptography resistant to quantum computing
+- ⛓️ **Blockchain Anchored**: Every signature is a permanent, verifiable transaction
+- 🔒 **End-to-End Encrypted**: Documents encrypted from creation to delivery
+- 🌐 **Decentralized Storage**: Files stored on Filecoin's resilient network
+- 💰 **Crypto Payments**: USDFC subscriptions with no intermediary fees
 
-Enterprises using centralized e-signature platforms face significant **"platform risk"**:
+## 🚀 Quick Start
 
-- **Trust Dependency**: Must trust provider's security, policies, and long-term viability
-- **Single Point of Failure**: Security breach, policy change, or shutdown can invalidate legally binding documents
-- **No Mathematical Proof**: Only promises about document integrity, not verifiable certainty
+Getting started with Filosign takes just a few minutes:
 
-Filosign replaces fragile platform trust with permanent mathematical proof.
+1. **Connect Wallet**: Link your Web3 wallet (MetaMask, Coinbase, etc.)
+2. **Create Account**: Set up dual-factor authentication with PIN + wallet
+3. **Upload & Share**: Upload documents and invite signers
+4. **Sign Securely**: Use familiar drawing, typing, or upload signature methods
+5. **Verify Permanently**: All signatures are immutably recorded on-chain
 
-## **Links**
+## 🎯 Perfect For
 
-- **[Website](https://app.filosign.xyz)**: Check out the live website
-- **[GitHub Org](https://github.com/filosign-dapp)**: View all repositories and contribute
-- **[Demo Video](https://www.loom.com/share/8e142c8bb06f43edb0a18162222f96f8?t=262)**: Check out our demo video
+- **Legal Professionals**: Contract signing with cryptographic proof
+- **Business Agreements**: High-value deals requiring permanent verification
+- **Real Estate**: Property documents with immutable signatures
+- **Financial Services**: Regulatory compliance with blockchain audit trails
+- **Any High-Stakes Document**: Where trust and permanence matter
 
-## **Filosign Ecosystem**
+## 📋 Features
 
-Filosign consists of multiple specialized repositories, each handling different aspects of the platform:
+### 🔒 Security First
+- **Dual-Factor Authentication**: PIN + wallet signature protection
+- **Quantum-Resistant Crypto**: Kyber + Dilithium algorithms
+- **Zero-Trust Architecture**: Server never sees your private keys
+- **Immutable Records**: Every action permanently recorded on-chain
 
-### **Core Repositories**
+### 📄 Document Management
+- **Universal Format Support**: PDF, DOC, images, and more
+- **Multi-Signer Workflows**: Sequential or parallel signing
+- **Real-Time Collaboration**: Live document status updates
+- **Version Control**: Complete audit trail of all changes
 
-| Repository                | Purpose                    | Status                 | Link                                                                                   |
-| ------------------------- | -------------------------- | ---------------------- | -------------------------------------------------------------------------------------- |
-| **filosign/client**       | React frontend application | 🕒 Work in Progress    | [github.com/filosign-dapp/client](https://github.com/filosign-dapp/client)             |
-| **filosign/contracts**    | FVM smart contracts        | ✅ Deployed on Testnet | [github.com/filosign-dapp/contracts](https://github.com/filosign-dapp/contracts)       |
-| **filosign/crypto-utils** | WebAssembly crypto SDK     | ✅ Published           | [github.com/filosign-dapp/crypto-utils](https://github.com/filosign-dapp/crypto-utils) |
-| **filosign/platform**     | TypeScript client library  | 🕒 Work in Progress    | [github.com/filosign-dapp/platform](https://github.com/filosign-dapp/platform)         |
+### 🌐 Web3 Native
+- **Wallet Integration**: Connect any Web3 wallet
+- **Decentralized Storage**: Files stored on Filecoin network
+- **Token Payments**: USDFC cryptocurrency subscriptions
+- **Cross-Chain Compatible**: Ethereum and Filecoin networks
 
-### **Key Dependencies**
+### 🎨 User Experience
+- **Familiar Interface**: Just like DocuSign, but with Web3 power
+- **Mobile Optimized**: Sign documents on any device
+- **Bulk Operations**: Process multiple documents efficiently
+- **API Integration**: Connect with your existing systems
 
-- **Privy**: Wallet connection and authentication
-- **Synapse SDK**: Filecoin on-chain interactions
-- **FilCDN**: Decentralized file storage and delivery
-- **Filecoin Pay**: Cryptocurrency payment processing
-- **WAGMI + Viem**: Ethereum/Filecoin blockchain interactions
+## 🔗 Links
 
-## **Solution Architecture**
+- **[🌐 Website](https://app.filosign.xyz)** - Try Filosign live
+- **[📹 Demo Video](https://www.loom.com/share/8e142c8bb06f43edb0a18162222f96f8)** - See it in action
+- **[📚 Documentation](https://docs.filosign.xyz)** - Complete guides and API docs
+- **[🐛 Issues](https://github.com/filosign-dapp/client/issues)** - Report bugs and request features
 
-### **Core Components**
+## 💡 How It Works
 
-#### **1. Frontend (React + TypeScript)**
+### **1. Connect & Authenticate**
+Link your Web3 wallet and set up dual-factor security with a PIN. Your cryptographic keys are generated client-side - we never store your private information.
 
-Modern, responsive UI built with:
+### **2. Upload & Encrypt**
+Documents are encrypted on your device before upload. Using quantum-resistant algorithms, each file gets its own unique encryption key.
 
-- **React 19** with hooks and modern patterns
-- **Tailwind CSS** for consistent design system
-- **shadcn/ui** for accessible, reusable components
-- **React Hook Form** with Zod validation
-- **TanStack Router** for type-safe routing
+### **3. Share Securely**
+Invite signers and share documents through our permission system. Recipients can only access files they've been explicitly granted permission to view.
 
-#### **2. Client SDK (TypeScript)**
+### **4. Sign & Verify**
+Signers create signatures using familiar methods (draw, type, or upload). Every signature is cryptographically verified and permanently anchored to the blockchain.
 
-Non-custodial cryptographic operations:
+### **5. Audit & Prove**
+All actions are immutably recorded on-chain. Anyone can independently verify the authenticity, timestamp, and integrity of any signed document.
 
-- **PIN + Wallet Dual-Factor**: Argon2id key derivation
-- **XChaCha20Poly1305**: Authenticated encryption
-- **ECDH Key Exchange**: Secure document sharing
-- **Session-Based Keys**: Never stored long-term
+## 🔐 Security & Trust
 
-#### **3. Smart Contracts (Solidity)**
+### **Zero-Trust by Design**
+- Your private keys never leave your device
+- Documents are encrypted before transmission
+- Server acts only as a coordinator, never storing sensitive data
 
-Decentralized business logic on FVM:
+### **Quantum-Resistant**
+Built with post-quantum cryptographic algorithms that remain secure even against future quantum computers.
 
-- **FSManager**: Trust and access management
-- **FSFileRegistry**: Document lifecycle management
-- **FSKeyRegistry**: Cryptographic identity storage
+### **Blockchain Verification**
+Every signature, timestamp, and document hash is permanently recorded on the Filecoin network, providing mathematical proof of authenticity.
 
-#### **4. Filecoin Onchain Cloud**
+## 🛠️ For Developers
 
-Decentralized storage infrastructure:
-
-- **Synapse SDK**: On-chain interactions
-- **FilCDN**: Fast document retrieval
-- **FWSS**: Permanent verifiable storage
-- **Filecoin Pay**: USDFC subscription payments
-
-### **Security Model**
-
-```
-User PIN → Argon2id → Authentication Key
-Wallet Signature → HKDF → Signing Key
-PIN Key ⊕ Auth Key → Wrapper Key
-Wrapper Key → XChaCha20 → Encrypted Seed
-Seed → HKDF → Document Encryption Keys
-```
-
-## **Getting Started**
-
-### **Prerequisites**
-
-- **Bun** >= 1.0.0 (JavaScript runtime & package manager)
-- **Web3 Wallet** (MetaMask, Coinbase Wallet, etc.)
-- **Filecoin Calibration Testnet** access (for testing)
-
-### **Installation**
-
+### **Quick Setup**
 ```bash
-# Clone the repository
+# Clone and install
 git clone https://github.com/filosign-dapp/client.git
-cd client
+cd client && bun install
 
-# Install all dependencies
-bun run setup
+# Start local development environment
+./scripts/serloc.sh
 
-# Copy environment template
-cd packages/client && cp .env.template .env
-
-# Start development server
-bun run dev
+# Run integration tests
+cd test && bun run dev
 ```
 
-### **Development Workflow**
-
-````bash
-# Start development server with hot reload
-bun run dev
-
-# Build for production
-bun run build
-
-# Preview production build
-bun run start
-
-## **User Experience**
-
-### **Complete User Journey**
-
-1. **Landing Page**: Value proposition and feature overview
-2. **Wallet Connection**: Seamless onboarding via Privy
-3. **Account Setup**: PIN creation for dual-factor security
-4. **Document Creation**: Upload, annotate, and place signatures
-5. **Recipient Management**: Add signers with email verification
-6. **Send for Signature**: Encrypted transmission via blockchain
-7. **Signing Process**: Intuitive signature creation (draw/type/upload)
-8. **Verification**: On-chain proof of authenticity
-
-### **Key Screens**
-
-- **Dashboard**: Document overview and analytics
-- **Document Viewer**: PDF annotation and signature placement
-- **Signature Creation**: Multiple input methods
-- **File Management**: Folder organization system
-- **Profile Settings**: Account and security management
-
-
-## **Technical Architecture**
-
-### **Frontend Stack**
-
+### **SDK Integration**
 ```typescript
-// Modern React with TypeScript
-React 19 + TypeScript 5.x
+import { FilosignProvider, useFilosignClient } from '@filosign/react';
 
-// State Management
-Zustand (lightweight, scalable)
-
-// Form Handling
-React Hook Form + Zod validation
-
-// UI Components
-Radix UI primitives + Tailwind CSS
-Phosphor Icons + Motion animations
-
-// Routing
-TanStack Router (type-safe)
-
-// PDF Handling
-React PDF + PDF annotation tools
-
-// Signature Input
-React Signature Canvas + Tldraw
-````
-
-### **Filecoin Integration**
-
-- **Synapse SDK**: Core interactions with the Filecoin network
-- **Filecoin Warm Storage**: Decentralized storage for documents
-- **FilCDN**: Blazing fast retrieval of documents
-- **Filecoin Pay**: Subscription management using USDFC
-- **FVM Contracts**: On-chain document registry
-
-## **API Reference**
-
-### **Client SDK Integration**
-
-```typescript
-import { FilosignClient } from "@filosign/platform";
-
-// Initialize with wallet
-const client = new FilosignClient(walletClient);
-await client.initialize();
-
-// User registration
-await client.register("secure-pin");
-
-// Document operations
-const docId = await client.createDocument(file, recipients);
-await client.sendForSignature(docId);
+function MyApp() {
+  return (
+    <FilosignProvider config={{ apiBaseUrl: "https://api.filosign.xyz" }}>
+      <DocumentSigner />
+    </FilosignProvider>
+  );
+}
 ```
 
-### **Core Hooks & Components**
+See our [📚 Documentation](https://docs.filosign.xyz) for complete integration guides.
 
-```typescript
-// Authentication hooks
-const { user, login, logout } = useAuth();
+## 🤝 Community & Contributing
 
-// Document management
-const { documents, createDocument } = useDocuments();
+### **Get Involved**
+We welcome contributions from developers, designers, and cryptography experts! Filosign is an open-source project building the future of trustless digital agreements.
 
-// Signature creation
-const { signatures, createSignature } = useSignatures();
-```
+### **Ways to Contribute**
+- 🐛 **Report Issues**: Found a bug? Let us know on GitHub
+- 💡 **Suggest Features**: Have ideas for new functionality?
+- 🔧 **Code Contributions**: Help build the platform
+- 📖 **Documentation**: Improve our docs and guides
+- 🧪 **Testing**: Help test new features and report issues
 
-## **Resources**
-
-- **[Demo Video](https://www.loom.com/share/8e142c8bb06f43edb0a18162222f96f8)**: Complete workflow walkthrough
-- **[Documentation](https://docs.filosign.xyz)**: Comprehensive guides and API docs
-- **[Issue Tracker](https://github.com/filosign-dapp/client/issues)**: Bug reports and feature requests
-
-### **Repository Structure**
-
-```
-client/
-├── packages/client/         # Main React application
-│   ├── src/
-│   │   ├── components/      # Reusable UI components (shadcn/ui)
-│   │   ├── pages/           # Route-based page components
-│   │   ├── hooks/           # Custom React hooks
-│   │   ├── lib/             # Utilities and configurations
-│   │   ├── stores/          # Zustand state management
-│   │   └── types/           # TypeScript type definitions
-│   ├── api/                 # Hono backend routes
-│   ├── public/              # Static assets
-│   ├── db/                  # Database schemas
-│   ├── .env.template        # Environment variables template
-│   └── vercel.json          # Deployment configuration
-├── packages/*               # Additional packages
-└── docs/                    # Documentation
-```
-
-## **Development & Contribution**
-
-### **Development Setup**
-
+### **Development**
 ```bash
-# Clone and setup
-git clone https://github.com/filosign-dapp/client.git
-cd client
-bun run setup
+# Fork the repository
+# Create your feature branch
+git checkout -b feature/amazing-feature
 
-# Configure environment
-cd packages/client && cp .env.template .env
-# Edit .env with your configuration
-
-# Start development
-bun run dev
+# Make your changes and test
+# Submit a pull request
 ```
 
-### **Project Structure Guidelines**
+### **Community**
+- **📧 Email**: hello@filosign.xyz
+- **🐦 Twitter**: [@filosign](https://twitter.com/filosign)
+- **💬 Discord**: Join our community discussions
 
-- **Components**: Use shadcn/ui patterns with proper TypeScript
-- **Icons**: Import from `@phosphor-icons/react`
-- **Styling**: Follow design system defined in `globals.css`
-- **State**: Prefer Zustand over Context for global state
-- **Forms**: Use React Hook Form with Zod schemas
+## 📄 License
 
-### **Contributing**
+**AGPL-3.0-or-later** - Filosign is free and open-source software.
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Commit changes: `git commit -m 'Add amazing feature'`
-4. Push to branch: `git push origin feature/amazing-feature`
-5. Open a Pull Request
+---
 
-## **Current Status & Roadmap**
-
-### **Completed (Phase 1-2)**
-
-- **Live Frontend UI**: Complete user interface with mock interactions
-- **Core Smart Contracts**: Deployed on Filecoin Calibration testnet
-- **Encryption SDK**: WebAssembly cryptographic utilities
-- **Client Library**: Backend integration and API layer
-- **Wallet Integration**: Privy-powered Web3 onboarding
-- **Document Management**: Upload, annotation, and signature placement
-
-### **In Progress (Phase 3)**
-
-- **Full-Stack Integration**: Connect frontend with contracts and backend
-- **Filecoin Storage**: Implement Synapse SDK and FilCDN integration
-- **Payment System**: Filecoin Pay subscription management
-- **User Testing**: Gather feedback and iterate on UX
-
-### **Future Roadmap (Phase 4+)**
-
-- **Enterprise Features**: Team management, multi-sig, audit logs
-- **API Platform**: REST API and webhook integrations
-- **Mobile Apps**: React Native iOS/Android applications
-- **Compliance**: SOC 2, GDPR, ISO certifications
-- **Mainnet Launch**: Production deployment on Filecoin mainnet
-
-## **Support & Community**
-
-- **Follow us on X**: [@filosign](https://x.com/filosign)
-- **Bug Reports**: [GitHub Issues](https://github.com/filosign-dapp/client/issues)
+*Built with ❤️ for the decentralized future*

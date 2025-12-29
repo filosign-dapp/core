@@ -5,6 +5,7 @@ import db from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { verifyJwt } from "@/lib/utils/jwt";
 import { respond } from "@/lib/utils/respond";
+import tryCatchSync from "@/lib/utils/tryCatch";
 
 export const authenticated = createMiddleware<{
 	Variables: {
@@ -19,9 +20,23 @@ export const authenticated = createMiddleware<{
 
 	const token = authHeader.substring(7); // Remove "Bearer " prefix
 
-	const payload = verifyJwt(token);
+	const result = tryCatchSync(() => verifyJwt(token));
 
+	if (result.error) {
+		console.error("JWT verification failed:", {
+			error:
+				result.error instanceof Error
+					? result.error.message
+					: String(result.error),
+			token: `${token.substring(0, 20)}...`, // Log partial token for debugging
+			authHeader: `${authHeader.substring(0, 50)}...`, // Log partial header
+		});
+		return respond.err(ctx, "Invalid token format", 401);
+	}
+
+	const payload = result.data;
 	if (!payload || !payload.sub) {
+		console.error("JWT verification returned invalid payload:", { payload });
 		return respond.err(ctx, "Invalid or expired token", 401);
 	}
 

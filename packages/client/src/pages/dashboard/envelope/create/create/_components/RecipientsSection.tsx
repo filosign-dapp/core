@@ -9,8 +9,12 @@ import {
 } from "@phosphor-icons/react";
 import { motion } from "motion/react";
 import { useState } from "react";
-import type { Control, UseFieldArrayAppend, UseFieldArrayRemove } from "react-hook-form";
-import type { FieldArrayWithId } from "react-hook-form";
+import type {
+	Control,
+	FieldArrayWithId,
+	UseFieldArrayAppend,
+	UseFieldArrayRemove,
+} from "react-hook-form";
 import AddRecipientDialog from "@/src/lib/components/custom/AddRecipientDialog";
 import { Button } from "@/src/lib/components/ui/button";
 import {
@@ -144,7 +148,10 @@ export default function RecipientsSection({
 																<div className="flex items-center gap-2">
 																	<span className="text-sm font-medium text-foreground">
 																		{formField.value.name ||
-																			formField.value.walletAddress.slice(0, 6) +
+																			formField.value.walletAddress.slice(
+																				0,
+																				6,
+																			) +
 																				"..." +
 																				formField.value.walletAddress.slice(-4)}
 																	</span>
@@ -225,7 +232,8 @@ export default function RecipientsSection({
 										weight="duotone"
 									/>
 									<p className="text-sm text-muted-foreground text-center">
-										{acceptedPeople?.people && acceptedPeople.people.length === 0
+										{acceptedPeople?.people &&
+										acceptedPeople.people.length === 0
 											? "No recipients available yet"
 											: "All available recipients have been added"}
 									</p>

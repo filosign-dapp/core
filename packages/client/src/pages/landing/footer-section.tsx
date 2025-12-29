@@ -1,7 +1,5 @@
 import {
-	ArrowRightIcon,
 	GithubLogoIcon,
-	LinkedinLogoIcon,
 	SparkleIcon,
 	TwitterLogoIcon,
 } from "@phosphor-icons/react";
@@ -61,9 +59,7 @@ export default function FooterSection() {
 								viewport={{ once: true }}
 								className="text-4xl md:text-5xl font-semibold tracking-tight mb-8 font-manrope"
 							>
-								Join the 12,000+
-								<br />
-								businesses using Filosign
+								Get started with filosign
 							</motion.h2>
 						</div>
 						<motion.div
@@ -115,7 +111,11 @@ export default function FooterSection() {
 
 				<div className="flex flex-col md:flex-row justify-between items-end md:items-center gap-8 border-t border-border/50 pt-4">
 					<div className="space-y-2">
-						<Logo className="px-0" textClassName="text-4xl text-foreground" />
+						<Logo
+							className="px-0"
+							textClassName="text-4xl text-foreground"
+							redirectTo="/"
+						/>
 						<p className="text-xs text-muted-foreground font-manrope">
 							© 2025 Filosign. All rights reserved.
 						</p>

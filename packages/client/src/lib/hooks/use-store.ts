@@ -1,5 +1,3 @@
-import type { Chain } from "viem";
-import { hardhat } from "viem/chains";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { CreateForm } from "@/src/pages/dashboard/envelope/create/types";

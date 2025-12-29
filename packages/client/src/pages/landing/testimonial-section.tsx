@@ -29,11 +29,9 @@ export default function TestimonialSection() {
 						/>
 					</div>
 					<div className="text-left">
-						<div className="font-semibold text-lg font-manrope">
-							Sandeep Nailwal
-						</div>
+						<div className="font-semibold text-lg font-manrope">Adam & Eve</div>
 						<div className="text-muted-foreground text-sm font-manrope">
-							Founder & CEO @Polygon
+							Genesis Inc.
 						</div>
 					</div>
 				</div>

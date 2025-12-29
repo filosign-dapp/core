@@ -1,8 +1,6 @@
-# Filosign (previously Portal)
+# Filosign - On-Chain E-Signatures
 
-## **1. Overview**
-
-FiloSign is an on-chain e-signature platform designed for enterprises that require mathematical certainty for their agreements. It replaces the inherent platform risk of centralized services like DocuSign with a permanent, verifiable ledger built on the Filecoin Onchain Cloud. Our mission is to become the trusted standard for high-value digital agreements by making cryptographic truth a practical and accessible business tool.
+**Decentralized e-signature platform** for enterprises requiring mathematical certainty. Replaces centralized platform risk with permanent Filecoin ledger. Mission: Make cryptographic truth practical for high-value agreements.
 
 ---
 
@@ -22,21 +20,16 @@ This problem is **fundamentally a challenge of verifiable, permanent storage**. 
 
 ## **3. Solution & Value Proposition**
 
-### **3.1. The Solution**
+### **The Solution**
+Secure, intuitive e-signature platform with **"Irrevocable Signatures"**: Every signature is an FVM transaction, document hash permanently anchored to Filecoin. Creates tamper-proof, verifiable audit trails outside any single entity's control.
 
-FiloSign provides a secure, intuitive platform for executing and managing e-signatures. The core innovation is our **"Irrevocable Signature"** process: every signature is a transaction on the Filecoin Virtual Machine (FVM), and the final signed document's hash is permanently anchored to the Filecoin network. This creates a tamper-proof, time-stamped, and independently verifiable audit trail that exists outside the control of any single entity.
+### **Value Proposition**
+**Replace fragile platform trust with permanent mathematical proof.** Familiar DocuSign UX with superior security - agreements safe from hacks, policy changes, or shutdowns.
 
-### **3.2. Clear Value Proposition**
-
-Our value proposition is simple and powerful: **We replace fragile platform trust with permanent mathematical proof.** We offer the familiar workflow of platforms like DocuSign but with superior security and permanence to the end users. Your most critical agreements are safe from hacks, policy changes, or provider shutdowns.
-
-### **3.3. Use of Filecoin's Core Strengths**
-
-Our solution is built on the unique strengths of the Filecoin network:
-
-- **Verifiability:** The FVM provides an immutable ledger, allowing anyone to verify the authenticity and timestamp of an agreement.
-- **Decentralized Storage:** Encrypted documents are stored on the Filecoin on-chain cloud for verifiable, content-addressed & resilient storage, fast retrieval, and cheaper cost to the end user.
-- **Payments:** On-chain subscription model backed by payments in **USDFC**, allowing for a seamless and transparent model.
+### **Filecoin Integration**
+- **Verifiability**: Immutable FVM ledger for agreement authenticity/timestamps
+- **Decentralized Storage**: Encrypted docs on Filecoin for content-addressed, resilient storage
+- **Payments**: USDFC-backed subscription model
 
 ## **4. System Architecture**
 

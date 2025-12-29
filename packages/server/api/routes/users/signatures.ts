@@ -5,9 +5,9 @@ import z from "zod";
 import { authenticated } from "@/api/middleware/auth";
 import { KB } from "@/constants";
 import db from "@/lib/db";
-import { userSignatures } from "@/lib/db/schema";
 import { respond } from "@/lib/utils/respond";
 
+const { userSignatures } = db.schema;
 export default new Hono()
 
 	.post(

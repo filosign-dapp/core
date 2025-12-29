@@ -61,14 +61,14 @@ export default function AddRecipientDialog({
 			setMessage("");
 			setOpen(false);
 			onSuccess?.();
-		} catch (error: unknown) {
-			// Error handling is done in useEffect below
+		} catch (error) {
+			console.error(error);
+			toast.error("Failed to send share request. Please try again.");
 		}
 	};
 
 	useEffect(() => {
 		if (sendShareRequest.isError && sendShareRequest.error) {
-			// The error from postSafe is thrown as an Error with the message
 			const errorMessage =
 				sendShareRequest.error instanceof Error
 					? sendShareRequest.error.message

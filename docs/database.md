@@ -1,8 +1,6 @@
 # Filosign Storage Architecture
 
-## Overview
-
-Filosign implements a **multi-layered storage architecture** combining blockchain immutability, relational databases, decentralized file storage, and client-side caching. This design provides security, performance, and decentralization while maintaining data integrity and user privacy.
+**Multi-layer storage**: Blockchain immutability + relational DB + decentralized files + client caching. Ensures security, performance, and decentralization.
 
 ## Storage Layers
 

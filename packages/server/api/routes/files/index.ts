@@ -11,13 +11,6 @@ import { getAddress } from "viem";
 import z from "zod";
 import { authenticated } from "@/api/middleware/auth";
 import db from "@/lib/db";
-import {
-	fileAcknowledgements,
-	fileParticipants,
-	fileSignatures,
-	files,
-	users,
-} from "@/lib/db/schema";
 import { fsContracts } from "@/lib/evm";
 import { bucket } from "@/lib/s3/client";
 import { getOrCreateUserDataset } from "@/lib/synapse";
@@ -26,6 +19,8 @@ import { tryCatch } from "@/lib/utils/tryCatch";
 
 const { FSFileRegistry } = fsContracts;
 const MAX_FILE_SIZE = 30 * 1024 * 1024;
+
+const { files, fileParticipants, fileSignatures, users } = db.schema;
 
 export default new Hono()
 	.post("/upload/start", authenticated, async (ctx) => {

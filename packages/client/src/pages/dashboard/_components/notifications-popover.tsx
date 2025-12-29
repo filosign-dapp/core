@@ -69,7 +69,7 @@ export function NotificationsPopover() {
 		// Count pending received requests
 		if (receivedRequests.data && Array.isArray(receivedRequests.data)) {
 			count += receivedRequests.data.filter(
-				(req) => req.status === "PENDING" || req.status === "pending",
+				(req) => req.status === "PENDING",
 			).length;
 		}
 
@@ -205,9 +205,9 @@ export function NotificationsPopover() {
 							</div>
 
 							<div className="space-y-3">
-								{pendingRequests.map((req, i) => (
+								{pendingRequests.map((req) => (
 									<NotificationItemCard
-										key={i}
+										key={req.id}
 										icon={<UserCheckIcon className="h-4 w-4 text-primary" />}
 										title={`From: ${formatAddress(req.senderWallet)}`}
 										subtitle={req.message || "No message provided"}
@@ -243,12 +243,11 @@ export function NotificationsPopover() {
 							</div>
 
 							<div className="space-y-3">
-								{allReceivedFiles.map((file, i: number) => (
+								{allReceivedFiles.map((file) => (
 									<ReceivedFileNotification
 										key={file.pieceCid}
 										pieceCid={file.pieceCid}
 										sender={file.sender}
-										navigate={navigate}
 										setOpen={setOpen}
 									/>
 								))}
@@ -309,18 +308,17 @@ export function NotificationsPopover() {
 function ReceivedFileNotification({
 	pieceCid,
 	sender,
-	navigate,
 	setOpen,
 }: {
 	pieceCid: string;
 	sender: string;
-	navigate: any;
 	setOpen: (open: boolean) => void;
 }) {
 	const queryClient = useQueryClient();
 	const { data: file } = useFileInfo({ pieceCid });
 	const acknowledgeFile = useAckFile();
 	const viewFile = useViewFile();
+	const navigate = useNavigate();
 
 	const handleAcknowledge = async () => {
 		try {

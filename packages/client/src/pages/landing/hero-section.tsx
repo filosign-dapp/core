@@ -53,7 +53,7 @@ export default function HeroSection() {
 					}}
 					className="text-3xl sm:text-4xl md:text-5xl xl:text-7xl leading-tight"
 				>
-					Trustless document signing for the modern web.
+					Trustless standard for permanent agreements.
 				</motion.h1>
 
 				{/* Sub-headline */}
@@ -90,7 +90,7 @@ export default function HeroSection() {
 						className="w-full sm:w-auto"
 					>
 						<Link
-							to="/dashboard"
+							to="/"
 							className="flex items-center justify-center gap-2 group"
 						>
 							Get started
@@ -105,7 +105,7 @@ export default function HeroSection() {
 						className="w-full sm:w-auto"
 					>
 						<Link
-							to="/dashboard"
+							to="/"
 							className="flex items-center justify-center gap-2 group"
 						>
 							<PlayIcon className="w-4 h-4 transition-transform duration-200 group-hover:rotate-120" />

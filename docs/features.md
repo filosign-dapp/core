@@ -1,146 +1,74 @@
 # Filosign Platform Features
 
-## Overview
-
-Filosign is a decentralized e-signature platform built on Filecoin that provides mathematically verifiable digital agreements. The platform combines quantum-resistant cryptography with blockchain-based document registry to eliminate "platform risk" inherent in traditional e-signature services.
+**Decentralized e-signature platform** on Filecoin with quantum-resistant cryptography and blockchain verification. Eliminates platform risk through mathematical proof.
 
 ## Core Features
 
 ### 🔐 **Dual-Factor Authentication**
-**Quantum-resistant user authentication combining PIN + wallet signatures**
+**PQ-resistant auth combining PIN + wallet signatures**
 
-#### Features:
-- **PIN-based key derivation**: Argon2id hardened password hashing
-- **Wallet signature verification**: Cryptographic proof of wallet ownership
-- **Session management**: Secure JWT-based API authentication
-- **Logout security**: Complete key material cleanup
+**Features**: Argon2id PIN hashing, wallet signature verification, JWT sessions, secure logout
 
-#### Implementation:
 ```typescript
-// User registration with dual-factor security
-await client.register({ pin: "secure-user-pin" });
-
-// Login verification
-await client.login({ pin: "secure-user-pin" });
+await client.register({ pin: "secure-pin" });
+await client.login({ pin: "secure-pin" });
 ```
 
 ---
 
 ### 📄 **Document Management**
-**Complete document lifecycle from upload to permanent blockchain storage**
+**Complete lifecycle: upload → encryption → blockchain storage**
 
-#### Features:
-- **End-to-end encryption**: AES-GCM encryption with Kyber-derived keys
-- **Multi-recipient support**: Share documents with multiple signers
-- **Acknowledgment tracking**: Blockchain-verified document receipt
-- **Metadata support**: Custom document properties and tags
-- **File status tracking**: S3 → Filecoin Onchain Cloud migration
-- **Pagination**: Efficient handling of large document libraries
+**Features**: E2E AES-GCM encryption, multi-recipient sharing, blockchain acknowledgments, metadata, S3→Filecoin migration, pagination
 
-#### Document Upload:
 ```typescript
+// Upload with recipients
 const result = await client.files.uploadFile({
   data: fileBuffer,
   recipientAddresses: ["0x123...", "0x456..."],
-  metadata: {
-    title: "Legal Agreement",
-    category: "contracts",
-    expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000
-  }
+  metadata: { title: "Legal Agreement" }
 });
-```
 
-#### Document Retrieval:
-```typescript
-// Get sent documents
-const sentFiles = await client.files.getSentFiles({ page: 1, limit: 20 });
-
-// Get received documents
-const receivedFiles = await client.files.getReceivedFiles({ page: 1, limit: 10 });
-
-// Get detailed file information
-const fileDetails = await client.files.getFileDetails({ pieceCid: "cid..." });
-```
-
-#### Document Acknowledgment:
-```typescript
-// Acknowledge receipt of document
+// Query operations
+const sent = await client.files.getSentFiles({ page: 1, limit: 20 });
+const received = await client.files.getReceivedFiles({ page: 1, limit: 10 });
+const details = await client.files.getFileDetails({ pieceCid: "cid..." });
 await client.files.acknowledgeFile({ pieceCid: "cid..." });
 ```
 
 ---
 
 ### ✍️ **Digital Signatures**
-**Post-quantum signature creation and management**
+**PQ signature creation and management**
 
-#### Features:
-- **Multiple signature types**: Draw, type, or upload signature images
-- **Signature library**: Save and reuse personal signatures
-- **Visual hash verification**: Unique visual fingerprint for each signature
-- **Blockchain anchoring**: Signatures permanently recorded on-chain
-- **Signature metadata**: Timestamp, signer identity, transaction hash
+**Features**: Multiple signature types (draw/type/upload), signature library, visual hash verification, blockchain anchoring, timestamp metadata
 
-#### Signature Management:
 ```typescript
-// Upload custom signature
-await client.signatures.uploadSignature({
-  file: signatureImageFile,
-  name: "My Legal Signature"
-});
-
-// Get all user signatures
+// Signature management
+await client.signatures.uploadSignature({ file: signatureImageFile, name: "My Signature" });
 const signatures = await client.signatures.getSignatures();
-
-// Delete unused signature
 await client.signatures.deleteSignature(signatureId);
-```
 
-#### Signature Verification:
-```typescript
-// Signatures are automatically verified through:
-// - Dilithium quantum-resistant signatures
-// - Blockchain transaction proofs
-// - Visual hash consistency checks
+// Verification: Dilithium PQ signatures + blockchain proofs + visual hashes
 ```
 
 ---
 
 ### 🔗 **Secure Document Sharing**
-**Granular permission system for controlled document access**
+**Permission-based sharing with granular access control**
 
-#### Features:
-- **Sender approval system**: Require explicit permission to receive documents
-- **Permission management**: Approve/reject sharing requests
-- **Recipient discovery**: Find people you can share with
-- **Request lifecycle**: Send → Pending → Accepted/Rejected → Expired
-- **Message support**: Include custom messages with sharing requests
+**Features**: Sender approval system, request lifecycle management, network discovery, custom messages
 
-#### Sharing Workflow:
 ```typescript
-// Send sharing request
-await client.shareCapability.sendShareRequest({
-  recipientWallet: "0x123...",
-  message: "Please review this contract",
-  metadata: { priority: "high", deadline: "2024-12-31" }
-});
-
-// Get pending requests
-const receivedRequests = await client.shareCapability.getReceivedRequests();
-const sentRequests = await client.shareCapability.getSentRequests();
-
-// Approve sharing permission (on-chain transaction)
+// Sharing workflow
+await client.shareCapability.sendShareRequest({ recipientWallet: "0x123...", message: "Review contract" });
+const received = await client.shareCapability.getReceivedRequests();
+const sent = await client.shareCapability.getSentRequests();
 await client.shareCapability.allowSharing({ senderWallet: "0x456..." });
-
-// Cancel pending request
 await client.shareCapability.cancelShareRequest({ requestId: "req-id" });
-```
 
-#### Network Discovery:
-```typescript
-// Find people you can send documents to
+// Network discovery
 const canSendTo = await client.shareCapability.getPeopleCanSendTo();
-
-// Find people who can send documents to you
 const canReceiveFrom = await client.shareCapability.getPeopleCanReceiveFrom();
 ```
 

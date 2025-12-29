@@ -16,6 +16,7 @@ import { respond } from "@/lib/utils/respond";
 
 const nonces: Record<Address, { nonce: Hash; validTill: number }> = {};
 
+const { users } = db.schema;
 export default new Hono()
 
 	.get("/nonce", async (ctx) => {

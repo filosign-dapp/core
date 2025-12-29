@@ -4,10 +4,10 @@ import { isAddress } from "viem";
 import z from "zod";
 import { authenticated } from "@/api/middleware/auth";
 import db from "@/lib/db";
-import { users } from "@/lib/db/schema";
 import { bucket } from "@/lib/s3/client";
 import { respond } from "@/lib/utils/respond";
 
+const { users } = db.schema;
 export default new Hono()
 	.get("/", authenticated, async (ctx) => {
 		const wallet = ctx.var.userWallet;

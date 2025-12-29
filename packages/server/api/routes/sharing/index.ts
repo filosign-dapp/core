@@ -3,18 +3,13 @@ import { Hono } from "hono";
 import { getAddress, isAddress } from "viem";
 import { authenticated } from "@/api/middleware/auth";
 import db from "@/lib/db";
-import {
-	shareApprovals,
-	shareRequests,
-	userInvites,
-	users,
-} from "@/lib/db/schema";
 import { respond } from "@/lib/utils/respond";
 import { tryCatch } from "@/lib/utils/tryCatch";
 
 // Base hours for spam prevention: wait this^(cancelled_count) hours after cancelling
 const REQUEST_SPAM_BASE_HOURS = 3;
 
+const { shareApprovals, shareRequests, userInvites, users } = db.schema;
 export default new Hono()
 	.post("/request", authenticated, async (ctx) => {
 		const { recipientWallet, message } = await ctx.req.json();
@@ -237,37 +232,61 @@ export default new Hono()
 	})
 	.get("/received", authenticated, async (ctx) => {
 		const userWallet = ctx.var.userWallet;
-		const requests = await db
-			.select({
-				id: shareRequests.id,
-				senderWallet: shareRequests.senderWallet,
-				recipientWallet: shareRequests.recipientWallet,
-				message: shareRequests.message,
-				status: shareRequests.status,
-				createdAt: shareRequests.createdAt,
-				updatedAt: shareRequests.updatedAt,
-			})
-			.from(shareRequests)
-			.where(eq(shareRequests.recipientWallet, userWallet))
-			.orderBy(desc(shareRequests.createdAt));
-		return respond.ok(ctx, { requests }, "Received requests retrieved", 200);
+
+		try {
+			const requests = await db
+				.select({
+					id: shareRequests.id,
+					senderWallet: shareRequests.senderWallet,
+					recipientWallet: shareRequests.recipientWallet,
+					message: shareRequests.message,
+					status: shareRequests.status,
+					createdAt: shareRequests.createdAt,
+					updatedAt: shareRequests.updatedAt,
+				})
+				.from(shareRequests)
+				.where(eq(shareRequests.recipientWallet, userWallet))
+				.orderBy(desc(shareRequests.createdAt));
+
+			return respond.ok(ctx, { requests }, "Received requests retrieved", 200);
+		} catch (error) {
+			console.error("Error fetching received share requests:", {
+				userWallet,
+				error: error instanceof Error ? error.message : String(error),
+				stack: error instanceof Error ? error.stack : undefined,
+			});
+
+			return respond.err(ctx, "Failed to retrieve received requests", 500);
+		}
 	})
 	.get("/sent", authenticated, async (ctx) => {
 		const userWallet = ctx.var.userWallet;
-		const requests = await db
-			.select({
-				id: shareRequests.id,
-				senderWallet: shareRequests.senderWallet,
-				recipientWallet: shareRequests.recipientWallet,
-				message: shareRequests.message,
-				status: shareRequests.status,
-				createdAt: shareRequests.createdAt,
-				updatedAt: shareRequests.updatedAt,
-			})
-			.from(shareRequests)
-			.where(eq(shareRequests.senderWallet, userWallet))
-			.orderBy(desc(shareRequests.createdAt));
-		return respond.ok(ctx, { requests }, "Sent requests retrieved", 200);
+
+		try {
+			const requests = await db
+				.select({
+					id: shareRequests.id,
+					senderWallet: shareRequests.senderWallet,
+					recipientWallet: shareRequests.recipientWallet,
+					message: shareRequests.message,
+					status: shareRequests.status,
+					createdAt: shareRequests.createdAt,
+					updatedAt: shareRequests.updatedAt,
+				})
+				.from(shareRequests)
+				.where(eq(shareRequests.senderWallet, userWallet))
+				.orderBy(desc(shareRequests.createdAt));
+
+			return respond.ok(ctx, { requests }, "Sent requests retrieved", 200);
+		} catch (error) {
+			console.error("Error fetching sent share requests:", {
+				userWallet,
+				error: error instanceof Error ? error.message : String(error),
+				stack: error instanceof Error ? error.stack : undefined,
+			});
+
+			return respond.err(ctx, "Failed to retrieve sent requests", 500);
+		}
 	})
 	.get("/can-send-to", authenticated, async (ctx) => {
 		const { recipient } = ctx.req.query();

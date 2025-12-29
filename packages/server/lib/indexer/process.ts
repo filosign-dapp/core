@@ -3,8 +3,8 @@ import { decodeEventLog, type Hash, isHex } from "viem";
 import db from "../db";
 import { evmClient, fsContracts } from "../evm";
 
+const { users, shareApprovals, shareRequests } = db.schema;
 const { FSKeyRegistry, FSManager } = fsContracts;
-
 export async function processTransaction(
 	txHash: Hash,
 	data: Record<string, unknown>,
@@ -47,12 +47,12 @@ export async function processTransaction(
 
 				const [exists] = await db
 					.select()
-					.from(db.schema.users)
-					.where(eq(db.schema.users.walletAddress, log.args.user));
+					.from(users)
+					.where(eq(users.walletAddress, log.args.user));
 				if (exists) continue;
 
 				try {
-					await db.insert(db.schema.users).values({
+					await db.insert(users).values({
 						walletAddress: log.args.user,
 						encryptionPublicKey,
 						signaturePublicKey,
@@ -96,21 +96,21 @@ export async function processTransaction(
 					// Check if both recipient and sender exist in users table
 					const [recipientExists] = await db
 						.select()
-						.from(db.schema.users)
-						.where(eq(db.schema.users.walletAddress, log.args.recipient))
+						.from(users)
+						.where(eq(users.walletAddress, log.args.recipient))
 						.limit(1);
 
 					const [senderExists] = await db
 						.select()
-						.from(db.schema.users)
-						.where(eq(db.schema.users.walletAddress, log.args.sender))
+						.from(users)
+						.where(eq(users.walletAddress, log.args.sender))
 						.limit(1);
 
 					if (!recipientExists || !senderExists) {
 						continue;
 					}
 
-					await db.insert(db.schema.shareApprovals).values({
+					await db.insert(shareApprovals).values({
 						recipientWallet: log.args.recipient,
 						senderWallet: log.args.sender,
 						txHash: encodedLog.transactionHash,
@@ -119,13 +119,13 @@ export async function processTransaction(
 
 					// Check if there's a pending request and mark it as approved
 					await db
-						.update(db.schema.shareRequests)
+						.update(shareRequests)
 						.set({ status: "ACCEPTED" })
 						.where(
 							and(
-								eq(db.schema.shareRequests.senderWallet, log.args.sender),
-								eq(db.schema.shareRequests.recipientWallet, log.args.recipient),
-								eq(db.schema.shareRequests.status, "PENDING"),
+								eq(shareRequests.senderWallet, log.args.sender),
+								eq(shareRequests.recipientWallet, log.args.recipient),
+								eq(shareRequests.status, "PENDING"),
 							),
 						);
 				}
@@ -134,21 +134,21 @@ export async function processTransaction(
 					// Check if both recipient and sender exist in users table
 					const [recipientExists] = await db
 						.select()
-						.from(db.schema.users)
-						.where(eq(db.schema.users.walletAddress, log.args.recipient))
+						.from(users)
+						.where(eq(users.walletAddress, log.args.recipient))
 						.limit(1);
 
 					const [senderExists] = await db
 						.select()
-						.from(db.schema.users)
-						.where(eq(db.schema.users.walletAddress, log.args.sender))
+						.from(users)
+						.where(eq(users.walletAddress, log.args.sender))
 						.limit(1);
 
 					if (!recipientExists || !senderExists) {
 						continue;
 					}
 
-					await db.insert(db.schema.shareApprovals).values({
+					await db.insert(shareApprovals).values({
 						recipientWallet: log.args.recipient,
 						senderWallet: log.args.sender,
 						active: false,

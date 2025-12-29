@@ -1,6 +1,6 @@
-import { Badge } from "@/src/lib/components/ui/badge";
-import { Image } from "@/src/lib/components/custom/Image";
 import { motion } from "motion/react";
+import { Image } from "@/src/lib/components/custom/Image";
+import { Badge } from "@/src/lib/components/ui/badge";
 
 type Category = "Articles" | "Filosign News" | "Customer Story";
 
@@ -31,8 +31,7 @@ const posts: BlogPost[] = [
 	},
 	{
 		id: "recent-3",
-		title:
-			"How Quantum Leap DAO doubled their governance speed with Filosign",
+		title: "How Quantum Leap DAO doubled their governance speed with Filosign",
 		category: "Customer Story",
 		image: "/static/images/stock_5.webp",
 		slug: "/blog/post-8",
@@ -93,4 +92,3 @@ export default function RecentlyPublished() {
 		</section>
 	);
 }
-

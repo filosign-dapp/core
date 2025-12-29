@@ -1,9 +1,9 @@
-import { Button } from "@/src/lib/components/ui/button";
-import { Switch } from "@/src/lib/components/ui/switch";
-import { cn } from "@/src/lib/utils";
 import { CheckIcon } from "@phosphor-icons/react";
 import { motion } from "motion/react";
 import { useState } from "react";
+import { Button } from "@/src/lib/components/ui/button";
+import { Switch } from "@/src/lib/components/ui/switch";
+import { cn } from "@/src/lib/utils";
 
 type Plan = {
 	name: string;
