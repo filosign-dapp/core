@@ -3,7 +3,6 @@ import { usePrivy } from "@privy-io/react-auth";
 import { Link } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { Button } from "@/src/lib/components/ui/button";
-import { UserDropdownButton } from "./UserDropdownButton";
 
 export default function ConnectButton() {
 	const { ready, authenticated, login: loginPrivy } = usePrivy();
@@ -16,8 +15,6 @@ export default function ConnectButton() {
 		if (!isRegistered.data) return "get-started";
 		return "dashboard";
 	};
-
-	const showUserDropdown = authenticated;
 
 	return (
 		<motion.div
@@ -86,9 +83,6 @@ export default function ConnectButton() {
 					</Link>
 				</Button>
 			) : null}
-
-			{/* User dropdown with logout - show when authenticated */}
-			{showUserDropdown && <UserDropdownButton />}
 		</motion.div>
 	);
 }

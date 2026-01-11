@@ -54,10 +54,8 @@ BigInt.prototype.toJSON = function () {
 	return this.toString();
 };
 
-// Hot module replacement
-if (import.meta.hot) {
-	const root = import.meta.hot.data.root ?? createRoot(rootElement);
-	root.render(app);
-} else {
-	createRoot(rootElement).render(app);
+if (!import.meta.hot.data.root) {
+	import.meta.hot.data.root = createRoot(rootElement);
 }
+const root = import.meta.hot.data.root;
+root.render(app);

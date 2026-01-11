@@ -46,7 +46,7 @@ export default function ChangelogHero() {
 						placeholder="Enter your email address"
 						value={email}
 						onChange={(e) => setEmail(e.target.value)}
-						className="w-full bg-background border-border/50 h-12 text-base text-center placeholder:text-muted-foreground/70"
+						className="w-full bg-background border-border/50 h-12 text-base placeholder:text-muted-foreground/70"
 						required
 					/>
 					<Button

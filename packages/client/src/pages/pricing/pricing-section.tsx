@@ -75,8 +75,8 @@ const plans: Plan[] = [
 		name: "Enterprise",
 		description: "For large organizations needing custom security and scale.",
 		price: {
-			monthly: 99,
-			yearly: 79,
+			monthly: 199,
+			yearly: 169,
 		},
 		features: [
 			"Custom contract limits",
@@ -157,7 +157,7 @@ export default function PricingSection() {
 									<span className="text-4xl font-medium font-manrope">
 										${isYearly ? plan.price.yearly : plan.price.monthly}
 									</span>
-									<span className="text-sm text-muted-foreground">USD</span>
+									<span className="text-sm text-muted-foreground">USDFC</span>
 								</div>
 								<div className="text-sm text-muted-foreground mt-1">
 									/month {plan.name !== "Free" && "for one user"}

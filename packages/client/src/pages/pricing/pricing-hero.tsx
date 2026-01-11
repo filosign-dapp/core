@@ -1,28 +1,7 @@
-import {
-	AlienIcon,
-	ArrowDownIcon,
-	AtomIcon,
-	BuildingsIcon,
-	CoinIcon,
-	CubeIcon,
-	DatabaseIcon,
-	GlobeHemisphereWestIcon,
-	HexagonIcon,
-} from "@phosphor-icons/react";
+import { ArrowDownIcon } from "@phosphor-icons/react";
 import { motion } from "motion/react";
 import { Button } from "@/src/lib/components/ui/button";
 import { cn } from "@/src/lib/utils";
-
-const companies = [
-	{ name: "Gitcoin", icon: CoinIcon },
-	{ name: "Filecoin Foundation", icon: DatabaseIcon },
-	{ name: "Hedera Hashgraph", icon: HexagonIcon },
-	{ name: "Aragon", icon: GlobeHemisphereWestIcon },
-	{ name: "Matter Labs", icon: AtomIcon },
-	{ name: "Metaplex", icon: CubeIcon },
-	{ name: "Towns", icon: BuildingsIcon },
-	{ name: "Near", icon: AlienIcon },
-];
 
 interface MarqueeProps extends React.HTMLAttributes<HTMLDivElement> {
 	className?: string;
@@ -132,37 +111,6 @@ export default function PricingHero() {
 						</Button>
 					</motion.div>
 				</div>
-
-				{/* Bottom Section: Trusted Companies */}
-				<motion.div
-					initial={{ opacity: 0 }}
-					animate={{ opacity: 1 }}
-					transition={{ duration: 0.8, delay: 0.4 }}
-					className="pt-8 space-y-8"
-				>
-					<p className="text-muted-foreground text-sm font-medium font-manrope">
-						Trusted by 100+ Web3 leaders
-					</p>
-
-					<div className="relative flex w-full flex-col items-center justify-center overflow-hidden bg-background -ml-4 md:ml-0">
-						<Marquee className="[--duration:60s]">
-							{companies.map((company) => (
-								<div
-									key={company.name}
-									className="flex items-center gap-3 text-muted-foreground/60 hover:text-foreground transition-colors px-8 grayscale hover:grayscale-0 duration-300"
-								>
-									<company.icon className="h-6 w-6" weight="fill" />
-									<span className="text-xl font-manrope font-medium tracking-tight">
-										{company.name}
-									</span>
-								</div>
-							))}
-						</Marquee>
-
-						<div className="pointer-events-none absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-background dark:from-background" />
-						<div className="pointer-events-none absolute inset-y-0 right-0 w-1/4 bg-gradient-to-l from-background dark:from-background" />
-					</div>
-				</motion.div>
 			</div>
 
 			{/* Background Decorative Elements */}

@@ -138,7 +138,7 @@ export default function HeroSection() {
 				<div className="absolute inset-0" />
 
 				<Image
-					src="/static/hero_2.webp"
+					src="/static/5.png"
 					alt="Filosign"
 					width={500}
 					height={500}

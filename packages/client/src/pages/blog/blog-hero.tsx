@@ -29,7 +29,15 @@ export default function BlogHero() {
 								size="lg"
 								className="rounded-full px-8"
 							>
-								<Link to="/blog/post-1">Read article</Link>
+								<Link
+									to="/blog/$postId"
+									params={{
+										postId:
+											"understanding-decentralized-identity-a-founders-guide-to-smart-security",
+									}}
+								>
+									Read article
+								</Link>
 							</Button>
 						</div>
 					</motion.div>
