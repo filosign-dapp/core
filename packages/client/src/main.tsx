@@ -1,6 +1,6 @@
 import { RouterProvider } from "@tanstack/react-router";
 import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
+import { createRoot, type Root } from "react-dom/client";
 import { Toaster } from "sonner";
 import { ErrorBoundary } from "./lib/components/errors/ErrorBoundary";
 import { QueryClientProvider } from "./lib/context/query-client";
@@ -54,8 +54,13 @@ BigInt.prototype.toJSON = function () {
 	return this.toString();
 };
 
-if (!import.meta.hot.data.root) {
-	import.meta.hot.data.root = createRoot(rootElement);
+let root: Root;
+if (import.meta.hot) {
+	if (!import.meta.hot.data.root) {
+		import.meta.hot.data.root = createRoot(rootElement);
+	}
+	root = import.meta.hot.data.root;
+} else {
+	root = createRoot(rootElement);
 }
-const root = import.meta.hot.data.root;
 root.render(app);
