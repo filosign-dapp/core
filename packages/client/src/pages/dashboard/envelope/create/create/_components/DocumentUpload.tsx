@@ -25,6 +25,14 @@ import type { EnvelopeForm, UploadedFile } from "../../types";
 import { ACCEPTED_FILE_EXTENSIONS, ACCEPTED_FILE_MIME_SET } from "../../types";
 import FileCard from "./FileCard";
 
+type AcceptedMimeType = typeof ACCEPTED_FILE_MIME_SET extends Set<infer T>
+	? T
+	: never;
+
+function isAcceptedMimeType(type: string): type is AcceptedMimeType {
+	return ACCEPTED_FILE_MIME_SET.has(type as AcceptedMimeType);
+}
+
 interface DocumentsSectionProps {
 	control: Control<EnvelopeForm>;
 	fields: FieldArrayWithId<EnvelopeForm, "documents", "id">[];
@@ -54,8 +62,9 @@ export default function DocumentsSection({
 			if (!files) return;
 
 			const incoming = Array.from(files);
+
 			const rejected = incoming
-				.filter((file) => !ACCEPTED_FILE_MIME_SET.has(file.type as any))
+				.filter((file) => !isAcceptedMimeType(file.type))
 				.map((file) => file.name);
 
 			const oversized = incoming
@@ -64,9 +73,7 @@ export default function DocumentsSection({
 
 			const newFiles: UploadedFile[] = incoming
 				.filter(
-					(file) =>
-						ACCEPTED_FILE_MIME_SET.has(file.type as any) &&
-						file.size <= MAX_FILE_SIZE,
+					(file) => isAcceptedMimeType(file.type) && file.size <= MAX_FILE_SIZE,
 				)
 				.map((file) => ({
 					id: Math.random().toString(36).substr(2, 9),
@@ -76,7 +83,6 @@ export default function DocumentsSection({
 					type: file.type,
 				}))
 				.filter((newFile) => {
-					// Check if file with same name and size already exists
 					return !fields.some(
 						(existingFile) =>
 							existingFile.name === newFile.name &&
@@ -84,11 +90,14 @@ export default function DocumentsSection({
 					);
 				});
 
-			newFiles.forEach((file) => append(file));
+			for (const file of newFiles) {
+				append(file);
+			}
+
 			setUnsupportedFiles(rejected);
 			setOversizedFiles(oversized);
 		},
-		[fields, append, MAX_FILE_SIZE],
+		[fields, append],
 	);
 
 	const handleFileInputChange = (
@@ -185,7 +194,7 @@ export default function DocumentsSection({
 								return true;
 							},
 						}}
-						render={({ field }) => (
+						render={() => (
 							<FormItem>
 								{/* Hidden file input */}
 								<input

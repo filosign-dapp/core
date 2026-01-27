@@ -68,7 +68,7 @@ export function useOtherReload() {
 }
 
 function App() {
-	const [dilithium, setDilithium] = useState<any>(null);
+	const [dilithium, setDilithium] = useState<unknown>(null);
 
 	useEffect(() => {
 		let mounted = true;
@@ -76,7 +76,7 @@ function App() {
 		async function init() {
 			try {
 				// Mock chrome for the dilithium library
-				(globalThis as any).chrome = {
+				(globalThis as { chrome?: unknown }).chrome = {
 					runtime: {
 						getURL: () => "/dilithium.wasm",
 					},

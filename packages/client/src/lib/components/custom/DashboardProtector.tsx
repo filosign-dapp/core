@@ -59,7 +59,15 @@ export default function DashboardProtector({
 		) {
 			navigate({ to: "/" });
 		}
-	}, [ready, authenticated, isRegistered.data, isLoggedIn.data, navigate]);
+	}, [
+		ready,
+		authenticated,
+		isRegistered.data,
+		isLoggedIn.data,
+		navigate,
+		isLoggedIn.isPending,
+		isRegistered.isPending,
+	]);
 
 	const handlePinSubmit = async () => {
 		if (pin.length !== 6) return;

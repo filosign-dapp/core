@@ -2,7 +2,6 @@ import { useAcceptedPeople } from "@filosign/react/hooks";
 import {
 	CaretDownIcon,
 	MagnifyingGlassIcon,
-	MinusIcon,
 	PlusIcon,
 	UsersThree,
 	XIcon,
@@ -38,7 +37,7 @@ import {
 } from "@/src/lib/components/ui/select";
 import { Textarea } from "@/src/lib/components/ui/textarea";
 import { cn } from "@/src/lib/utils/utils";
-import type { EnvelopeForm, Recipient } from "../../types";
+import type { EnvelopeForm } from "../../types";
 
 interface RecipientsSectionProps {
 	control: Control<EnvelopeForm>;

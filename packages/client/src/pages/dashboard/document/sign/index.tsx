@@ -28,21 +28,6 @@ export default function SignDocumentPage() {
 	const { data: authedApi, isLoading: authLoading } = useAuthedApi();
 
 	// Check if pieceCid is provided
-	if (!pieceCid) {
-		return (
-			<div className="flex flex-col items-center justify-center min-h-screen p-8">
-				<FileTextIcon className="h-16 w-16 text-muted-foreground mb-4" />
-				<h2 className="text-xl font-semibold mb-2">Invalid Request</h2>
-				<p className="text-muted-foreground mb-4">
-					No document specified for signing.
-				</p>
-				<Button onClick={() => navigate({ to: "/dashboard" })}>
-					<ArrowLeftIcon className="h-4 w-4 mr-2" />
-					Back to Dashboard
-				</Button>
-			</div>
-		);
-	}
 
 	// Only fetch file info after authentication is complete
 	const {
@@ -146,8 +131,7 @@ export default function SignDocumentPage() {
 	// Load file data when component mounts or file changes
 	useEffect(() => {
 		if (
-			file &&
-			file.acked &&
+			file?.acked &&
 			file.kemCiphertext &&
 			file.encryptedEncryptionKey &&
 			!fileData &&
@@ -157,8 +141,13 @@ export default function SignDocumentPage() {
 		}
 	}, [file, fileData, viewFile.isPending, handleViewFile]);
 
-	const handleSignFile = async () => {
+	const handleSignFile = useCallback(async () => {
 		if (!file) return;
+
+		if (typeof file.pieceCid !== "string") {
+			toast.error("Invalid document identifier");
+			return;
+		}
 
 		try {
 			await signFile.mutateAsync({
@@ -170,7 +159,7 @@ export default function SignDocumentPage() {
 			console.error("Failed to sign file:", error);
 			toast.error("Failed to sign document");
 		}
-	};
+	}, [file, signFile, navigate]);
 
 	const handleZoomIn = useCallback(() => {
 		setZoom((prev) => Math.min(prev + 25, 200));
@@ -216,7 +205,7 @@ export default function SignDocumentPage() {
 		const fieldHeight = isMobile ? 32 : 42;
 
 		return (
-			<div
+			<button
 				className="absolute border-2 border-dashed rounded-md bg-primary/20 hover:bg-primary/25 cursor-pointer select-none flex justify-center items-center gap-1.5 z-50 pointer-events-auto"
 				style={{
 					left: `${left}px`,
@@ -230,7 +219,7 @@ export default function SignDocumentPage() {
 						handleSignFile();
 					}
 				}}
-				role="button"
+				type="button"
 				tabIndex={0}
 				aria-label="Sign document"
 			>
@@ -243,7 +232,7 @@ export default function SignDocumentPage() {
 				>
 					Click to Sign
 				</span>
-			</div>
+			</button>
 		);
 	}, [fileData?.signaturePositionOffset, isMobile, handleSignFile]);
 
@@ -411,6 +400,22 @@ export default function SignDocumentPage() {
 			</div>
 		);
 	};
+	// ✅ ADD THIS HERE (after hooks, before loaders)
+	if (!pieceCid) {
+		return (
+			<div className="flex flex-col items-center justify-center min-h-screen p-8">
+				<FileTextIcon className="h-16 w-16 text-muted-foreground mb-4" />
+				<h2 className="text-xl font-semibold mb-2">Invalid Request</h2>
+				<p className="text-muted-foreground mb-4">
+					No document specified for signing.
+				</p>
+				<Button onClick={() => navigate({ to: "/dashboard" })}>
+					<ArrowLeftIcon className="h-4 w-4 mr-2" />
+					Back to Dashboard
+				</Button>
+			</div>
+		);
+	}
 
 	// Show loader while authenticating or loading file
 	if (authLoading || fileLoading) {

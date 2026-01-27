@@ -14,43 +14,57 @@ import type { UseWalletClientReturnType } from "wagmi";
 import ApiClient from "../ApiClient";
 import { MINUTE } from "../constants";
 
+/* ---------------------------------- Types --------------------------------- */
+
 type Wallet = UseWalletClientReturnType["data"];
 
-type FilosignContext = {
+type DilithiumRuntime = {
+	generateKeys?: () => unknown;
+};
+
+type Runtime = {
+	uptime: number;
+	chain: Chain;
+	serverAddressSynapse: string;
+};
+
+type FilosignContextValue = {
 	ready: boolean;
 	api: ApiClient;
 	wallet: Wallet;
 	contracts: FilosignContracts | null;
 	runtime: Runtime;
 	wasm: {
-		// biome-ignore lint/suspicious/noExplicitAny: pata nahi bhai, maa chudaa rha tha
-		dilithium: any;
+		dilithium: DilithiumRuntime | null;
 	};
 };
-
-const FilosignContext = createContext<FilosignContext>({
-	ready: false,
-	api: {} as ApiClient,
-	wallet: undefined,
-	contracts: null,
-	runtime: {} as Runtime,
-	wasm: {
-		dilithium: undefined,
-	},
-});
 
 type FilosignConfig = {
 	children: ReactNode;
 	apiBaseUrl: string;
 	wallet: Wallet | undefined;
 	wasm: {
-		dilithium: unknown;
+		dilithium: DilithiumRuntime | null;
 	};
-	loader?: React.ComponentType<{ text?: string }>;
 };
 
+/* ------------------------------- Context ---------------------------------- */
+
+const FilosignContext = createContext<FilosignContextValue>({
+	ready: false,
+	api: {} as ApiClient,
+	wallet: undefined,
+	contracts: null,
+	runtime: {} as Runtime,
+	wasm: {
+		dilithium: null,
+	},
+});
+
+/* ------------------------------- Provider --------------------------------- */
+
 export function FilosignProvider(props: FilosignConfig) {
-	const { children, apiBaseUrl, wallet, wasm, loader: LoaderComponent } = props;
+	const { children, apiBaseUrl, wallet, wasm } = props;
 
 	const [contracts, setContracts] = useState<FilosignContracts | null>(null);
 
@@ -62,52 +76,40 @@ export function FilosignProvider(props: FilosignConfig) {
 			const response = await api.rpc.base.get("/runtime");
 			const data = await response.data;
 			if (!data) throw new Error("Failed to fetch runtime");
-			return data;
+			return data as Runtime;
 		},
 		staleTime: 5 * MINUTE,
-
-		enabled: !!api,
+		enabled: Boolean(api),
 	});
 
-	const flag = useRef(false);
+	const initialized = useRef(false);
 
 	useEffect(() => {
-		if (!flag.current && wallet && runtime.data) {
-			flag.current = true;
+		if (!initialized.current && wallet && runtime.data) {
+			initialized.current = true;
+
 			const fsContracts = getContracts({
 				client: wallet,
 				chainId: runtime.data.chain.id,
 			});
+
 			setContracts(fsContracts);
 		}
 	}, [runtime.data, wallet]);
 
-	const value: FilosignContext = useMemo(
+	const value: FilosignContextValue = useMemo(
 		() => ({
-			ready: !!api && !!runtime.data,
-			wallet: wallet,
-			api: api as ApiClient,
+			ready: Boolean(api && runtime.data),
+			api,
+			wallet,
 			contracts,
-			wasm: { dilithium: wasm.dilithium },
-			runtime: runtime.data || ({} as Runtime),
+			runtime: runtime.data ?? ({} as Runtime),
+			wasm: {
+				dilithium: wasm.dilithium,
+			},
 		}),
-		[api, wallet, contracts, wasm, runtime.data],
+		[api, wallet, contracts, runtime.data, wasm.dilithium],
 	);
-
-	// if (!runtime.data) {
-	// 	if (LoaderComponent) {
-	// 		return <LoaderComponent />;
-	// 	}
-	// 	return <>Runtime Loading...</>;
-	// }
-
-	// if (!contracts) {
-	// 	console.log("contracts", contracts);
-	// 	if (LoaderComponent) {
-	// 		return <LoaderComponent />;
-	// 	}
-	// 	return <>Not Ready...</>;
-	// }
 
 	return (
 		<FilosignContext.Provider value={value}>
@@ -116,12 +118,8 @@ export function FilosignProvider(props: FilosignConfig) {
 	);
 }
 
+/* ---------------------------------- Hook ---------------------------------- */
+
 export function useFilosignContext() {
 	return useContext(FilosignContext);
 }
-
-type Runtime = {
-	uptime: number;
-	chain: Chain;
-	serverAddressSynapse: string;
-};

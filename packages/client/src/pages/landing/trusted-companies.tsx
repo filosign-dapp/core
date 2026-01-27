@@ -1,14 +1,12 @@
 import {
 	AlienIcon,
 	AtomIcon,
-	BankIcon,
 	BuildingsIcon,
 	CoinIcon,
 	CubeIcon,
 	DatabaseIcon,
 	GlobeHemisphereWestIcon,
 	HexagonIcon,
-	ShieldCheckIcon,
 } from "@phosphor-icons/react";
 import { motion } from "motion/react";
 import { cn } from "@/src/lib/utils";
@@ -80,6 +78,7 @@ const Marquee = ({
 				.fill(0)
 				.map((_, i) => (
 					<motion.div
+						// biome-ignore lint/suspicious/noArrayIndexKey: static marquee duplication for animation
 						key={i}
 						className={cn("flex shrink-0 justify-around [gap:var(--gap)]", {
 							"flex-row": !vertical,

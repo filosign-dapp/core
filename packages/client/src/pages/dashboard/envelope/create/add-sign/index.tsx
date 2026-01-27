@@ -237,7 +237,11 @@ export default function AddSignaturePage() {
 			const sendPromises = [];
 			for (const doc of createForm.documents) {
 				// Convert data URL back to file
-				const response = await fetch(doc.dataUrl!);
+				if (!doc.dataUrl) {
+					toast.error(`Document "${doc.name}" is missing file data`);
+					return;
+				}
+				const response = await fetch(doc.dataUrl);
 				const blob = await response.blob();
 				const file = new File([blob], doc.name, { type: doc.type });
 				const fileData = new Uint8Array(await file.arrayBuffer());
@@ -405,8 +409,9 @@ export default function AddSignaturePage() {
 						<p className="font-medium text-muted-foreground">Documents</p>
 						<div className="space-y-2">
 							{documents.map((doc) => (
-								<div
+								<button
 									key={doc.id}
+									type="button"
 									className={cn(
 										"aspect-[3/4] bg-muted rounded border-2 cursor-pointer transition-colors relative",
 										currentDocumentId === doc.id
@@ -445,7 +450,7 @@ export default function AddSignaturePage() {
 											{doc.name}
 										</div>
 									</div>
-								</div>
+								</button>
 							))}
 						</div>
 					</div>

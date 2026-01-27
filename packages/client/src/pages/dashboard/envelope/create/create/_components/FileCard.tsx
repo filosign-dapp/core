@@ -8,7 +8,6 @@ import {
 } from "@phosphor-icons/react";
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
-import { Image } from "@/src/lib/components/custom/Image";
 import { Button } from "@/src/lib/components/ui/button";
 import { Skeleton } from "@/src/lib/components/ui/skeleton";
 import { cn } from "@/src/lib/utils/utils";
@@ -87,7 +86,7 @@ export default function FileCard({
 		const k = 1024;
 		const sizes = ["Bytes", "KB", "MB", "GB"];
 		const i = Math.floor(Math.log(bytes) / Math.log(k));
-		return parseFloat((bytes / k ** i).toFixed(2)) + " " + sizes[i];
+		return `${parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
 	};
 
 	const isImage = file.type.includes("image");

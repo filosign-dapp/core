@@ -1,4 +1,5 @@
 import { GearIcon } from "@phosphor-icons/react";
+import type { UseFormReturn } from "react-hook-form";
 import {
 	Card,
 	CardContent,
@@ -6,6 +7,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/src/lib/components/ui/card";
+
 import { FormField, FormLabel } from "@/src/lib/components/ui/form";
 import { Separator } from "@/src/lib/components/ui/separator";
 import { Switch } from "@/src/lib/components/ui/switch";
@@ -38,8 +40,16 @@ const PreferenceField = ({
 	</>
 );
 
+interface AccountPreferencesForm {
+	preferences: {
+		emailNotifications: boolean;
+		pushNotifications: boolean;
+		twoFactorAuth: boolean;
+	};
+}
+
 interface AccountPreferencesSectionProps {
-	form: any;
+	form: UseFormReturn<AccountPreferencesForm>;
 	sectionState: {
 		hasChanges: boolean;
 		state: { isSaving: boolean; isSaved: boolean; error?: string };
@@ -48,7 +58,6 @@ interface AccountPreferencesSectionProps {
 }
 
 export function AccountPreferencesSection({
-	form,
 	sectionState,
 }: AccountPreferencesSectionProps) {
 	return (

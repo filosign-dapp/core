@@ -47,6 +47,8 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 					<div className="flex items-start space-x-3">
 						<div className="flex h-8 w-8 items-center justify-center rounded-full bg-destructive/10 text-destructive">
 							<svg
+								aria-hidden="true"
+								focusable="false"
 								xmlns="http://www.w3.org/2000/svg"
 								width="16"
 								height="16"
@@ -62,6 +64,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 								<line x1="12" y1="17" x2="12.01" y2="17" />
 							</svg>
 						</div>
+
 						<div>
 							<h2 className="text-sm font-medium text-destructive">
 								Something went wrong
@@ -69,6 +72,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 							<p className="mt-1 text-xs text-destructive/80">
 								{this.state.error?.message || "An unexpected error occurred"}
 							</p>
+
 							<Button
 								className="mt-3"
 								size="sm"
@@ -76,6 +80,8 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 								onClick={() => this.setState({ hasError: false, error: null })}
 							>
 								<svg
+									aria-hidden="true"
+									focusable="false"
 									xmlns="http://www.w3.org/2000/svg"
 									width="14"
 									height="14"
@@ -87,10 +93,10 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 									strokeLinejoin="round"
 									className="mr-1"
 								>
-									<path d="M21 2v6h-6"></path>
-									<path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path>
-									<path d="M3 22v-6h6"></path>
-									<path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path>
+									<path d="M21 2v6h-6" />
+									<path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
+									<path d="M3 22v-6h6" />
+									<path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
 								</svg>
 								Try again
 							</Button>

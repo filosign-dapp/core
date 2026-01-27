@@ -4,6 +4,12 @@ import { z } from "zod";
 import { db } from "@/api/lib/db";
 import { respond } from "@/api/lib/utils/respond";
 
+type WaitlistRow = {
+	id: bigint;
+	email: string;
+	created_at: string;
+};
+
 const waitlist = new Hono()
 	// Get all emails in waitlist
 	.get("/", async (ctx) => {
@@ -12,10 +18,10 @@ const waitlist = new Hono()
 				.query(
 					"SELECT id, email, created_at FROM waitlist ORDER BY created_at DESC",
 				)
-				.all();
+				.all() as WaitlistRow[];
 
 			// Convert BigInt id to number for JSON serialization
-			const serializedEmails = emails.map((email: any) => ({
+			const serializedEmails = emails.map((email) => ({
 				...email,
 				id: Number(email.id),
 			}));
@@ -86,9 +92,9 @@ const waitlist = new Hono()
 					const result = db
 						.query(
 							`
-            INSERT INTO waitlist (email, created_at, updated_at)
-            VALUES ($email, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-          `,
+							INSERT INTO waitlist (email, created_at, updated_at)
+							VALUES ($email, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+							`,
 						)
 						.run({ $email: email });
 
@@ -116,14 +122,9 @@ const waitlist = new Hono()
 					return respond.err(ctx, "Email already registered", 409);
 				}
 
-				// Handle SQLite-specific errors
 				if (error && typeof error === "object" && "code" in error) {
 					const sqliteError = error as { code: number; message: string };
-					console.error(
-						`SQLite error ${sqliteError.code}: ${sqliteError.message}`,
-					);
 
-					// Handle constraint violations (e.g., unique constraint on email)
 					if (sqliteError.code === 19) {
 						// SQLITE_CONSTRAINT
 						return respond.err(ctx, "Email already registered", 409);

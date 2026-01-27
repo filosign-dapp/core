@@ -58,8 +58,17 @@ export function FileViewer({ file, open, onOpenChange }: FileViewerProps) {
 	const viewFile = useViewFile();
 
 	// Determine if current user is the sender or receiver
-	const isSender =
-		wallet?.account?.address?.toLowerCase() === fileInfo?.sender?.toLowerCase();
+	const walletAddress =
+		typeof wallet?.account?.address === "string"
+			? wallet.account.address.toLowerCase()
+			: undefined;
+
+	const senderAddress =
+		typeof fileInfo?.sender === "string"
+			? fileInfo.sender.toLowerCase()
+			: undefined;
+
+	const isSender = walletAddress === senderAddress;
 
 	// Detect mobile/desktop and set responsive dimensions
 	useEffect(() => {
@@ -103,6 +112,18 @@ export function FileViewer({ file, open, onOpenChange }: FileViewerProps) {
 			? fileInfo.senderEncryptedEncryptionKey
 			: fileInfo.encryptedEncryptionKey;
 
+		// ---- ADD START ----
+		if (
+			typeof fileInfo.pieceCid !== "string" ||
+			typeof kemCiphertext !== "string" ||
+			typeof encryptedEncryptionKey !== "string"
+		) {
+			const error = "Invalid or missing decryption data";
+			setViewError(error);
+			return;
+		}
+		// ---- ADD END ----
+
 		if (!kemCiphertext || !encryptedEncryptionKey) {
 			const error = `Missing decryption keys for ${isSender ? "sender" : "receiver"}`;
 			console.error(error, {
@@ -137,8 +158,27 @@ export function FileViewer({ file, open, onOpenChange }: FileViewerProps) {
 				metadata: result?.metadata,
 			});
 
+			const mimeType =
+				typeof (result as unknown as { metadata?: { mimeType?: unknown } })
+					?.metadata?.mimeType === "string"
+					? (result as unknown as { metadata: { mimeType: string } }).metadata
+							.mimeType
+					: "application/octet-stream";
+
 			// Store the decrypted file data in state
-			setFileData(result);
+			setFileData({
+				fileBytes: result.fileBytes,
+				sender: result.sender,
+				timestamp: result.timestamp,
+				metadata: {
+					name: result.metadata.name,
+					mimeType,
+				},
+				signaturePositionOffset: {
+					top: 0,
+					left: 0,
+				},
+			});
 		} catch (error) {
 			console.error("Failed to load file:", error);
 			const errorMessage =
@@ -389,8 +429,10 @@ export function FileViewer({ file, open, onOpenChange }: FileViewerProps) {
 	if (!open) return null;
 
 	return (
-		<div
-			className="fixed inset-0 z-50 bg-foreground/90 backdrop-blur-sm"
+		<button
+			type="button"
+			aria-label="Close file viewer"
+			className="fixed inset-0 z-50 bg-foreground/90 backdrop-blur-sm cursor-default"
 			onClick={handleBackdropClick}
 		>
 			{/* Responsive Navbar */}
@@ -557,6 +599,6 @@ export function FileViewer({ file, open, onOpenChange }: FileViewerProps) {
 						renderFileContent()}
 				</div>
 			</div>
-		</div>
+		</button>
 	);
 }

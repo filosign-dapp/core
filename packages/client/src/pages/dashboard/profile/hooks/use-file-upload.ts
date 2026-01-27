@@ -1,6 +1,11 @@
 import { useCallback, useState } from "react";
+import type { UseFormReturn } from "react-hook-form";
 
-export const useFileUpload = (form: any) => {
+interface ProfilePictureForm {
+	profilePicture: string | null;
+}
+
+export const useFileUpload = (form: UseFormReturn<ProfilePictureForm>) => {
 	const [uploadError, setUploadError] = useState<string>();
 
 	const uploadFile = useCallback(
@@ -24,7 +29,9 @@ export const useFileUpload = (form: any) => {
 
 			const reader = new FileReader();
 			reader.onload = () => {
-				form.setValue("profilePicture", reader.result as string);
+				form.setValue("profilePicture", reader.result as string, {
+					shouldDirty: true,
+				});
 			};
 			reader.onerror = () => {
 				setUploadError("Failed to read file");

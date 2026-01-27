@@ -1,5 +1,4 @@
 import {
-	DotsThreeVertical,
 	DotsThreeVerticalIcon,
 	FileIcon,
 	FileImageIcon,
@@ -11,6 +10,8 @@ import { Image } from "@/src/lib/components/custom/Image";
 import { Button } from "@/src/lib/components/ui/button";
 import { cn } from "@/src/lib/utils/utils";
 
+type ExtraMetadataFields = string | number | boolean | Date | null | undefined;
+
 interface RealFile {
 	pieceCid: string;
 	metadata?: {
@@ -19,10 +20,11 @@ interface RealFile {
 		fileType?: string;
 		message?: string;
 		originalId?: string;
+		dataUrl?: string;
+		[key: string]: ExtraMetadataFields;
 	};
 	type?: "sent" | "received";
 	createdAt?: Date;
-	[key: string]: any;
 }
 
 interface FileCardProps {
@@ -70,7 +72,7 @@ export default function FileCard({
 		const k = 1024;
 		const sizes = ["Bytes", "KB", "MB", "GB"];
 		const i = Math.floor(Math.log(bytes) / Math.log(k));
-		return parseFloat((bytes / k ** i).toFixed(2)) + " " + sizes[i];
+		return `${parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
 	};
 
 	const formatDate = (date: Date) => {

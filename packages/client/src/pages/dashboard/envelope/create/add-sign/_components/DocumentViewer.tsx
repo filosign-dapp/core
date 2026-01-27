@@ -47,7 +47,7 @@ interface DocumentViewerProps {
 	signatureFields: SignatureField[];
 	selectedField: string | null;
 	isPlacingField: boolean;
-	pendingFieldType: SignatureField["type"] | null;
+	_pendingFieldType: SignatureField["type"] | null;
 	onFieldPlaced: (x: number, y: number) => void;
 	onFieldSelect: (fieldId: string) => void;
 	onFieldRemove: (fieldId: string) => void;
@@ -62,7 +62,7 @@ export default function DocumentViewer({
 	signatureFields,
 	selectedField,
 	isPlacingField,
-	pendingFieldType,
+	_pendingFieldType,
 	onFieldPlaced,
 	onFieldSelect,
 	onFieldRemove,
@@ -168,7 +168,7 @@ export default function DocumentViewer({
 
 			onFieldUpdate(dragData.fieldId, { x: newX, y: newY });
 		},
-		[isDragging, onFieldUpdate, zoom],
+		[isDragging, onFieldUpdate, zoom, documentHeight, documentWidth, margin],
 	);
 
 	const handleMouseUp = useCallback(() => {
@@ -274,79 +274,39 @@ export default function DocumentViewer({
 				>
 					{/* Document Page */}
 					<div
-						className={cn(`bg-white relative`)}
-						style={{
-							width: documentWidth,
-							height: documentHeight,
-						}}
+						className="bg-white relative"
+						style={{ width: documentWidth, height: documentHeight }}
 					>
-						{/* Render uploaded PDF or image if provided */}
+						{/* Document preview */}
 						{document?.url ? (
-							document.url.startsWith("data:application/pdf") ||
-							document.name?.toLowerCase().endsWith(".pdf") ? (
-								<>
-									<object
-										data={document.url}
-										type="application/pdf"
-										className="absolute inset-0 w-full h-full z-10"
-									>
-										<div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground px-6 text-center">
-											PDF preview not supported in this browser.
-										</div>
-									</object>
-									<div
-										className={cn(
-											"absolute inset-0 w-full h-full pointer-events-auto",
-											isPlacingField
-												? "cursor-crosshair bg-blue-500/5 z-20"
-												: "cursor-default bg-transparent",
-										)}
-										onClick={handleDocumentClick}
-									/>
-									{isPlacingField && (
-										<div className="absolute inset-0 border-2 border-dashed border-secondary/50 bg-secondary/20 pointer-events-none">
-											<div className="absolute top-2 left-2 text-xs text-primary bg-secondary px-2 py-1 rounded">
-												Click to place {pendingFieldType} field
-											</div>
-										</div>
+							<>
+								<Image
+									src={document.url}
+									alt={document.name}
+									className="absolute inset-0 w-full h-full object-contain bg-white z-10"
+									draggable={false}
+									onClick={handleDocumentClick}
+								/>
+								<button
+									type="button"
+									aria-label="Place field on document"
+									className={cn(
+										"absolute inset-0 w-full h-full pointer-events-auto",
+										isPlacingField
+											? "cursor-crosshair bg-blue-500/5 z-20"
+											: "cursor-default bg-transparent",
 									)}
-								</>
-							) : (
-								<>
-									<Image
-										src={document.url}
-										alt={document.name}
-										className="absolute inset-0 w-full h-full object-contain bg-white z-10"
-										draggable={false}
-										onClick={handleDocumentClick}
-									/>
-									<div
-										className={cn(
-											"absolute inset-0 w-full h-full pointer-events-auto",
-											isPlacingField
-												? "cursor-crosshair bg-blue-500/5 z-20"
-												: "cursor-default bg-transparent",
-										)}
-										onClick={handleDocumentClick}
-									/>
-									{isPlacingField && (
-										<div className="absolute inset-0 border-2 border-dashed border-secondary/50 bg-secondary/20 pointer-events-none z-20">
-											<div className="absolute top-2 left-2 text-xs text-primary bg-secondary px-2 py-1 rounded ">
-												Click to place {pendingFieldType} field
-											</div>
-										</div>
-									)}
-								</>
-							)
+									onClick={handleDocumentClick}
+								/>
+							</>
 						) : (
-							<div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground px-6 text-center">
+							<div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground">
 								No document preview available
 							</div>
 						)}
 
 						{/* Signature Fields */}
 						{signatureFields.map((field) => {
-							// Responsive signature box dimensions
 							const fieldWidth = isMobile ? 90 : 130;
 							const fieldHeight = isMobile ? 32 : 42;
 
@@ -360,53 +320,47 @@ export default function DocumentViewer({
 							);
 
 							return (
-								<div
+								<button
 									key={field.id}
+									type="button"
+									aria-label={`Signature field: ${getFieldLabel(field.type)}`}
 									className={cn(
-										"absolute border-2 border-dashed rounded-md bg-primary/10 hover:bg-primary/10 cursor-move select-none group flex justify-center items-center gap-1.5 z-30",
+										"absolute border-2 border-dashed rounded-md bg-primary/10 hover:bg-primary/10 cursor-move select-none group flex items-center gap-1.5 z-30",
 										isMobile ? "p-1.5" : "p-2",
 										selectedField === field.id
-											? "border-primary bg-primary/10 shadow-lg "
+											? "border-primary bg-primary/10 shadow-lg"
 											: "border-primary/50 hover:border-primary/70 hover:bg-primary/80",
 									)}
-									style={{
-										left: constrainedX,
-										top: constrainedY,
-									}}
+									style={{ left: constrainedX, top: constrainedY }}
 									onClick={(e) => handleFieldClick(field.id, e)}
 									onMouseDown={(e) => handleFieldMouseDown(field.id, e)}
 								>
-									<div
+									<span className="text-primary">
+										{getFieldIcon(field.type)}
+									</span>
+
+									<span
 										className={cn(
-											"flex items-center",
-											isMobile ? "gap-1" : "gap-2",
+											"font-medium text-primary whitespace-nowrap",
+											isMobile ? "text-[10px]" : "text-xs",
 										)}
 									>
-										<span className="text-primary">
-											{getFieldIcon(field.type)}
-										</span>
-										<span
-											className={cn(
-												"font-medium text-primary whitespace-nowrap",
-												isMobile ? "text-[10px]" : "text-xs",
-											)}
-										>
-											{getFieldLabel(field.type)}
-										</span>
-										<button
-											type="button"
-											className={cn("p-0", isMobile ? "w-3 h-3" : "w-4 h-4")}
-											onClick={(e) => {
-												e.stopPropagation();
-												onFieldRemove(field.id);
-											}}
-										>
-											<XIcon
-												className={cn(isMobile ? "w-2.5 h-2.5" : "w-3 h-3")}
-											/>
-										</button>
-									</div>
-								</div>
+										{getFieldLabel(field.type)}
+									</span>
+
+									<span
+										aria-hidden
+										className="flex items-center justify-center cursor-pointer"
+										onClick={(e) => {
+											e.stopPropagation();
+											onFieldRemove(field.id);
+										}}
+									>
+										<XIcon
+											className={cn(isMobile ? "w-2.5 h-2.5" : "w-3 h-3")}
+										/>
+									</span>
+								</button>
 							);
 						})}
 					</div>

@@ -49,7 +49,7 @@ export function NotificationsPopover() {
 		null,
 	);
 	const queryClient = useQueryClient();
-	const navigate = useNavigate();
+	const _navigate = useNavigate();
 
 	// Only get the actionable data - pending requests and unacknowledged files
 	const receivedRequests = useReceivedRequests();
@@ -361,7 +361,7 @@ function ReceivedFileNotification({
 			URL.revokeObjectURL(url);
 
 			toast.success("File downloaded!");
-		} catch (error) {
+		} catch (_error) {
 			toast.error("Failed to download file");
 		}
 	};

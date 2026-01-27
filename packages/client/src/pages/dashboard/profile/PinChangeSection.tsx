@@ -1,4 +1,6 @@
 import { LockIcon } from "@phosphor-icons/react";
+import type { UseFormReturn } from "react-hook-form";
+
 import {
 	Card,
 	CardContent,
@@ -16,8 +18,16 @@ import {
 import { Input } from "@/src/lib/components/ui/input";
 import { SaveButton } from "./components/SaveButton";
 
+interface PinChangeForm {
+	pin: {
+		current: string;
+		new: string;
+		confirm: string;
+	};
+}
+
 interface PinChangeSectionProps {
-	form: any;
+	form: UseFormReturn<PinChangeForm>;
 	sectionState: {
 		hasChanges: boolean;
 		state: { isSaving: boolean; isSaved: boolean; error?: string };

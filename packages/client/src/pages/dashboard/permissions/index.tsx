@@ -16,7 +16,6 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
-import { useState } from "react";
 import { toast } from "sonner";
 import Logo from "@/src/lib/components/custom/Logo";
 import { Badge } from "@/src/lib/components/ui/badge";
@@ -28,10 +27,37 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/src/lib/components/ui/card";
-import { Separator } from "@/src/lib/components/ui/separator";
+
+type PermissionStatus =
+	| "PENDING"
+	| "pending"
+	| "ACCEPTED"
+	| "accepted"
+	| "ALLOWED"
+	| "allowed"
+	| "REJECTED"
+	| "rejected"
+	| "DENIED"
+	| "denied";
+
+interface PermissionRequest {
+	id: string;
+	status: PermissionStatus;
+	senderWallet: string;
+	recipientWallet: string;
+	message?: string;
+	createdAt: string;
+}
+
+interface Approval {
+	active: boolean;
+	createdAt: string;
+	senderWallet: string;
+	recipientWallet: string;
+}
 
 export default function PermissionsPage() {
-	const queryClient = useQueryClient();
+	const _queryClient = useQueryClient();
 
 	// Fetch all permission-related data
 	const sentRequests = useSentRequests();
@@ -40,7 +66,7 @@ export default function PermissionsPage() {
 	const allowedReceivers = useReceivableFrom();
 
 	// Mutations for managing permissions
-	const allowSharing = useApproveSender();
+	const _allowSharing = useApproveSender();
 	const cancelRequest = useCancelRequest();
 
 	const formatAddress = (address: string) => {
@@ -49,7 +75,7 @@ export default function PermissionsPage() {
 
 	const getStatusBadge = (status: string) => {
 		switch (status.toLowerCase()) {
-			case "PENDING":
+			case "pending":
 				return (
 					<Badge
 						variant="secondary"
@@ -59,8 +85,8 @@ export default function PermissionsPage() {
 						Pending
 					</Badge>
 				);
-			case "ACCEPTED":
-			case "ALLOWED":
+			case "accepted":
+			case "allowed":
 				return (
 					<Badge
 						variant="secondary"
@@ -70,8 +96,8 @@ export default function PermissionsPage() {
 						Allowed
 					</Badge>
 				);
-			case "REJECTED":
-			case "DENIED":
+			case "rejected":
+			case "denied":
 				return (
 					<Badge
 						variant="secondary"
@@ -98,30 +124,32 @@ export default function PermissionsPage() {
 		try {
 			await cancelRequest.mutateAsync(requestId);
 			toast.success("Request cancelled");
-		} catch (error) {
+		} catch (_error) {
 			toast.error("Failed to cancel request");
 		}
 	};
 
 	// Categorize requests
-	const receivedRequestsData = receivedRequests.data || [];
+	const receivedRequestsData = (receivedRequests.data ??
+		[]) as PermissionRequest[];
+
 	const pendingRequests = Array.isArray(receivedRequestsData)
 		? receivedRequestsData.filter(
-				(req: any) => req.status === "PENDING" || req.status === "pending",
+				(req) => req.status === "PENDING" || req.status === "pending",
 			)
 		: [];
-	const allowedRequests = Array.isArray(receivedRequestsData)
+	const _allowedRequests = Array.isArray(receivedRequestsData)
 		? receivedRequestsData.filter(
-				(req: any) =>
+				(req) =>
 					req.status === "ACCEPTED" ||
 					req.status === "ALLOWED" ||
 					req.status === "accepted" ||
 					req.status === "allowed",
 			)
 		: [];
-	const rejectedRequests = Array.isArray(receivedRequestsData)
+	const _rejectedRequests = Array.isArray(receivedRequestsData)
 		? receivedRequestsData.filter(
-				(req: any) =>
+				(req) =>
 					req.status === "REJECTED" ||
 					req.status === "DENIED" ||
 					req.status === "rejected" ||
@@ -209,9 +237,9 @@ export default function PermissionsPage() {
 								</div>
 							) : (
 								<div className="space-y-3">
-									{pendingRequests.map((req: any, i: number) => (
+									{pendingRequests.map((req) => (
 										<div
-											key={i}
+											key={req.id}
 											className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
 										>
 											<div>
@@ -258,11 +286,11 @@ export default function PermissionsPage() {
 								</div>
 							) : (
 								<div className="space-y-3">
-									{allowedSenders.data
-										.filter((approval: any) => approval.active)
-										.map((approval: any, i: number) => (
+									{(allowedSenders.data as Approval[])
+										.filter((approval) => approval.active)
+										.map((approval) => (
 											<div
-												key={i}
+												key={approval.recipientWallet ?? approval.senderWallet}
 												className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
 											>
 												<div className="flex items-center gap-3">
@@ -322,9 +350,9 @@ export default function PermissionsPage() {
 								</div>
 							) : (
 								<div className="space-y-3">
-									{sentRequests.data.map((req: any, i: number) => (
+									{sentRequests.data.map((req) => (
 										<div
-											key={i}
+											key={req.id}
 											className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
 										>
 											<div>
@@ -383,11 +411,11 @@ export default function PermissionsPage() {
 								</div>
 							) : (
 								<div className="space-y-3">
-									{allowedReceivers.data
-										.filter((approval: any) => approval.active)
-										.map((approval: any, i: number) => (
+									{(allowedReceivers.data as Approval[])
+										.filter((approval) => approval.active)
+										.map((approval) => (
 											<div
-												key={i}
+												key={approval.senderWallet}
 												className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
 											>
 												<div className="flex items-center gap-3">

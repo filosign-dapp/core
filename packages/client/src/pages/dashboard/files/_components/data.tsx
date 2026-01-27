@@ -1,4 +1,10 @@
-import { Archive, FileText, Folder, Image } from "@phosphor-icons/react";
+import {
+	Archive,
+	FileText,
+	Folder,
+	type Icon,
+	Image,
+} from "@phosphor-icons/react";
 
 export interface FileOrFolder {
 	type: "folder" | "file";
@@ -6,7 +12,7 @@ export interface FileOrFolder {
 	id: string;
 	fileType?: "document" | "image" | "archive" | "other";
 	lastModified?: string;
-	icon?: React.ComponentType<any>;
+	icon?: Icon;
 }
 
 export const initialFilesAndFolders: FileOrFolder[] = [
@@ -72,7 +78,10 @@ export const initialFilesAndFolders: FileOrFolder[] = [
 	},
 ];
 
-export const fileTypeIcons = {
+export const fileTypeIcons: Record<
+	"document" | "image" | "archive" | "other" | "folder",
+	Icon
+> = {
 	document: FileText,
 	image: Image,
 	archive: Archive,

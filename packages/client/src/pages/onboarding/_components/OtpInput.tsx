@@ -112,6 +112,7 @@ export default function OtpInput({
 		<div className={cn("flex gap-2 justify-center", className)}>
 			{Array.from({ length }, (_, index) => (
 				<input
+					// biome-ignore lint/suspicious/noArrayIndexKey: fixed-length OTP input
 					key={index}
 					ref={(el) => {
 						inputRefs.current[index] = el;

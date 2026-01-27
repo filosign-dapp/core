@@ -230,8 +230,9 @@ export default function Crop({
 				</div>
 
 				{filteredAspectRatios.length > 1 && (
-					<div className="flex flex-col gap-2 py-4">
-						<label className="text-sm font-medium">Aspect Ratio</label>
+					<fieldset className="flex flex-col gap-2 py-4">
+						<legend className="text-sm font-medium">Aspect Ratio</legend>
+
 						<ToggleGroup
 							type="single"
 							value={aspectRatio}
@@ -252,7 +253,7 @@ export default function Crop({
 								</ToggleGroupItem>
 							))}
 						</ToggleGroup>
-					</div>
+					</fieldset>
 				)}
 
 				<div className="flex flex-col gap-2 py-2">

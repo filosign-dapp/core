@@ -1,0 +1,12 @@
+# Dependencies & build output
+node_modules
+dist
+build
+.next
+
+# Minified / generated files
+**/*.min.js
+**/*.min.css
+
+# Generated crypto / wasm
+test/src/dilithium.min.js

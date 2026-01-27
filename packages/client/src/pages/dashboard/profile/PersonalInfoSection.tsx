@@ -1,4 +1,5 @@
 import { UserIcon } from "@phosphor-icons/react";
+import type { UseFormReturn } from "react-hook-form";
 import {
 	Card,
 	CardContent,
@@ -17,8 +18,17 @@ import { Input } from "@/src/lib/components/ui/input";
 import { Textarea } from "@/src/lib/components/ui/textarea";
 import { SaveButton } from "./components/SaveButton";
 
+interface PersonalInfoForm {
+	personal: {
+		walletAddress: string;
+		firstName: string;
+		lastName: string;
+		bio?: string;
+	};
+}
+
 interface PersonalInfoSectionProps {
-	form: any;
+	form: UseFormReturn<PersonalInfoForm>;
 	sectionState: {
 		hasChanges: boolean;
 		state: { isSaving: boolean; isSaved: boolean; error?: string };

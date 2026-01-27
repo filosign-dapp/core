@@ -14,7 +14,7 @@ export default function (props: IProps) {
 
 	useEffect(() => {
 		file && props.setImage(file);
-	}, [file]);
+	}, [file, props.setImage]);
 
 	const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const selectedFile = e.target.files?.[0];

@@ -1,5 +1,4 @@
 import {
-	ArrowLeftIcon,
 	CaretLeftIcon,
 	FileTextIcon,
 	FunnelIcon,
@@ -30,13 +29,16 @@ export default function DocumentFolderPage() {
 		from: "/dashboard/document/folder/$folderId",
 	});
 	const [viewMode, setViewMode] = useState<"list" | "grid">("grid");
-	const [isViewSwitching, setIsViewSwitching] = useState(false);
+	const [_isViewSwitching, setIsViewSwitching] = useState(false);
 	const [viewerOpen, setViewerOpen] = useState(false);
 	const [selectedFileId, setSelectedFileId] = useState<string | null>(null);
 	const [isFilterOpen, setIsFilterOpen] = useState(false);
+	if (!folderId) {
+		throw new Error("Folder ID is missing in file $folderId.tsx");
+	}
 
-	const folder = getFolderById(folderId!);
-	const files = getFilesInFolder(folderId!);
+	const folder = getFolderById(folderId);
+	const files = getFilesInFolder(folderId);
 
 	const handleViewModeChange = (newViewMode: "list" | "grid") => {
 		if (newViewMode !== viewMode) {

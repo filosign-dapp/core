@@ -22,7 +22,7 @@ export default function OnboardingSetPinPage() {
 	const [confirmPin, setConfirmPin] = useState("");
 	const [step, setStep] = useState<"enter" | "confirm">("enter");
 	const navigate = useNavigate();
-	const { onboardingForm, setOnboardingForm } = useStorePersist();
+	const { onboardingForm } = useStorePersist();
 
 	const login = useLogin();
 	const isRegistered = useIsRegistered();
